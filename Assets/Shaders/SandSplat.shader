@@ -1,0 +1,92 @@
+// SandSplat.shader — blends 5 sand materials using an RGBA splat map.
+// Channels: R=Rock, G=Grass, B=Snow, A=Mud. Sand weight = 1 - (R+G+B+A).
+Shader "Sandplay/SandSplat"
+{
+    Properties
+    {
+        _MainTex      ("Base Texture (Sand)", 2D) = "white" {}
+        _BumpMap      ("Normal Map", 2D) = "bump" {}
+        _BumpScale    ("Normal Scale", Float) = 0.8
+        _DetailTex    ("Detail Texture", 2D) = "grey" {}
+
+        _SplatMap     ("Splat Map", 2D) = "black" {}
+
+        // Per-material albedo colours
+        _Color0 ("Sand Color",  Color) = (0.70, 0.60, 0.45, 1)
+        _Color1 ("Rock Color",  Color) = (0.40, 0.38, 0.36, 1)
+        _Color2 ("Grass Color", Color) = (0.24, 0.46, 0.22, 1)
+        _Color3 ("Snow Color",  Color) = (0.88, 0.92, 0.96, 1)
+        _Color4 ("Mud Color",   Color) = (0.32, 0.24, 0.16, 1)
+
+        // Per-material smoothness
+        _Smooth0 ("Sand Smoothness",  Range(0,1)) = 0.08
+        _Smooth1 ("Rock Smoothness",  Range(0,1)) = 0.20
+        _Smooth2 ("Grass Smoothness", Range(0,1)) = 0.12
+        _Smooth3 ("Snow Smoothness",  Range(0,1)) = 0.55
+        _Smooth4 ("Mud Smoothness",   Range(0,1)) = 0.35
+    }
+
+    SubShader
+    {
+        Tags { "RenderType"="Opaque" }
+        LOD 200
+
+        CGPROGRAM
+        #pragma surface surf Standard fullforwardshadows
+        #pragma target 3.0
+
+        sampler2D _MainTex;
+        sampler2D _BumpMap;
+        sampler2D _DetailTex;
+        sampler2D _SplatMap;
+        float     _BumpScale;
+
+        fixed4 _Color0, _Color1, _Color2, _Color3, _Color4;
+        float  _Smooth0, _Smooth1, _Smooth2, _Smooth3, _Smooth4;
+
+        struct Input
+        {
+            float2 uv_MainTex;
+            float2 uv_SplatMap; // splat uses its own (untiled) UV scaling
+        };
+
+        void surf(Input IN, inout SurfaceOutputStandard o)
+        {
+            // Sample splat map with its OWN UV (kept at 0-1 across the mesh).
+            // Using uv_MainTex would inherit the base sand tiling and cause the
+            // splatmap to repeat — making paint strokes appear in many places.
+            fixed4 splat = tex2D(_SplatMap, IN.uv_SplatMap);
+            float w1 = splat.r; // rock
+            float w2 = splat.g; // grass
+            float w3 = splat.b; // snow
+            float w4 = splat.a; // mud
+            float w0 = saturate(1.0 - w1 - w2 - w3 - w4); // sand
+
+            // Blend albedo
+            fixed3 albedo = w0 * _Color0.rgb
+                          + w1 * _Color1.rgb
+                          + w2 * _Color2.rgb
+                          + w3 * _Color3.rgb
+                          + w4 * _Color4.rgb;
+
+            // Blend smoothness
+            float smoothness = w0 * _Smooth0
+                             + w1 * _Smooth1
+                             + w2 * _Smooth2
+                             + w3 * _Smooth3
+                             + w4 * _Smooth4;
+
+            // Tint by base texture for extra grain
+            fixed4 baseTex = tex2D(_MainTex, IN.uv_MainTex);
+            fixed4 detail  = tex2D(_DetailTex, IN.uv_MainTex * 3.0);
+
+            o.Albedo     = albedo * baseTex.rgb * (detail.rgb * 2.0);
+            o.Smoothness = smoothness;
+            o.Metallic   = 0;
+            o.Normal     = UnpackScaleNormal(tex2D(_BumpMap, IN.uv_MainTex), _BumpScale);
+        }
+        ENDCG
+    }
+
+    FallBack "Diffuse"
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Allows cleartext (HTTP) traffic to the Sandplay API server only.
+    All other HTTP traffic remains blocked.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">43.99.51.164</domain>
+    </domain-config>
+</network-security-config>
