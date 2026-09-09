@@ -58,7 +58,7 @@ namespace Sandplay.Core
         private static readonly Color HomeGold = new Color(0.98f, 0.75f, 0.14f, 1f);            // #fbbf24
         private static readonly Color HomeProPurple = new Color(0.19f, 0.11f, 0.57f, 1f);       // #311b92 PRO+
         private static readonly Color HomeObjects = new Color(0.32f, 0.19f, 0.06f, 0.90f);      // Objects brown
-        private static readonly Color HomeTeal = new Color(0.03f, 0.24f, 0.22f, 0.90f);         // AI Analysis
+        private static readonly Color HomeTeal = new Color(0.03f, 0.24f, 0.22f, 0.90f);         // AI-assisted reflection
         private static readonly Color HomeAccountCard = new Color(0.09f, 0.10f, 0.12f, 0.88f);
         private readonly Dictionary<string, Sprite> _homeIconCache = new Dictionary<string, Sprite>();
         private Sprite _navActiveGradientSprite;
@@ -421,7 +421,7 @@ namespace Sandplay.Core
             CreateHomeFeatureTile(content.transform, "Tile_Objects", "objects",
                 Localization.Get("menu.tile_objects"), Localization.Get("menu.tile_objects_desc"),
                 new Vector2(0.50f, 0.03f), new Vector2(0.735f, 0.185f),
-                HomeObjects, true, () => ShowHomeSection("objects"));
+                HomeObjects, false, () => ShowHomeSection("objects"));
             CreateHomeFeatureTile(content.transform, "Tile_Multiplayer", "multiplayer",
                 Localization.Get("menu.tile_multiplayer"), Localization.Get("menu.tile_multiplayer_desc"),
                 new Vector2(0.745f, 0.03f), new Vector2(0.995f, 0.185f),
@@ -740,12 +740,8 @@ namespace Sandplay.Core
 
             CreateHomeCtaCard(_objectsPage.transform, "Btn_ObjectsOpen", "objects",
                 Localization.Get("menu.tile_objects"), Localization.Get("menu.tile_objects_desc"),
-                new Vector2(0.01f, 0.55f), new Vector2(0.48f, 0.74f),
+                new Vector2(0.01f, 0.55f), new Vector2(0.99f, 0.74f),
                 HomeObjects, OpenHomeObjectsEntry);
-            CreateHomeCtaCard(_objectsPage.transform, "Btn_ObjectsPro", "pro",
-                Localization.Get("sub.pro_badge") + "+", Localization.Get("menu.tile_objects_desc"),
-                new Vector2(0.52f, 0.55f), new Vector2(0.99f, 0.74f),
-                HomeProPurple, () => ShowPaywallPanel());
 
             _homePages["objects"] = _objectsPage;
         }
@@ -1223,11 +1219,6 @@ namespace Sandplay.Core
             if (client == null || !client.IsLoggedIn)
             {
                 OpenLoginScreen(OpenHomeObjectsEntry);
-                return;
-            }
-            if (!client.IsSubscribed)
-            {
-                ShowPaywallPanel();
                 return;
             }
             ShowCatalogManagementPanel();
@@ -2265,6 +2256,7 @@ namespace Sandplay.Core
             dropdownImg.color = new Color(0.2f, 0.25f, 0.3f, 0.9f);
             ApplyRoundedCorners(dropdownImg);
             var dropdown = dropdownGo.AddComponent<TMP_Dropdown>();
+            dropdown.targetGraphic = dropdownImg;
 
             // Caption label (shows current selection)
             var captionGo = new GameObject("Label");
@@ -2329,6 +2321,11 @@ namespace Sandplay.Core
             contentRT.pivot = new Vector2(0.5f, 1);
             contentRT.anchoredPosition = Vector2.zero;
             contentRT.sizeDelta = new Vector2(0, 0);
+            var dropdownScroll = template.AddComponent<ScrollRect>();
+            dropdownScroll.viewport = viewportRT;
+            dropdownScroll.content = contentRT;
+            dropdownScroll.horizontal = false;
+            dropdownScroll.vertical = true;
 
             // Item template
             var templateItem = new GameObject("Item");
@@ -2363,6 +2360,16 @@ namespace Sandplay.Core
             dropdown.captionText = captionTxt;
             dropdown.itemText = itemTxt;
 
+            // Sharing selector for the currently selected catalog.
+            var visibilityGo = Instantiate(dropdownGo, container.transform);
+            visibilityGo.name = "VisibilityDropdown";
+            var visibilityRT = visibilityGo.GetComponent<RectTransform>();
+            visibilityRT.anchorMin = new Vector2(0.05f, 0.69f);
+            visibilityRT.anchorMax = new Vector2(0.32f, 0.74f);
+            visibilityRT.offsetMin = Vector2.zero;
+            visibilityRT.offsetMax = Vector2.zero;
+            var visibilityDropdown = visibilityGo.GetComponent<TMP_Dropdown>();
+
             // Create Catalog button (between dropdown and refresh)
             var createCatalogBtn = CreateMenuButton(container.transform, "CreateCatalogBtn", "Create Catalog",
                 new Vector2(0.58f, 0.76f), new Vector2(0.75f, 0.82f),
@@ -2394,7 +2401,7 @@ namespace Sandplay.Core
             statusTxt.color = new Color(1f, 0.9f, 0.4f);
             statusTxt.font = menuFont;
             var statusRT = statusGo.GetComponent<RectTransform>();
-            statusRT.anchorMin = new Vector2(0.05f, 0.70f);
+            statusRT.anchorMin = new Vector2(0.35f, 0.69f);
             statusRT.anchorMax = new Vector2(0.95f, 0.74f);
             statusRT.offsetMin = Vector2.zero;
             statusRT.offsetMax = Vector2.zero;
@@ -2447,6 +2454,7 @@ namespace Sandplay.Core
             uploadPanelRT.offsetMax = Vector2.zero;
             uploadPanel.SetActive(false);
             var uploadUI = uploadPanel.AddComponent<CatalogUploadUI>();
+            uploadUI.BuildRuntimeUI(uploadPanel, menuFont);
 
             // Add management UI component and wire everything up
             var mgmtUI = panelGo.AddComponent<CatalogManagementUI>();
@@ -2457,6 +2465,7 @@ namespace Sandplay.Core
             var panelField = mgmtType.GetField("_panel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var closeButtonField = mgmtType.GetField("_closeButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var catalogDropdownField = mgmtType.GetField("_catalogDropdown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var visibilityDropdownField = mgmtType.GetField("_visibilityDropdown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var refreshButtonField = mgmtType.GetField("_refreshButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var createCatalogButtonField = mgmtType.GetField("_createCatalogButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var uploadObjectButtonField = mgmtType.GetField("_uploadObjectButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -2469,6 +2478,7 @@ namespace Sandplay.Core
             panelField?.SetValue(mgmtUI, panelGo);
             closeButtonField?.SetValue(mgmtUI, closeBtn);
             catalogDropdownField?.SetValue(mgmtUI, dropdown);
+            visibilityDropdownField?.SetValue(mgmtUI, visibilityDropdown);
             refreshButtonField?.SetValue(mgmtUI, refreshBtn);
             createCatalogButtonField?.SetValue(mgmtUI, createCatalogBtn);
             uploadObjectButtonField?.SetValue(mgmtUI, uploadBtn);

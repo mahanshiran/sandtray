@@ -207,7 +207,7 @@ namespace Sandplay.Data
         }
 
         /// <summary>
-        /// Get screenshot as Base64 string (for AI analysis).
+        /// Get screenshot as Base64 string (for AI-assisted reflection).
         /// </summary>
         public string CaptureAsBase64(int width = 1024, int height = 768)
         {

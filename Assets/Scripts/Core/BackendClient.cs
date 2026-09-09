@@ -28,8 +28,7 @@ namespace Sandplay.Core
             }
         }
 
-        // Change to your production URL before shipping.
-        private const string BaseUrl = "http://43.99.51.164:8000/api";
+        private const string BaseUrl = "https://api.sandtraypro.com/api";
 
         private const string PrefKeyToken = "backend_access_token";
         private const string PrefKeyRefreshToken = "backend_refresh_token";
@@ -221,7 +220,57 @@ namespace Sandplay.Core
         }
 
         /// <summary>
-        /// Save an AI analysis record to the cloud. Returns the new record UUID via onSuccess.
+        /// Fetches the signed-in user's complete usable library: official/public,
+        /// their own catalogs, and active therapist-clinic catalogs.
+        /// </summary>
+        public void FetchLibraryCatalog(
+            Action<Sandplay.Objects.NetworkCatalogItem[]> onSuccess,
+            Action<string> onError)
+        {
+            if (!IsLoggedIn)
+            {
+                FetchPublicCatalog(onSuccess, onError);
+                return;
+            }
+
+            StartCoroutine(Get($"{BaseUrl}/catalogs/library/", AccessToken, json =>
+            {
+                var resp = JsonUtility.FromJson<Sandplay.Objects.PublicCatalogResponse>(json);
+                onSuccess?.Invoke(resp?.objects ?? new Sandplay.Objects.NetworkCatalogItem[0]);
+            }, onError));
+        }
+
+        /// <summary>
+        /// Generate an AI-assisted reflection through the authenticated backend.
+        /// The Bailian API key and safety prompt stay on the server.
+        /// </summary>
+        public void RequestAiReflection(Sandplay.AI.AnalysisPayload payload,
+            string screenshotB64, string language,
+            Action<string, string> onSuccess, Action<string> onError)
+        {
+            if (!IsLoggedIn) { onError?.Invoke("Not logged in"); return; }
+
+            string sessionJson = payload == null ? "{}" : JsonUtility.ToJson(payload);
+            var body = "{" +
+                "\"language\":\"" + EscapeForJson(language) + "\"," +
+                "\"session_data\":" + sessionJson + "," +
+                "\"screenshot_base64\":\"" + EscapeForJson(screenshotB64) + "\"" +
+                "}";
+
+            StartCoroutine(Post($"{BaseUrl}/analysis/reflect/", body, AccessToken, json =>
+            {
+                var response = JsonUtility.FromJson<AiReflectionResponse>(json);
+                if (response == null || string.IsNullOrEmpty(response.reflection))
+                {
+                    onError?.Invoke("The reflection service returned an empty response.");
+                    return;
+                }
+                onSuccess?.Invoke(response.reflection, response.model);
+            }, onError));
+        }
+
+        /// <summary>
+        /// Save an AI-assisted reflection record to the cloud. Returns the new record UUID via onSuccess.
         /// </summary>
         public void SaveAnalysisRecord(string resultText, string screenshotB64, string modelUsed,
             Action<string> onSuccess, Action<string> onError)
@@ -523,13 +572,18 @@ namespace Sandplay.Core
         /// <summary>
         /// Create a new catalog for the current user.
         /// </summary>
-        public CreateCatalogResult CreateCatalog(string catalogName)
+        public CreateCatalogResult CreateCatalog(string catalogName, string visibility = "private")
         {
-            return new CreateCatalogResult(this, catalogName);
+            return new CreateCatalogResult(this, catalogName, visibility);
+        }
+
+        public CatalogUpdateResult UpdateCatalogVisibility(string catalogId, string visibility)
+        {
+            return new CatalogUpdateResult(this, catalogId, visibility);
         }
 
         internal IEnumerator UploadFileCoroutine(byte[] fileData, string fileName, string mimeType,
-            Action<string> onSuccess, Action<string> onError)
+            Action<string, string> onSuccess, Action<string> onError)
         {
             if (!IsLoggedIn)
             {
@@ -559,13 +613,14 @@ namespace Sandplay.Core
             {
                 var response = req.downloadHandler.text;
                 var url = ParseField(response, "url");
+                var sha256 = ParseField(response, "sha256");
                 if (string.IsNullOrEmpty(url))
                 {
                     onError?.Invoke("Upload succeeded but no URL returned");
                 }
                 else
                 {
-                    onSuccess?.Invoke(url);
+                    onSuccess?.Invoke(url, sha256 ?? "");
                 }
             }
             else
@@ -599,7 +654,8 @@ namespace Sandplay.Core
                 ""tags"":[{tagsJson}],
                 ""description"":""{EscapeForJson(objectData.description)}"",
                 ""model_url"":""{EscapeForJson(objectData.model_url)}"",
-                ""thumbnail_url"":""{EscapeForJson(objectData.thumbnail_url)}""
+                ""thumbnail_url"":""{EscapeForJson(objectData.thumbnail_url)}"",
+                ""model_hash"":""{EscapeForJson(objectData.model_hash)}""
             }}";
 
             var req = new UnityWebRequest($"{BaseUrl}/catalogs/{catalogId}/objects/", "POST");
@@ -707,7 +763,7 @@ namespace Sandplay.Core
             }
         }
 
-        internal IEnumerator CreateCatalogCoroutine(string catalogName,
+        internal IEnumerator CreateCatalogCoroutine(string catalogName, string visibility,
             Action<string> onSuccess, Action<string> onError)
         {
             if (!IsLoggedIn)
@@ -717,7 +773,7 @@ namespace Sandplay.Core
             }
 
             // Create JSON payload
-            string json = $"{{\"name\":\"{EscapeForJson(catalogName)}\"}}";
+            string json = $"{{\"name\":\"{EscapeForJson(catalogName)}\",\"visibility\":\"{EscapeForJson(visibility)}\"}}";
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
 
             var req = UnityWebRequest.Put($"{BaseUrl}/catalogs/", bodyRaw);
@@ -754,6 +810,30 @@ namespace Sandplay.Core
             }
         }
 
+        internal IEnumerator UpdateCatalogVisibilityCoroutine(string catalogId, string visibility,
+            Action onSuccess, Action<string> onError)
+        {
+            if (!IsLoggedIn)
+            {
+                onError?.Invoke("Not logged in");
+                yield break;
+            }
+
+            var body = Encoding.UTF8.GetBytes(
+                $"{{\"visibility\":\"{EscapeForJson(visibility)}\"}}");
+            var req = new UnityWebRequest($"{BaseUrl}/catalogs/{catalogId}/", "PATCH");
+            req.uploadHandler = new UploadHandlerRaw(body);
+            req.downloadHandler = new DownloadHandlerBuffer();
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("Authorization", "Bearer " + AccessToken);
+            yield return req.SendWebRequest();
+
+            if (req.result == UnityWebRequest.Result.Success)
+                onSuccess?.Invoke();
+            else
+                onError?.Invoke(ExtractError(req.downloadHandler.text, req.responseCode));
+        }
+
         // ── Response DTOs ─────────────────────────────────────────────────────
 
         [Serializable] private class TokenResponse { public string access; public string refresh; }
@@ -776,6 +856,13 @@ namespace Sandplay.Core
             public int limit;
             public int remaining;
         }
+        [Serializable]
+        private class AiReflectionResponse
+        {
+            public string reflection;
+            public string model;
+            public int tokens_used;
+        }
         [Serializable] private class AgoraTokenResponse { public string token; public string app_id; public int expires_at; }
     }
 
@@ -788,6 +875,7 @@ namespace Sandplay.Core
     {
         public bool Success { get; private set; }
         public string FileUrl { get; private set; }
+        public string Sha256 { get; private set; }
         public string Error { get; private set; }
         private bool _done;
 
@@ -796,10 +884,11 @@ namespace Sandplay.Core
         public FileUploadResult(BackendClient client, byte[] fileData, string fileName, string mimeType)
         {
             client.StartCoroutine(client.UploadFileCoroutine(fileData, fileName, mimeType,
-                url =>
+                (url, sha256) =>
                 {
                     Success = true;
                     FileUrl = url;
+                    Sha256 = sha256;
                     _done = true;
                 },
                 err =>
@@ -860,7 +949,14 @@ namespace Sandplay.Core
                 {
                     try
                     {
-                        var response = JsonUtility.FromJson<UI.UserCatalogsResponse>($"{{\"catalogs\":{json}}}");
+                        UI.UserCatalogsResponse response;
+                        if (json.TrimStart().StartsWith("["))
+                            response = JsonUtility.FromJson<UI.UserCatalogsResponse>($"{{\"catalogs\":{json}}}");
+                        else
+                        {
+                            var page = JsonUtility.FromJson<UI.PaginatedUserCatalogsResponse>(json);
+                            response = new UI.UserCatalogsResponse { catalogs = page?.results };
+                        }
                         if (response != null && response.catalogs != null)
                         {
                             Catalogs = new List<UI.UserCatalog>(response.catalogs);
@@ -902,7 +998,14 @@ namespace Sandplay.Core
                 {
                     try
                     {
-                        var response = JsonUtility.FromJson<UI.CatalogObjectsResponse>($"{{\"objects\":{json}}}");
+                        UI.CatalogObjectsResponse response;
+                        if (json.TrimStart().StartsWith("["))
+                            response = JsonUtility.FromJson<UI.CatalogObjectsResponse>($"{{\"objects\":{json}}}");
+                        else
+                        {
+                            var page = JsonUtility.FromJson<UI.PaginatedCatalogObjectsResponse>(json);
+                            response = new UI.CatalogObjectsResponse { objects = page?.results };
+                        }
                         if (response != null && response.objects != null)
                         {
                             Objects = new List<UI.CatalogObjectData>(response.objects);
@@ -965,9 +1068,9 @@ namespace Sandplay.Core
 
         public override bool keepWaiting => !_done;
 
-        public CreateCatalogResult(BackendClient client, string catalogName)
+        public CreateCatalogResult(BackendClient client, string catalogName, string visibility)
         {
-            client.StartCoroutine(client.CreateCatalogCoroutine(catalogName,
+            client.StartCoroutine(client.CreateCatalogCoroutine(catalogName, visibility,
                 catalogId =>
                 {
                     Success = true;
@@ -980,6 +1083,21 @@ namespace Sandplay.Core
                     Error = err;
                     _done = true;
                 }));
+        }
+    }
+
+    public class CatalogUpdateResult : CustomYieldInstruction
+    {
+        public bool Success { get; private set; }
+        public string Error { get; private set; }
+        private bool _done;
+        public override bool keepWaiting => !_done;
+
+        public CatalogUpdateResult(BackendClient client, string catalogId, string visibility)
+        {
+            client.StartCoroutine(client.UpdateCatalogVisibilityCoroutine(catalogId, visibility,
+                () => { Success = true; _done = true; },
+                error => { Error = error; Success = false; _done = true; }));
         }
     }
 }

@@ -339,14 +339,15 @@ namespace Sandplay.Core
             }
 
             // Fetch fresh catalog from API (merge with cached)
-            BackendClient.Instance.FetchPublicCatalog(
+            BackendClient.Instance.FetchLibraryCatalog(
                 apiItems =>
                 {
                     // Merge: API items + cached items (deduplicate by ID, prefer API version)
-                    var merged = MergeCatalogItems(cachedItems, apiItems);
+                    var merged = MergeCatalogItems(_networkCatalogItems ?? cachedItems, apiItems);
                     _networkCatalogItems = merged;
                     Sandplay.Objects.NetworkCatalogRegistry.Register(merged);
                     PopulateCatalogItems(merged);
+                    NetworkBootstrapper.Instance?.BroadcastCatalogManifest();
                     if (_catalogStatusText != null)
                         _catalogStatusText.text = merged.Length == 0 ? "No items available." : "";
                 },
@@ -393,14 +394,15 @@ namespace Sandplay.Core
             // Quiet background refresh — do not PopulateCatalogItems / PreloadGlb here
             if (BackendClient.Instance == null) return;
             var cached = _networkCatalogItems ?? System.Array.Empty<NetworkCatalogItem>();
-            BackendClient.Instance.FetchPublicCatalog(
+            BackendClient.Instance.FetchLibraryCatalog(
                 apiItems =>
                 {
                     try
                     {
-                        var merged = MergeCatalogItems(cached, apiItems);
+                        var merged = MergeCatalogItems(_networkCatalogItems ?? cached, apiItems);
                         _networkCatalogItems = merged;
                         Sandplay.Objects.NetworkCatalogRegistry.Register(merged);
+                        NetworkBootstrapper.Instance?.BroadcastCatalogManifest();
                     }
                     catch (System.Exception ex)
                     {
@@ -408,6 +410,20 @@ namespace Sandplay.Core
                     }
                 },
                 err => Debug.LogWarning($"[Catalog] Background fetch failed (board still loads): {err}"));
+        }
+
+        /// <summary>
+        /// Merge the host's session library into this client's browser and runtime registry.
+        /// Private catalog metadata is shared only through the live room connection.
+        /// </summary>
+        public void ApplySharedCatalog(NetworkCatalogItem[] sharedItems)
+        {
+            if (sharedItems == null || sharedItems.Length == 0) return;
+            var merged = MergeCatalogItems(_networkCatalogItems ?? Array.Empty<NetworkCatalogItem>(), sharedItems);
+            _networkCatalogItems = merged;
+            NetworkCatalogRegistry.Merge(sharedItems);
+            if (_catalogContentGo != null)
+                PopulateCatalogItems(merged);
         }
 
         /// <summary>Merge cached and API items, preferring API version if duplicate IDs exist.</summary>

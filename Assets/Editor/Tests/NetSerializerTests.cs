@@ -2,6 +2,7 @@ using System;
 using NUnit.Framework;
 using UnityEngine;
 using Sandplay.Core;
+using Sandplay.Objects;
 
 namespace Sandplay.Tests
 {
@@ -279,6 +280,46 @@ namespace Sandplay.Tests
             AssertVec(objects[0].Position, rObjs[0].Position);
             AssertQuat(objects[0].Rotation, rObjs[0].Rotation);
             Assert.AreEqual(objects[0].Scale, rObjs[0].Scale, 1e-6f);
+        }
+
+        [Test]
+        public void CatalogManifest_RoundTrip_PreservesDownloadMetadata()
+        {
+            var items = new[]
+            {
+                new NetworkCatalogItem
+                {
+                    id = "8ee18e56-704b-42a6-9150-ea971101677a",
+                    display_name = "Family figure",
+                    category = "people",
+                    model_url = "https://api.example.com/files/model/",
+                    thumbnail_url = "https://api.example.com/files/thumb/",
+                    model_hash = "abc123",
+                    description = "Uploaded by the session host",
+                    tags = new[] { "family", "custom" },
+                },
+            };
+
+            byte[] data = NetSerializer.WriteCatalogManifest(items);
+            var result = NetSerializer.ReadCatalogManifest(data);
+
+            Assert.AreEqual(1, result.Length);
+            Assert.AreEqual(items[0].id, result[0].id);
+            Assert.AreEqual(items[0].display_name, result[0].display_name);
+            Assert.AreEqual(items[0].category, result[0].category);
+            Assert.AreEqual(items[0].model_url, result[0].model_url);
+            Assert.AreEqual(items[0].thumbnail_url, result[0].thumbnail_url);
+            Assert.AreEqual(items[0].model_hash, result[0].model_hash);
+            Assert.AreEqual(items[0].description, result[0].description);
+            CollectionAssert.AreEqual(items[0].tags, result[0].tags);
+        }
+
+        [Test]
+        public void CatalogManifest_NullArray_RoundTripsAsEmpty()
+        {
+            var result = NetSerializer.ReadCatalogManifest(
+                NetSerializer.WriteCatalogManifest(null));
+            Assert.AreEqual(0, result.Length);
         }
 
         // ── Pointer hover (with backward compat) ────────────────────────────

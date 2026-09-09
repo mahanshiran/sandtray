@@ -20,10 +20,10 @@ This project requires API keys for third-party services. These keys are stored i
 
 Select the `GameConfig` asset in the Inspector and fill in the following fields:
 
-#### **Bailian AI Analysis** (optional)
-- **BailianApiKey**: Get from [Aliyun Bailian Console](https://bailian.console.aliyun.com/)
-- Format: `sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-- Leave blank to disable AI analysis features
+#### **AI-assisted reflection**
+- No Bailian key is stored in Unity.
+- The app sends authenticated requests to the Sandtray backend.
+- Configure the Bailian key and matching API Host only in the backend `.env`.
 
 #### **RevenueCat Subscriptions** (optional for development)
 - **RevenueCatAppleApiKey**: Get from [RevenueCat Dashboard](https://app.revenuecat.com/) → Settings → API Keys
@@ -49,7 +49,7 @@ Select the `GameConfig` asset in the Inspector and fill in the following fields:
 Before every commit:
 
 - [ ] `GameConfig.asset` is NOT staged (`git status` should be clean)
-- [ ] No API keys appear in `.cs` files (`git diff` clean)
+- [ ] No server-side API keys appear in `.cs` files (`git diff` clean)
 - [ ] Shared any keys with team via secure channels (1Password, not Slack)
 
 **Read the full security guide:** [`API_KEY_SECURITY.md`](/API_KEY_SECURITY.md)
@@ -58,8 +58,8 @@ Before every commit:
 
 ## Troubleshooting
 
-**"Bailian API key not configured — AI analysis disabled"**
-→ This is normal if you haven't set up Bailian yet. Feature gracefully degrades.
+**"AI-assisted reflection is temporarily unavailable"**
+→ The backend does not yet have a working Bailian key/API Host pair.
 
 **"GameConfig not found" error**
 → You forgot step 3 (assign to SceneBootstrapper Inspector field).
@@ -73,8 +73,8 @@ Before every commit:
 
 If you're new to the project:
 
-1. Ask a team member to share their **local** `GameConfig.asset` file (via secure channel, not Git)
-2. Or create a fresh one and obtain your own API keys from the dashboards above
-3. For development, you can leave all keys blank — the app will run with limited features
+1. Create a fresh local `GameConfig.asset`.
+2. Add only client-safe service keys from the dashboards above.
+3. For development, you can leave optional client keys blank.
 
 **Do not** ask for keys via Slack, email, or public channels.

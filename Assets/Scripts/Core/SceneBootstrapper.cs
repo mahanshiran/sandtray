@@ -188,7 +188,6 @@ namespace Sandplay.Core
             CreateSessionManager();
             CreateScreenshotManager();
             CreateAIManager();
-            CreateBailianClient();
             CreateUndoManager();
             CreateRevenueCatManager();
             CreateAgoraManager();
@@ -394,18 +393,6 @@ namespace Sandplay.Core
         {
             var go = new GameObject("AIAnalysisManager");
             go.AddComponent<AIAnalysisManager>();
-        }
-
-        private void CreateBailianClient()
-        {
-            if (string.IsNullOrEmpty(_config?.BailianApiKey))
-            {
-                Debug.LogWarning("[SceneBootstrapper] Bailian API key not configured — AI analysis disabled.");
-                return;
-            }
-            var go = new GameObject("BailianClient");
-            var client = go.AddComponent<Sandplay.AI.BailianClient>();
-            client.SetApiKey(_config.BailianApiKey);
         }
 
         private void CreateUndoManager()
@@ -2211,7 +2198,7 @@ namespace Sandplay.Core
 
             actionPanel.Initialize(UnityEngine.Camera.main);
 
-            // === AI Analysis Panel ===
+            // === AI-Assisted Reflection Panel ===
             CreateAnalysisPanel();
         }
 

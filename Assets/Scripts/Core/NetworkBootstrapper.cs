@@ -176,6 +176,21 @@ namespace Sandplay.Core
             _networkObjects.Clear();
         }
 
+        /// <summary>
+        /// Share the host's currently loaded catalog metadata with room participants.
+        /// Called after the authenticated library fetch and for every late join.
+        /// </summary>
+        public void BroadcastCatalogManifest()
+        {
+            if (!_isOnline || !_isHost || !NetworkCatalogRegistry.IsLoaded) return;
+            var payload = NetSerializer.WriteCatalogManifest(NetworkCatalogRegistry.Snapshot());
+            var packet = NetSerializer.Pack(NetMsgType.CatalogManifest, payload);
+            if (_relayMode)
+                SendToRelay(packet);
+            else
+                BroadcastToClients(packet);
+        }
+
         public void SetMaterialColor(string materialName, Color color)
         {
             _materialColors[materialName] = color;
@@ -577,6 +592,7 @@ namespace Sandplay.Core
 
         private void SendFullStateViaRelay()
         {
+            BroadcastCatalogManifest();
             var payload = BuildFullStatePayload();
             SendToRelay(NetSerializer.Pack(NetMsgType.FullState, payload));
 
@@ -1055,6 +1071,15 @@ namespace Sandplay.Core
                                 ApplyColorLocally(c.MaterialName, c.Color);
 
                         Debug.Log("[Network] Full state applied");
+                        break;
+                    }
+                case NetMsgType.CatalogManifest:
+                    {
+                        var items = NetSerializer.ReadCatalogManifest(payload);
+                        NetworkCatalogRegistry.Merge(items);
+                        var scene = FindAnyObjectByType<SceneBootstrapper>();
+                        scene?.ApplySharedCatalog(items);
+                        Debug.Log($"[Network] Shared catalog received ({items.Length} items)");
                         break;
                     }
                 case NetMsgType.HeightmapRegion:
@@ -1542,6 +1567,12 @@ namespace Sandplay.Core
 
         private void SendFullStateToClient(TcpClient client)
         {
+            if (NetworkCatalogRegistry.IsLoaded)
+            {
+                var catalogPayload = NetSerializer.WriteCatalogManifest(NetworkCatalogRegistry.Snapshot());
+                SendToClient(client, NetSerializer.Pack(NetMsgType.CatalogManifest, catalogPayload));
+            }
+
             var sandMesh = SandMesh.Instance;
             byte[] heightmapBytes = Array.Empty<byte>();
             if (sandMesh != null)

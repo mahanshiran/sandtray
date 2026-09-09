@@ -48,7 +48,7 @@ namespace Sandplay.Core
                 closeTxt.fontStyle = FontStyles.Bold;
             }
 
-            // --- Centered "Ask AI Psychologist" button container ---
+            // --- Centered AI-assisted reflection button container ---
             var askContainer = new GameObject("AskBtnContainer");
             askContainer.transform.SetParent(analysisPanel.transform, false);
             var askContainerRT = askContainer.AddComponent<RectTransform>();

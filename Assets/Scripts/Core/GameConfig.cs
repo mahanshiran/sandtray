@@ -47,10 +47,6 @@ namespace Sandplay.Core
         [Tooltip("Agora App ID (fallback for non-logged-in users). Token-based auth is preferred when logged in. Leave blank to disable voice/video.")]
         public string AgoraAppId = "4e83cfbb48df4b298e769d0bf591f88b"; // Kept for fallback; backend now uses token authentication
 
-        [Header("Bailian AI Analysis")]
-        [Tooltip("Aliyun Bailian API key (sk-...). Leave blank to disable AI analysis features.")]
-        public string BailianApiKey = ""; // Configure locally; never commit server-side API keys.
-
         [Header("RevenueCat Subscription")]
         [Tooltip("Apple App Store API key from the RevenueCat dashboard")]
         public string RevenueCatAppleApiKey = "appl_OARoUMFKxBwoZIimzOcXlDFgZBa"; // TODO: rotate before public release

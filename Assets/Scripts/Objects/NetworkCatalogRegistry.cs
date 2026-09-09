@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Sandplay.Objects
@@ -27,6 +28,20 @@ namespace Sandplay.Objects
                     _items[item.id] = item;
             _loaded = true;
         }
+
+        /// <summary>Add or refresh items without discarding the receiver's own library.</summary>
+        public static void Merge(NetworkCatalogItem[] items)
+        {
+            if (items != null)
+            {
+                foreach (var item in items)
+                    if (item != null && !string.IsNullOrEmpty(item.id))
+                        _items[item.id] = item;
+            }
+            _loaded = true;
+        }
+
+        public static NetworkCatalogItem[] Snapshot() => _items.Values.ToArray();
 
         /// <summary>Try to look up an item by its API UUID.</summary>
         public static bool TryGet(string id, out NetworkCatalogItem item) =>

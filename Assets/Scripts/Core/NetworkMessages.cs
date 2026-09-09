@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using UnityEngine;
+using Sandplay.Objects;
 
 namespace Sandplay.Core
 {
@@ -42,6 +43,10 @@ namespace Sandplay.Core
         // Throttled to a few hertz on the patient; host re-broadcasts to all peers
         // so a therapist (and observers) can see where the patient is working.
         PointerHover = 22, // payload: Vector3 worldPos (12 bytes) + 1 byte PatientPointerKind
+
+        // Host library metadata. Clients merge this with their own/public objects so
+        // custom models can be downloaded before spawn/full-state messages arrive.
+        CatalogManifest = 23,
     }
 
     /// <summary>
@@ -83,6 +88,8 @@ namespace Sandplay.Core
         private const int MaxPayloadBytes = 16 * 1024 * 1024;
         private const int MaxObjectCount = 2048;
         private const int MaxColorCount = 128;
+        private const int MaxCatalogItemCount = 4096;
+        private const int MaxTagsPerItem = 64;
 
         // Write length-prefixed message: [4-byte length][1-byte type][payload]
         public static byte[] Pack(NetMsgType type, byte[] payload)
@@ -165,6 +172,30 @@ namespace Sandplay.Core
             WriteVector3(w, pos);
             WriteQuaternion(w, rot);
             w.Write(scale);
+            return ms.ToArray();
+        }
+
+        public static byte[] WriteCatalogManifest(NetworkCatalogItem[] items)
+        {
+            using var ms = new MemoryStream();
+            using var w = new BinaryWriter(ms);
+            int count = Mathf.Min(items?.Length ?? 0, MaxCatalogItemCount);
+            w.Write(count);
+            for (int i = 0; i < count; i++)
+            {
+                var item = items[i] ?? new NetworkCatalogItem();
+                w.Write(item.id ?? "");
+                w.Write(item.display_name ?? "");
+                w.Write(item.category ?? "");
+                w.Write(item.model_url ?? "");
+                w.Write(item.thumbnail_url ?? "");
+                w.Write(item.model_hash ?? "");
+                w.Write(item.description ?? "");
+                int tagCount = Mathf.Min(item.tags?.Length ?? 0, MaxTagsPerItem);
+                w.Write(tagCount);
+                for (int tagIndex = 0; tagIndex < tagCount; tagIndex++)
+                    w.Write(item.tags[tagIndex] ?? "");
+            }
             return ms.ToArray();
         }
 
@@ -302,6 +333,34 @@ namespace Sandplay.Core
             pos = ReadVector3(r);
             rot = ReadQuaternion(r);
             scale = r.ReadSingle();
+        }
+
+        public static NetworkCatalogItem[] ReadCatalogManifest(byte[] data)
+        {
+            RequireBytes(data, 4, nameof(ReadCatalogManifest));
+            using var ms = new MemoryStream(data);
+            using var r = new BinaryReader(ms);
+            int count = ReadLength(r, "catalog item count", MaxCatalogItemCount);
+            var items = new NetworkCatalogItem[count];
+            for (int i = 0; i < count; i++)
+            {
+                var item = new NetworkCatalogItem
+                {
+                    id = r.ReadString(),
+                    display_name = r.ReadString(),
+                    category = r.ReadString(),
+                    model_url = r.ReadString(),
+                    thumbnail_url = r.ReadString(),
+                    model_hash = r.ReadString(),
+                    description = r.ReadString(),
+                };
+                int tagCount = ReadLength(r, "catalog tag count", MaxTagsPerItem);
+                item.tags = new string[tagCount];
+                for (int tagIndex = 0; tagIndex < tagCount; tagIndex++)
+                    item.tags[tagIndex] = r.ReadString();
+                items[i] = item;
+            }
+            return items;
         }
 
         public static void ReadMoveObject(byte[] data, out uint netId,

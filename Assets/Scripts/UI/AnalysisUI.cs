@@ -125,16 +125,17 @@ namespace Sandplay.UI
             AIAnalysisManager.Instance.RequestAnalysis(payload, _lastScreenshotB64,
                 result =>
                 {
-                    _lastResultText = result;
-                    SaveLocalReport(result);
+                    // Keep the limitation visible in the app, saved reports, and exported PDFs.
+                    _lastResultText = Localization.Get("analysis.disclaimer") + "\n\n" + result;
+                    SaveLocalReport(_lastResultText);
                     if (_loadingIndicator) _loadingIndicator.SetActive(false);
                     if (_scrollArea) _scrollArea.SetActive(true);
                     if (_resultText)
                     {
                         // Force-add all glyphs into the dynamic CJK atlas before display.
                         if (_resultText.font != null)
-                            _resultText.font.TryAddCharacters(result);
-                        _resultText.text = result;
+                            _resultText.font.TryAddCharacters(_lastResultText);
+                        _resultText.text = _lastResultText;
                         _resultText.ForceMeshUpdate();
                     }
                     ShowActionBar();
@@ -191,7 +192,8 @@ namespace Sandplay.UI
             if (_saveCloudBtn) _saveCloudBtn.interactable = false;
 
             BackendClient.Instance.SaveAnalysisRecord(
-                _lastResultText ?? "", _lastScreenshotB64 ?? "", "qwen-vl-plus",
+                _lastResultText ?? "", _lastScreenshotB64 ?? "",
+                AIAnalysisManager.Instance?.LastModelUsed ?? "",
                 id =>
                 {
                     _lastAnalysisId = id;
@@ -336,4 +338,3 @@ namespace Sandplay.UI
         }
     }
 }
-

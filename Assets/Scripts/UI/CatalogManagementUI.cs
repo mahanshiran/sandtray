@@ -19,6 +19,7 @@ namespace Sandplay.UI
         [SerializeField] private GameObject _panel;
         [SerializeField] private Button _closeButton;
         [SerializeField] private TMP_Dropdown _catalogDropdown;
+        [SerializeField] private TMP_Dropdown _visibilityDropdown;
         [SerializeField] private Button _refreshButton;
         [SerializeField] private Button _createCatalogButton;
         [SerializeField] private Transform _objectListContent;
@@ -35,6 +36,7 @@ namespace Sandplay.UI
         private List<CatalogObjectData> _currentObjects = new List<CatalogObjectData>();
 
         private bool _initialized = false;
+        private bool _settingVisibility;
 
         private void Start()
         {
@@ -61,9 +63,27 @@ namespace Sandplay.UI
                 });
             }
             if (_catalogDropdown) _catalogDropdown.onValueChanged.AddListener(OnCatalogSelected);
+            if (_visibilityDropdown)
+            {
+                _visibilityDropdown.ClearOptions();
+                _visibilityDropdown.AddOptions(new List<string> { "Private", "Clinic", "Public", "Marketplace" });
+                _visibilityDropdown.onValueChanged.AddListener(OnVisibilityChanged);
+            }
+            EventBus.Subscribe<CatalogRefreshRequestedEvent>(OnCatalogRefreshRequested);
 
             _initialized = true;
             Debug.Log($"Initialize() completed - buttons wired: close={_closeButton != null}, refresh={_refreshButton != null}, upload={_uploadObjectButton != null}");
+        }
+
+        private void OnDestroy()
+        {
+            if (_initialized)
+                EventBus.Unsubscribe<CatalogRefreshRequestedEvent>(OnCatalogRefreshRequested);
+        }
+
+        private void OnCatalogRefreshRequested(CatalogRefreshRequestedEvent _)
+        {
+            LoadUserCatalogs();
         }
 
         public void Show()
@@ -148,6 +168,7 @@ namespace Sandplay.UI
             {
                 _catalogDropdown.AddOptions(new List<string> { "No catalogs" });
                 _catalogDropdown.interactable = false;
+                if (_visibilityDropdown) _visibilityDropdown.interactable = false;
                 // Don't disable upload button - user can still create catalog by uploading
                 // if (_uploadObjectButton) _uploadObjectButton.interactable = false;
                 UpdateStatus("No catalogs found. Upload an object to create one.");
@@ -163,12 +184,14 @@ namespace Sandplay.UI
 
             _catalogDropdown.AddOptions(options);
             _catalogDropdown.interactable = true;
+            if (_visibilityDropdown) _visibilityDropdown.interactable = true;
             if (_uploadObjectButton) _uploadObjectButton.interactable = true;
 
             // Select first catalog
             if (_userCatalogs.Count > 0)
             {
                 _selectedCatalogId = _userCatalogs[0].id;
+                ShowSelectedVisibility(_userCatalogs[0].visibility);
                 LoadCatalogObjects(_selectedCatalogId);
             }
         }
@@ -177,7 +200,45 @@ namespace Sandplay.UI
         {
             if (index < 0 || index >= _userCatalogs.Count) return;
             _selectedCatalogId = _userCatalogs[index].id;
+            ShowSelectedVisibility(_userCatalogs[index].visibility);
             LoadCatalogObjects(_selectedCatalogId);
+        }
+
+        private void ShowSelectedVisibility(string visibility)
+        {
+            if (_visibilityDropdown == null) return;
+            string[] values = { "private", "clinic", "public", "marketplace" };
+            int index = Array.IndexOf(values, visibility ?? "private");
+            _settingVisibility = true;
+            _visibilityDropdown.SetValueWithoutNotify(Mathf.Max(0, index));
+            _settingVisibility = false;
+        }
+
+        private void OnVisibilityChanged(int index)
+        {
+            if (_settingVisibility || string.IsNullOrEmpty(_selectedCatalogId)) return;
+            string[] values = { "private", "clinic", "public", "marketplace" };
+            if (index < 0 || index >= values.Length) return;
+            StartCoroutine(UpdateVisibilityCoroutine(values[index]));
+        }
+
+        private IEnumerator UpdateVisibilityCoroutine(string visibility)
+        {
+            UpdateStatus("Updating sharing...");
+            var result = BackendClient.Instance.UpdateCatalogVisibility(_selectedCatalogId, visibility);
+            yield return result;
+            if (result.Success)
+            {
+                var selected = _userCatalogs.Find(c => c.id == _selectedCatalogId);
+                if (selected != null) selected.visibility = visibility;
+                UpdateStatus($"Sharing set to {visibility}.");
+            }
+            else
+            {
+                UpdateStatus($"Could not update sharing: {result.Error}");
+                var selected = _userCatalogs.Find(c => c.id == _selectedCatalogId);
+                if (selected != null) ShowSelectedVisibility(selected.visibility);
+            }
         }
 
         private void LoadCatalogObjects(string catalogId)
@@ -445,6 +506,12 @@ namespace Sandplay.UI
     }
 
     [Serializable]
+    public class PaginatedUserCatalogsResponse
+    {
+        public UserCatalog[] results;
+    }
+
+    [Serializable]
     public class CatalogObjectData
     {
         public string id;
@@ -453,6 +520,7 @@ namespace Sandplay.UI
         public string[] tags;
         public string model_url;
         public string thumbnail_url;
+        public string model_hash;
         public string description;
         public string created_at;
     }
@@ -461,5 +529,11 @@ namespace Sandplay.UI
     public class CatalogObjectsResponse
     {
         public CatalogObjectData[] objects;
+    }
+
+    [Serializable]
+    public class PaginatedCatalogObjectsResponse
+    {
+        public CatalogObjectData[] results;
     }
 }
