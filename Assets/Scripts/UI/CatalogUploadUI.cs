@@ -408,12 +408,13 @@ namespace Sandplay.UI
             dropdown.captionText = caption as TextMeshProUGUI;
 
             var template = CreateRect(rt, "Template", new Vector2(0, 0), new Vector2(1, 0));
-            template.pivot = new Vector2(0.5f, 1); template.sizeDelta = new Vector2(0, 180);
+            template.pivot = new Vector2(0.5f, 1); template.sizeDelta = new Vector2(0, 240);
             template.gameObject.AddComponent<Image>().color = new Color(0.12f, 0.17f, 0.23f, 1f);
             var viewport = CreateRect(template, "Viewport", Vector2.zero, Vector2.one);
             viewport.gameObject.AddComponent<RectMask2D>();
             var content = CreateRect(viewport, "Content", new Vector2(0, 1), Vector2.one);
             content.pivot = new Vector2(0.5f, 1);
+            content.sizeDelta = new Vector2(0, 30);
             var scroll = template.gameObject.AddComponent<ScrollRect>();
             scroll.viewport = viewport;
             scroll.content = content;
