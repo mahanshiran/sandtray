@@ -109,21 +109,58 @@ namespace Sandplay.Data
         private readonly Vector3 _position;
         private readonly Quaternion _rotation;
         private readonly float _scale;
+        private readonly bool _skipOffset;
         private Objects.PlacedObject _placed;
+        public Objects.PlacedObject PlacedObject => _placed;
 
         public PlaceObjectCommand(Objects.ObjectPlacer placer, Objects.SandplayObject data,
-            Vector3 position, Quaternion rotation, float scale)
+            Vector3 position, Quaternion rotation, float scale, bool skipOffset = false)
         {
             _placer = placer;
             _data = data;
             _position = position;
             _rotation = rotation;
             _scale = scale;
+            _skipOffset = skipOffset;
         }
 
         public void Execute()
         {
-            _placed = _placer.PlaceObject(_data, _position, _rotation, _scale);
+            _placed = _placer.PlaceObject(_data, _position, _rotation, _scale, _skipOffset);
+        }
+
+        public void Undo()
+        {
+            if (_placed != null)
+                _placer.RemoveObject(_placed);
+        }
+    }
+
+    public class PlaceNetworkObjectCommand : ICommand
+    {
+        private readonly Objects.ObjectPlacer _placer;
+        private readonly Objects.NetworkCatalogItem _item;
+        private readonly Vector3 _position;
+        private readonly Quaternion _rotation;
+        private readonly float _scale;
+        private readonly bool _skipOffset;
+        private Objects.PlacedObject _placed;
+        public Objects.PlacedObject PlacedObject => _placed;
+
+        public PlaceNetworkObjectCommand(Objects.ObjectPlacer placer, Objects.NetworkCatalogItem item,
+            Vector3 position, Quaternion rotation, float scale, bool skipOffset = false)
+        {
+            _placer = placer;
+            _item = item;
+            _position = position;
+            _rotation = rotation;
+            _scale = scale;
+            _skipOffset = skipOffset;
+        }
+
+        public void Execute()
+        {
+            _placed = _placer.PlaceNetworkObject(_item, _position, _rotation, _scale, _skipOffset);
         }
 
         public void Undo()

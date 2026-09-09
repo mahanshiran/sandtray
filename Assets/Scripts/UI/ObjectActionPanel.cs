@@ -265,6 +265,13 @@ namespace Sandplay.UI
             }
         }
 
+        public void OnDuplicatePressed()
+        {
+            if (_verticalDropping || IsActionActive || _target == null) return;
+            var placer = FindAnyObjectByType<ObjectPlacer>();
+            placer?.DuplicateObject(_target);
+        }
+
         private float GetObjectTopY(PlacedObject obj)
         {
             // Only consider renderers that are part of the actual object, not gizmo children

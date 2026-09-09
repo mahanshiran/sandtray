@@ -21,19 +21,34 @@ namespace Sandplay.Objects
 
         private void Awake()
         {
+            CacheRenderers();
+            PlacementTime = Time.time;
+        }
+
+        private void CacheRenderers()
+        {
             _renderers = GetComponentsInChildren<Renderer>();
             _originalColors = new Color[_renderers.Length];
             for (int i = 0; i < _renderers.Length; i++)
-                _originalColors[i] = GetMainColor(_renderers[i].material);
-            PlacementTime = Time.time;
+            {
+                var renderer = _renderers[i];
+                var material = renderer != null ? renderer.material : null;
+                _originalColors[i] = material != null ? GetMainColor(material) : Color.white;
+            }
         }
 
         public void SetSelected(bool selected)
         {
+            // PlacedObject can be attached dynamically (including by downloaded GLBs).
+            // Lazily initialize so selection is safe even before Unity has invoked Awake.
+            if (_renderers == null || _originalColors == null || _renderers.Length != _originalColors.Length)
+                CacheRenderers();
             _isSelected = selected;
             for (int i = 0; i < _renderers.Length; i++)
             {
+                if (_renderers[i] == null) continue;
                 var mat = _renderers[i].material;
+                if (mat == null) continue;
                 if (selected)
                     SetMainColor(mat, _originalColors[i] * 1.3f + new Color(0.1f, 0.2f, 0.4f, 0f));
                 else

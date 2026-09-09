@@ -1967,11 +1967,11 @@ namespace Sandplay.Core
                 statusText.GetComponent<TextMeshProUGUI>().text = Localization.Get("status.loaded", evt.SessionName);
             });
 
-            // === Floating object toolbar (Up/Down, Rotate, Resize, Delete) ===
+            // === Floating object toolbar (Up/Down, Rotate, Resize, Duplicate, Delete) ===
             var actionPanelGo = new GameObject("ObjectActionPanel");
             actionPanelGo.transform.SetParent(_sandboxUI.transform, false);
             var actionRT = actionPanelGo.AddComponent<RectTransform>();
-            actionRT.sizeDelta = new Vector2(248, 56);
+            actionRT.sizeDelta = new Vector2(310, 56);
             actionRT.pivot = new Vector2(0.5f, 0f);
 
             var actionBg = actionPanelGo.AddComponent<Image>();
@@ -2149,6 +2149,55 @@ namespace Sandplay.Core
             resizeUp.eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp;
             resizeUp.callback.AddListener((_) => actionPanel.OnResizePointerUp());
             resizeTrigger.triggers.Add(resizeUp);
+
+            // Duplicate button — places an identical copy beside the selected object.
+            var duplicateBtnGo = new GameObject("Btn_Duplicate");
+            duplicateBtnGo.transform.SetParent(actionPanelGo.transform, false);
+            var duplicateBtnImg = duplicateBtnGo.AddComponent<Image>();
+            duplicateBtnImg.color = new Color(0.43f, 0.34f, 0.58f, 1f);
+            ApplyRoundedCorners(duplicateBtnImg);
+            var duplicateBtn = duplicateBtnGo.AddComponent<Button>();
+            duplicateBtn.targetGraphic = duplicateBtnImg;
+            var duplicateColors = duplicateBtn.colors;
+            duplicateColors.highlightedColor = new Color(0.56f, 0.46f, 0.73f, 1f);
+            duplicateColors.pressedColor = new Color(0.32f, 0.24f, 0.47f, 1f);
+            duplicateBtn.colors = duplicateColors;
+            Sprite duplicateIcon = LoadIconWhiteTinted("copy");
+            if (duplicateIcon != null)
+            {
+                var duplicateIconGo = new GameObject("Icon");
+                duplicateIconGo.transform.SetParent(duplicateBtnGo.transform, false);
+                var duplicateIconImg = duplicateIconGo.AddComponent<Image>();
+                duplicateIconImg.sprite = duplicateIcon;
+                duplicateIconImg.preserveAspect = true;
+                duplicateIconImg.raycastTarget = false;
+                var duplicateIconRT = duplicateIconGo.GetComponent<RectTransform>();
+                duplicateIconRT.anchorMin = new Vector2(0.14f, 0.14f);
+                duplicateIconRT.anchorMax = new Vector2(0.86f, 0.86f);
+                duplicateIconRT.offsetMin = Vector2.zero;
+                duplicateIconRT.offsetMax = Vector2.zero;
+            }
+            else
+            {
+                var duplicateTxtGo = new GameObject("Label");
+                duplicateTxtGo.transform.SetParent(duplicateBtnGo.transform, false);
+                var duplicateTxt = duplicateTxtGo.AddComponent<TextMeshProUGUI>();
+                duplicateTxt.text = Localization.Get("action.duplicate");
+                duplicateTxt.fontSize = 11;
+                duplicateTxt.enableAutoSizing = true;
+                duplicateTxt.fontSizeMin = 8;
+                duplicateTxt.fontSizeMax = 11;
+                duplicateTxt.alignment = TextAlignmentOptions.Center;
+                duplicateTxt.color = Color.white;
+                duplicateTxt.font = GetUIFont();
+                duplicateTxt.raycastTarget = false;
+                var duplicateTxtRT = duplicateTxtGo.GetComponent<RectTransform>();
+                duplicateTxtRT.anchorMin = Vector2.zero;
+                duplicateTxtRT.anchorMax = Vector2.one;
+                duplicateTxtRT.offsetMin = new Vector2(2, 2);
+                duplicateTxtRT.offsetMax = new Vector2(-2, -2);
+            }
+            duplicateBtn.onClick.AddListener(() => actionPanel.OnDuplicatePressed());
 
             // Delete button
             var deleteBtnGo = new GameObject("Btn_Delete");

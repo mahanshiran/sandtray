@@ -162,6 +162,7 @@ namespace Sandplay.Core
             ["action.vertical"] = "\u2195",
             ["action.rotate"] = "\u21BB",
             ["action.resize"] = "\u2922",
+            ["action.duplicate"] = "Duplicate",
             ["action.delete"] = "\u2716",
 
             // Analysis
@@ -512,6 +513,7 @@ namespace Sandplay.Core
             ["action.vertical"] = "\u2195",
             ["action.rotate"] = "\u21BB",
             ["action.resize"] = "\u2922",
+            ["action.duplicate"] = "复制",
             ["action.delete"] = "\u2716",
 
             // Analysis

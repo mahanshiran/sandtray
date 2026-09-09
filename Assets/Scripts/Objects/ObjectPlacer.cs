@@ -343,39 +343,20 @@ namespace Sandplay.Objects
             // Copy: Ctrl/Cmd+C
             if (modifier && Input.GetKeyDown(KeyCode.C))
             {
-                if (_selectedPlaced != null && _selectedPlaced.ObjectData != null)
+                if (_selectedPlaced != null &&
+                    (_selectedPlaced.ObjectData != null || _selectedPlaced.NetworkItem != null))
                 {
                     _copiedObject = _selectedPlaced;
-                    Debug.Log($"[ObjectPlacer] Copied object: {_copiedObject.ObjectData.DisplayName}");
+                    Debug.Log($"[ObjectPlacer] Copied object: {GetObjectDisplayName(_copiedObject)}");
                 }
             }
 
             // Paste: Ctrl/Cmd+V
             if (modifier && Input.GetKeyDown(KeyCode.V))
             {
-                if (_copiedObject != null && _copiedObject.ObjectData != null && _copiedObject.gameObject != null)
+                if (_copiedObject != null && _copiedObject.gameObject != null)
                 {
-                    // Place copy slightly offset from the original
-                    Vector3 pastePos = _copiedObject.transform.position + new Vector3(0.5f, 0, 0.5f);
-
-                    // Use raycast to place at correct sand height
-                    if (_sandMesh != null)
-                    {
-                        float sandY = _sandMesh.SampleWorldHeight(pastePos);
-                        float bottomOffset = GetObjectBottomOffset(_copiedObject);
-                        pastePos.y = sandY + bottomOffset;
-                    }
-
-                    var cmd = new PlaceObjectCommand(
-                        this,
-                        _copiedObject.ObjectData,
-                        pastePos,
-                        _copiedObject.transform.rotation,
-                        _copiedObject.transform.localScale.x / _copiedObject.ObjectData.Prefab.transform.localScale.x
-                    );
-                    UndoManager.Instance?.Execute(cmd);
-
-                    Debug.Log($"[ObjectPlacer] Pasted object: {_copiedObject.ObjectData.DisplayName}");
+                    DuplicateObject(_copiedObject);
                 }
             }
 
@@ -514,6 +495,83 @@ namespace Sandplay.Objects
             return placed;
         }
 
+        /// <summary>
+        /// Duplicate a local or downloaded catalog object beside the source. The copy keeps
+        /// the exact rotation, scale, and vertical placement; it prefers screen-right and
+        /// automatically uses screen-left when the right side is too close to a tray wall.
+        /// </summary>
+        public PlacedObject DuplicateObject(PlacedObject source)
+        {
+            if (source == null || source.gameObject == null) return null;
+            if (source.ObjectData == null && source.NetworkItem == null) return null;
+
+            Vector3 screenRight = _cam != null
+                ? Vector3.ProjectOnPlane(_cam.transform.right, Vector3.up).normalized
+                : Vector3.right;
+            if (screenRight.sqrMagnitude < 0.001f) screenRight = Vector3.right;
+
+            var renderers = source.GetComponentsInChildren<Renderer>();
+            float separation = 0.5f;
+            if (renderers.Length > 0)
+            {
+                Bounds bounds = renderers[0].bounds;
+                foreach (var renderer in renderers) bounds.Encapsulate(renderer.bounds);
+                separation = Mathf.Max(0.35f, Mathf.Max(bounds.size.x, bounds.size.z) + 0.12f);
+            }
+
+            Vector3 right = ClampToBounds(source.transform.position + screenRight * separation, source.gameObject);
+            Vector3 left = ClampToBounds(source.transform.position - screenRight * separation, source.gameObject);
+            float rightDistance = Vector2.Distance(
+                new Vector2(source.transform.position.x, source.transform.position.z),
+                new Vector2(right.x, right.z));
+            float leftDistance = Vector2.Distance(
+                new Vector2(source.transform.position.x, source.transform.position.z),
+                new Vector2(left.x, left.z));
+            Vector3 duplicatePosition = rightDistance >= leftDistance ? right : left;
+
+            float relativeScale = source.Serialize().Scale;
+            PlacedObject duplicate;
+            if (source.ObjectData != null)
+            {
+                var command = new PlaceObjectCommand(this, source.ObjectData, duplicatePosition,
+                    source.transform.rotation, relativeScale, skipOffset: true);
+                ExecutePlacementCommand(command);
+                duplicate = command.PlacedObject;
+            }
+            else
+            {
+                var command = new PlaceNetworkObjectCommand(this, source.NetworkItem, duplicatePosition,
+                    source.transform.rotation, relativeScale, skipOffset: true);
+                ExecutePlacementCommand(command);
+                duplicate = command.PlacedObject;
+            }
+
+            if (duplicate != null)
+            {
+                SelectObject(duplicate);
+                if (duplicate.NetworkId != 0)
+                    NetworkBootstrapper.Instance?.SendObjectSelection(duplicate.NetworkId);
+                Debug.Log($"[ObjectPlacer] Duplicated object: {GetObjectDisplayName(source)}");
+            }
+            return duplicate;
+        }
+
+        private static void ExecutePlacementCommand(ICommand command)
+        {
+            if (UndoManager.Instance != null)
+                UndoManager.Instance.Execute(command);
+            else
+                command.Execute();
+        }
+
+        private static string GetObjectDisplayName(PlacedObject obj)
+        {
+            if (obj == null) return "Object";
+            if (obj.ObjectData != null) return obj.ObjectData.DisplayName;
+            if (obj.NetworkItem != null) return obj.NetworkItem.display_name;
+            return "Object";
+        }
+
         public void RemoveObject(PlacedObject obj)
         {
             if (obj == null) return;
@@ -525,7 +583,10 @@ namespace Sandplay.Objects
             // Disable colliders before destroying so settle raycasts ignore it
             foreach (var c in obj.GetComponentsInChildren<Collider>())
                 c.enabled = false;
-            Destroy(obj.gameObject);
+            if (Application.isPlaying)
+                Destroy(obj.gameObject);
+            else
+                DestroyImmediate(obj.gameObject);
 
             SettleFloatingObjects();
         }
@@ -772,7 +833,8 @@ namespace Sandplay.Objects
         /// </summary>
         private Vector3 ClampToBounds(Vector3 pos, GameObject obj)
         {
-            var config = GameManager.Instance.Config;
+            var config = GameManager.Instance?.Config;
+            if (config == null) return pos;
             float halfW = config.SandboxWidth * 0.5f;
             float halfD = config.SandboxDepth * 0.5f;
 
