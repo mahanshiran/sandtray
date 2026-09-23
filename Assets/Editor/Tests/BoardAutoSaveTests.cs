@@ -23,6 +23,8 @@ namespace Sandplay.Tests
         string BoardPath => Path.Combine(directory, "Test board.json");
         void Invoke(string method, params object[] args) => typeof(SessionManager).GetMethod(method, Private).Invoke(manager, args);
         void Set(string field, object value) => typeof(SessionManager).GetField(field, Private).SetValue(manager, value);
+        static void ResetLocalAccountStorage() => typeof(LocalAccountStorage)
+            .GetMethod("Reset", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, null);
 
         [SetUp]
         public void SetUp()
@@ -30,6 +32,7 @@ namespace Sandplay.Tests
             author=BackendClient.Instance;originalToken=author.AccessToken;originalUser=author.UserId;
             typeof(BackendClient).GetProperty("AccessToken").SetValue(author,"test-only-report-author");
             typeof(BackendClient).GetProperty("UserId").SetValue(author,901);
+            ResetLocalAccountStorage();
             directory = Path.Combine(Path.GetTempPath(), "sandtray-autosave-test-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(directory);
             root = new GameObject("AutoSaveTest");
@@ -201,6 +204,7 @@ namespace Sandplay.Tests
         {
             typeof(BackendClient).GetProperty("AccessToken").SetValue(author,originalToken);
             typeof(BackendClient).GetProperty("UserId").SetValue(author,originalUser);
+            ResetLocalAccountStorage();
             UnityEngine.Object.DestroyImmediate(root);
             UnityEngine.Object.DestroyImmediate(config);
             typeof(SessionManager).GetProperty("Instance").SetValue(null, previousManager);
@@ -291,7 +295,9 @@ namespace Sandplay.Tests
             Assert.AreEqual(before,File.ReadAllText(BoardPath));
             typeof(BackendClient).GetProperty("UserId").SetValue(author,901);
             Assert.Throws<UnauthorizedAccessException>(() => manager.GetSavedSessions());
-            // Simulate the fresh manager guard installed by workspace reconstruction.
+            // Rebuild account-pinned storage exactly as the completed transition does
+            // before a fresh manager captures its workspace guard.
+            LocalAccountStorage.CompleteWorkspaceTransition();
             Set("_requireWorkspace", LocalAccountStorage.CaptureGuard());
             var revised=manager.UpdateAnalysisReportText("Test board","owned","Original","Reviewed");
             Assert.AreEqual(901,revised.Revisions[0].EditedByUserId);Assert.AreEqual("ai",revised.Source);
@@ -312,7 +318,10 @@ namespace Sandplay.Tests
                 var ui=uiRoot.AddComponent<SceneBootstrapper>();
                 typeof(SceneBootstrapper).GetField("_safeArea",Private).SetValue(ui,uiRoot);
                 manager.AppendAnalysisReport("Test board",new AnalysisReport {ReportId="ai",CreatedAt=DateTime.UtcNow.ToString("o"),Source="ai",ResultText="AI draft"});
-                typeof(SceneBootstrapper).GetMethod("OpenReportWorkspace",Private).Invoke(ui,new object[]{"Test board"});
+                // This test covers the editor itself. Access-policy/network gating is
+                // exercised separately, so enter the already-authorized path directly.
+                typeof(SceneBootstrapper).GetMethod("OpenAuthorizedReportWorkspace",Private)
+                    .Invoke(ui,new object[]{"Test board",true,null});
                 var card=uiRoot.transform.Find("ClientDialog/Card").GetComponent<RectTransform>();
                 Assert.AreEqual(new Vector2(.5f,.5f),card.anchorMin);
                 Assert.AreEqual(new Vector2(.5f,.5f),card.anchorMax);

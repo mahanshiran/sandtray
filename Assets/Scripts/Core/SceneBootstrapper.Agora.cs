@@ -695,11 +695,13 @@ namespace Sandplay.Core
             string channel = manager != null ? manager.ChannelName : null;
             int generation = manager != null ? manager.ChannelGeneration : -1;
             int userId = backend != null ? backend.UserId : 0;
+            string accessToken = backend != null ? backend.AccessToken : null;
             int accountEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
             return () => this != null && manager != null && AgoraManager.Instance == manager &&
                 manager.IsCurrentChannel(channel, generation) && backend != null &&
                 BackendClient.Instance == backend && backend.IsLoggedIn &&
-                backend.UserId == userId && Sandplay.Data.LocalAccountStorage.Epoch == accountEpoch;
+                backend.UserId == userId && backend.AccessToken == accessToken &&
+                Sandplay.Data.LocalAccountStorage.Epoch == accountEpoch;
         }
 
         private void RenewAgoraToken()

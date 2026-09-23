@@ -36,17 +36,9 @@ namespace Sandplay.Data
                     BackendClient.Instance.RecordOrganizationBoardCreated(data.OrganizationId, data.OrganizationClientId, data.BoardHistoryId, data.SessionName);
             }
 
-            if (!CapacityEnforced) { Persist(); return; }
-            // Refresh the server snapshot before creating a new local table. This
-            // prevents the UI from creating known-over-limit boards while the
-            // journal reservation is being reconciled in the background.
-            BackendClient.Instance.FetchAccessSnapshot(snapshot =>
-            {
-                var capability = AccessPolicy.Find(snapshot?.capabilities, "tables.capacity");
-                if (capability == null || !capability.entitled || (!capability.unlimited && capability.remaining <= 0))
-                { failed?.Invoke("Your table storage limit has been reached."); return; }
-                Persist();
-            }, error => failed?.Invoke(string.IsNullOrEmpty(error) ? "Could not verify table storage capacity." : error), force: true);
+            // Board creation is local-first. Capacity registration is reconciled
+            // asynchronously by SessionManager.BoardQuota after the durable write.
+            Persist();
         }
     }
 }
