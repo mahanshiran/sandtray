@@ -545,30 +545,33 @@ namespace Sandplay.Tests
         }
 
         [Test]
-        public void LiveEditUpdatesResultInvalidatesCloudAndRejectsClosedPanel()
+        public void InlineReflectionEditorPreservesFormatAndEditsSectionBodies()
         {
-            var root = new GameObject("Live editing test");
+            var root = new GameObject("Inline reflection editing test", typeof(RectTransform));
             try
             {
                 var ui = root.AddComponent<Sandplay.UI.AnalysisUI>();
                 const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
                 void Set(string name, object value) => typeof(Sandplay.UI.AnalysisUI).GetField(name, flags).SetValue(ui, value);
-                object Get(string name) => typeof(Sandplay.UI.AnalysisUI).GetField(name, flags).GetValue(ui);
-                var report = new AnalysisReport { ReportId = "r", ResultText = "Original" };
-                Set("_localReport", report); Set("_localReportBoard", "Board");
-                Set("_lastResultText", "Original"); Set("_lastAnalysisId", "old-cloud");
-                Action saved = null; Func<bool> current = null;
-                ui.EditResult = (r, board, guard, done) => { Assert.AreEqual("Board", board); current = guard; saved = done; };
-                ui.RequestEditResult();
-                Assert.IsTrue(current());
-                report.ResultText = "Edited"; saved();
-                Assert.AreEqual("Edited", Get("_lastResultText"));
-                Assert.IsNull(Get("_lastAnalysisId"));
-                Assert.IsFalse(current());
-                ui.RequestEditResult(); root.SetActive(false);
-                Assert.IsFalse(current());
-                report.ResultText = "Obsolete"; saved();
-                Assert.AreEqual("Edited", Get("_lastResultText"));
+                var resultGo = new GameObject("Result", typeof(RectTransform));
+                resultGo.transform.SetParent(root.transform, false);
+                var result = resultGo.AddComponent<TextMeshProUGUI>();
+                Set("_resultText", result);
+                Set("_editingReflection", true);
+                const string original = "Safety notice\n\nSUMMARY\nOriginal summary\n\nOBSERVATIONS\nOriginal observation";
+                typeof(Sandplay.UI.AnalysisUI).GetMethod("BuildReflectionCards", flags)
+                    .Invoke(ui, new object[] { original });
+                var parts = (System.Collections.IList)typeof(Sandplay.UI.AnalysisUI)
+                    .GetField("_reflectionParts", flags).GetValue(ui);
+                Assert.AreEqual(3, parts.Count);
+                var editorField = parts[1].GetType().GetField("Editor");
+                var editor = (TMP_InputField)editorField.GetValue(parts[1]);
+                editor.text = "Edited summary";
+                string composed = (string)typeof(Sandplay.UI.AnalysisUI)
+                    .GetMethod("ComposeEditedReflection", flags).Invoke(ui, null);
+                Assert.AreEqual(
+                    "Safety notice\n\nSUMMARY\nEdited summary\n\nOBSERVATIONS\nOriginal observation",
+                    composed);
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }
         }

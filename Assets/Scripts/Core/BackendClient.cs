@@ -686,6 +686,26 @@ namespace Sandplay.Core
         }
 
         /// <summary>
+        /// Render the current reflection directly. The server atomically enforces
+        /// PDF allowance and does not require a cloud AnalysisRecord first.
+        /// </summary>
+        public void ExportReflectionPdf(string operationId, string reportText,
+            string screenshotB64, string tableName, string modelUsed,
+            Action<byte[]> onSuccess, Action onLimitReached, Action<string> onError)
+        {
+            if (!IsLoggedIn) { onError?.Invoke("Not logged in"); return; }
+            var body = "{" +
+                "\"operation_id\":\"" + EscapeForJson(operationId) + "\"," +
+                "\"report_text\":\"" + EscapeForJson(reportText ?? "") + "\"," +
+                "\"screenshot_base64\":\"" + (screenshotB64 ?? "") + "\"," +
+                "\"table_name\":\"" + EscapeForJson(tableName ?? "") + "\"," +
+                "\"model_used\":\"" + EscapeForJson(modelUsed ?? "") + "\"" +
+                "}";
+            StartCoroutine(PostBytes($"{BaseUrl}/analysis/export-pdf/", body, AccessToken,
+                onSuccess, onLimitReached, onError));
+        }
+
+        /// <summary>
         /// Compatibility notification for older flows. The server decides whether the operation was already metered.
         /// </summary>
         public void ConsumeFreeFeature(string feature, Action<int> onAllowed,
@@ -923,6 +943,33 @@ namespace Sandplay.Core
 
             if (req.result == UnityWebRequest.Result.Success)
                 onSuccess?.Invoke(req.downloadHandler.data);
+            else
+                onError?.Invoke(RequestFailure(req));
+        }
+
+        private IEnumerator PostBytes(string url, string jsonBody, string token,
+            Action<byte[]> onSuccess, Action onForbidden, Action<string> onError)
+        {
+            using var req = new UnityWebRequest(url, "POST");
+            ApplyRequestTimeout(req, url, true);
+            req.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonBody));
+            req.downloadHandler = new DownloadHandlerBuffer();
+            req.SetRequestHeader("Content-Type", "application/json");
+            if (!string.IsNullOrEmpty(token))
+                req.SetRequestHeader("Authorization", "Bearer " + token);
+
+            var requestGuard = CaptureCredentialGuard();
+            int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
+            yield return req.SendWebRequest();
+            if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
+
+            if (req.result == UnityWebRequest.Result.Success)
+            {
+                InvalidateAccess();
+                onSuccess?.Invoke(req.downloadHandler.data);
+            }
+            else if (req.responseCode == 403)
+                onForbidden?.Invoke();
             else
                 onError?.Invoke(RequestFailure(req));
         }

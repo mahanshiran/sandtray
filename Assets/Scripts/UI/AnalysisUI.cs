@@ -1,4 +1,8 @@
 using System.IO;
+using System.Collections;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -25,8 +29,8 @@ namespace Sandplay.UI
 
         // Action bar (shown after result arrives)
         [SerializeField] private GameObject _actionBar;
-        [SerializeField] private Button _saveCloudBtn;
         [SerializeField] private Button _exportPdfBtn;
+        [SerializeField] private Button _editReportBtn;
         [SerializeField] private TextMeshProUGUI _actionStatusText;
 
         [Header("References")]
@@ -37,7 +41,6 @@ namespace Sandplay.UI
         private string _requestScreenshotB64;
         private string _lastAnalysisId;
         private string _lastResultText;
-        private bool _saveInProgress;
         private int _resultGeneration;
         private AnalysisReport _localReport;
         private AnalysisReport _pendingReport;
@@ -51,11 +54,22 @@ namespace Sandplay.UI
         public Color ReflectionAccent = new Color(0f, .42f, .39f);
         private string _renderedReflection;
         private readonly System.Collections.Generic.List<RectTransform> _reflectionCards = new();
+        private readonly List<ReflectionPart> _reflectionParts = new();
         private float _reflectionWidth;
+        private bool _editingReflection;
+        private string _editOriginalText;
         private GameObject _errorPanel;
         private AnalysisPayload _retryPayload;
         private AccessCapability _lastAnalysisQuota;
-        public System.Action<AnalysisReport, string, System.Func<bool>, System.Action> EditResult { private get; set; }
+
+        private sealed class ReflectionPart
+        {
+            public string Heading;
+            public string Title;
+            public string Body;
+            public int Section;
+            public TMP_InputField Editor;
+        }
 
         internal static AnalysisReport[] AIHistoryReports(SessionData data) =>
             (data?.Reports ?? new System.Collections.Generic.List<AnalysisReport>())
@@ -66,26 +80,14 @@ namespace Sandplay.UI
 
         public void RequestEditResult()
         {
-            if (EditResult == null) return;
-            if (_localReport == null && !SaveLocalReport(_lastResultText))
-            { if (_actionStatusText) _actionStatusText.text = Localization.Get(_reportSavePending ? "records.capacity_pending" : "report.local_failed"); return; }
-            var current = CaptureResultGuard();
-            EditResult(_localReport, _localReportBoard, current, () =>
-            {
-                if (!current()) return;
-                _resultGeneration++;
-                _lastResultText = _localReport.ResultText;
-                _lastAnalysisId = null;
-                _saveInProgress = false;
-                if (_resultText) _resultText.text = _lastResultText;
-                ShowActionBar();
-            });
+            if (_editingReflection) SaveInlineEdit();
+            else BeginInlineEdit();
         }
 
         private void OnDisable()
         {
             _resultGeneration++;
-            _saveInProgress = false;
+            _editingReflection = false;
         }
 
         private System.Func<bool> CaptureResultGuard()
@@ -144,11 +146,11 @@ namespace Sandplay.UI
             if (_askAIBtn)
                 _askAIBtn.onClick.AddListener(RunAIAnalysis);
 
-            if (_saveCloudBtn)
-                _saveCloudBtn.onClick.AddListener(TriggerCloudSave);
-
             if (_exportPdfBtn)
-                _exportPdfBtn.onClick.AddListener(TriggerExportPdf);
+                _exportPdfBtn.onClick.AddListener(HandleExportOrCancel);
+
+            if (_editReportBtn)
+                _editReportBtn.onClick.AddListener(RequestEditResult);
 
             EventBus.Subscribe<AnalysisRequestedEvent>(OnAnalysisRequested);
             EventBus.Subscribe<AnalysisCompletedEvent>(OnAnalysisCompleted);
@@ -177,7 +179,8 @@ namespace Sandplay.UI
             _lastResultText = null;
             _localReport = null;
             _localReportBoard = null;
-            _saveInProgress = false;
+            _editingReflection = false;
+            _editOriginalText = null;
             RefreshHistoryButton();
             SetHistoryVisible(false);
         }
@@ -247,7 +250,7 @@ namespace Sandplay.UI
                     if (!current()) return;
                     // Keep the limitation visible in the app, saved reports, and exported PDFs.
                     _lastResultText = Localization.Get("analysis.disclaimer") + "\n\n" + result;
-                    bool localSaved = SaveLocalReport(_lastResultText);
+                    SaveLocalReport(_lastResultText);
                     if (_loadingIndicator) _loadingIndicator.SetActive(false);
                     if (_scrollArea) _scrollArea.SetActive(true);
                     if (_resultText)
@@ -260,9 +263,6 @@ namespace Sandplay.UI
                     }
                     SetHistoryVisible(true);
                     ShowActionBar();
-                    if (!localSaved && _actionStatusText) _actionStatusText.text = Localization.Get(_reportSavePending ? "records.capacity_pending" : "report.local_failed");
-                    // Extra cloud record persistence requires Save to Cloud or
-                    // the separately confirmed PDF export, not merely generation.
                 },
                 error => { if (current()) ShowError(error); },
                 quota =>
@@ -303,7 +303,12 @@ namespace Sandplay.UI
                     _reportSavePending=false;
                     if (_lastResultText != resultText) return;
                     FinishLocalArchive(report, boardName);
-                },error=>{if(this!=null && epoch==LocalAccountStorage.Epoch){_reportSavePending=false;if(_actionStatusText)_actionStatusText.text=error;}});
+                },error=>
+                {
+                    if(this==null || epoch!=LocalAccountStorage.Epoch)return;
+                    _reportSavePending=false;
+                    Debug.LogWarning("[AnalysisUI] Local reflection history could not be updated: " + error);
+                });
                 // Local-first AI persistence can complete synchronously. Otherwise
                 // remain pending and wait for the callback before enabling exports.
                 return !_reportSavePending && _localReport != null && _localReport.ReportId == report.ReportId;
@@ -327,8 +332,6 @@ namespace Sandplay.UI
             if (!string.IsNullOrWhiteSpace(_lastScreenshotB64))
                 ScreenshotManager.SaveAnalysisImage(report.ReportId, _lastScreenshotB64);
             AnalysisArchiveClient.Instance.Queue(boardName, report);
-            if (_actionStatusText)
-                _actionStatusText.text = Localization.Get("analysis.auto_saved");
             RefreshHistoryButton();
         }
 
@@ -360,7 +363,8 @@ namespace Sandplay.UI
             _lastResultText = report.ResultText;
             _lastAnalysisId = report.CloudId;
             _lastScreenshotB64 = ScreenshotManager.LoadAnalysisImageBase64(report.ReportId);
-            _saveInProgress = false;
+            _editingReflection = false;
+            _editOriginalText = null;
             if (_resultText)
             {
                 if (_resultText.font != null) _resultText.font.TryAddCharacters(_lastResultText);
@@ -451,196 +455,224 @@ namespace Sandplay.UI
         private void ShowActionBar()
         {
             if (_actionBar) _actionBar.SetActive(true);
-            SetStatus(_localReport != null ? Localization.Get("analysis.auto_saved") : "");
-            if (_saveCloudBtn)
-            {
-                _saveCloudBtn.interactable = false;
-                var lbl = _saveCloudBtn.GetComponentInChildren<TextMeshProUGUI>();
-                if (lbl) lbl.text = Localization.Get("analysis.auto_save_button");
-            }
+            SetStatus("");
             if (_exportPdfBtn) _exportPdfBtn.interactable = true;
+            if (_editReportBtn) _editReportBtn.interactable = true;
+            UpdateActionLabels();
         }
 
-        private void DoSave(System.Action onComplete)
+        private void HandleExportOrCancel()
         {
-            if (_saveInProgress) return;
-            var current = CaptureResultGuard();
-            _saveInProgress = true;
-            SetStatus(Localization.Get("analysis.saving"));
-            if (_saveCloudBtn) _saveCloudBtn.interactable = false;
-
-            var savedSession = !string.IsNullOrEmpty(_localReportBoard)
-                ? SessionManager.Instance?.LoadSessionData(_localReportBoard) : null;
-            bool organizationReport = savedSession != null &&
-                !string.IsNullOrEmpty(savedSession.OrganizationId);
-            if (organizationReport && (_localReport == null ||
-                string.IsNullOrEmpty(_localReport.ReportId)))
-            {
-                _saveInProgress = false;
-                if (_saveCloudBtn) _saveCloudBtn.interactable = false;
-                SetStatus(Localization.Get("report.local_failed"));
-                return;
-            }
-            BackendClient.Instance.SaveAnalysisRecord(
-                _lastResultText ?? "", _lastScreenshotB64 ?? "",
-                _localReport?.ModelUsed ?? AIAnalysisManager.Instance?.LastModelUsed ?? "",
-                savedSession?.OrganizationId, savedSession?.OrganizationClientId,
-                _localReport?.ReportId, _localReportBoard,
-                id =>
-                {
-                    if (!current()) return;
-                    if (_localReport != null)
-                    {
-                        try
-                        {
-                            if (SessionManager.Instance == null || !SessionManager.Instance.TryAttachReportCloudId(
-                                _localReportBoard, _localReport.ReportId, _lastResultText, id))
-                                throw new System.InvalidOperationException();
-                            _localReport.CloudId = id;
-                        }
-                        catch (System.Exception)
-                        {
-                            _saveInProgress = false;
-                            if (_saveCloudBtn) _saveCloudBtn.interactable = false;
-                            if (_exportPdfBtn) _exportPdfBtn.interactable = true;
-                            SetStatus(Localization.Get("reports.edit_stale"));
-                            return;
-                        }
-                    }
-                    _lastAnalysisId = id;
-                    _saveInProgress = false;
-                    if (_saveCloudBtn)
-                    {
-                        _saveCloudBtn.interactable = false;
-                        var lbl = _saveCloudBtn.GetComponentInChildren<TextMeshProUGUI>();
-                        if (lbl) lbl.text = Localization.Get("analysis.auto_save_button");
-                    }
-                    SetStatus(Localization.Get("analysis.save_done"));
-                    onComplete?.Invoke();
-                },
-                err =>
-                {
-                    if (!current()) return;
-                    _saveInProgress = false;
-                    if (_saveCloudBtn) _saveCloudBtn.interactable = false;
-                    SetStatus(string.Format(Localization.Get("analysis.save_fail"), err));
-                    onComplete?.Invoke();
-                }
-            );
-        }
-
-        private void TriggerCloudSave()
-        {
-            if (_saveInProgress) return;
-            if (!string.IsNullOrEmpty(_lastAnalysisId)) { SetStatus(Localization.Get("analysis.save_done")); return; }
-            var client = BackendClient.Instance;
-            if (client == null || !client.IsLoggedIn) { SetStatus(Localization.Get("analysis.save_not_logged_in")); return; }
-            DoSave(null);
+            if (_editingReflection) CancelInlineEdit();
+            else TriggerExportPdf();
         }
 
         private void TriggerExportPdf()
         {
-            RequestPdfReview(ExportReviewedPdf);
-        }
-
-        private void ExportReviewedPdf()
-        {
             var client = BackendClient.Instance;
             if (client == null || !client.IsLoggedIn) { SetStatus(Localization.Get("analysis.pdf_login_required")); return; }
-            if (_saveInProgress) { SetStatus(Localization.Get("analysis.wait_save")); return; }
-
-            if (string.IsNullOrEmpty(_lastAnalysisId))
-            {
-                if (_exportPdfBtn) _exportPdfBtn.interactable = false;
-                DoSave(() =>
-                {
-                    if (_exportPdfBtn) _exportPdfBtn.interactable = true;
-                    if (!string.IsNullOrEmpty(_lastAnalysisId))
-                        DownloadAndSavePdf();
-                });
-            }
-            else
-            {
-                DownloadAndSavePdf();
-            }
+#if UNITY_STANDALONE || UNITY_EDITOR
+            StartCoroutine(ChoosePdfDestination());
+#else
+            RequestPdfBytes(null);
+#endif
         }
 
-        private void DownloadAndSavePdf()
+        private IEnumerator ChoosePdfDestination()
         {
-            var currentResult = CaptureResultGuard();
-            string analysisId = _lastAnalysisId;
-            string text = _lastResultText;
-            var localReport = _localReport;
-            string board = _localReportBoard;
-            System.Func<bool> current = () =>
-            {
-                if (!currentResult() || _lastAnalysisId != analysisId) return false;
-                if (localReport == null || (SessionManager.Instance != null &&
-                    SessionManager.Instance.IsCurrentReportText(board, localReport.ReportId, text))) return true;
-                if (_exportPdfBtn) _exportPdfBtn.interactable = true;
-                SetStatus(Localization.Get("reports.edit_stale"));
-                return false;
-            };
+            if (SimpleFileBrowser.FileBrowser.IsOpen) yield break;
+            string fileName = PdfFileName();
+            SimpleFileBrowser.FileBrowser.SetFilters(false,
+                new SimpleFileBrowser.FileBrowser.Filter("PDF", ".pdf"));
+            SimpleFileBrowser.FileBrowser.SetDefaultFilter(".pdf");
+            yield return SimpleFileBrowser.FileBrowser.WaitForSaveDialog(
+                SimpleFileBrowser.FileBrowser.PickMode.Files, false, null, fileName,
+                Localization.Current == Language.Chinese ? "保存 PDF" : "Save PDF",
+                Localization.Current == Language.Chinese ? "保存" : "Save");
+            if (!SimpleFileBrowser.FileBrowser.Success ||
+                SimpleFileBrowser.FileBrowser.Result == null ||
+                SimpleFileBrowser.FileBrowser.Result.Length == 0) yield break;
+            string destination = SimpleFileBrowser.FileBrowser.Result[0];
+            if (!destination.EndsWith(".pdf", System.StringComparison.OrdinalIgnoreCase))
+                destination += ".pdf";
+            RequestPdfBytes(destination);
+        }
+
+        private void RequestPdfBytes(string destination)
+        {
+            var client = BackendClient.Instance;
+            if (client == null || !client.IsLoggedIn || string.IsNullOrWhiteSpace(_lastResultText)) return;
+            var current = CaptureResultGuard();
             SetStatus(Localization.Get("analysis.pdf_generating"));
             if (_exportPdfBtn) _exportPdfBtn.interactable = false;
-
-            BackendClient.Instance.DownloadAnalysisPdf(analysisId,
+            if (_editReportBtn) _editReportBtn.interactable = false;
+            client.ExportReflectionPdf(PdfOperationId(), _lastResultText, _lastScreenshotB64,
+                _localReportBoard ?? SessionManager.Instance?.CurrentBoardName ?? "",
+                _localReport?.ModelUsed ?? AIAnalysisManager.Instance?.LastModelUsed ?? "",
                 pdfBytes =>
                 {
                     if (!current()) return;
+                    if (_exportPdfBtn) _exportPdfBtn.interactable = true;
+                    if (_editReportBtn) _editReportBtn.interactable = true;
                     if (pdfBytes == null || pdfBytes.Length == 0)
                     {
-                        if (_exportPdfBtn) _exportPdfBtn.interactable = true;
                         SetStatus(string.Format(Localization.Get("analysis.pdf_fail"), "Empty PDF response"));
                         return;
                     }
-
-                    BackendClient.Instance.ConsumeFreeFeature(
-                        BackendClient.FeaturePdfExport,
-                        _ => { if (current()) SavePdfBytes(pdfBytes); },
-                        () =>
-                        {
-                            if (!current()) return;
-                            if (_exportPdfBtn) _exportPdfBtn.interactable = true;
-                            SetStatus(Localization.Get("sub.free_pdf_limit"));
-                            ShowUpgradePrompt(Localization.Get("sub.free_pdf_limit"));
-                        },
-                        error =>
-                        {
-                            if (!current()) return;
-                            if (_exportPdfBtn) _exportPdfBtn.interactable = true;
-                            SetStatus(string.Format(Localization.Get("analysis.pdf_fail"), error));
-                        }
-                    );
+                    SavePdfBytes(pdfBytes, destination);
                 },
-                err =>
+                () =>
                 {
                     if (!current()) return;
                     if (_exportPdfBtn) _exportPdfBtn.interactable = true;
-                    SetStatus(string.Format(Localization.Get("analysis.pdf_fail"), err));
-                }
-            );
+                    if (_editReportBtn) _editReportBtn.interactable = true;
+                    SetStatus(Localization.Get("sub.free_pdf_limit"));
+                    ShowUpgradePrompt(Localization.Get("sub.free_pdf_limit"));
+                },
+                error =>
+                {
+                    if (!current()) return;
+                    if (_exportPdfBtn) _exportPdfBtn.interactable = true;
+                    if (_editReportBtn) _editReportBtn.interactable = true;
+                    SetStatus(string.Format(Localization.Get("analysis.pdf_fail"), error));
+                });
         }
 
-        private void SavePdfBytes(byte[] pdfBytes)
+        private void SavePdfBytes(byte[] pdfBytes, string destination)
         {
-            if (_exportPdfBtn) _exportPdfBtn.interactable = true;
-            var dir = Path.Combine(Sandplay.Data.LocalAccountStorage.Root, "Reports");
             try
             {
-                Directory.CreateDirectory(dir);
-                string id = string.IsNullOrEmpty(_lastAnalysisId)
-                    ? System.DateTime.UtcNow.ToString("yyyyMMddHHmmss")
-                    : _lastAnalysisId.Substring(0, System.Math.Min(8, _lastAnalysisId.Length));
-                var fileName = $"analysis_{id}.pdf";
-                var path = Path.Combine(dir, fileName);
+                string fileName = PdfFileName();
+#if UNITY_STANDALONE || UNITY_EDITOR
+                File.WriteAllBytes(destination, pdfBytes);
+#elif UNITY_WEBGL
+                NativeShare.SavePdf(fileName, pdfBytes, null);
+#elif UNITY_IOS || UNITY_ANDROID
+                NativeShare.SavePdf(fileName, pdfBytes,
+                    Path.Combine(Application.temporaryCachePath, fileName));
+#else
+                string path = Path.Combine(Sandplay.Data.LocalAccountStorage.Root, "Reports", fileName);
                 NativeShare.SavePdf(fileName, pdfBytes, path);
+#endif
                 SetStatus(string.Format(Localization.Get("analysis.pdf_saved"), fileName));
             }
             catch (System.Exception ex)
             {
                 SetStatus(string.Format(Localization.Get("analysis.pdf_fail"), ex.Message));
             }
+        }
+
+        private string PdfFileName()
+        {
+            string board = _localReportBoard ?? SessionManager.Instance?.CurrentBoardName ?? "reflection";
+            var safe = new string(board.Select(ch => Path.GetInvalidFileNameChars().Contains(ch) ? '_' : ch).ToArray()).Trim();
+            if (string.IsNullOrWhiteSpace(safe)) safe = "reflection";
+            return safe + "_reflection.pdf";
+        }
+
+        private string PdfOperationId()
+        {
+            string key = (_localReport?.ReportId ?? "unsaved") + "\n" +
+                (_localReportBoard ?? SessionManager.Instance?.CurrentBoardName ?? "") + "\n" +
+                (_lastResultText ?? "");
+            using var sha = SHA256.Create();
+            byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(key));
+            byte[] guid = new byte[16];
+            System.Array.Copy(hash, guid, 16);
+            guid[7] = (byte)((guid[7] & 0x0f) | 0x50);
+            guid[8] = (byte)((guid[8] & 0x3f) | 0x80);
+            return new System.Guid(guid).ToString();
+        }
+
+        private void BeginInlineEdit()
+        {
+            if (string.IsNullOrWhiteSpace(_lastResultText)) return;
+            if (_localReport == null && !SaveLocalReport(_lastResultText))
+            {
+                SetStatus(Localization.Get(_reportSavePending ? "records.capacity_pending" : "report.local_failed"));
+                return;
+            }
+            if (_localReport == null || !SessionManager.CanEditReport(_localReport))
+            {
+                SetStatus(Localization.Current == Language.Chinese
+                    ? "只有此报告的创建者可以编辑。"
+                    : "Only the report creator can edit this reflection.");
+                return;
+            }
+            _editOriginalText = _lastResultText;
+            _editingReflection = true;
+            SetStatus("");
+            BuildReflectionCards(_lastResultText);
+            _reflectionWidth = -1;
+            UpdateActionLabels();
+        }
+
+        private void CancelInlineEdit()
+        {
+            if (!_editingReflection) return;
+            _editingReflection = false;
+            _editOriginalText = null;
+            BuildReflectionCards(_lastResultText ?? "");
+            _reflectionWidth = -1;
+            SetStatus("");
+            UpdateActionLabels();
+        }
+
+        private void SaveInlineEdit()
+        {
+            string edited = ComposeEditedReflection();
+            if (string.IsNullOrWhiteSpace(edited)) return;
+            if (string.Equals(edited, _editOriginalText, System.StringComparison.Ordinal))
+            {
+                CancelInlineEdit();
+                return;
+            }
+            try
+            {
+                if (SessionManager.Instance == null || _localReport == null)
+                    throw new System.InvalidOperationException();
+                _localReport = SessionManager.Instance.UpdateAnalysisReportText(
+                    _localReportBoard, _localReport.ReportId, _editOriginalText, edited);
+                _lastResultText = _localReport.ResultText;
+                _lastAnalysisId = null;
+                _editingReflection = false;
+                _editOriginalText = null;
+                if (_resultText) _resultText.text = _lastResultText;
+                BuildReflectionCards(_lastResultText);
+                _reflectionWidth = -1;
+                SetStatus(Localization.Current == Language.Chinese ? "更改已保存" : "Changes saved");
+                UpdateActionLabels();
+                RefreshHistoryButton();
+            }
+            catch (System.Exception)
+            {
+                SetStatus(Localization.Get("reports.edit_stale"));
+            }
+        }
+
+        private string ComposeEditedReflection()
+        {
+            var text = new StringBuilder();
+            foreach (var part in _reflectionParts)
+            {
+                string body = part.Editor ? part.Editor.text.Trim() : part.Body.Trim();
+                if (text.Length > 0) text.Append("\n\n");
+                if (!string.IsNullOrWhiteSpace(part.Heading))
+                    text.Append(part.Heading.Trim()).Append('\n');
+                text.Append(body);
+            }
+            return text.ToString().Trim();
+        }
+
+        private void UpdateActionLabels()
+        {
+            var exportLabel = _exportPdfBtn ? _exportPdfBtn.GetComponentInChildren<TextMeshProUGUI>() : null;
+            if (exportLabel) exportLabel.text = _editingReflection
+                ? Localization.Get("dialog.cancel") : Localization.Get("analysis.export_pdf");
+            var editLabel = _editReportBtn ? _editReportBtn.GetComponentInChildren<TextMeshProUGUI>() : null;
+            if (editLabel) editLabel.text = _editingReflection
+                ? (Localization.Current == Language.Chinese ? "保存更改" : "Save changes")
+                : Localization.Get("reports.edit");
         }
 
         private static void ShowUpgradePrompt(string message)
@@ -765,20 +797,35 @@ namespace Sandplay.UI
         private void LateUpdate()
         {
             if (!_resultText || !_scrollArea || !_scrollArea.activeSelf) return;
-            if (_renderedReflection != _resultText.text)
+            if (!_editingReflection && _renderedReflection != _resultText.text)
             {
                 _renderedReflection = _resultText.text;
                 BuildReflectionCards(_renderedReflection ?? "");
                 _reflectionWidth = -1;
             }
             float width = _resultText.rectTransform.rect.width;
-            if (Mathf.Abs(width - _reflectionWidth) < .5f) return;
+            if (!_editingReflection && Mathf.Abs(width - _reflectionWidth) < .5f) return;
             _reflectionWidth = width;
             float y = 0;
             foreach (var card in _reflectionCards)
             {
-                var body = card.Find("Body").GetComponent<TextMeshProUGUI>();
-                float height = body.GetPreferredValues(body.text, Mathf.Max(40, width - 40), 0).y + 78;
+                var bodyTransform = card.Find("Body");
+                var editorTransform = card.Find("Editor");
+                float bodyHeight;
+                if (editorTransform)
+                {
+                    var editor = editorTransform.GetComponent<TMP_InputField>();
+                    bodyHeight = editor.textComponent.GetPreferredValues(
+                        editor.text, Mathf.Max(40, width - 64), 0).y + 24;
+                    editorTransform.GetComponent<RectTransform>().offsetMin = new Vector2(20, 18);
+                    editorTransform.GetComponent<RectTransform>().offsetMax = new Vector2(-20, -58);
+                }
+                else
+                {
+                    var body = bodyTransform.GetComponent<TextMeshProUGUI>();
+                    bodyHeight = body.GetPreferredValues(body.text, Mathf.Max(40, width - 40), 0).y;
+                }
+                float height = Mathf.Max(112, bodyHeight + 78);
                 card.anchoredPosition = new Vector2(0, -y);
                 card.sizeDelta = new Vector2(0, height);
                 y += height + 12;
@@ -790,6 +837,8 @@ namespace Sandplay.UI
         {
             foreach (var card in _reflectionCards) { card.gameObject.SetActive(false); Destroy(card.gameObject); }
             _reflectionCards.Clear();
+            _reflectionParts.Clear();
+            _renderedReflection = text;
             _resultText.enabled = false;
             bool zh = Localization.Current == Language.Chinese;
             var headings = new[] { "SUMMARY", "OBSERVATIONS", "OPTIONAL HYPOTHESES", "QUESTIONS FOR REFLECTION", "CONCLUSION",
@@ -797,25 +846,40 @@ namespace Sandplay.UI
             var labels = zh ? new[] { "摘要", "观察", "探索不同可能", "反思问题", "总结" }
                 : new[] { "At a glance", "What is on the table", "Possibilities to explore", "Questions for you", "Conclusion" };
             string title = zh ? "关于本次反思" : "About this reflection";
+            string heading = null;
             int section = -1;
             var body = new System.Text.StringBuilder();
+            void Flush()
+            {
+                string value = body.ToString().Trim();
+                if (value.Length == 0) return;
+                var part = new ReflectionPart
+                {
+                    Heading = heading,
+                    Title = title,
+                    Body = value,
+                    Section = section,
+                };
+                _reflectionParts.Add(part);
+                AddReflectionCard(part);
+            }
             foreach (string line in text.Replace("\r", "").Split('\n'))
             {
                 string candidate = line.Trim().Trim('#', '*', ':', '：').Trim();
                 int index = System.Array.FindIndex(headings, h => string.Equals(h, candidate, System.StringComparison.OrdinalIgnoreCase));
                 if (index >= 0)
                 {
-                    if (body.Length > 0) AddReflectionCard(title, body.ToString().Trim(), section);
-                    body.Clear(); section = index % 5; title = labels[section];
+                    Flush();
+                    body.Clear(); section = index % 5; title = labels[section]; heading = candidate;
                 }
                 else body.AppendLine(line);
             }
-            if (body.ToString().Trim().Length > 0) AddReflectionCard(title, body.ToString().Trim(), section);
+            Flush();
             var scroll = GetComponent<ScrollRect>();
             if (scroll) scroll.verticalNormalizedPosition = 1;
         }
 
-        private void AddReflectionCard(string title, string body, int section)
+        private void AddReflectionCard(ReflectionPart part)
         {
             var card = new GameObject("ReflectionSection", typeof(RectTransform), typeof(Image));
             card.transform.SetParent(_resultText.transform, false);
@@ -832,20 +896,63 @@ namespace Sandplay.UI
                 label.richText = false; label.raycastTarget = false; label.enableWordWrapping = true;
                 return label;
             }
-            var header = Label("Heading", title, 17); header.fontStyle = FontStyles.Bold;
+            var header = Label("Heading", part.Title, 17); header.fontStyle = FontStyles.Bold;
             header.rectTransform.anchorMin = new Vector2(0, 1); header.rectTransform.anchorMax = Vector2.one;
             header.rectTransform.offsetMin = new Vector2(62, -52); header.rectTransform.offsetMax = new Vector2(-20, -16);
-            var content = Label("Body", body, section < 0 ? 11 : 14);
-            content.rectTransform.anchorMin = Vector2.zero; content.rectTransform.anchorMax = Vector2.one;
-            content.rectTransform.offsetMin = new Vector2(20, 18); content.rectTransform.offsetMax = new Vector2(-20, -58);
+            if (_editingReflection && part.Section >= 0)
+                part.Editor = AddReflectionEditor(card.transform, part.Body);
+            else
+            {
+                var content = Label("Body", part.Body, part.Section < 0 ? 11 : 14);
+                content.rectTransform.anchorMin = Vector2.zero; content.rectTransform.anchorMax = Vector2.one;
+                content.rectTransform.offsetMin = new Vector2(20, 18); content.rectTransform.offsetMax = new Vector2(-20, -58);
+            }
             var badge = new GameObject("SectionIcon", typeof(RectTransform), typeof(Image)); badge.transform.SetParent(card.transform, false);
             var badgeImage = badge.GetComponent<Image>(); badgeImage.color = ReflectionAccent; RoundReflectionCard?.Invoke(badgeImage);
             var br = badge.GetComponent<RectTransform>(); br.anchorMin = br.anchorMax = new Vector2(0, 1);
             br.pivot = new Vector2(0, 1); br.anchoredPosition = new Vector2(18, -16); br.sizeDelta = new Vector2(32, 32);
             var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer)); iconGo.transform.SetParent(badge.transform, false);
-            var icon = iconGo.AddComponent<ReflectionSectionIcon>(); icon.Section = section; icon.color = Color.white; icon.raycastTarget = false;
+            var icon = iconGo.AddComponent<ReflectionSectionIcon>(); icon.Section = part.Section; icon.color = Color.white; icon.raycastTarget = false;
             icon.rectTransform.anchorMin = new Vector2(.2f, .2f); icon.rectTransform.anchorMax = new Vector2(.8f, .8f);
             icon.rectTransform.offsetMin = icon.rectTransform.offsetMax = Vector2.zero;
+        }
+
+        private TMP_InputField AddReflectionEditor(Transform parent, string value)
+        {
+            var editorGo = new GameObject("Editor", typeof(RectTransform), typeof(Image), typeof(TMP_InputField));
+            editorGo.transform.SetParent(parent, false);
+            var editorRect = editorGo.GetComponent<RectTransform>();
+            editorRect.anchorMin = Vector2.zero; editorRect.anchorMax = Vector2.one;
+            editorRect.offsetMin = new Vector2(20, 18); editorRect.offsetMax = new Vector2(-20, -58);
+            var editorImage = editorGo.GetComponent<Image>();
+            editorImage.color = Color.Lerp(ReflectionCardColor, _resultText.color, .06f);
+            RoundReflectionCard?.Invoke(editorImage);
+
+            var viewport = new GameObject("Text Area", typeof(RectTransform), typeof(RectMask2D));
+            viewport.transform.SetParent(editorGo.transform, false);
+            var viewportRect = viewport.GetComponent<RectTransform>();
+            viewportRect.anchorMin = Vector2.zero; viewportRect.anchorMax = Vector2.one;
+            viewportRect.offsetMin = new Vector2(10, 8); viewportRect.offsetMax = new Vector2(-10, -8);
+
+            var textGo = new GameObject("Text", typeof(RectTransform));
+            textGo.transform.SetParent(viewport.transform, false);
+            var text = textGo.AddComponent<TextMeshProUGUI>();
+            text.font = _resultText.font; text.fontSize = 14; text.color = _resultText.color;
+            text.richText = false; text.enableWordWrapping = true;
+            text.alignment = TextAlignmentOptions.TopLeft;
+            var textRect = text.rectTransform;
+            textRect.anchorMin = Vector2.zero; textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = textRect.offsetMax = Vector2.zero;
+
+            var editor = editorGo.GetComponent<TMP_InputField>();
+            editor.targetGraphic = editorImage;
+            editor.textViewport = viewportRect;
+            editor.textComponent = text;
+            editor.lineType = TMP_InputField.LineType.MultiLineNewline;
+            editor.contentType = TMP_InputField.ContentType.Standard;
+            editor.text = value;
+            editor.onValueChanged.AddListener(_ => _reflectionWidth = -1);
+            return editor;
         }
 
         private void OnDestroy()

@@ -19,6 +19,15 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:usesCleartextTraffic="false"
         tools:replace="android:networkSecurityConfig,android:usesCleartextTraffic">
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.sandtrayfileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/sandtray_file_paths" />
+        </provider>
         <activity
             android:name="com.unity3d.player.UnityPlayerActivity"
             android:exported="true"

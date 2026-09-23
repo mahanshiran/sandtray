@@ -43,6 +43,8 @@ namespace Sandplay.Core
             _SaveFileBytes(name, bytes, bytes.Length, mimeType ?? "application/octet-stream");
 #elif UNITY_IOS && !UNITY_EDITOR
             _ShareFile(path, mimeType ?? "application/octet-stream", name);
+#elif UNITY_ANDROID && !UNITY_EDITOR
+            ShareAndroid(path, mimeType ?? "application/octet-stream", name);
 #else
             Application.OpenURL("file://" + path);
 #endif
@@ -116,5 +118,34 @@ namespace Sandplay.Core
             ShareExistingFile(path, mimeType, fileName);
 #endif
         }
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+        private static void ShareAndroid(string path, string mimeType, string title)
+        {
+            try
+            {
+                using var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+                using var activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+                using var file = new AndroidJavaObject("java.io.File", path);
+                string authority = activity.Call<string>("getPackageName") + ".sandtrayfileprovider";
+                using var provider = new AndroidJavaClass("androidx.core.content.FileProvider");
+                using var uri = provider.CallStatic<AndroidJavaObject>("getUriForFile", activity, authority, file);
+                using var intent = new AndroidJavaObject("android.content.Intent", "android.intent.action.SEND");
+                intent.Call<AndroidJavaObject>("setType", mimeType);
+                using var intentClass = new AndroidJavaClass("android.content.Intent");
+                string stream = intentClass.GetStatic<string>("EXTRA_STREAM");
+                int readPermission = intentClass.GetStatic<int>("FLAG_GRANT_READ_URI_PERMISSION");
+                intent.Call<AndroidJavaObject>("putExtra", stream, uri);
+                intent.Call<AndroidJavaObject>("addFlags", readPermission);
+                using var chooser = intentClass.CallStatic<AndroidJavaObject>("createChooser", intent, title);
+                activity.Call("startActivity", chooser);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning("[NativeShare] Android share failed: " + ex.Message);
+                Application.OpenURL("file://" + path);
+            }
+        }
+#endif
     }
 }

@@ -191,7 +191,7 @@ namespace Sandplay.Core
 
             scrollArea.SetActive(false);
 
-            // ── Action bar (Save to Cloud + Export PDF + status) ──────────────────
+            // ── Action bar (export + in-place editing + status) ──────────────────
             var actionBar = new GameObject("ActionBar");
             actionBar.transform.SetParent(analysisPanel.transform, false);
             var actionBarImg = actionBar.AddComponent<Image>();
@@ -202,13 +202,8 @@ namespace Sandplay.Core
             actionBarRT.offsetMin = new Vector2(0, 0);
             actionBarRT.offsetMax = new Vector2(0, 50);
 
-            var saveCloudBtn = CreateButton(actionBar.transform, "Btn_SaveCloud", Localization.Get("analysis.save"),
-                new Vector2(10, 6), new Vector2(140, 44));
-            var saveCloudImg = saveCloudBtn.GetComponent<Image>();
-            if (saveCloudImg) saveCloudImg.color = HomePrimary;
-
             var exportPdfBtn = CreateButton(actionBar.transform, "Btn_ExportPdf", Localization.Get("analysis.export_pdf"),
-                new Vector2(150, 6), new Vector2(290, 44));
+                new Vector2(10, 6), new Vector2(290, 44));
             var exportPdfImg = exportPdfBtn.GetComponent<Image>();
             if (exportPdfImg) exportPdfImg.color = new Color(0.38f, 0.30f, 0.18f, 1f);
 
@@ -262,27 +257,24 @@ namespace Sandplay.Core
                 ?.SetValue(analysisUI, FindAnyObjectByType<Sand.SandMesh>());
             type.GetField("_actionBar", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 ?.SetValue(analysisUI, actionBar);
-            type.GetField("_saveCloudBtn", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                ?.SetValue(analysisUI, saveCloudBtn);
             type.GetField("_exportPdfBtn", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 ?.SetValue(analysisUI, exportPdfBtn);
             type.GetField("_actionStatusText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 ?.SetValue(analysisUI, statusTxt);
 
-            analysisUI.ReviewBeforeExport = ShowReportExportReview;
-            analysisUI.EditResult = (report, board, current, saved) => ShowReportEditorGuarded(report, board, saved, current);
             var editLive = CreateButton(actionBar.transform, "Btn_EditLiveReport", Localization.Get("reports.edit"),
                 new Vector2(298, 6), new Vector2(410, 44));
-            editLive.onClick.AddListener(analysisUI.RequestEditResult);
+            type.GetField("_editReportBtn", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.SetValue(analysisUI, editLive);
             TrackLocalized(editLive.GetComponentInChildren<TextMeshProUGUI>(), "reports.edit");
-            // Three proportional actions; status gets its own line on narrow screens.
+            // Two proportional actions; status gets its own line on narrow screens.
             actionBarRT.offsetMax = new Vector2(0, 82);
-            var actions = new[] { saveCloudBtn, exportPdfBtn, editLive };
+            var actions = new[] { exportPdfBtn, editLive };
             for (int i = 0; i < actions.Length; i++)
             {
                 var rect = actions[i].GetComponent<RectTransform>();
-                rect.anchorMin = new Vector2(i / 3f, 0);
-                rect.anchorMax = new Vector2((i + 1) / 3f, 0);
+                rect.anchorMin = new Vector2(i / 2f, 0);
+                rect.anchorMax = new Vector2((i + 1) / 2f, 0);
                 rect.offsetMin = new Vector2(6, 30);
                 rect.offsetMax = new Vector2(-6, 78);
             }
