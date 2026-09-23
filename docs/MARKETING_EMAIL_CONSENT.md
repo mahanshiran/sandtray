@@ -11,6 +11,7 @@ The setting applies only to promotional email. Verification codes, password rese
 ## Product rules
 
 - The registration checkbox is separate from account creation and starts unchecked.
+- The consent row links directly to the Privacy Policy without making policy acknowledgment a condition of consent.
 - Declining does not block or reduce the service.
 - Social sign-ups and all accounts that existed before this feature start opted out.
 - A signed-in user can opt in or withdraw in **Edit profile**.

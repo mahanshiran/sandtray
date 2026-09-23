@@ -186,10 +186,18 @@ namespace Sandplay.UI
             _marketingConsentMark.raycastTarget = false;
             var consentText = MakeText("ConsentText", _marketingConsentRow.transform, font,
                 AuthText("login.marketing_consent"), 12, FontStyles.Normal, Ink,
-                new Vector2(.075f, 0f), Vector2.one);
+                new Vector2(.075f, .27f), Vector2.one);
             consentText.alignment = TextAlignmentOptions.MidlineLeft;
             consentText.enableWordWrapping = true;
             consentText.raycastTarget = false;
+            var privacyButton = MakeButton("MarketingPrivacyPolicy", _marketingConsentRow.transform,
+                Localization.Get("sub.privacy"), font, Color.clear,
+                new Vector2(.075f, 0f), new Vector2(.38f, .28f));
+            var privacyLabel = privacyButton.GetComponentInChildren<TextMeshProUGUI>();
+            privacyLabel.color = Primary;
+            privacyLabel.fontSize = 11;
+            privacyLabel.alignment = TextAlignmentOptions.Left;
+            privacyButton.onClick.AddListener(() => Application.OpenURL("https://sandtraypro.com/privacy/"));
             RefreshMarketingConsentVisual();
 
             var statusGo = new GameObject("Status");
