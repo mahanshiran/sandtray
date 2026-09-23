@@ -6,6 +6,7 @@ using Sandplay.Core;
 using Sandplay.AI;
 using Sandplay.Data;
 using Sandplay.Objects;
+using System.Linq;
 
 namespace Sandplay.UI
 {
@@ -18,6 +19,9 @@ namespace Sandplay.UI
         [SerializeField] private GameObject _askBtnContainer;
         [SerializeField] private GameObject _loadingIndicator;
         [SerializeField] private GameObject _scrollArea;
+        [SerializeField] private GameObject _historyRail;
+        [SerializeField] private Transform _historyList;
+        [SerializeField] private RectTransform _titleRect;
 
         // Action bar (shown after result arrives)
         [SerializeField] private GameObject _actionBar;
@@ -52,6 +56,13 @@ namespace Sandplay.UI
         private AnalysisPayload _retryPayload;
         private AccessCapability _lastAnalysisQuota;
         public System.Action<AnalysisReport, string, System.Func<bool>, System.Action> EditResult { private get; set; }
+
+        internal static AnalysisReport[] AIHistoryReports(SessionData data) =>
+            (data?.Reports ?? new System.Collections.Generic.List<AnalysisReport>())
+                .Where(report => report != null && !report.Archived && report.Source == "ai")
+                .OrderByDescending(report => System.DateTimeOffset.TryParse(report.CreatedAt, out var created)
+                    ? created : System.DateTimeOffset.MinValue)
+                .ToArray();
 
         public void RequestEditResult()
         {
@@ -128,7 +139,7 @@ namespace Sandplay.UI
                 _closeBtn.onClick.AddListener(() => gameObject.SetActive(false));
 
             if (_historyBtn)
-                _historyBtn.onClick.AddListener(() => OpenHistory?.Invoke());
+                _historyBtn.onClick.AddListener(OpenAIHistory);
 
             if (_askAIBtn)
                 _askAIBtn.onClick.AddListener(RunAIAnalysis);
@@ -168,6 +179,7 @@ namespace Sandplay.UI
             _localReportBoard = null;
             _saveInProgress = false;
             RefreshHistoryButton();
+            SetHistoryVisible(false);
         }
 
         private void RunAIAnalysis()
@@ -246,6 +258,7 @@ namespace Sandplay.UI
                         _resultText.text = _lastResultText;
                         _resultText.ForceMeshUpdate();
                     }
+                    SetHistoryVisible(true);
                     ShowActionBar();
                     if (!localSaved && _actionStatusText) _actionStatusText.text = Localization.Get(_reportSavePending ? "records.capacity_pending" : "report.local_failed");
                     // Extra cloud record persistence requires Save to Cloud or
@@ -319,6 +332,59 @@ namespace Sandplay.UI
             RefreshHistoryButton();
         }
 
+        private void OpenAIHistory()
+        {
+            string board = SessionManager.Instance?.CurrentBoardName;
+            if (string.IsNullOrWhiteSpace(board)) return;
+            AnalysisReport[] reports;
+            try { reports = AIHistoryReports(SessionManager.Instance.LoadSessionData(board)); }
+            catch { return; }
+            if (reports.Length == 0) { OpenHistory?.Invoke(); return; }
+            SetHistoryVisible(true);
+            if (_localReport == null || _localReport.Source != "ai") SelectHistoryReport(reports[0], board);
+            else RefreshHistoryButton();
+        }
+
+        private void SelectHistoryReport(AnalysisReport report, string board)
+        {
+            if (report == null || report.Source != "ai" || report.Archived || string.IsNullOrWhiteSpace(report.ResultText)) return;
+            _resultGeneration++;
+            if (_errorPanel) _errorPanel.SetActive(false);
+            if (_loadingIndicator) _loadingIndicator.SetActive(false);
+            if (_askBtnContainer) _askBtnContainer.SetActive(false);
+            if (_scrollArea) _scrollArea.SetActive(true);
+            _retryPayload = null;
+            _lastAnalysisQuota = null;
+            _localReport = report;
+            _localReportBoard = board;
+            _lastResultText = report.ResultText;
+            _lastAnalysisId = report.CloudId;
+            _lastScreenshotB64 = ScreenshotManager.LoadAnalysisImageBase64(report.ReportId);
+            _saveInProgress = false;
+            if (_resultText)
+            {
+                if (_resultText.font != null) _resultText.font.TryAddCharacters(_lastResultText);
+                _resultText.text = _lastResultText;
+                _resultText.ForceMeshUpdate();
+            }
+            SetHistoryVisible(true);
+            ShowActionBar();
+            RefreshHistoryButton();
+        }
+
+        private void SetHistoryVisible(bool visible)
+        {
+            bool show = visible && _historyRail != null && _historyList != null;
+            if (_historyRail) _historyRail.SetActive(show);
+            float inset = show ? .205f : 0f;
+            foreach (var item in new[] { _scrollArea, _actionBar, _askBtnContainer })
+            {
+                if (!item || !(item.transform is RectTransform rect)) continue;
+                rect.anchorMin = new Vector2(inset, rect.anchorMin.y);
+            }
+            if (_titleRect) _titleRect.anchorMin = new Vector2(inset, _titleRect.anchorMin.y);
+        }
+
         private void RefreshHistoryButton()
         {
             if (!_historyBtn) return;
@@ -327,12 +393,57 @@ namespace Sandplay.UI
             {
                 string board = SessionManager.Instance?.CurrentBoardName;
                 if (string.IsNullOrWhiteSpace(board)) return;
-                count = SessionManager.Instance?.LoadSessionData(board)?.Reports?
-                    .FindAll(report => report != null && !report.Archived && report.Source == "ai").Count ?? 0;
+                var reports = AIHistoryReports(SessionManager.Instance?.LoadSessionData(board));
+                count = reports.Length;
+                RebuildHistoryRail(reports, board);
             }
             catch { }
             var label = _historyBtn.GetComponentInChildren<TextMeshProUGUI>();
             if (label) label.text = (Localization.Current == Language.Chinese ? "历史" : "History") + " (" + count + ")";
+        }
+
+        private void RebuildHistoryRail(AnalysisReport[] reports, string board)
+        {
+            if (_historyList == null) return;
+            for (int i = _historyList.childCount - 1; i >= 0; i--) Destroy(_historyList.GetChild(i).gameObject);
+            foreach (var report in reports)
+            {
+                var captured = report;
+                var row = new GameObject("AIHistory_" + report.ReportId, typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+                row.transform.SetParent(_historyList, false);
+                row.GetComponent<LayoutElement>().preferredHeight = 72;
+                bool selected = _localReport != null && _localReport.ReportId == report.ReportId;
+                var image = row.GetComponent<Image>();
+                image.color = selected ? Color.Lerp(ReflectionCardColor, ReflectionAccent, .38f) : ReflectionCardColor;
+                RoundReflectionCard?.Invoke(image);
+                var button = row.GetComponent<Button>();
+                button.targetGraphic = image;
+                button.onClick.AddListener(() => SelectHistoryReport(captured, board));
+                var labelGo = new GameObject("Label", typeof(RectTransform));
+                labelGo.transform.SetParent(row.transform, false);
+                var label = labelGo.AddComponent<TextMeshProUGUI>();
+                label.font = _resultText ? _resultText.font : null;
+                string date = System.DateTimeOffset.TryParse(report.CreatedAt, out var created)
+                    ? created.ToLocalTime().ToString("MMM d · HH:mm") : report.CreatedAt;
+                label.text = (Localization.Current == Language.Chinese ? "AI 反思" : "AI reflection") + "\n" + date;
+                label.fontSize = 11; label.fontStyle = selected ? FontStyles.Bold : FontStyles.Normal;
+                label.color = _resultText ? _resultText.color : Color.white;
+                label.alignment = TextAlignmentOptions.MidlineLeft;
+                label.richText = false; label.enableWordWrapping = true;
+                label.rectTransform.anchorMin = Vector2.zero; label.rectTransform.anchorMax = Vector2.one;
+                label.rectTransform.offsetMin = new Vector2(selected ? 14 : 10, 6);
+                label.rectTransform.offsetMax = new Vector2(-8, -6);
+                if (selected)
+                {
+                    var marker = new GameObject("Selected", typeof(RectTransform), typeof(Image));
+                    marker.transform.SetParent(row.transform, false);
+                    var markerRect = marker.GetComponent<RectTransform>();
+                    markerRect.anchorMin = new Vector2(0, .12f); markerRect.anchorMax = new Vector2(0, .88f);
+                    markerRect.pivot = new Vector2(0, .5f); markerRect.anchoredPosition = Vector2.zero;
+                    markerRect.sizeDelta = new Vector2(4, 0);
+                    marker.GetComponent<Image>().color = ReflectionAccent;
+                }
+            }
         }
 
         // ── Action bar ────────────────────────────────────────────────────────
@@ -372,7 +483,7 @@ namespace Sandplay.UI
             }
             BackendClient.Instance.SaveAnalysisRecord(
                 _lastResultText ?? "", _lastScreenshotB64 ?? "",
-                AIAnalysisManager.Instance?.LastModelUsed ?? "",
+                _localReport?.ModelUsed ?? AIAnalysisManager.Instance?.LastModelUsed ?? "",
                 savedSession?.OrganizationId, savedSession?.OrganizationClientId,
                 _localReport?.ReportId, _localReportBoard,
                 id =>

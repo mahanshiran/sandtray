@@ -58,6 +58,11 @@ namespace Sandplay.Core
             Add("report.ai_reflection",sections.AIReflection);
             return text.ToString();
         }
+        internal static List<AnalysisReport> ManualReportHistory(SessionData data) =>
+            (data?.Reports ?? new List<AnalysisReport>())
+                .Where(report => report != null && !report.Archived && report.Source != "ai")
+                .OrderByDescending(report => DateTimeOffset.TryParse(report.CreatedAt,out var created)
+                    ? created : DateTimeOffset.MinValue).ToList();
         private void OpenReportWorkspace(string board) => OpenReportWorkspaceRecord(board, true);
 
         private void OpenReportWorkspaceRecord(string board, bool newReport, string reportId = null)
@@ -256,9 +261,9 @@ namespace Sandplay.Core
             void RefreshHistory()
             {
                 ClearClientChildren(history);
-                var reports=manager.LoadSessionData(board)?.Reports?.FindAll(r=>r!=null && !r.Archived);
+                var reports=ManualReportHistory(manager.LoadSessionData(board));
                 if(reports==null || reports.Count==0)TextHistory(Localization.Get("report.empty"),null);
-                else foreach(var report in reports.Where(r=>r!=null).OrderByDescending(r=>DateTimeOffset.TryParse(r.CreatedAt,out var d)?d:DateTimeOffset.MinValue))
+                else foreach(var report in reports)
                 {
                     string source=report.Source=="ai"?Localization.Get("report.ai_source"):report.Source=="manual"?Localization.Get("report.manual_source"):Localization.Get("report.legacy");
                     string date=DateTimeOffset.TryParse(report.CreatedAt,out var d)?d.ToLocalTime().ToString("g"):report.CreatedAt;
@@ -337,8 +342,9 @@ namespace Sandplay.Core
             share=ClientButton(box,F("Share & notify","共享并通知"),0,0,1,1,()=>GuardChange(()=>OpenReportSharing(board,selected)));
             Layout();RefreshHistory();
             var initialReports = newReport ? null : manager.LoadSessionData(board)?.Reports;
-            var initialReport = newReport ? null : initialReports?.Where(r => r != null && !r.Archived)
-                .OrderByDescending(r => r.CreatedAt).FirstOrDefault(r => reportId == null || r.ReportId == reportId);
+            var requestedReport = newReport || reportId == null ? null : initialReports?
+                .FirstOrDefault(r => r != null && !r.Archived && r.ReportId == reportId);
+            var initialReport = newReport ? null : requestedReport ?? ManualReportHistory(manager.LoadSessionData(board)).FirstOrDefault();
             Render(initialReport);
             StartCoroutine(WatchReportWorkspace());
             IEnumerator WatchReportWorkspace()

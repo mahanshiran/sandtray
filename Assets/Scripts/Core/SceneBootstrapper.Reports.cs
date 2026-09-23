@@ -69,6 +69,17 @@ namespace Sandplay.Core
             var historyLabel = historyBtn.GetComponentInChildren<TextMeshProUGUI>();
             if (historyLabel != null) { historyLabel.fontSize = 13; historyLabel.color = HomeText; }
 
+            // AI history belongs to the reflection experience, separate from the
+            // practitioner-authored report workspace.
+            var aiHistoryList = ClientScroll(analysisPanel.transform, "AIReflectionHistory", .01f, .02f, .19f, .90f);
+            var aiHistoryRail = aiHistoryList.parent.gameObject;
+            aiHistoryRail.GetComponent<Image>().color = HomeIsLight
+                ? new Color(.94f, .955f, .95f, .98f) : new Color(.035f, .065f, .075f, .98f);
+            var aiHistoryLayout = aiHistoryList.GetComponent<VerticalLayoutGroup>();
+            aiHistoryLayout.spacing = 6;
+            aiHistoryLayout.padding = new RectOffset(6, 10, 8, 8);
+            aiHistoryRail.SetActive(false);
+
             // --- Centered AI-assisted reflection button container ---
             var askContainer = new GameObject("AskBtnContainer");
             askContainer.transform.SetParent(analysisPanel.transform, false);
@@ -239,6 +250,12 @@ namespace Sandplay.Core
                 ?.SetValue(analysisUI, loadingGo);
             type.GetField("_scrollArea", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 ?.SetValue(analysisUI, scrollArea);
+            type.GetField("_historyRail", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.SetValue(analysisUI, aiHistoryRail);
+            type.GetField("_historyList", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.SetValue(analysisUI, aiHistoryList);
+            type.GetField("_titleRect", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.SetValue(analysisUI, headingRect);
             type.GetField("_objectPlacer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 ?.SetValue(analysisUI, FindAnyObjectByType<ObjectPlacer>());
             type.GetField("_sandMesh", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
@@ -254,16 +271,6 @@ namespace Sandplay.Core
 
             analysisUI.ReviewBeforeExport = ShowReportExportReview;
             analysisUI.EditResult = (report, board, current, saved) => ShowReportEditorGuarded(report, board, saved, current);
-            analysisUI.OpenHistory = () =>
-            {
-                string board = SessionManager.Instance?.CurrentBoardName;
-                if (string.IsNullOrEmpty(board)) return;
-                string latestAi = SessionManager.Instance.LoadSessionData(board)?.Reports?
-                    .Where(report => report != null && !report.Archived && report.Source == "ai")
-                    .OrderByDescending(report => report.CreatedAt).FirstOrDefault()?.ReportId;
-                analysisPanel.SetActive(false);
-                OpenReportWorkspaceRecord(board, false, latestAi);
-            };
             var editLive = CreateButton(actionBar.transform, "Btn_EditLiveReport", Localization.Get("reports.edit"),
                 new Vector2(298, 6), new Vector2(410, 44));
             editLive.onClick.AddListener(analysisUI.RequestEditResult);

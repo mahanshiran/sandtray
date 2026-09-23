@@ -309,7 +309,7 @@ namespace Sandplay.Tests
         }
 
         [Test]
-        public void ReportWorkspaceCreatesStructuredAuthoredReportAndListsBothSources()
+        public void ReportWorkspaceCreatesStructuredAuthoredReportAndKeepsAiHistorySeparate()
         {
             var uiRoot=new GameObject("ReportWorkspaceTest",typeof(RectTransform));
             try
@@ -334,7 +334,10 @@ namespace Sandplay.Tests
                 Assert.AreEqual("manual",reports[1].Source);Assert.AreEqual(901,reports[1].AuthorUserId);
                 Assert.AreEqual("Observed placement of three objects.",reports[1].Sections.Observations);
                 Assert.IsFalse(reports[1].ResultText.Contains(Localization.Get("report.ai_reflection")));
-                Assert.IsTrue(Array.Exists(uiRoot.GetComponentsInChildren<TMPro.TMP_Text>(),t=>t.text.Contains(Localization.Get("report.ai_source"))));
+                var historyMethod=typeof(SceneBootstrapper).GetMethod("ManualReportHistory",
+                    BindingFlags.Static|BindingFlags.NonPublic);
+                var history=(List<AnalysisReport>)historyMethod.Invoke(null,new object[]{manager.LoadSessionData("Test board")});
+                CollectionAssert.AreEqual(new[]{reports[1].ReportId},history.ConvertAll(report=>report.ReportId));
             }
             finally {UnityEngine.Object.DestroyImmediate(uiRoot);}
         }
