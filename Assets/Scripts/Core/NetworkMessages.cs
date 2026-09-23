@@ -47,6 +47,23 @@ namespace Sandplay.Core
         // Host library metadata. Clients merge this with their own/public objects so
         // custom models can be downloaded before spawn/full-state messages arrive.
         CatalogManifest = 23,
+        ProtocolHello = 24,
+        ProtocolResult = 25,
+        ParticipantLeft = 26,
+        RelayPing = 27,
+        RelayPong = 28,
+        TargetedSnapshot = 29,
+        RemoveParticipant = 30,
+        SessionRemoved = 31,
+        SessionStatus = 32,
+        RevisionRole = 33,
+        RevisionEdit = 34,
+        SnapshotBegin = 35,
+        SnapshotComplete = 36,
+        SnapshotAck = 37,
+        SessionProfilesRequest = 40,
+        SessionProfiles = 41,
+        HostingLeaseStatus = 42, // relay → host only: failure flag + Int32 seconds
     }
 
     /// <summary>
@@ -424,7 +441,8 @@ namespace Sandplay.Core
             return BitConverter.ToUInt32(data, 0);
         }
 
-        // startX/Y are pixel coords (0–511), pixels is RGBA bytes (width*height*4).
+        // startX/Y are pixel coords. Legacy payloads contain one RGBA map (4 B/px);
+        // current payloads contain primary + extra RGBA maps (8 B/px).
         public static byte[] WriteSplatmapRegion(int startX, int startY, int width, int height, byte[] pixels)
         {
             if (pixels == null) pixels = Array.Empty<byte>();
@@ -450,10 +468,12 @@ namespace Sandplay.Core
             height = r.ReadInt32();
             if (width <= 0 || height <= 0)
                 throw new InvalidDataException("Splatmap region dimensions must be positive.");
-            long expected = (long)width * height * 4;
-            if (expected <= 0 || expected > MaxPayloadBytes)
+            long legacy = (long)width * height * 4;
+            long current = (long)width * height * 8;
+            long remaining = data.Length - 16L;
+            if (legacy <= 0 || current > MaxPayloadBytes || (remaining != legacy && remaining != current))
                 throw new InvalidDataException("Splatmap region payload length is invalid.");
-            pixels = ReadBytesExact(r, (int)expected, "splatmap region");
+            pixels = ReadBytesExact(r, (int)remaining, "splatmap region");
         }
 
         // ── Pointer hover (Therapist mode "Patient is acting" indicator) ──

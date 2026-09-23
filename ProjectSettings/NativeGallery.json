@@ -1,0 +1,6 @@
+{
+  "AutomatedSetup": true,
+  "PhotoLibraryUsageDescription": "Choose a profile photo for a client. The selected photo is copied into the client's record on this device.",
+  "PhotoLibraryAdditionsUsageDescription": "",
+  "DontAskLimitedPhotosPermissionAutomaticallyOnIos14": true
+}

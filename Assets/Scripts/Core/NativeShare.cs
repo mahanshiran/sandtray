@@ -1,6 +1,8 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using Process = System.Diagnostics.Process;
+using ProcessStartInfo = System.Diagnostics.ProcessStartInfo;
 
 namespace Sandplay.Core
 {
@@ -45,6 +47,46 @@ namespace Sandplay.Core
             Application.OpenURL("file://" + path);
 #endif
             Debug.Log($"[NativeShare] Shared: {path} ({mimeType})");
+        }
+
+        /// <summary>Reveal an exported file in the desktop file manager.</summary>
+        public static bool RevealExistingFile(string path)
+        {
+            if (string.IsNullOrEmpty(path) || !File.Exists(path)) return false;
+#if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+            try
+            {
+                Process.Start(new ProcessStartInfo("open", "-R \"" + path.Replace("\"", "\\\"") + "\"")
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                });
+                return true;
+            }
+            catch (System.Exception ex) { Debug.LogWarning("[NativeShare] Reveal failed: " + ex.Message); }
+#elif UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+            try
+            {
+                Process.Start(new ProcessStartInfo("explorer.exe", "/select,\"" + path.Replace("\"", "\\\"") + "\"")
+                {
+                    UseShellExecute = true
+                });
+                return true;
+            }
+            catch (System.Exception ex) { Debug.LogWarning("[NativeShare] Reveal failed: " + ex.Message); }
+#elif UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
+            try
+            {
+                Process.Start(new ProcessStartInfo("xdg-open", "\"" + Path.GetDirectoryName(path)?.Replace("\"", "\\\"") + "\"")
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                });
+                return true;
+            }
+            catch (System.Exception ex) { Debug.LogWarning("[NativeShare] Reveal failed: " + ex.Message); }
+#endif
+            return false;
         }
 
         /// <summary>Write bytes to path then share/download.</summary>

@@ -178,6 +178,24 @@ namespace Sandplay.Tests
             CollectionAssert.AreEqual(pixels, rPx);
         }
 
+        [Test]
+        public void ExtendedSplatmapRegion_RoundTrip()
+        {
+            int sx = 3, sy = 7, w = 5, h = 2;
+            byte[] pixels = new byte[w * h * 8];
+            for (int i = 0; i < pixels.Length; i++) pixels[i] = (byte)(i * 7);
+
+            byte[] data = NetSerializer.WriteSplatmapRegion(sx, sy, w, h, pixels);
+            NetSerializer.ReadSplatmapRegion(data, out var rSx, out var rSy,
+                out var rW, out var rH, out var rPx);
+
+            Assert.AreEqual(sx, rSx);
+            Assert.AreEqual(sy, rSy);
+            Assert.AreEqual(w, rW);
+            Assert.AreEqual(h, rH);
+            CollectionAssert.AreEqual(pixels, rPx);
+        }
+
         // ── Composite payloads ──────────────────────────────────────────────
 
         [Test]

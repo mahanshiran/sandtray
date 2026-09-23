@@ -80,19 +80,21 @@ extern "C" {
 
     // Cancel button
     UIButton* cancelBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-    CGFloat bw = 200, bh = 50;
-    cancelBtn.frame = CGRectMake((self.view.bounds.size.width - bw) / 2.0,
-                                 self.view.bounds.size.height - bh - 60, bw, bh);
-    cancelBtn.autoresizingMask = UIViewAutoresizingFlexibleTopMargin |
-                                 UIViewAutoresizingFlexibleLeftMargin |
-                                 UIViewAutoresizingFlexibleRightMargin;
-    [cancelBtn setTitle:@"Cancel" forState:UIControlStateNormal];
+    cancelBtn.translatesAutoresizingMaskIntoConstraints = NO;
+    [cancelBtn setTitle:@"×" forState:UIControlStateNormal];
+    cancelBtn.accessibilityLabel = @"Close scanner";
     [cancelBtn setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
-    cancelBtn.titleLabel.font = [UIFont systemFontOfSize:18 weight:UIFontWeightSemibold];
+    cancelBtn.titleLabel.font = [UIFont systemFontOfSize:32 weight:UIFontWeightSemibold];
     cancelBtn.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.18];
     cancelBtn.layer.cornerRadius = 10;
     [cancelBtn addTarget:self action:@selector(onCancel) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:cancelBtn];
+    [NSLayoutConstraint activateConstraints:@[
+        [cancelBtn.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:16],
+        [cancelBtn.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
+        [cancelBtn.widthAnchor constraintEqualToConstant:48],
+        [cancelBtn.heightAnchor constraintEqualToConstant:48]
+    ]];
 
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
         [self.session startRunning];

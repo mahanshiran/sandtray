@@ -18,6 +18,24 @@ namespace Sandplay.Sand
 
         public bool IsDrawing => _strokeActive;
 
+        private void OnEnable() { EventBus.Subscribe<NetworkRoleAssignedEvent>(OnRoleChanged); }
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<NetworkRoleAssignedEvent>(OnRoleChanged);
+            StopEditingGesture();
+        }
+        private void OnRoleChanged(NetworkRoleAssignedEvent evt)
+        {
+            if (evt.Role != PlayerRole.Patient) StopEditingGesture();
+        }
+        public void StopEditingGesture()
+        {
+            // Keep changes already applied; never issue a late stroke after permission loss.
+            _strokeActive = false;
+            _activeStrokeCmd = null;
+            _activePaintCmd = null;
+        }
+
         public float BrushRadius
         {
             get => _brushRadius;

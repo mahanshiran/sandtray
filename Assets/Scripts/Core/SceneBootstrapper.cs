@@ -50,8 +50,15 @@ namespace Sandplay.Core
         private GameObject _nameDialogPanel; // name input dialog overlay
         private GameObject _reportsPanel;    // board reports viewer panel
         private GameObject _settingsPanel;   // settings HUD overlay
-        private GameObject _catalogPanel;    // catalog overlay
-        private GameObject _catalogButton;   // catalog toggle button (top-right)
+        private GameObject _catalogPanel;    // catalog drawer
+        private GameObject _catalogButton;   // catalog toggle button (right edge)
+        private RectTransform _catalogButtonRT;
+        private Image _catalogButtonImage;
+        private GameObject _catalogButtonHandleVisual;
+        private GameObject _catalogButtonGlyph;
+        private bool _catalogPhoneLayout;
+        private Coroutine _catalogDrawerRoutine;
+        private bool _catalogDrawerOpen;
         private GameObject _colorPickerDialog; // color picker dialog
         private GameObject _networkPanel;      // host/join UI overlay
         private GameObject _paywallPanel;      // subscription paywall overlay
@@ -113,9 +120,14 @@ namespace Sandplay.Core
             _floorMaterial = frame.FloorMaterial;
         }
 
+        internal GameConfig WorkspaceConfig => _config;
+        internal Sandplay.Objects.ObjectCatalog WorkspaceCatalog => _catalog;
+
         private void OnDestroy()
         {
+            ClearJoinedSessionLoadingHandlers();
             Localization.OnLanguageChanged -= RefreshAllLocalizedTexts;
+            UnwireNotificationHeadsUp();
             if (AgoraManager.Instance != null)
             {
                 AgoraManager.Instance.OnRemoteUserJoined -= AddAgoraRemoteTile;
@@ -145,6 +157,11 @@ namespace Sandplay.Core
         {
             Debug.Log("[Sandplay] Bootstrap starting...");
             Localization.AutoDetect(); // set language (PlayerPrefs > system) before any UI is built
+            if (Sandplay.Data.LocalAccountStorage.RequiresRestart)
+            {
+                Sandplay.Data.LocalAccountStorage.ShowRestartShield();
+                return;
+            }
             // RevenueCatManager.IsDebugMode = true; // DISABLED FOR PRODUCTION - only enable for testing
             // Validate dependencies
             if (_config == null)
@@ -222,6 +239,12 @@ namespace Sandplay.Core
 
         private void Update()
         {
+            if (Sandplay.Data.LocalAccountStorage.RequiresRestart) { Sandplay.Data.LocalAccountStorage.ShowRestartShield(); return; }
+            UpdateAccessPolicy();
+            UpdateAccessUsage();
+            UpdateHostingWallet();
+            UpdateHostingWarning();
+            RefreshScheduleBadgeClock();
             // Close catalog on tap outside when open
             if (_catalogPanel != null && _catalogPanel.activeSelf)
             {
@@ -387,6 +410,8 @@ namespace Sandplay.Core
         {
             var go = new GameObject("ScreenshotManager");
             go.AddComponent<ScreenshotManager>();
+            // Resume any paid reflection backup interrupted by an app close or network loss.
+            AnalysisArchiveClient.Instance.EnsureAccount();
         }
 
         private void CreateAIManager()
@@ -407,8 +432,13 @@ namespace Sandplay.Core
 
         private void CreateEnvironment()
         {
-            // === Lighting ===
-            // Warm trilight ambient for cozy room feel
+            ApplyEnvironmentLighting();
+            BuildTherapyRoom();
+        }
+
+        private void ApplyEnvironmentLighting()
+        {
+            // Warm trilight ambient for cozy room feel.
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
             RenderSettings.ambientSkyColor = new Color(0.75f, 0.70f, 0.62f);
             RenderSettings.ambientEquatorColor = new Color(0.85f, 0.78f, 0.68f);
@@ -416,12 +446,19 @@ namespace Sandplay.Core
 
             // Disable skybox — we have a room now
             RenderSettings.skybox = null;
-            UnityEngine.Camera.main.clearFlags = CameraClearFlags.SolidColor;
-            UnityEngine.Camera.main.backgroundColor = new Color(0.15f, 0.13f, 0.12f);
+            var camera = UnityEngine.Camera.main ?? FindAnyObjectByType<UnityEngine.Camera>();
+            if (camera != null)
+            {
+                camera.clearFlags = CameraClearFlags.SolidColor;
+                camera.backgroundColor = new Color(0.15f, 0.13f, 0.12f);
+            }
+            else Debug.LogWarning("[Sandplay] Environment camera is not ready; room lighting will still be created.");
 
-            DynamicGI.UpdateEnvironment();
-
-            BuildTherapyRoom();
+            // A graphics-device/GI refresh problem must never prevent creation of
+            // the actual room lights below.
+            try { DynamicGI.UpdateEnvironment(); }
+            catch (System.Exception error)
+            { Debug.LogWarning("[Sandplay] Ambient lighting refresh skipped: " + error.GetType().Name); }
         }
 
         /// <summary>
@@ -431,7 +468,12 @@ namespace Sandplay.Core
         {
             // Destroy previous room if resizing
             if (_therapyRoom != null)
+            {
+                // Destroy is deferred until the end of the frame. Disable first
+                // so old and replacement lights can never illuminate together.
+                _therapyRoom.SetActive(false);
                 Destroy(_therapyRoom);
+            }
 
             // === Dynamic Room Dimensions ===
             // Scale room based on board size with a generous multiplier, minimum 80
@@ -501,11 +543,6 @@ namespace Sandplay.Core
 
             // Right wall — has a window
             BuildWindowWall(roomParent.transform, roomWidth, roomHeight, roomDepth, wallThick, floorY, wallColor, trimColor);
-
-            // Real shelf asset — left wall only (not every wall)
-            PlaceRoomShelfAsset(roomParent.transform, roomWidth, roomHeight, roomDepth, wallThick, floorY);
-            // Wall map — back wall (no door / shelf / window)
-            PlaceRoomWallMap(roomParent.transform, roomWidth, roomHeight, roomDepth, wallThick, floorY);
 
             // === Baseboards (trim along bottom of walls) ===
             float trimH = 0.25f;
@@ -587,6 +624,15 @@ namespace Sandplay.Core
             fillLight.intensity = 0.35f;
             fillLight.range = roomWidth;
             fillLight.shadows = LightShadows.None;
+
+            // Decoration is intentionally last and isolated. A missing or bad
+            // optional asset must not prevent the room lights from existing.
+            try { PlaceRoomShelfAsset(roomParent.transform, roomWidth, roomHeight, roomDepth, wallThick, floorY); }
+            catch (System.Exception error)
+            { Debug.LogWarning("[Sandplay] Room shelf skipped: " + error.GetType().Name); }
+            try { PlaceRoomWallMap(roomParent.transform, roomWidth, roomHeight, roomDepth, wallThick, floorY); }
+            catch (System.Exception error)
+            { Debug.LogWarning("[Sandplay] Room wall map skipped: " + error.GetType().Name); }
         }
 
         /// <summary>
@@ -971,7 +1017,7 @@ namespace Sandplay.Core
             float btnPad = 4f;
             var sandRow = CreatePanel(_sandboxUI.transform, "SandToolBar",
                 new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 0), new Vector2(toolbarWidth, 0));
-            sandRow.GetComponent<Image>().color = new Color(0.15f, 0.15f, 0.15f, 0.9f);
+            sandRow.GetComponent<Image>().color = new Color(0.065f, 0.085f, 0.10f, 0.96f);
 
             float sy = -btnPad; // current Y offset from top
 
@@ -987,6 +1033,7 @@ namespace Sandplay.Core
             var matBtn = CreateVerticalToolButton(sandRow.transform, "Btn_SandMaterial", Localization.Get("tool.sand_material"),
                 toolbarWidth, btnSize, ref sy, btnPad);
             TrackLocalized(matBtn.GetComponentInChildren<TextMeshProUGUI>(), "tool.sand_material");
+            float matButtonTop = sy + btnSize + btnPad;
 
             // Build flyout panel (hidden by default, anchored right of toolbar)
             var matPanel = new GameObject("SandMaterialPanel");
@@ -995,11 +1042,12 @@ namespace Sandplay.Core
             matPanelImg.color = new Color(0.14f, 0.14f, 0.18f, 0.96f);
             ApplyRoundedCorners(matPanelImg);
             var matPanelRT = matPanel.GetComponent<RectTransform>();
-            matPanelRT.anchorMin = new Vector2(0, 0);
-            matPanelRT.anchorMax = new Vector2(0, 0);
-            matPanelRT.pivot = new Vector2(0, 0);
-            matPanelRT.anchoredPosition = new Vector2(toolbarWidth + 6f, 6f);
-            matPanelRT.sizeDelta = new Vector2(110f, 5 * 44f + 8f);
+            matPanelRT.anchorMin = new Vector2(0, 1);
+            matPanelRT.anchorMax = new Vector2(0, 1);
+            matPanelRT.pivot = new Vector2(0, 1);
+            matPanelRT.anchoredPosition = new Vector2(toolbarWidth + 8f, matButtonTop);
+            int materialRows = Mathf.CeilToInt(Sandplay.Sand.SandMaterialController.PresetNames.Length / 2f);
+            matPanelRT.sizeDelta = new Vector2(228f, 26f + materialRows * 44f + 6f);
             matPanel.SetActive(false);
 
             // Header label inside flyout
@@ -1018,9 +1066,9 @@ namespace Sandplay.Core
             matHeaderRT.anchoredPosition = new Vector2(0, -2f);
             matHeaderRT.sizeDelta = new Vector2(0, 14f);
 
-            // 5 material preset buttons inside the flyout
+            // Compact two-column material grid inside the attached flyout.
             // Selecting a preset sets it as the active paint material and activates SandPaint tool
-            string[] matLabelKeys = { "mat.sand", "mat.rock", "mat.grass", "mat.snow", "mat.mud" };
+            string[] matLabelKeys = { "mat.sand", "mat.rock", "mat.grass", "mat.snow", "mat.mud", "mat.water", "mat.clay" };
             var matBtns = new Button[Sandplay.Sand.SandMaterialController.PresetNames.Length];
             for (int mi = 0; mi < Sandplay.Sand.SandMaterialController.PresetNames.Length; mi++)
             {
@@ -1032,11 +1080,12 @@ namespace Sandplay.Core
                 mbImg.color = presetColor;
                 ApplyRoundedCorners(mbImg);
                 var mbRT = mbGo.GetComponent<RectTransform>();
-                mbRT.anchorMin = new Vector2(0, 1);
-                mbRT.anchorMax = new Vector2(1, 1);
-                mbRT.pivot = new Vector2(0.5f, 1);
-                mbRT.anchoredPosition = new Vector2(0, -18f - presetIndex * 44f);
-                mbRT.sizeDelta = new Vector2(-8f, 40f);
+                int column = presetIndex % 2;
+                int row = presetIndex / 2;
+                mbRT.anchorMin = mbRT.anchorMax = new Vector2(0, 1);
+                mbRT.pivot = new Vector2(0, 1);
+                mbRT.anchoredPosition = new Vector2(6f + column * 110f, -24f - row * 44f);
+                mbRT.sizeDelta = new Vector2(106f, 40f);
                 var mbBtn = mbGo.AddComponent<Button>();
                 var mbColors = mbBtn.colors;
                 mbColors.highlightedColor = presetColor * 1.25f;
@@ -1046,10 +1095,10 @@ namespace Sandplay.Core
                 mbTxtGo.transform.SetParent(mbGo.transform, false);
                 var mbTxt = mbTxtGo.AddComponent<TextMeshProUGUI>();
                 mbTxt.text = Localization.Get(matLabelKeys[mi]);
-                mbTxt.fontSize = 14;
+                mbTxt.fontSize = 13;
                 mbTxt.fontStyle = FontStyles.Bold;
                 mbTxt.alignment = TextAlignmentOptions.Center;
-                mbTxt.color = (mi == 3) ? new Color(0.15f, 0.15f, 0.20f) : Color.white; // dark text on Snow
+                mbTxt.color = (mi == 0 || mi == 3) ? new Color(0.15f, 0.15f, 0.20f) : Color.white;
                 mbTxt.font = GetUIFont();
                 var mbTxtRT = mbTxtGo.GetComponent<RectTransform>();
                 mbTxtRT.anchorMin = Vector2.zero;
@@ -1109,21 +1158,34 @@ namespace Sandplay.Core
             // Separator
             sy -= 8;
 
-            // === Raise / Dig / Smooth / Flatten ===
-            string[] sandKeys = { "tool.raise", "tool.dig", "tool.smooth", "tool.flatten" };
-            string[] sandNames = { Localization.Get(sandKeys[0]), Localization.Get(sandKeys[1]), Localization.Get(sandKeys[2]), Localization.Get(sandKeys[3]) };
+            // === Raise / Dig / Flatten ===
+            string[] sandKeys = { "tool.raise", "tool.dig", "tool.flatten" };
+            string[] sandNames = { Localization.Get(sandKeys[0]), Localization.Get(sandKeys[1]), Localization.Get(sandKeys[2]) };
             ToolMode[] sandModes = {
                 ToolMode.SandRaise, ToolMode.SandDig,
-                ToolMode.SandSmooth, ToolMode.SandFlatten
+                ToolMode.SandFlatten
             };
             var sandButtons = new Button[sandNames.Length];
-            var sandButtonDefaultColor = new Color(0.22f, 0.22f, 0.27f, 1f);
-            var sandButtonActiveColor = new Color(0.48f, 0.36f, 0.16f, 1f);
+            var sandButtonDefaultColor = new Color(0.12f, 0.15f, 0.17f, 1f);
+            var sandButtonActiveColor = new Color(0.15f, 0.38f, 0.40f, 1f);
             for (int i = 0; i < sandNames.Length; i++)
             {
                 var btn = CreateVerticalToolButton(sandRow.transform, $"Btn_{sandNames[i]}", sandNames[i],
                     toolbarWidth, btnSize, ref sy, btnPad);
                 TrackLocalized(btn.GetComponentInChildren<TextMeshProUGUI>(), sandKeys[i]);
+                var icon = btn.transform.Find("Icon_plus");
+                if (icon != null) icon.gameObject.SetActive(false);
+                foreach (var image in btn.GetComponentsInChildren<Image>())
+                    if (image.gameObject != btn.gameObject) image.enabled = false;
+                var terrainIcon = new GameObject("TerrainGlyph", typeof(RectTransform));
+                terrainIcon.transform.SetParent(btn.transform, false);
+                var terrainGlyph = terrainIcon.AddComponent<TerrainToolGlyph>();
+                terrainGlyph.Mode = i;
+                terrainGlyph.color = new Color(.84f,.89f,.91f);
+                terrainGlyph.raycastTarget = false;
+                var terrainRT = terrainIcon.GetComponent<RectTransform>();
+                terrainRT.anchorMin = terrainRT.anchorMax = new Vector2(.5f,.65f);
+                terrainRT.sizeDelta = new Vector2(22,22);
                 var mode = sandModes[i];
                 btn.onClick.AddListener(() =>
                 {
@@ -1179,10 +1241,23 @@ namespace Sandplay.Core
             // Separator
             sy -= 8;
 
-            var manualBtn = CreateVerticalToolButton(sandRow.transform, "Btn_ManualReport", Localization.Get("tool.manual_analysis"),
+            var manualBtn = CreateVerticalToolButton(sandRow.transform, "Btn_ManualReport", Localization.Get("report.reports"),
                 toolbarWidth, btnSize, ref sy, btnPad);
-            TrackLocalized(manualBtn.GetComponentInChildren<TextMeshProUGUI>(), "tool.manual_analysis");
+            TrackLocalized(manualBtn.GetComponentInChildren<TextMeshProUGUI>(), "report.reports");
             manualBtn.onClick.AddListener(() => ToggleManualReportPanel());
+
+            // Center the complete group in the available sidebar height, retaining
+            // existing spacing between controls and adapting to window resizing.
+            float toolbarGroupHeight = -sy;
+            foreach (RectTransform child in sandRow.transform)
+            {
+                child.anchorMin = new Vector2(child.anchorMin.x, .5f);
+                child.anchorMax = new Vector2(child.anchorMax.x, .5f);
+                child.anchoredPosition += new Vector2(0, toolbarGroupHeight * .5f);
+            }
+
+            ApplyHomeRoundedCorners(sandRow.GetComponent<Image>(), 12f);
+            sandRow.AddComponent<ContentSizedToolDock>().Initialize(toolbarWidth, toolbarGroupHeight);
 
             // Forward-declare so the lambdas below can capture them
             GameObject brushPanel = null;
@@ -1202,7 +1277,7 @@ namespace Sandplay.Core
             exitBtnImg.color = new Color(0.48f, 0.26f, 0.26f, 0.92f);
             ApplyRoundedCorners(exitBtnImg);
             var exitBtn = exitBtnGo.AddComponent<Button>();
-            exitBtn.onClick.AddListener(() => ReturnToMenu());
+            exitBtn.onClick.AddListener(() => ShowSandboxExitConfirmation(ReturnToMenu));
             var exitBtnTxtGo = new GameObject("Label");
             exitBtnTxtGo.transform.SetParent(exitBtnGo.transform, false);
             var exitBtnTxt = exitBtnTxtGo.AddComponent<TextMeshProUGUI>();
@@ -1522,17 +1597,31 @@ namespace Sandplay.Core
             // Therapist-mode "Patient is acting" pointer indicator (host-side).
             // Wires its own subscription to NetworkBootstrapper.OnPatientPointerHover.
             EnsurePatientPointerOverlay();
+            var sessionControls = new GameObject("SessionControlLayer", typeof(RectTransform));
+            sessionControls.transform.SetParent(_sandboxUI.transform, false);
+            var sessionControlsRT = (RectTransform)sessionControls.transform;
+            sessionControlsRT.anchorMin = Vector2.zero; sessionControlsRT.anchorMax = Vector2.one;
+            sessionControlsRT.offsetMin = sessionControlsRT.offsetMax = Vector2.zero;
+            var permissionPanel = sessionControls.AddComponent<SessionControlPanel>();
+            permissionPanel.Initialize(GetUIFont());
+            CreateMeetingDock(permissionPanel);
+            var sessionTimer = new GameObject("LiveSessionTimer", typeof(RectTransform));
+            sessionTimer.transform.SetParent(_sandboxUI.transform, false);
+            sessionTimer.AddComponent<LiveSessionTimer>().Initialize(GetUIFont());
 
             // Listen for network role changes to show/hide spectator elements
             EventBus.Subscribe<NetworkRoleAssignedEvent>(evt =>
             {
                 bool isSpec = evt.Role != PlayerRole.Patient;
                 _spectatorBadge?.SetActive(isSpec);
-                // Hide sand tools, brush panel, undo/redo and catalog for spectators
+                // Editing tools remain hidden, while the catalog stays discoverable and
+                // explains how to obtain editing permission when tapped.
                 sandRow.SetActive(!isSpec);
                 undoRedoBar.SetActive(!isSpec);
                 if (brushPanel != null) brushPanel.SetActive(false);
-                if (_catalogButton != null) _catalogButton.SetActive(!isSpec);
+                if (_catalogButton != null)
+                    _catalogButton.SetActive(GameManager.Instance == null ||
+                        GameManager.Instance.CurrentTool != ToolMode.WalkMode);
                 if (isSpec && _catalogPanel != null) CloseCatalogPanel();
                 // Ensure exit button stays visible for spectators
                 if (exitBtnGo != null) exitBtnGo.SetActive(true);
@@ -1566,8 +1655,14 @@ namespace Sandplay.Core
                 };
 
                 // Show room code when cloud session is created (live update)
-                NetworkBootstrapper.Instance.OnRoomCreated += code => UpdateRoomCodeDisplay();
+                NetworkBootstrapper.Instance.OnRoomCreated += code =>
+                {
+                    UpdateRoomCodeDisplay();
+                    HandleScheduledRoomCreated(code);
+                };
                 NetworkBootstrapper.Instance.OnConnected += () => UpdateRoomCodeDisplay();
+                NetworkBootstrapper.Instance.OnConnectionError += ShowConnectionError;
+                NetworkBootstrapper.Instance.OnHostingLeaseStatus += ReceiveHostingDeadline;
 
                 // Agora: auto-join when 2+ users are in the session.
                 // OnClientCountChanged fires on the host side (count = remote clients).
@@ -1583,14 +1678,14 @@ namespace Sandplay.Core
                     }
                     else if (!multiUser)
                     {
-                        AgoraManager.Instance?.LeaveChannel();
+                        LeaveAgoraSession();
                         if (_agoraPanelGo != null) _agoraPanelGo.SetActive(false);
                         if (_agoraToggleGo != null) _agoraToggleGo.SetActive(false);
                     }
                 };
-                NetworkBootstrapper.Instance.OnConnected += () =>
+                NetworkBootstrapper.Instance.OnSnapshotReady += () =>
                 {
-                    // Client side: connected to host = 2 people
+                    // A client joins live media only after the complete scene is ready.
                     if (!NetworkBootstrapper.Instance.IsHost)
                     {
                         string ch = NetworkBootstrapper.Instance.RoomCode
@@ -1600,7 +1695,8 @@ namespace Sandplay.Core
                 };
                 NetworkBootstrapper.Instance.OnDisconnected += () =>
                 {
-                    AgoraManager.Instance?.LeaveChannel();
+                    UpdateRoomCodeDisplay();
+                    LeaveAgoraSession();
                     if (_agoraPanelGo != null) _agoraPanelGo.SetActive(false);
                     if (_agoraToggleGo != null) _agoraToggleGo.SetActive(false);
                 };
@@ -1608,8 +1704,10 @@ namespace Sandplay.Core
 
             // === Brush Settings Panel (right of vertical toolbar) ===
             brushPanel = CreatePanel(_sandboxUI.transform, "BrushSettings",
-                new Vector2(0, 1), new Vector2(0, 1), new Vector2(toolbarWidth, -4), new Vector2(toolbarWidth + 500, -42));
-            brushPanel.GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f, 0.85f);
+                new Vector2(0, 1), new Vector2(0, 1), new Vector2(toolbarWidth + 8, -132), new Vector2(toolbarWidth + 508, -48));
+            brushPanel.GetComponent<Image>().color = new Color(0.075f, 0.10f, 0.12f, 1f);
+            // Standard UI material keeps these essential controls independent of custom shaders.
+            brushPanel.GetComponent<Image>().material = null;
             brushPanel.SetActive(false);
 
             var radiusSlider = CreateSlider(brushPanel.transform, "RadiusSlider",
@@ -1632,6 +1730,10 @@ namespace Sandplay.Core
                 new Vector2(500, 4), new Vector2(580, 30));
             TrackLocalized(strengthLabel.GetComponent<TextMeshProUGUI>(), "brush.strength");
 
+            var brushLayout = brushPanel.AddComponent<Sandplay.UI.BrushSettingsLayout>();
+            brushLayout.Initialize(radiusSlider, strengthSlider,
+                radiusLabel.GetComponent<TextMeshProUGUI>(), strengthLabel.GetComponent<TextMeshProUGUI>(), toolbarWidth + 8);
+
             // Wire sliders to sand tool
             var sandTool = FindAnyObjectByType<SandToolController>();
             if (sandTool != null)
@@ -1639,12 +1741,10 @@ namespace Sandplay.Core
                 radiusSlider.onValueChanged.AddListener(v =>
                 {
                     sandTool.BrushRadius = v;
-                    radiusLabel.GetComponent<TextMeshProUGUI>().text = Localization.Get("brush.radius_val", v);
                 });
                 strengthSlider.onValueChanged.AddListener(v =>
                 {
                     sandTool.BrushStrength = v;
-                    strengthLabel.GetComponent<TextMeshProUGUI>().text = Localization.Get("brush.strength_val", v);
                 });
             }
 
@@ -1659,11 +1759,23 @@ namespace Sandplay.Core
                 // Update tool label to show current mode
                 toolLabel.GetComponent<TextMeshProUGUI>().text = isSand ? evt.NewMode.ToString().Replace("Sand", "") : Localization.Get("toolbar.sand");
             });
+            if (GameManager.Instance != null)
+            {
+                var mode = GameManager.Instance.CurrentTool;
+                brushPanel.SetActive(mode == ToolMode.SandRaise || mode == ToolMode.SandDig ||
+                    mode == ToolMode.SandSmooth || mode == ToolMode.SandFlatten || mode == ToolMode.SandPaint);
+            }
 
-            // === Catalog Panel (right side — API-driven) ===
+            // === Catalog Panel (right-side drawer — API-driven) ===
             _catalogPanel = CreatePanel(_sandboxUI.transform, "CatalogPanel",
-                new Vector2(1, 0), new Vector2(1, 1), new Vector2(-260, 0), new Vector2(0, 0));
+                new Vector2(1, 0), new Vector2(1, 1), new Vector2(-420, 0), new Vector2(0, 0));
+            var catalogPanelRT = _catalogPanel.GetComponent<RectTransform>();
+            catalogPanelRT.pivot = new Vector2(1, 0.5f);
+            catalogPanelRT.anchoredPosition = new Vector2(catalogPanelRT.rect.width, 0);
+            _catalogPanel.AddComponent<Sandplay.UI.CatalogDrawerSafeAreaLayout>();
             _catalogPanel.GetComponent<Image>().color = new Color(0.12f, 0.12f, 0.12f, 0.92f);
+            var catalogPanelGesture = _catalogPanel.AddComponent<Sandplay.UI.CatalogDrawerGesture>();
+            catalogPanelGesture.Initialize(OpenCatalogPanel, CloseCatalogPanel);
             _catalogPanel.SetActive(false);
 
             // Header row: title + close button
@@ -1684,12 +1796,14 @@ namespace Sandplay.Core
                 var closeBtnGo = new GameObject("CloseBtn");
                 closeBtnGo.transform.SetParent(headerGo.transform, false);
                 var closeBtnRT = closeBtnGo.AddComponent<RectTransform>();
-                closeBtnRT.anchorMin = new Vector2(1, 0.5f);
-                closeBtnRT.anchorMax = new Vector2(1, 0.5f);
-                closeBtnRT.pivot = new Vector2(1, 0.5f);
-                closeBtnRT.anchoredPosition = new Vector2(-4, 0);
+                closeBtnRT.anchorMin = new Vector2(0, 0.5f);
+                closeBtnRT.anchorMax = new Vector2(0, 0.5f);
+                closeBtnRT.pivot = new Vector2(0, 0.5f);
+                closeBtnRT.anchoredPosition = new Vector2(4, 0);
                 closeBtnRT.sizeDelta = new Vector2(30, 30);
-                closeBtnGo.AddComponent<Image>().color = new Color(0.42f, 0.22f, 0.22f, 0.92f);
+                var closeBtnImg = closeBtnGo.AddComponent<Image>();
+                closeBtnImg.color = new Color(0.42f, 0.22f, 0.22f, 0.92f);
+                ApplyRoundedCorners(closeBtnImg);
                 var closeBtn = closeBtnGo.AddComponent<Button>();
                 closeBtn.onClick.AddListener(() => CloseCatalogPanel());
                 var closeLbl = new GameObject("Lbl");
@@ -1708,44 +1822,7 @@ namespace Sandplay.Core
                 closeLblRT.offsetMax = Vector2.zero;
             }
 
-            // Tab bar — single "Official Catalog" tab
-            {
-                var tabBarGo = new GameObject("TabBar");
-                tabBarGo.transform.SetParent(_catalogPanel.transform, false);
-                var tabBarRT = tabBarGo.AddComponent<RectTransform>();
-                tabBarRT.anchorMin = new Vector2(0, 1);
-                tabBarRT.anchorMax = new Vector2(1, 1);
-                tabBarRT.pivot = new Vector2(0.5f, 1);
-                tabBarRT.anchoredPosition = new Vector2(0, -40);
-                tabBarRT.sizeDelta = new Vector2(0, 34);
-                tabBarGo.AddComponent<Image>().color = new Color(0.10f, 0.10f, 0.10f, 0.95f);
-
-                var tabGo = new GameObject("TabOfficial");
-                tabGo.transform.SetParent(tabBarGo.transform, false);
-                var tabRT = tabGo.AddComponent<RectTransform>();
-                tabRT.anchorMin = Vector2.zero;
-                tabRT.anchorMax = Vector2.one;
-                tabRT.offsetMin = new Vector2(4, 3);
-                tabRT.offsetMax = new Vector2(-4, -3);
-                var tabImg = tabGo.AddComponent<Image>();
-                tabImg.color = new Color(0.22f, 0.42f, 0.52f, 1f);
-                ApplyRoundedCorners(tabImg);
-                var tabLblGo = new GameObject("Lbl");
-                tabLblGo.transform.SetParent(tabGo.transform, false);
-                var tabLbl = tabLblGo.AddComponent<TextMeshProUGUI>();
-                tabLbl.text = "Official Catalog";
-                tabLbl.fontSize = 12;
-                tabLbl.alignment = TextAlignmentOptions.Center;
-                tabLbl.color = Color.white;
-                tabLbl.font = GetUIFont();
-                tabLbl.fontStyle = FontStyles.Bold;
-                tabLbl.raycastTarget = false;
-                var tabLblRT = tabLblGo.GetComponent<RectTransform>();
-                tabLblRT.anchorMin = Vector2.zero;
-                tabLblRT.anchorMax = Vector2.one;
-                tabLblRT.offsetMin = Vector2.zero;
-                tabLblRT.offsetMax = Vector2.zero;
-            }
+            CreateCatalogCategoryStrip();
 
             // Status / loading text (shown while fetching)
             {
@@ -1761,7 +1838,7 @@ namespace Sandplay.Core
                 statusRT.anchorMin = new Vector2(0, 1);
                 statusRT.anchorMax = new Vector2(1, 1);
                 statusRT.pivot = new Vector2(0.5f, 1);
-                statusRT.anchoredPosition = new Vector2(0, -74);
+                statusRT.anchoredPosition = new Vector2(0, -80);
                 statusRT.sizeDelta = new Vector2(-10, 24);
             }
 
@@ -1773,7 +1850,9 @@ namespace Sandplay.Core
                 viewportRT.anchorMin = new Vector2(0, 0);
                 viewportRT.anchorMax = new Vector2(1, 1);
                 viewportRT.offsetMin = new Vector2(5, 5);
-                viewportRT.offsetMax = new Vector2(-5, -100);
+                // Start the results immediately below the category strip; the
+                // old loading/header reservation created a large empty band.
+                viewportRT.offsetMax = new Vector2(-5, -80);
                 viewportGo.AddComponent<RectMask2D>();
 
                 _catalogContentGo = new GameObject("CatalogContent");
@@ -1823,9 +1902,8 @@ namespace Sandplay.Core
                 leftOuterRT.pivot = new Vector2(0, 0);
                 leftOuterRT.anchoredPosition = new Vector2(joystickMargin, joystickMargin);
                 leftOuterRT.sizeDelta = new Vector2(joystickSize, joystickSize);
-                var leftOuterImg = leftJoyOuter.AddComponent<Image>();
-                leftOuterImg.color = new Color(1f, 1f, 1f, 0.15f);
-                ApplyRoundedCorners(leftOuterImg);
+                var leftOuterImg = leftJoyOuter.AddComponent<TouchControlDisc>();
+                leftOuterImg.color = new Color(.08f, .12f, .15f, .5f);
 
                 var leftKnob = new GameObject("LeftKnob");
                 leftKnob.transform.SetParent(leftJoyOuter.transform, false);
@@ -1833,13 +1911,34 @@ namespace Sandplay.Core
                 leftKnobRT.anchorMin = new Vector2(0.5f, 0.5f);
                 leftKnobRT.anchorMax = new Vector2(0.5f, 0.5f);
                 leftKnobRT.sizeDelta = new Vector2(40f, 40f);
-                var leftKnobImg = leftKnob.AddComponent<Image>();
-                leftKnobImg.color = new Color(1f, 1f, 1f, 0.5f);
-                ApplyRoundedCorners(leftKnobImg);
+                var leftKnobImg = leftKnob.AddComponent<TouchControlDisc>();
+                leftKnobImg.color = new Color(1f, 1f, 1f, .7f);
                 leftKnobImg.raycastTarget = false;
 
                 leftJoystick = leftJoyOuter.AddComponent<VirtualJoystick>();
                 leftJoystick.Initialize(leftOuterRT, leftKnobRT);
+
+                var jump = new GameObject("Jump", typeof(RectTransform));
+                jump.transform.SetParent(walkModeUI.transform, false);
+                var jumpRT = (RectTransform)jump.transform;
+                jumpRT.anchorMin = jumpRT.anchorMax = new Vector2(1, 0);
+                jumpRT.pivot = new Vector2(1, 0);
+                jumpRT.anchoredPosition = new Vector2(-30, 40);
+                jumpRT.sizeDelta = new Vector2(64, 64);
+                var jumpDisc = jump.AddComponent<TouchControlDisc>();
+                jumpDisc.color = new Color(.08f, .12f, .15f, .65f);
+                var jumpButton = jump.AddComponent<Button>();
+                jumpButton.targetGraphic = jumpDisc;
+                jumpButton.onClick.AddListener(() => WalkModeController.Instance?.Jump());
+                var jumpIcon = new GameObject("JumpArrow", typeof(RectTransform));
+                jumpIcon.transform.SetParent(jump.transform, false);
+                var jumpIconRT = (RectTransform)jumpIcon.transform;
+                jumpIconRT.anchorMin = jumpIconRT.anchorMax = new Vector2(.5f, .5f);
+                jumpIconRT.sizeDelta = new Vector2(28, 28);
+                var jumpGlyph = jumpIcon.AddComponent<TerrainToolGlyph>();
+                jumpGlyph.Mode = 0;
+                jumpGlyph.color = Color.white;
+                jumpGlyph.raycastTarget = false;
             }
 
             // -- Exit Walk button (top-right) --
@@ -1850,7 +1949,7 @@ namespace Sandplay.Core
             exitWalkRT.anchorMax = new Vector2(1, 1);
             exitWalkRT.pivot = new Vector2(1, 1);
             exitWalkRT.anchoredPosition = new Vector2(-10, -10);
-            exitWalkRT.sizeDelta = new Vector2(90, 36);
+            exitWalkRT.sizeDelta = new Vector2(90, 44);
             var exitWalkImg = exitWalkGo.AddComponent<Image>();
             exitWalkImg.color = new Color(0.48f, 0.26f, 0.26f, 0.92f);
             ApplyRoundedCorners(exitWalkImg);
@@ -1886,7 +1985,8 @@ namespace Sandplay.Core
                 sandRow.SetActive(!entering && !isSpec);
                 undoRedoBar.SetActive(!entering && !isSpec);
                 exitBtnGo.SetActive(!entering);
-                _catalogButton.SetActive(!entering && !isSpec);
+                if (entering) CloseCatalogPanel();
+                _catalogButton.SetActive(!entering);
 
                 if (entering)
                     WalkModeController.Instance?.EnterWalkMode();
@@ -1894,50 +1994,102 @@ namespace Sandplay.Core
                     WalkModeController.Instance?.ExitWalkMode();
             });
 
-            // === Catalog button (top-right) ===
+            // === Catalog button (right-edge drawer toggle) ===
+            _catalogPhoneLayout = IsPhoneCatalogLayout();
             _catalogButton = new GameObject("Btn_Catalog");
             _catalogButton.transform.SetParent(_sandboxUI.transform, false);
-            var catalogBtnRT = _catalogButton.AddComponent<RectTransform>();
-            catalogBtnRT.anchorMin = new Vector2(1, 1);
-            catalogBtnRT.anchorMax = new Vector2(1, 1);
-            catalogBtnRT.pivot = new Vector2(1, 1);
-            catalogBtnRT.anchoredPosition = new Vector2(-10, -10);
-            catalogBtnRT.sizeDelta = new Vector2(80, 36);
-            var catalogBtnImg = _catalogButton.AddComponent<Image>();
-            catalogBtnImg.color = new Color(0.22f, 0.42f, 0.52f, 0.92f);
-            ApplyRoundedCorners(catalogBtnImg);
+            _catalogButtonRT = _catalogButton.AddComponent<RectTransform>();
+            _catalogButtonImage = _catalogButton.AddComponent<Image>();
+            if (_catalogPhoneLayout)
+            {
+                // Phones use the compact pre-drawer control. A full-height rail
+                // consumes too much of the safe-area viewport on small screens.
+                _catalogButtonRT.anchorMin = new Vector2(1, 1);
+                _catalogButtonRT.anchorMax = new Vector2(1, 1);
+                _catalogButtonRT.pivot = new Vector2(1, 1);
+                _catalogButtonRT.anchoredPosition = new Vector2(-10, -10);
+                _catalogButtonRT.sizeDelta = new Vector2(80, 36);
+                _catalogButtonImage.color = new Color(0.22f, 0.42f, 0.52f, 0.92f);
+                ApplyRoundedCorners(_catalogButtonImage);
+            }
+            else
+            {
+                _catalogButtonRT.anchorMin = new Vector2(1, 0);
+                _catalogButtonRT.anchorMax = new Vector2(1, 1);
+                _catalogButtonRT.pivot = new Vector2(1, 0.5f);
+                // Sit flush against the right edge; the grab handle protrudes
+                // from the opposite side like a conventional drawer pull.
+                _catalogButtonRT.anchoredPosition = Vector2.zero;
+                _catalogButtonRT.sizeDelta = new Vector2(56, 0);
+                _catalogButtonImage.color = new Color(0.045f, 0.055f, 0.06f, 1f);
+            }
             catalogBtn = _catalogButton.AddComponent<Button>();
             catalogBtn.onClick.AddListener(ToggleCatalogPanel);
-            Sprite catalogIcon = LoadIconWhiteTinted("catalog");
+            var catalogGesture = _catalogButton.AddComponent<Sandplay.UI.CatalogDrawerGesture>();
+            catalogGesture.Initialize(OpenCatalogPanel, CloseCatalogPanel);
+            var catalogHint = _catalogButton.AddComponent<Sandplay.UI.CatalogButtonHint>();
+            catalogHint.Initialize(_catalogButtonImage);
+            // The first use teaches the affordance, then the cue stays out of the way.
+            catalogBtn.onClick.AddListener(catalogHint.Dismiss);
+
+            var catalogHandleGo = new GameObject("DrawerHandle");
+            catalogHandleGo.transform.SetParent(_catalogButton.transform, false);
+            _catalogButtonHandleVisual = catalogHandleGo;
+            var catalogHandleImg = catalogHandleGo.AddComponent<Image>();
+            catalogHandleImg.color = new Color(0.015f, 0.02f, 0.025f, 1f);
+            catalogHandleImg.raycastTarget = false;
+            ApplyRoundedCorners(catalogHandleImg);
+            var catalogHandleRT = catalogHandleGo.GetComponent<RectTransform>();
+            catalogHandleRT.anchorMin = new Vector2(0, 0.5f);
+            catalogHandleRT.anchorMax = new Vector2(0, 0.5f);
+            catalogHandleRT.pivot = new Vector2(1, 0.5f);
+            catalogHandleRT.anchoredPosition = Vector2.zero;
+            catalogHandleRT.sizeDelta = new Vector2(14, 150);
+            if (_catalogPhoneLayout)
+                catalogHandleGo.SetActive(false);
+
+            var catalogIcon = LoadIconWhiteTinted("catalog");
             if (catalogIcon != null)
             {
                 var catalogIconGo = new GameObject("Icon");
                 catalogIconGo.transform.SetParent(_catalogButton.transform, false);
+                _catalogButtonGlyph = catalogIconGo;
                 var catalogIconImg = catalogIconGo.AddComponent<Image>();
                 catalogIconImg.sprite = catalogIcon;
                 catalogIconImg.preserveAspect = true;
+                catalogIconImg.raycastTarget = false;
                 var catalogIconRT = catalogIconGo.GetComponent<RectTransform>();
-                catalogIconRT.anchorMin = new Vector2(0.15f, 0.15f);
-                catalogIconRT.anchorMax = new Vector2(0.85f, 0.85f);
-                catalogIconRT.offsetMin = Vector2.zero;
-                catalogIconRT.offsetMax = Vector2.zero;
+                if (_catalogPhoneLayout)
+                {
+                    catalogIconRT.anchorMin = new Vector2(.15f, .15f);
+                    catalogIconRT.anchorMax = new Vector2(.85f, .85f);
+                    catalogIconRT.offsetMin = Vector2.zero;
+                    catalogIconRT.offsetMax = Vector2.zero;
+                }
+                else
+                {
+                    catalogIconRT.anchorMin = catalogIconRT.anchorMax = new Vector2(0.5f, 0.5f);
+                    catalogIconRT.sizeDelta = new Vector2(30, 30);
+                    catalogIconRT.anchoredPosition = Vector2.zero;
+                }
             }
             else
             {
-                var catalogBtnTxtGo = new GameObject("Label");
-                catalogBtnTxtGo.transform.SetParent(_catalogButton.transform, false);
-                var catalogBtnTxt = catalogBtnTxtGo.AddComponent<TextMeshProUGUI>();
-                catalogBtnTxt.text = Localization.Get("button.catalog");
-                TrackLocalized(catalogBtnTxt, "button.catalog");
-                catalogBtnTxt.fontSize = 14;
-                catalogBtnTxt.alignment = TextAlignmentOptions.Center;
-                catalogBtnTxt.color = Color.white;
-                catalogBtnTxt.font = GetUIFont();
-                var catalogBtnTxtRT = catalogBtnTxtGo.GetComponent<RectTransform>();
-                catalogBtnTxtRT.anchorMin = Vector2.zero;
-                catalogBtnTxtRT.anchorMax = Vector2.one;
-                catalogBtnTxtRT.offsetMin = Vector2.zero;
-                catalogBtnTxtRT.offsetMax = Vector2.zero;
+                var catalogLabel = new GameObject("Label");
+                catalogLabel.transform.SetParent(_catalogButton.transform, false);
+                _catalogButtonGlyph = catalogLabel;
+                var catalogText = catalogLabel.AddComponent<TextMeshProUGUI>();
+                catalogText.text = Localization.Get("button.catalog");
+                TrackLocalized(catalogText, "button.catalog");
+                catalogText.fontSize = 11;
+                catalogText.alignment = TextAlignmentOptions.Center;
+                catalogText.color = Color.white;
+                catalogText.font = GetUIFont();
+                catalogText.raycastTarget = false;
+                var catalogLabelRT = catalogLabel.GetComponent<RectTransform>();
+                catalogLabelRT.anchorMin = Vector2.zero;
+                catalogLabelRT.anchorMax = Vector2.one;
+                catalogLabelRT.offsetMin = catalogLabelRT.offsetMax = Vector2.zero;
             }
 
             // === Status bar (bottom, right of toolbar) ===
@@ -1952,9 +2104,12 @@ namespace Sandplay.Core
             EventBus.Subscribe<ObjectSelectedEvent>(evt =>
             {
                 var txt = statusText.GetComponent<TextMeshProUGUI>();
-                txt.text = evt.PlacedObject != null
-                    ? Localization.Get("status.selected", evt.PlacedObject.ObjectData?.DisplayName ?? Localization.Get("status.object"))
-                    : Localization.Get("status.ready");
+                var selected = FindAnyObjectByType<ObjectPlacer>();
+                txt.text = selected != null && selected.Selection.Count > 1
+                    ? Localization.Get("status.selected_many", selected.Selection.Count)
+                    : evt.PlacedObject != null
+                        ? Localization.Get("status.selected", evt.PlacedObject.ObjectData?.DisplayName ?? evt.PlacedObject.NetworkItem?.display_name ?? Localization.Get("status.object"))
+                        : Localization.Get("selection.hint");
             });
 
             EventBus.Subscribe<SessionSavedEvent>(evt =>
@@ -1967,11 +2122,17 @@ namespace Sandplay.Core
                 statusText.GetComponent<TextMeshProUGUI>().text = Localization.Get("status.loaded", evt.SessionName);
             });
 
+            var saveIndicator = new GameObject("BoardSaveIndicator", typeof(RectTransform));
+            saveIndicator.transform.SetParent(_sandboxUI.transform, false);
+            saveIndicator.AddComponent<BoardSaveIndicator>().Initialize(GetUIFont());
+
             // === Floating object toolbar (Up/Down, Rotate, Resize, Duplicate, Delete) ===
             var actionPanelGo = new GameObject("ObjectActionPanel");
             actionPanelGo.transform.SetParent(_sandboxUI.transform, false);
             var actionRT = actionPanelGo.AddComponent<RectTransform>();
             actionRT.sizeDelta = new Vector2(310, 56);
+            // Scale the complete strip, including icons, spacing and shortcut labels.
+            actionRT.localScale = Vector3.one * 0.81f;
             actionRT.pivot = new Vector2(0.5f, 0f);
 
             var actionBg = actionPanelGo.AddComponent<Image>();
@@ -2245,6 +2406,7 @@ namespace Sandplay.Core
             }
             deleteBtn.onClick.AddListener(() => actionPanel.OnDeletePressed());
 
+            actionPanel.ConfigureKeyboardHints(GetUIFont());
             actionPanel.Initialize(UnityEngine.Camera.main);
 
             // === AI-Assisted Reflection Panel ===
@@ -2367,11 +2529,19 @@ namespace Sandplay.Core
         private static TMP_FontAsset _uiFont;
         private static TMP_FontAsset _cjkFont;
         private static bool _cjkFallbackAdded;
+        private static TMP_FontAsset _japaneseFont;
+        private static TMP_FontAsset _latinFallbackFont;
 
         /// <summary>Latin UI font with Chinese fallback attached.</summary>
         private static TMP_FontAsset GetUIFont()
         {
             EnsureCjkFallback();
+            if (Localization.Current == Language.Japanese)
+            {
+                if (_japaneseFont == null)
+                    _japaneseFont = TryCreateDynamicCjkTmpFont(Resources.Load<Font>("Fonts/NotoSansCJKjp-Regular"));
+                if (_japaneseFont != null) return _japaneseFont;
+            }
             return _uiFont;
         }
 
@@ -2388,6 +2558,19 @@ namespace Sandplay.Core
         {
             if (_uiFont == null)
                 _uiFont = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
+
+            // The bundled static atlas is mostly ASCII. Bundle the font source so
+            // Czech accents (including the language selector) work on every OS.
+            if (_uiFont != null && _latinFallbackFont == null)
+            {
+                _latinFallbackFont = TryCreateDynamicCjkTmpFont(Resources.Load<Font>("Fonts/LiberationSans"));
+                if (_latinFallbackFont != null)
+                {
+                    if (_uiFont.fallbackFontAssetTable == null)
+                        _uiFont.fallbackFontAssetTable = new System.Collections.Generic.List<TMP_FontAsset>();
+                    _uiFont.fallbackFontAssetTable.Insert(0, _latinFallbackFont);
+                }
+            }
 
             if (_cjkFallbackAdded || _uiFont == null) return;
 
@@ -2627,6 +2810,37 @@ namespace Sandplay.Core
                 textRT.offsetMax = Vector2.zero;
             }
 
+            var oldIcon = go.transform.Find("Icon");
+            if (oldIcon != null) oldIcon.gameObject.SetActive(false);
+            string key = name.Contains("Settings") ? "settings" : name.Contains("Analyze") ? "ai" :
+                name.Contains("Manual") ? "replays" : name.Contains("Walk") ? "multiplayer" :
+                name.Contains("Material") ? "objects" : "new_board";
+            var modernIcon = AddHomeIconGraphic(go.transform, key, new Vector2(.3f,.4f), new Vector2(.7f,.88f), new Color(.84f,.89f,.91f));
+            if (name.Contains("Material") || name.Contains("Walk") || name.Contains("Manual"))
+            {
+                modernIcon.enabled = false;
+                var customGo = new GameObject("ActionGlyph", typeof(RectTransform));
+                customGo.transform.SetParent(go.transform, false);
+                var customRT = customGo.GetComponent<RectTransform>();
+                customRT.anchorMin = customRT.anchorMax = new Vector2(.5f,.65f);
+                customRT.sizeDelta = new Vector2(22,22);
+                var custom = customGo.AddComponent<TerrainToolGlyph>();
+                custom.Mode = name.Contains("Material") ? 3 : name.Contains("Walk") ? 4 : 5;
+                custom.color = new Color(.84f,.89f,.91f);
+                custom.raycastTarget = false;
+            }
+            var modernLabel = go.transform.Find("Label").GetComponent<TextMeshProUGUI>();
+            modernLabel.enableAutoSizing = true;
+            modernLabel.fontSizeMin = 7;
+            modernLabel.fontSizeMax = 10;
+            modernLabel.enableWordWrapping = true;
+            modernLabel.overflowMode = TextOverflowModes.Ellipsis;
+            modernLabel.rectTransform.anchorMin = new Vector2(.03f,.03f);
+            modernLabel.rectTransform.anchorMax = new Vector2(.97f,.4f);
+            img.color = new Color(.12f,.15f,.17f);
+            colors.highlightedColor = new Color(1.3f,1.3f,1.3f);
+            colors.pressedColor = new Color(.7f,.85f,.9f);
+            btn.colors = colors;
             yOffset -= (btnH + pad);
             return btn;
         }

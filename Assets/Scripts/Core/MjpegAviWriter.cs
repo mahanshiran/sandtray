@@ -20,7 +20,6 @@ namespace Sandplay.Core
         private FileStream _stream;
         private BinaryWriter _writer;
         private long _moviStart;
-        private bool _headerWritten;
         private bool _finished;
 
         public int FrameCount => _chunkSizes.Count;
@@ -45,11 +44,9 @@ namespace Sandplay.Core
         public void AddFrame(Texture2D rgbTex, int jpegQuality = 75)
         {
             if (_finished || rgbTex == null) return;
-            // EncodeToJPG expects top-down; Unity textures from ReadPixels are bottom-up —
-            // flip for correct orientation in most players.
-            var flipped = FlipVertical(rgbTex);
-            byte[] jpg = flipped.EncodeToJPG(Mathf.Clamp(jpegQuality, 40, 95));
-            if (flipped != rgbTex) UnityEngine.Object.Destroy(flipped);
+            // EncodeToJPG already converts Unity's texture coordinates into the JPEG's
+            // top-down scan order. Flipping here a second time produces upside-down AVI.
+            byte[] jpg = rgbTex.EncodeToJPG(Mathf.Clamp(jpegQuality, 40, 95));
             if (jpg == null || jpg.Length == 0) return;
 
             // 00dc chunk
@@ -203,24 +200,7 @@ namespace Sandplay.Core
             _writer.Write(0); // patch movi size
             _moviStart = _stream.Position;
             _writer.Write(Encoding.ASCII.GetBytes("movi"));
-            _headerWritten = true;
         }
 
-        private static Texture2D FlipVertical(Texture2D src)
-        {
-            int w = src.width, h = src.height;
-            var dst = new Texture2D(w, h, TextureFormat.RGB24, false);
-            var pixels = src.GetPixels32();
-            var flipped = new Color32[pixels.Length];
-            for (int y = 0; y < h; y++)
-            {
-                int srcRow = y * w;
-                int dstRow = (h - 1 - y) * w;
-                Array.Copy(pixels, srcRow, flipped, dstRow, w);
-            }
-            dst.SetPixels32(flipped);
-            dst.Apply();
-            return dst;
-        }
     }
 }

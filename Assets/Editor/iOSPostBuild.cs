@@ -29,9 +29,10 @@ public static class iOSPostBuild
 
         // Enable In-App Purchase capability on the main target
         project.AddCapability(mainTargetGuid, PBXCapabilityType.InAppPurchase);
+        project.AddFrameworkToProject(frameworkTargetGuid, "Security.framework", false);
 
         project.WriteToFile(pbxProjectPath);
-        Debug.Log("[iOSPostBuild] In-App Purchase capability added to Xcode project.");
+        Debug.Log("[iOSPostBuild] In-App Purchase capability and Security.framework added to Xcode project.");
     }
 #endif
 }

@@ -79,6 +79,8 @@ namespace Sandplay.Camera
             if (_config == null) return;
             if (_isAnimatingIntro) return; // coroutine controls the camera
             if (!_enabled) return;
+            var selection = FindAnyObjectByType<Sandplay.Objects.ObjectPlacer>();
+            if (selection != null && selection.IsSelectionGestureActive) return;
 
             HandleInput();
             SmoothApply();
@@ -393,7 +395,11 @@ namespace Sandplay.Camera
             }
 
             // Keyboard camera: W/S zoom, A/D orbit left/right (desktop only, not in walk mode)
-            if (GameManager.Instance != null && GameManager.Instance.CurrentTool != ToolMode.WalkMode)
+            if (GameManager.Instance != null && GameManager.Instance.CurrentTool != ToolMode.WalkMode &&
+                !InputHelper.IsTextInputFocused &&
+                !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl) &&
+                !Input.GetKey(KeyCode.LeftCommand) && !Input.GetKey(KeyCode.RightCommand) &&
+                !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
             {
                 float keyZoom = 0f;
                 if (Input.GetKey(KeyCode.W)) keyZoom = -1f;

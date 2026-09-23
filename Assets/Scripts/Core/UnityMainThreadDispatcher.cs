@@ -26,7 +26,8 @@ namespace Sandplay.Core
                 _inst = go.AddComponent<UnityMainThreadDispatcher>();
                 DontDestroyOnLoad(go);
             }
-            lock (_queue) _queue.Enqueue(action);
+            int epoch = Sandplay.Data.LocalAccountStorage.Epoch;
+            lock (_queue) _queue.Enqueue(() => { if (epoch == Sandplay.Data.LocalAccountStorage.Epoch) action(); });
         }
 
         private void Update()

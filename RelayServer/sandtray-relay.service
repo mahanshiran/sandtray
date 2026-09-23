@@ -1,0 +1,17 @@
+[Unit]
+Description=Sandtray Multiplayer Relay
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/RelayServer/out
+ExecStart=/usr/bin/dotnet /root/RelayServer/out/RelayServer.dll 7777
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sandtray-relay
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+support.delete_account|Delete account|删除账号|Eliminar cuenta|Excluir conta|Supprimer le compte|Konto löschen|アカウント削除|Smazat účet
+support.request|Request deletion|申请删除|Solicitar eliminación|Solicitar exclusão|Demander la suppression|Löschung beantragen|削除を申請|Požádat o smazání
+support.title|Help & support|帮助与支持|Ayuda y soporte|Ajuda e suporte|Aide et assistance|Hilfe und Support|ヘルプとサポート|Nápověda a podpora
+support.email|Contact support|联系支持|Contactar con soporte|Contatar suporte|Contacter l’assistance|Support kontaktieren|サポートに連絡|Kontaktovat podporu
+support.open_email|Open email app|打开邮件应用|Abrir correo|Abrir aplicativo de email|Ouvrir la messagerie|E-Mail-App öffnen|メールアプリを開く|Otevřít e-mail
+support.copy_email|Support email address|支持邮箱|Correo de soporte|Email do suporte|Adresse d’assistance|Support-E-Mail-Adresse|サポートのメールアドレス|E-mail podpory
+support.copy|Copy|复制|Copiar|Copiar|Copier|Kopieren|コピー|Kopírovat
+support.copied|Copied|已复制|Copiado|Copiado|Copié|Kopiert|コピーしました|Zkopírováno
+support.website|Sandtray website|Sandtray 网站|Sitio web de Sandtray|Site do Sandtray|Site web Sandtray|Sandtray-Website|Sandtray ウェブサイト|Web Sandtray
+support.version|App version|应用版本|Versión de la aplicación|Versão do aplicativo|Version de l’application|App-Version|アプリのバージョン|Verze aplikace
+support.regulatory_filing|Regulatory filing|监管备案|Registro regulatorio|Registro regulatório|Enregistrement réglementaire|Behördliche Registrierung|規制当局への届出|Regulační registrace

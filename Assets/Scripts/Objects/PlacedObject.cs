@@ -88,7 +88,7 @@ namespace Sandplay.Objects
                             : NetworkItem != null ? NetworkItem.id
                             : "";
 
-            return new PlacedObjectData
+            var saved = new PlacedObjectData
             {
                 ObjectId = objectId,
                 Position = transform.position,
@@ -96,6 +96,18 @@ namespace Sandplay.Objects
                 Scale = relativeScale,
                 PlacementTime = PlacementTime
             };
+            // Keep a restore-only dependency snapshot with saved network objects.
+            // This lets a board reopen even when its catalog is later disabled or
+            // omitted from the active library response.
+            if (NetworkItem != null)
+            {
+                saved.NetworkCatalogId = NetworkItem.catalog;
+                saved.NetworkDisplayName = NetworkItem.display_name;
+                saved.NetworkModelUrl = NetworkItem.model_url;
+                saved.NetworkModelHash = NetworkItem.model_hash;
+                saved.NetworkThumbnailUrl = NetworkItem.thumbnail_url;
+            }
+            return saved;
         }
     }
 
@@ -107,5 +119,12 @@ namespace Sandplay.Objects
         public Vector3 Rotation;
         public float Scale;
         public float PlacementTime;
+        // Optional immutable metadata for restoring network catalog objects after
+        // their source catalog is hidden/disabled. Older saves leave these null.
+        public string NetworkCatalogId;
+        public string NetworkDisplayName;
+        public string NetworkModelUrl;
+        public string NetworkModelHash;
+        public string NetworkThumbnailUrl;
     }
 }

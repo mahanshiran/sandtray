@@ -17,10 +17,9 @@
 //     RevenueCatManager.Initialize(appleKey, googleKey).
 //
 //  4. In the RevenueCat dashboard:
-//     - Create a Product (monthly + annual)
-//     - Create an Entitlement with identifier  "premium"
-//     - Attach the products to the entitlement
-//     - Create an Offering called "default" with Monthly + Annual packages
+//     - Configure the five products and matching offerings in SubscriptionPlans.
+//     - Attach products to the intended entitlements.
+//     - Configure the authenticated backend webhook for subscription updates.
 // ============================================================
 
 using System;
@@ -50,6 +49,26 @@ namespace Sandplay.Core
         // ── Status ──────────────────────────────────────────────────────────
         public bool IsSubscribed => IsDebugMode || _isSubscribed;
         private bool _isSubscribed;
+        public bool PurchaseInProgress { get; private set; }
+        public string ActivePlanCode { get; private set; }
+        public string ManagementUrl { get; private set; }
+        public void ManageSubscription()
+        {
+            string url = ManagementUrl;
+            if (string.IsNullOrEmpty(url))
+#if UNITY_ANDROID && !UNITY_EDITOR
+                url = "https://play.google.com/store/account/subscriptions";
+#else
+                url = "https://apps.apple.com/account/subscriptions";
+#endif
+            if (Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme == "https") Application.OpenURL(url);
+        }
+        private void OnApplicationFocus(bool focused)
+        {
+            if (!focused || !IsInitialized || BackendClient.Instance == null || !BackendClient.Instance.IsLoggedIn) return;
+            RefreshSubscriptionStatus();
+            BackendClient.Instance.SyncStoreSubscription(null, null);
+        }
         public bool IsInitialized { get; private set; }
 
         // ── Cached offering data (platform-agnostic wrapper) ─────────────
@@ -57,7 +76,9 @@ namespace Sandplay.Core
 
         private string _entitlementId = "premium";
         private string _identifiedAppUserId = "";
+#if REVENUECAT_INSTALLED && (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
         private bool _identityChangeInProgress;
+#endif
         private int _identityGeneration;
         private readonly List<Action<bool, string>> _identityCallbacks =
             new List<Action<bool, string>>();
@@ -93,7 +114,7 @@ namespace Sandplay.Core
             if (string.IsNullOrEmpty(apiKey) || apiKey.StartsWith("REPLACE"))
             {
                 Debug.LogWarning("[RevenueCat] API key not set — skipping initialization.");
-                IsInitialized = true;
+                IsInitialized = false;
                 return;
             }
 
@@ -163,6 +184,8 @@ namespace Sandplay.Core
                 return;
             }
 
+            ActivePlanCode = null; ManagementUrl = null;
+            SetSubscriptionStatus(false);
             _identifiedAppUserId = appUserId;
             _identityChangeInProgress = true;
             int operationGeneration = ++_identityGeneration;
@@ -200,7 +223,11 @@ namespace Sandplay.Core
         {
             _identityGeneration++;
             _identifiedAppUserId = "";
+            ActivePlanCode = null; ManagementUrl = null;
+            SetSubscriptionStatus(false);
+#if REVENUECAT_INSTALLED && (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
             _identityChangeInProgress = false;
+#endif
             _identityCallbacks.Clear();
 
 #if REVENUECAT_INSTALLED && (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
@@ -249,8 +276,11 @@ namespace Sandplay.Core
         public void RefreshSubscriptionStatus()
         {
 #if REVENUECAT_INSTALLED && (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+            if (_purchases == null) return;
+            int generation = _identityGeneration;
             _purchases.GetCustomerInfo((info, error) =>
             {
+                if (generation != _identityGeneration) return;
                 if (error != null)
                 {
                     Debug.LogWarning($"[RevenueCat] GetCustomerInfo error: {error.Message}");
@@ -264,8 +294,12 @@ namespace Sandplay.Core
 #if REVENUECAT_INSTALLED && (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
         private void ApplyCustomerInfo(Purchases.CustomerInfo info)
         {
-            SetSubscriptionStatus(
-                info != null && info.Entitlements.Active.ContainsKey(_entitlementId));
+            ManagementUrl = info?.ManagementURL;
+            ActivePlanCode = null;
+            if (info?.ActiveSubscriptions != null)
+                foreach (var code in SubscriptionPlans.Codes)
+                    if (info.ActiveSubscriptions.Contains(SubscriptionPlans.Product(code))) ActivePlanCode = code;
+            SetSubscriptionStatus(ActivePlanCode != null);
         }
 #endif
 
@@ -301,6 +335,11 @@ namespace Sandplay.Core
             AvailablePackages.Clear();
 
 #if REVENUECAT_INSTALLED && (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+            if (_purchases == null || !IsInitialized)
+            {
+                onError?.Invoke("Store purchases are not configured yet.");
+                return;
+            }
             _purchases.GetOfferings((offerings, error) =>
             {
                 if (error != null)
@@ -310,14 +349,17 @@ namespace Sandplay.Core
                 }
 
                 _cachedOfferings = offerings;
-                var current = offerings?.Current;
-                if (current != null)
+                foreach (var code in SubscriptionPlans.Codes)
                 {
+                    if (offerings?.All == null || !offerings.All.TryGetValue(code, out var current)) continue;
                     foreach (var pkg in current.AvailablePackages)
                     {
+                        if (pkg.StoreProduct.Identifier != SubscriptionPlans.Product(code)) continue;
                         AvailablePackages.Add(new SubscriptionPackage
                         {
                             Identifier  = pkg.Identifier,
+                            PlanCode = code,
+                            ProductId = pkg.StoreProduct.Identifier,
                             Title       = pkg.StoreProduct.Title,
                             Description = pkg.StoreProduct.Description,
                             PriceString = pkg.StoreProduct.PriceString,
@@ -339,24 +381,29 @@ namespace Sandplay.Core
         public void PurchasePackage(SubscriptionPackage package, Action<bool, string> onResult)
         {
 #if REVENUECAT_INSTALLED && (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
-            if (package?.NativePackage == null)
+            if (PurchaseInProgress) { onResult?.Invoke(false, "A store operation is already in progress."); return; }
+            if (package?.NativePackage == null || SubscriptionPlans.Product(package.PlanCode) != package.ProductId)
             {
                 onResult?.Invoke(false, "Invalid package.");
                 return;
             }
 
+            PurchaseInProgress = true;
             EnsureAccountIdentity(() =>
             {
+                int generation = _identityGeneration;
                 _purchases.PurchasePackage(
                     (Purchases.Package)package.NativePackage,
                     (result) =>
                     {
+                        PurchaseInProgress = false;
+                        if (generation != _identityGeneration) { onResult?.Invoke(false, "Account changed. Restore after signing in."); return; }
                         if (result.UserCancelled) { onResult?.Invoke(false, null); return; }
                         if (result.Error != null) { onResult?.Invoke(false, result.Error.Message); return; }
                         ApplyCustomerInfo(result.CustomerInfo);
-                        onResult?.Invoke(IsSubscribed, null);
+                        onResult?.Invoke(true, null);
                     });
-            }, error => onResult?.Invoke(false, error));
+            }, error => { PurchaseInProgress = false; onResult?.Invoke(false, error); });
 #else
             onResult?.Invoke(false, "RevenueCat SDK not installed.");
 #endif
@@ -367,15 +414,20 @@ namespace Sandplay.Core
         public void RestorePurchases(Action<bool, string> onResult)
         {
 #if REVENUECAT_INSTALLED && (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+            if (PurchaseInProgress) { onResult?.Invoke(false, "A store operation is already in progress."); return; }
+            PurchaseInProgress = true;
             EnsureAccountIdentity(() =>
             {
+                int generation = _identityGeneration;
                 _purchases.RestorePurchases((info, error) =>
                 {
+                    PurchaseInProgress = false;
+                    if (generation != _identityGeneration) { onResult?.Invoke(false, "Account changed. Please restore again."); return; }
                     if (error != null) { onResult?.Invoke(false, error.Message); return; }
                     ApplyCustomerInfo(info);
-                    onResult?.Invoke(IsSubscribed, null);
+                    onResult?.Invoke(true, null);
                 });
-            }, error => onResult?.Invoke(false, error));
+            }, error => { PurchaseInProgress = false; onResult?.Invoke(false, error); });
 #else
             onResult?.Invoke(false, "Not available in Editor.");
 #endif
@@ -424,6 +476,8 @@ namespace Sandplay.Core
     public class SubscriptionPackage
     {
         public string Identifier;
+        public string PlanCode;
+        public string ProductId;
         public string Title;
         public string Description;
         public string PriceString;

@@ -69,12 +69,34 @@ namespace Sandplay.UI
                 if (btn)
                 {
                     var data = obj;
-                    btn.onClick.AddListener(() =>
-                    {
-                        EventBus.Publish(new CatalogObjectSelectedEvent { ObjectData = data });
-                    });
+                    btn.onClick.AddListener(() => StartCoroutine(SelectBuiltInAfterAccess(data)));
                 }
             }
+        }
+
+        private System.Collections.IEnumerator SelectBuiltInAfterAccess(SandplayObject data)
+        {
+            if (data == null) yield break;
+            bool done = false;
+            bool allowed = false;
+            if (BackendClient.Instance == null || !BackendClient.Instance.IsLoggedIn)
+            {
+                allowed = true;
+                done = true;
+            }
+            else
+            {
+                BackendClient.Instance.FetchAccessSnapshot(snapshot =>
+                {
+                    allowed = AccessPolicy.Evaluate(snapshot, "objects.builtin.read", checkUsage: false) == AccessDecision.Allowed;
+                    done = true;
+                }, _ => done = true, force: true);
+            }
+            while (!done) yield return null;
+            if (allowed)
+                EventBus.Publish(new CatalogObjectSelectedEvent { ObjectData = data });
+            else
+                Debug.LogWarning("[Catalog] Built-in objects are not included in the current plan.");
         }
     }
 }

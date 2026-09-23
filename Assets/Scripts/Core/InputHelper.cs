@@ -6,6 +6,19 @@ namespace Sandplay.Core
     {
         public static bool IsInputBlocked { get; private set; }
 
+        /// <summary>Keyboard focus, not pointer hover: typing must never edit the tray.</summary>
+        public static bool IsTextInputFocused
+        {
+            get
+            {
+                if (KeyboardShortcuts.IsEditing || TouchScreenKeyboard.visible) return true;
+                var selected = UnityEngine.EventSystems.EventSystem.current?.currentSelectedGameObject;
+                if (selected == null) return false;
+                return selected.GetComponentInParent<TMPro.TMP_InputField>() != null ||
+                    selected.GetComponentInParent<UnityEngine.UI.InputField>() != null;
+            }
+        }
+
         public static void SetInputBlocked(bool blocked)
         {
             IsInputBlocked = blocked;

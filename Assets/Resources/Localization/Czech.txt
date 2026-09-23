@@ -1,0 +1,533 @@
+# Czech (cs-CZ). UTF-8 key|value; preserve format placeholders and escaped newlines.
+save.local|Uloženo v tomto zařízení · automatické ukládání zapnuto
+quota.pending|Čeká se na kontrolu kvóty
+quota.confirmed|Kvóta potvrzena
+quota.full|Kapacita vyčerpána · místní práce může pokračovat
+quota.signin|Pro kontrolu kvóty se přihlaste · místní práce může pokračovat
+quota.offline|Kontrola kvóty není dostupná · pokus se zopakuje
+quota.recovery|Kvóta vyžaduje kontrolu · místní soubory zachovány
+quota.none|Registrace místní kvóty není vyžadována
+quota.legacy|Existující místní scéna
+quota.retry|Klepnutím zopakujete kontrolu kvóty
+backup.none|Bez zálohy v cloudu
+backup.unknown|Stav cloudové zálohy není znám
+backup.uploading|Nahrávání zálohy…
+backup.saved|Uložená verze je zálohována
+backup.changed|Uložené změny nejsou zálohovány
+backup.failed|Záloha není dokončena · místní soubor zachován
+toolbar.sand|Písek
+tool.raise|Zvýšit
+tool.dig|Hloubit
+tool.smooth|Vyhladit
+tool.flatten|Zarovnat
+tool.walk|Procházka
+tool.settings|Nastavení
+tool.ai_analysis|Reflexe\ns AI
+tool.manual_analysis|Vlastní\nzpráva
+tool.exit|Odejít
+tool.sand_material|Textura
+mat.sand|Písek
+mat.rock|Kámen
+mat.grass|Tráva
+mat.snow|Sníh
+mat.mud|Bláto
+manual.title|Vlastní zpráva
+manual.placeholder|Sem napište svá pozorování, poznámky nebo shrnutí sezení…
+manual.save|Uložit zprávu
+manual.saved|Zpráva uložena!
+manual.empty|Před uložením prosím něco napište.
+sub.pro_badge|PRO
+sub.subscribed_badge|PRO+
+sub.vip_feature|Odemknout tuto funkci
+sub.upgrade|Přejít na PRO
+sub.paywall_title|Sandtray Pro
+sub.paywall_subtitle|Pořádejte sezení, tvořte a reflektujte společně.
+sub.paywall_free_note|Zdarma: celkem 3 hostovaná sezení; měsíčně 3 AI reflexe a 3 exporty PDF.
+sub.feature_ai|Neomezené reflexe s AI
+sub.feature_host|Neomezené pořádání sezení
+sub.feature_reports|Neomezené zprávy PDF
+sub.feature_replays|Úplná historie záznamů
+sub.feature_support|Přednostní podpora
+sub.loading|Načítání tarifů…
+sub.subscribe|Předplatit
+sub.restore|Obnovit nákupy
+sub.restoring|Obnovování…
+sub.restored_yes|Předplatné obnoveno!
+sub.restored_no|Nenalezeno žádné aktivní předplatné.
+sub.purchasing|Zpracování…
+sub.purchase_ok|Vítejte v Sandtray Pro!
+sub.purchase_err|Nákup se nezdařil: {0}
+sub.terms|Předplatné se automaticky obnovuje, pokud jej nezrušíte alespoň 24 hodin před obnovením.
+sub.privacy|Ochrana osobních údajů
+sub.terms_link|Podmínky používání
+sub.best_value|Nejvýhodnější
+sub.save_percent|Ušetřete {0} %
+sub.locked_ai|Reflexe s podporou AI je funkce Pro. Odemkněte ji předplatným.
+sub.locked_host|Pro pořádání sezení se přihlaste. Bezplatné účty mohou uspořádat 3 sezení.
+sub.free_ai_limit|Tento měsíc jste využili 3 bezplatné reflexe s AI. Pro neomezené reflexe přejděte na VIP.
+sub.free_pdf_limit|Tento měsíc jste využili 3 bezplatné exporty PDF. Pro neomezené exporty přejděte na VIP.
+sub.free_host_limit|Využili jste 3 bezplatná hostovaná sezení. Pro neomezené pořádání přejděte na VIP.
+sub.locked_replay|Bezplatné účty mohou přehrát nejnovější záznam. Pro přístup ke starším záznamům přejděte na VIP.
+sub.period_month|/ měsíc
+sub.period_year|/ rok
+sub.period_week|/ týden
+sub.period_once|jednorázově
+sub.no_plans|Žádné dostupné tarify.
+sub.mobile_only|Předplatné je dostupné pro iOS a Android.\nPředplaťte si jej prosím v mobilní aplikaci.
+sub.ok|OK
+brush.radius|Poloměr
+brush.strength|Síla
+brush.radius_val|R:{0:F1}
+brush.strength_val|S:{0:F1}
+catalog.title|Katalog objektů
+button.catalog|Katalog
+status.ready|Připraveno
+status.hint|Připraveno – pravým tlačítkem otáčíte pohled, kolečkem přibližujete, prostředním tlačítkem posouváte
+status.selected|Vybráno: {0}
+status.selected_many|Vybrané objekty: {0} · Přetažením libovolného vybraného objektu přesunete celou skupinu
+selection.count|Vybráno: {0}
+selection.hint|Tažením po prázdném písku vyberete oblast · Shift + kliknutí přidá nebo odebere objekt
+status.saved|Uloženo: {0}
+save.title|Ukládání pískoviště
+social.google|Přihlásit se přes Google
+social.apple|Přihlásit se přes Apple
+social.open|Otevřít přihlášení v prohlížeči
+social.preparing|Příprava přihlášení…
+social.waiting|Otevřete prohlížeč tlačítkem níže, přihlaste se a pak se sem vraťte.
+social.unavailable|Přihlášení přes externí účet není nastavené nebo je dočasně nedostupné. Stále se můžete přihlásit e-mailem.
+social.existing|Účet s tímto e-mailem již existuje. Přihlaste se původním způsobem; automatické propojení účtů není povolené.
+social.expired|Platnost přihlášení vypršela. Zkuste to znovu.
+social.cancelled|Přihlášení zrušeno. Můžete to zkusit znovu.
+social.failed|Přihlášení se nepodařilo dokončit. Zkuste to znovu.
+save.automatic|Automatické ukládání · každých 30 sekund
+save.host_managed|Ukládání spravuje hostitel · bez místní kopie
+save.inactive|Automatické ukládání není aktivní
+save.saved|Všechny změny pískoviště jsou uložené v tomto zařízení
+save.recovered|Obnovena předchozí uložená kopie tohoto pískoviště
+save.failed|Uložení se nezdařilo. Nechte pískoviště otevřené, zkontrolujte volné místo a zkuste to znovu.
+save.load_failed|Pískoviště se nepodařilo otevřít. Jeho uložené soubory zůstaly zachované.
+status.loaded|Načteno: {0}
+status.object|Objekt
+action.vertical|↕
+action.rotate|↻
+action.resize|⤢
+action.duplicate|Duplikovat
+action.delete|✖
+analysis.title|Reflexe s podporou AI
+analysis.ask|Vytvořit reflexi s AI
+analysis.loading|Příprava reflexe… Čekejte prosím…
+analysis.login_required|Pro reflexi s podporou AI si vytvořte bezplatný účet nebo se přihlaste.
+analysis.disclaimer|Reflexe s podporou AI není diagnóza ani klinický závěr. Pozorování a možné hypotézy jsou níže oddělené; osobní význam může potvrdit pouze tvůrce.
+analysis.error.capture|Nepodařilo se zachytit data sezení.
+analysis.error.manager|Ve scéně nebyl nalezen AIAnalysisManager.
+analysis.error|Chyba: {0}
+analysis.save|Uložit
+analysis.saved|Uloženo
+analysis.export_pdf|Exportovat PDF
+analysis.save_not_logged_in|Nejste přihlášeni
+analysis.saving|Ukládání do cloudu…
+analysis.save_done|Uloženo do cloudu
+analysis.save_fail|Uložení se nezdařilo: {0}
+analysis.pdf_login_required|Pro PDF se přihlaste
+analysis.wait_save|Čekejte prosím…
+analysis.pdf_generating|Vytváření PDF…
+analysis.pdf_saved|PDF uloženo: {0}
+analysis.pdf_fail|Chyba PDF: {0}
+walk.exit|Ukončit procházku
+menu.title|Sandtray
+menu.subtitle|TERAPEUTICKÝ PROSTOR
+menu.welcome|Vítejte zpět, {0}
+menu.welcome_guest|Vítejte
+menu.welcome_sub|Tvořte, objevujte a přemýšlejte ve svém světě v písku.
+menu.workspace|VÁŠ PRACOVNÍ PROSTOR
+menu.workspace_heading|Prostor pro tvorbu a reflexi
+menu.workspace_sub|Začněte nový pískový svět nebo pokračujte tam, kde jste skončili.
+menu.continue_playing|Nedávná pískoviště
+menu.view_all|Zobrazit vše  >
+menu.nav_home|Domů
+menu.nav_boards|Moje pískoviště
+menu.my_boards_sub|Počet pískovišť: {0}
+menu.my_boards_open|Otevřít
+menu.nav_multiplayer|Společná sezení
+menu.nav_replays|Záznamy
+menu.nav_ai|Reflexe s AI
+menu.nav_objects|Objekty
+menu.nav_settings|Nastavení
+menu.cta_new_desc|Vytvořte nový svět v písku.
+menu.cta_host_desc|Vytvořte sezení a pozvěte ostatní.
+menu.cta_join_desc|Připojte se k probíhajícímu sezení.
+menu.tile_replays|Záznamy
+menu.tile_replays_desc|Prohlížejte si svá minulá sezení a přemýšlejte o nich.
+menu.tile_ai|Reflexe s podporou AI
+menu.tile_ai_desc|Prozkoumejte pozorování, možnosti a otevřené otázky.
+menu.tile_objects|Knihovna objektů
+menu.tile_objects_desc|Odemkněte všechny objekty a vytvořte svůj svět.
+menu.tile_multiplayer|Společná sezení
+menu.tile_multiplayer_desc|Vytvořte sezení nebo se připojte v reálném čase.
+menu.new_board|Nové pískoviště
+menu.host_online|Pořádat online
+menu.join_session|Připojit se
+menu.saved_boards|Uložená pískoviště
+menu.empty|Zatím nemáte žádná uložená pískoviště.\nKlepnutím na „+ Nové pískoviště“ vytvoříte první.
+menu.empty_title|Vytvořte své první pískoviště
+menu.empty_action|Vytvořit pískoviště
+menu.empty_join|Připojit se pomocí kódu místnosti
+menu.no_results_title|Filtrům neodpovídá žádné pískoviště
+menu.no_results|Zkuste jiné hledání nebo zobrazte všechna pískoviště.
+menu.clear_filters|Vymazat filtry
+menu.account|Účet
+menu.replays|Záznamy
+replays.title|Záznamy sezení
+replays.empty|Zatím nejsou žádné záznamy sezení.
+replays.duration|{0} s, počet událostí: {1}
+replays.play|Přehrát
+replays.vip_locked|VIP
+replays.upgrade|Přejít na vyšší tarif
+replays.delete|Smazat
+replays.close|Zavřít
+replays.confirm_delete|Smazat tento záznam?
+replays.read_only|ZÁZNAM JEN PRO ČTENÍ
+replays.stop|Zastavit
+replays.quit|Ukončit
+replays.pause|Pozastavit
+replays.resume|Přehrát
+replays.finished|Záznam skončil
+replays.replay_again|Přehrát znovu
+replays.back_list|Zpět na seznam
+replays.free_note|Zdarma lze přehrát jen nejnovější záznam. Pro úplnou historii přejděte na vyšší tarif.
+replays.storage_note|Záznamy jsou uložené v tomto zařízení. Smazáním starých uvolníte místo.
+replays.latest_badge|Nejnovější
+replays.reset_view|Obnovit pohled
+replays.export_video|Exportovat
+replays.exporting|Export videa… {0} %
+replays.export_done|Video je připravené ke sdílení
+replays.export_fail|Export se nezdařil: {0}
+replays.export_too_long|Záznam je pro export příliš dlouhý (maximum 5 minut).
+login.title|Přihlášení
+login.email|E-mail
+login.password|Heslo
+login.sign_in|Přihlásit se
+login.register|Vytvořit účet
+login.signing_in|Přihlašování…
+login.registering|Vytváření účtu…
+login.success|Vítejte, {0}
+login.error|Chyba: {0}
+login.logged_in_as|Přihlášeni jako {0}
+login.sign_out|Odhlásit se
+login.name|Celé jméno
+login.user_type|Typ účtu
+login.type_normal|Běžný uživatel
+login.type_psychologist|Psycholog
+board.open|Otevřít
+board.rename|Přejmenovat
+board.reports|Zprávy
+board.delete|Smazat
+board.loading|Otevírání pískoviště…
+board.loading_new|Příprava pískoviště…
+board.loading_catalog|Načítání katalogu…
+board.loading_prepare|Nastavování pískoviště…
+board.loading_restore|Obnovování pískoviště…
+board.loading_objects|Umisťování objektů…
+board.loading_ready|Téměř hotovo…
+reports.title|Zprávy: {0}
+reports.empty|Zatím nejsou žádné zprávy s reflexí AI.\nOtevřete toto pískoviště a vytvořte reflexi s podporou AI.
+reports.view|Zobrazit
+reports.delete|Smazat
+reports.pdf|📄 PDF
+reports.detail_title|Zpráva — {0}
+reports.pdf_login|Pro PDF se přihlaste
+reports.pdf_uploading|Nahrávání…
+reports.pdf_downloading|Vytváření PDF…
+reports.pdf_saved|PDF uloženo!
+reports.pdf_error|Chyba PDF: {0}
+dialog.new_board|Nové pískoviště
+dialog.rename|Přejmenovat pískoviště
+dialog.ok|OK
+dialog.cancel|Zrušit
+size.title|Zvolte velikost pískoviště
+size.standard|Standardní (čtvercové)
+size.standard_desc|10 × 10
+size.medium|Střední (široké)
+size.medium_desc|10 × 13
+size.custom|Vlastní
+size.width|Š:
+size.depth|V:
+host.title|Pořádat online sezení
+host.info|Zvolte režim hostování a poté otevřete pískoviště.\nMístnost se vytvoří po vstupu do pískoviště.
+host.cloud|☁  Cloudové sezení  (kód místnosti — funguje odkudkoli)
+host.lan|⚡  Sezení v LAN  (stejná Wi-Fi — IP: {0})
+host.cancel|Zrušit
+join.title|Připojit se k sezení
+join.role_label|Připojit se jako:
+join.observer|Pozorovatel
+join.therapist|Terapeut
+join.patient|Klient
+host.therapist_mode|Režim terapeuta
+host.therapist_mode_desc|Klepnutím přepnete režim. Účastníci pozorují, dokud jim ve správě nepovolíte úpravy.
+host.client_edits|Klient upravuje · Já hostuji a pozoruji
+host.i_edit|Já upravuji · Ostatní pozorují
+net.connection_error_title|Připojení k sezení se nezdařilo
+net.dismiss|Zavřít
+clients.confirm_move|Potvrdit přesun ke klientovi {0}
+reports.review_title|Kontrola před exportem
+reports.edit|Upravit zprávu
+reports.revisions|Předchozí verze
+reports.revisions_notice|Předchozí texty, od nejnovějšího. Data označují dobu nahrazení textu. Tato místní historie není ověřený auditní záznam.
+reports.revisions_empty|Žádné předchozí verze.
+reports.edit_notice|Změny se ukládají místně a předchozí text zůstane zachovaný. Upravené zprávy je nutné znovu exportovat do PDF. Text AI není diagnóza.
+reports.edit_stale|Zpráva nebo účet se změnily. Před úpravou zprávu zavřete a znovu otevřete.
+reports.review_notice|Zkontrolujte správnost zprávy a citlivé údaje. Text AI není diagnóza. Pokračováním odešlete zprávu na server pro export do PDF.
+reports.review_confirm|Kontrola hotova · Exportovat PDF
+clients.history_no_matches|Nenalezena žádná odpovídající pískoviště. Vymažte hledání pro zobrazení všech záznamů.
+clients.history|Historie přiřazení
+clients.history_unassigned|Nepřiřazeno
+clients.history_missing|Chybějící klient ({0})
+clients.history_local|Místní historie zařízení, nikoli ověřený auditní záznam. Jména klientů odpovídají aktuálním záznamům.
+clients.history_change|Od: {0}\nKomu: {1}
+clients.history_unknown_date|Neznámé datum
+clients.history_empty|Žádné zaznamenané změny přiřazení.
+clients.search_tables|Hledat pískoviště podle názvu…
+clients.recovered|Záznamy klientů byly obnoveny z místní zálohy. Nejnovější změny mohou chybět; zkontrolujte je.
+clients.search_reports|Hledat názvy pískovišť nebo text zpráv…
+session.paused|Úpravy pozastaveny
+session.paused_name|Pozastaveno: {0}
+session.waiting|Čekání na editora
+session.editing_name|Upravuje: {0}
+session.you_edit|Upravujete vy
+session.observing|Pozorování
+session.manage|Spravovat
+session.resume|Pokračovat v úpravách
+session.pause|Pozastavit úpravy
+session.take_control|Chci upravovat
+session.editing|Úpravy
+session.approve|Povolit úpravy
+session.give_control|Předat ovládání
+session.decline|Odmítnout úpravy
+session.remove|Odebrat
+session.confirm_remove|Potvrdit odebrání
+session.waiting_people|Čekání na účastníky…
+session.removed|Hostitel vás odebral z tohoto sezení. Klepnutím zavřete.
+net.update_required|Aplikace a server sezení nejsou kompatibilní. Aktualizujte aplikaci. Pokud je aktuální, požádejte podporu o aktualizaci serveru. Klepnutím zavřete.
+net.patient_active|Klient připojen
+therapist.patient_acting|Klient modeluje písek…
+therapist.patient_painting|Klient maluje…
+therapist.patient_placing|Klient umístil objekt
+join.cloud_label|Připojit se pomocí kódu místnosti
+join.placeholder_code|ABC123
+join.scan_qr|Skenovat QR
+join.join_room|Vstoupit do místnosti
+join.invalid_code|Zadejte kód místnosti (4–6 písmen)
+join.joining|Připojování…
+join.room_not_found|Místnost nenalezena nebo připojení selhalo
+join.or|nebo
+join.lan_label|⚡  Připojit se přes IP adresu  (stejná Wi-Fi)
+join.placeholder_ip|192.168.1.
+join.connect|Připojit
+join.missing_ip|Zadejte prosím IP adresu
+join.connecting|Připojování…
+join.connection_failed|Připojení se nezdařilo
+join.cancel|Zrušit
+net.room|Místnost: {0}
+net.connecting|Připojování…
+net.spectating|POZOROVÁNÍ
+net.viewers|Počet pozorovatelů: {0}{1}
+net.viewers_s|
+reconnect.return|Zpět do nabídky
+reconnect.message|Připojení ztraceno\nOpětovné připojování… ({0}/10)
+clients.title|Klienti
+clients.new|+ Nový klient
+clients.local_note|Záznamy klientů, pískoviště a zprávy se ukládají v tomto zařízení. Bez synchronizace s cloudem.
+clients.local_archived|Včetně archivovaných klientů · Uloženo v tomto zařízení, bez synchronizace s cloudem.
+clients.search|Hledat jméno nebo kód klienta…
+clients.archived_toggle|Zobrazit / skrýt archivované
+clients.archived|Archivováno
+clients.empty|Žádní odpovídající klienti. Vytvořte klienta a začněte organizovat jeho pískoviště.
+clients.unassigned|Nepřiřazená pískoviště
+clients.unassigned_help|Vaše stávající pískoviště zde zůstanou, dokud je nepřesunete do záznamu klienta. Přesun zachová všechny zprávy.
+clients.counts|Pískoviště: {0} · Zprávy: {1}
+clients.report_count|Zprávy: {0}
+clients.edit|Upravit profil
+clients.new_table|+ Nové pískoviště
+clients.archive|Archivovat klienta
+clients.restore|Obnovit klienta
+clients.tables|Pískoviště
+clients.reports|Zprávy
+clients.view|Zobrazit
+clients.open|Otevřít
+clients.move|Přesunout
+clients.move_title|Přesunout ke klientovi
+clients.no_tables|Zatím žádná pískoviště. Vytvořte klientovi nové nebo přesuňte stávající z nepřiřazených pískovišť či z nabídky Moje pískoviště.
+clients.no_reports|Zatím žádné zprávy. Zde se zobrazí zprávy uložené k pískovištím tohoto klienta.
+clients.name|Jméno nebo přezdívka *
+clients.reference|Kód klienta
+clients.dob|Datum narození
+clients.choose_date|Vybrat datum…
+clients.no_date|Datum není vybrané · nepovinné
+clients.clear_date|Vymazat
+clients.done|Hotovo
+clients.select|Vybrat
+clients.choose_photo|Vybrat fotografii
+clients.remove_photo|Odebrat
+clients.photo_hint|Nepovinná profilová fotografie · náhled oříznutý na střed. Uloženo v tomto zařízení.
+clients.photo_error|Fotografii se nepodařilo otevřít. Zkontrolujte oprávnění nebo zkuste JPG/PNG menší než 20 MB.
+clients.phone|Telefon
+clients.email|E-mail
+clients.optional|Povinné je pouze jméno nebo přezdívka. Klient nemusí mít účet v aplikaci.
+clients.notes|Poznámky
+clients.save|Uložit klienta
+clients.invalid_name|Zadejte jméno nebo přezdívku (nejvýše 100 znaků).
+clients.rename_error|Pískoviště se nepodařilo přejmenovat. Zvolte název, který ještě není použitý.
+clients.invalid_dob|Zadejte platné datum narození ve formátu RRRR-MM-DD, nikoli v budoucnosti.
+clients.duplicate_reference|Tento kód klienta se již používá. Zvolte jiný nebo jej nechte prázdný.
+clients.storage_error|Místní záznamy se nepodařilo přečíst nebo uložit. Zkontrolujte úložiště zařízení a zkuste to znovu.
+settings.title|Nastavení
+settings.close|×
+settings.sand_color|Barva písku
+settings.box_outer|Vnější strana pískoviště
+settings.box_inner|Vnitřní strana pískoviště
+settings.floor|Podlaha
+settings.allow_objects_in_air|Povolit objekty ve vzduchu
+settings.restore|Obnovit výchozí nastavení
+settings.pick|Vybrat
+shortcuts.title|Klávesové zkratky
+shortcuts.hint|Kliknutím na zkratku ji změníte. Ukládá se v tomto zařízení. Klávesa Shift zjemní úpravy objektů.
+shortcuts.search|Hledat akce nebo klávesy…
+shortcuts.default|Výchozí
+shortcuts.custom|Vlastní
+shortcuts.reset|Obnovit
+shortcuts.reset_all|Obnovit vše
+shortcuts.reset_confirm|Obnovit všechny výchozí klávesové zkratky? Vaše vlastní nastavení se odstraní.
+shortcuts.press|Stiskněte kombinaci kláves a klikněte na Uložit. Escape zruší změnu. Je nutná fyzická klávesnice.
+shortcuts.fine|Shift je pro tuto akci vyhrazený pro jemné úpravy.
+shortcuts.save|Uložit
+shortcuts.saved|Zkratky jsou uložené v tomto zařízení.
+shortcuts.unassign|Zrušit přiřazení
+shortcuts.reserved|Tato klávesa je vyhrazená pro navigaci, ovládání kamery nebo systém. Zvolte jinou kombinaci.
+shortcuts.conflict|Již používá akce {0}. Nejprve změňte nebo zrušte její přiřazení.
+shortcuts.save_error|Zkratky se nepodařilo uložit. Zkuste to znovu.
+shortcuts.empty|Žádné odpovídající zkratky.
+shortcuts.action.Raise|Zvednout objekt
+shortcuts.action.Lower|Snížit objekt
+shortcuts.action.RotateLeft|Otočit doleva
+shortcuts.action.RotateRight|Otočit doprava
+shortcuts.action.Enlarge|Zvětšit objekt
+shortcuts.action.Shrink|Zmenšit objekt
+shortcuts.action.Duplicate|Duplikovat objekt
+shortcuts.action.Delete|Smazat objekt
+shortcuts.action.Copy|Kopírovat objekt
+shortcuts.action.Paste|Vložit objekt
+shortcuts.action.Undo|Zpět
+shortcuts.action.Redo|Znovu
+settings.language|Jazyk
+settings.theme|Vzhled
+settings.theme_light|Světlý
+settings.theme_dark|Tmavý
+board.client_label|Klient: {0}
+board.client_linked|Přiřazeno ke klientovi
+settings.description|Přizpůsobte si Sandtray svému způsobu práce.
+settings.subscription|Předplatné
+settings.view_plans|Zobrazit tarify ›
+settings.configure|Přizpůsobit ›
+settings.view|Zobrazit ›
+settings.sign_in|Přihlásit se
+settings.managed|Spravovaný účet
+settings.off|Vypnuto
+settings.on|Zapnuto
+settings.reset|Obnovit
+settings.custom_color|Vlastní barva…
+credits.title|Autoři a licence
+credits.subtitle|Děkujeme tvůrcům našich 3D objektů
+credits.body|Vestavěné 3D modely zahrnují díla Poly by Google ze služby Poly Pizza (poly.pizza).\nLicence Creative Commons Uveďte původ 3.0 Unported (CC BY 3.0).
+credits.changes|Úpravy: modely jsou importované do Unity a jejich měřítko je přizpůsobené aplikaci Sandtray; materiály a vykreslování se mohou lišit od originálů.
+credits.disclaimer|Google ani Poly Pizza nejsou sponzory a jejich podpora se nepředpokládá. Tyto údaje se nevztahují na objekty nahrané uživateli.
+credits.creator|Profil tvůrce
+credits.source|Poly Pizza
+credits.models|Autoři modelů
+credits.license|CC BY 3.0
+account.type_title|Typ účtu
+account.type_hint|Změňte způsob používání Sandtray. Pískoviště, záznamy klientů a zprávy zůstanou zachované. Tímto se nemění předplatné ani neověřuje odborná kvalifikace.
+account.normal|Běžný uživatel
+account.therapist|Terapeut
+account.current|Aktuální
+account.sign_in|Pro změnu typu účtu se přihlaste přes položku Účet výše.
+account.managed|Typ tohoto účtu spravuje administrátor.
+account.saving|Ukládání typu účtu…
+account.saved|Typ účtu uložen.
+account.failed|Uložení se nezdařilo. Zkontrolujte připojení a zkuste to znovu.
+colorpicker.title|Vybrat barvu
+colorpicker.done|Hotovo
+qr.title|Skenovat QR kód
+qr.instruction|Namiřte kameru na QR kód místnosti
+qr.cancel|Zrušit
+qr.requesting|Žádost o přístup ke kameře…
+qr.waiting|Čekání na kameru…
+qr.scanning|Skenování…
+qr.found|Nalezeno: {0}
+qr.tap_close|Klepnutím kamkoli zavřete
+hud.radius|Poloměr: {0:F1}
+hud.strength|Síla: {0:F1}
+hud.select|Vybrat
+hud.raise_sand|Zvýšit písek
+hud.dig_sand|Hloubit písek
+hud.smooth_sand|Vyhladit písek
+hud.flatten_sand|Zarovnat písek
+hud.place_object|Umístit objekt
+hud.move_object|Přesunout objekt
+hud.rotate_object|Otočit objekt
+hud.scale_object|Změnit velikost objektu
+hud.none|Žádné
+hud.saved|Sezení uloženo!
+hud.loaded|Sezení načteno!
+hud.screenshot|Snímek obrazovky uložen!
+hud.analysis|Analýza vyžádána…
+agora.mic_on|Zapnout mikrofon
+agora.mic_off|Ztlumit
+agora.cam_on|Zapnout kameru
+agora.cam_off|Vypnout kameru
+agora.show|Zobrazit
+agora.hide|Skrýt
+agora.leave|Ukončit hovor
+agora.connecting|Připojování zvuku…
+agora.comm_title|Komunikace
+agora.you|Vy
+cat.Animals|Zvířata
+cat.People|Lidé
+cat.Buildings|Budovy
+cat.Nature|Příroda
+cat.Vehicles|Vozidla
+cat.Abstract|Abstraktní
+text:Object library|Knihovna objektů
+text:Your collections, ready for every session.|Vaše kolekce připravené pro každé sezení.
+text:COLLECTION|KOLEKCE
+text:SHARING|SDÍLENÍ
+text:+ New collection|+ Nová kolekce
+text:Search objects by name or category|Hledat objekty podle názvu nebo kategorie
+text:Refresh|Obnovit
+text:+ Upload object|+ Nahrát objekt
+text:Private|Soukromé
+text:Clinic|Klinika
+text:Public|Veřejné
+text:Marketplace|Tržiště
+text:Loading collections…|Načítání kolekcí…
+text:Sign in to view your collections.|Pro zobrazení kolekcí se přihlaste.
+text:No collections yet|Zatím žádné kolekce
+text:Create a collection to get started.|Začněte vytvořením kolekce.
+text:Sharing updated.|Sdílení aktualizováno.
+text:Loading objects…|Načítání objektů…
+text:Up to date|Aktuální
+text:{0} objects|Počet objektů: {0}
+text:No matching objects|Žádné odpovídající objekty
+text:Make room for your imagination|Dejte prostor své představivosti
+text:Try a different name or category.|Zkuste jiný název nebo kategorii.
+text:Upload a model and a preview image to build your collection.|Nahrajte model a obrázek náhledu a vytvořte svou kolekci.
+text:Preview|Náhled
+text:Ready to use in your sandtray|Připraveno k použití ve vašem pískovišti
+text:No preview|Bez náhledu
+text:New collection|Nová kolekce
+text:Give your collection a name|Pojmenujte svou kolekci
+text:Create|Vytvořit
+text:Creating collection…|Vytváření kolekce…
+text:All|Vše
+text:General|Obecné
+text:Search by name or tag|Hledat podle názvu nebo štítku
+sub.feature_calls|Videohovory a hlasové hovory během sezení

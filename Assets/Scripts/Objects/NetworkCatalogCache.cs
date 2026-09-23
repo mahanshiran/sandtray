@@ -19,6 +19,41 @@ namespace Sandplay.Objects
         private class CacheData
         {
             public List<NetworkCatalogItem> items = new List<NetworkCatalogItem>();
+            // Catalogs disabled by the user remain cached for existing boards but
+            // are excluded from the offline placement fallback.
+            public List<string> disabledCatalogs = new List<string>();
+            public List<string> disabledObjects = new List<string>();
+        }
+
+        private static CacheData ReadData()
+        {
+            if (!File.Exists(CachePath)) return new CacheData();
+            try
+            {
+                var data = JsonUtility.FromJson<CacheData>(File.ReadAllText(CachePath)) ?? new CacheData();
+                if (data.items == null) data.items = new List<NetworkCatalogItem>();
+                if (data.disabledCatalogs == null) data.disabledCatalogs = new List<string>();
+                if (data.disabledObjects == null) data.disabledObjects = new List<string>();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[CatalogCache] Read failed: {ex.Message}");
+                return new CacheData();
+            }
+        }
+
+        private static void WriteData(CacheData data)
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(CachePath));
+                File.WriteAllText(CachePath, JsonUtility.ToJson(data, prettyPrint: true));
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[CatalogCache] Save failed: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -33,7 +68,8 @@ namespace Sandplay.Objects
             try
             {
                 string json = File.ReadAllText(CachePath);
-                var data = JsonUtility.FromJson<CacheData>(json);
+                var data = JsonUtility.FromJson<CacheData>(json) ?? new CacheData();
+                if (data.items == null) data.items = new List<NetworkCatalogItem>();
                 Debug.Log($"[CatalogCache] Loaded {data.items.Count} cached items.");
                 return data.items.ToArray();
             }
@@ -54,16 +90,7 @@ namespace Sandplay.Objects
                 return;
 
             // Load current cache
-            var data = new CacheData();
-            if (File.Exists(CachePath))
-            {
-                try
-                {
-                    string json = File.ReadAllText(CachePath);
-                    data = JsonUtility.FromJson<CacheData>(json) ?? new CacheData();
-                }
-                catch { /* start fresh if corrupted */ }
-            }
+            var data = ReadData();
 
             // Remove old entry if exists (to update metadata)
             data.items.RemoveAll(x => x.id == item.id);
@@ -72,6 +99,7 @@ namespace Sandplay.Objects
             var itemCopy = new NetworkCatalogItem
             {
                 id = item.id,
+                catalog = item.catalog,
                 display_name = item.display_name,
                 category = item.category,
                 model_url = item.model_url,
@@ -82,18 +110,42 @@ namespace Sandplay.Objects
             };
             data.items.Add(itemCopy);
 
-            // Write back to disk
-            try
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(CachePath));
-                string json = JsonUtility.ToJson(data, prettyPrint: true);
-                File.WriteAllText(CachePath, json);
-                Debug.Log($"[CatalogCache] Saved {data.items.Count} items (added '{item.display_name}').");
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning($"[CatalogCache] Save failed: {ex.Message}");
-            }
+            // Write back to disk. Disabled state is intentionally preserved.
+            WriteData(data);
+            Debug.Log($"[CatalogCache] Saved {data.items.Count} items (added '{item.display_name}').");
+        }
+
+        /// <summary>
+        /// Persist catalog placement visibility without deleting its downloaded
+        /// objects. Existing boards still resolve those objects from this cache.
+        /// </summary>
+        public static void SetCatalogEnabled(string catalogId, bool enabled)
+        {
+            if (string.IsNullOrEmpty(catalogId)) return;
+            var data = ReadData();
+            data.disabledCatalogs.RemoveAll(id => id == catalogId);
+            if (!enabled) data.disabledCatalogs.Add(catalogId);
+            WriteData(data);
+        }
+
+        /// <summary>Persist object placement visibility without deleting its asset.</summary>
+        public static void SetObjectEnabled(string objectId, bool enabled)
+        {
+            if (string.IsNullOrEmpty(objectId)) return;
+            var data = ReadData();
+            data.disabledObjects.RemoveAll(id => id == objectId);
+            if (!enabled) data.disabledObjects.Add(objectId);
+            WriteData(data);
+        }
+
+        /// <summary>Return cached items that may be shown for new placement offline.</summary>
+        public static NetworkCatalogItem[] LoadCachedForPlacement()
+        {
+            var data = ReadData();
+            var disabled = new HashSet<string>(data.disabledCatalogs);
+            var disabledObjects = new HashSet<string>(data.disabledObjects);
+            return data.items.FindAll(item => item != null &&
+                !disabled.Contains(item.catalog) && !disabledObjects.Contains(item.id)).ToArray();
         }
 
         /// <summary>
@@ -106,12 +158,11 @@ namespace Sandplay.Objects
 
             try
             {
-                string json = File.ReadAllText(CachePath);
-                var data = JsonUtility.FromJson<CacheData>(json);
+                var data = ReadData();
                 int removed = data.items.RemoveAll(x => x.id == itemId);
                 if (removed > 0)
                 {
-                    File.WriteAllText(CachePath, JsonUtility.ToJson(data, prettyPrint: true));
+                    WriteData(data);
                     Debug.Log($"[CatalogCache] Removed item '{itemId}'.");
                 }
             }

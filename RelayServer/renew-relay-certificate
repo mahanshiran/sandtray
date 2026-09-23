@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Certbot deploy hook: refresh the relay PFX only for its hostname.
+if [[ "${RENEWED_LINEAGE:-}" != /etc/letsencrypt/live/api.sandtraypro.com ]]; then exit 0; fi
+umask 077
+openssl pkcs12 -export -out /etc/sandtray/secrets/relay.pfx.next \
+  -inkey "$RENEWED_LINEAGE/privkey.pem" -in "$RENEWED_LINEAGE/fullchain.pem" -passout pass:
+mv /etc/sandtray/secrets/relay.pfx.next /etc/sandtray/secrets/relay.pfx
+systemctl restart sandtray-relay

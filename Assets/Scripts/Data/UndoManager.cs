@@ -54,6 +54,7 @@ namespace Sandplay.Data
 
         public void UndoLast()
         {
+            if (GameManager.Instance != null && GameManager.Instance.IsSpectator) return;
             if (_undoStack.Count == 0) return;
             var cmd = _undoStack.Pop();
             cmd.Undo();
@@ -65,6 +66,7 @@ namespace Sandplay.Data
 
         public void RedoLast()
         {
+            if (GameManager.Instance != null && GameManager.Instance.IsSpectator) return;
             if (_redoStack.Count == 0) return;
             var cmd = _redoStack.Pop();
             cmd.Execute();
@@ -82,16 +84,15 @@ namespace Sandplay.Data
 
         private void Update()
         {
-            // Ctrl+Z / Cmd+Z for undo
-            bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) ||
-                        Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand);
-            if (ctrl && Input.GetKeyDown(KeyCode.Z))
-            {
-                if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-                    RedoLast();
-                else
-                    UndoLast();
-            }
+            if (Core.InputHelper.IsInputBlocked || Core.InputHelper.IsTextInputFocused) return;
+            if (Core.GameManager.Instance != null && Core.GameManager.Instance.IsSpectator) return;
+            if (Sandplay.Camera.WalkModeController.Instance != null && Sandplay.Camera.WalkModeController.Instance.IsActive) return;
+            var placer = FindAnyObjectByType<Sandplay.Objects.ObjectPlacer>();
+            if (placer != null && placer.IsSelectionGestureActive) return;
+            var panel = FindAnyObjectByType<Sandplay.UI.ObjectActionPanel>();
+            if (panel != null && panel.IsActionActive) return;
+            if (KeyboardShortcuts.Pressed(ShortcutAction.Undo)) UndoLast();
+            else if (KeyboardShortcuts.Pressed(ShortcutAction.Redo)) RedoLast();
         }
 
         private void OnDestroy()
@@ -173,15 +174,17 @@ namespace Sandplay.Data
     public class RemoveObjectCommand : ICommand
     {
         private readonly Objects.ObjectPlacer _placer;
-        private readonly Objects.PlacedObject _placed;
+        private Objects.PlacedObject _placed;
         private Objects.PlacedObjectData _savedData;
         private Objects.SandplayObject _objectData;
+        private Objects.NetworkCatalogItem _networkItem;
 
         public RemoveObjectCommand(Objects.ObjectPlacer placer, Objects.PlacedObject placed)
         {
             _placer = placer;
             _placed = placed;
             _objectData = placed.ObjectData;
+            _networkItem = placed.NetworkItem;
             _savedData = placed.Serialize();
         }
 
@@ -192,7 +195,10 @@ namespace Sandplay.Data
 
         public void Undo()
         {
-            _placer.PlaceObject(_objectData, _savedData.Position, Quaternion.Euler(_savedData.Rotation), _savedData.Scale);
+            _placed = _objectData != null
+                ? _placer.PlaceObject(_objectData, _savedData.Position, Quaternion.Euler(_savedData.Rotation), _savedData.Scale, skipOffset: true)
+                : _placer.PlaceNetworkObject(_networkItem, _savedData.Position, Quaternion.Euler(_savedData.Rotation), _savedData.Scale, skipOffset: true);
+            if (_placed != null) _placed.PlacementTime = _savedData.PlacementTime;
         }
     }
 

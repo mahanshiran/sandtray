@@ -158,17 +158,20 @@ namespace Sandplay.UI
             statusRT.sizeDelta = new Vector2(Screen.width * 0.8f, 30);
             statusRT.anchoredPosition = new Vector2(0, -vfSide / 2f - 40);
 
-            // Cancel button at bottom
+            // Close control inside the top-right safe area
             var cancelGo = new GameObject("CancelBtn");
-            cancelGo.transform.SetParent(transform, false);
+            var controls = new GameObject("SafeControls", typeof(RectTransform));
+            controls.transform.SetParent(transform, false);
+            controls.AddComponent<SafeAreaFitter>();
+            cancelGo.transform.SetParent(controls.transform, false);
             var cancelImg = cancelGo.AddComponent<Image>();
             cancelImg.color = new Color(1f, 1f, 1f, 0.15f);
             var cancelRT = cancelGo.GetComponent<RectTransform>();
-            cancelRT.anchorMin = new Vector2(0.5f, 0);
-            cancelRT.anchorMax = new Vector2(0.5f, 0);
-            cancelRT.pivot = new Vector2(0.5f, 0);
-            cancelRT.sizeDelta = new Vector2(200, 48);
-            cancelRT.anchoredPosition = new Vector2(0, 50);
+            cancelRT.anchorMin = Vector2.one;
+            cancelRT.anchorMax = Vector2.one;
+            cancelRT.pivot = Vector2.one;
+            cancelRT.sizeDelta = new Vector2(48, 48);
+            cancelRT.anchoredPosition = new Vector2(-16, -16);
             var cancelBtn = cancelGo.AddComponent<Button>();
             cancelBtn.targetGraphic = cancelImg;
             cancelBtn.onClick.AddListener(Close);
@@ -176,8 +179,8 @@ namespace Sandplay.UI
             var cancelLblGo = new GameObject("Label");
             cancelLblGo.transform.SetParent(cancelGo.transform, false);
             var cancelLbl = cancelLblGo.AddComponent<Text>();
-            cancelLbl.text = Localization.Get("dialog.cancel");
-            cancelLbl.fontSize = 18;
+            cancelLbl.text = "×";
+            cancelLbl.fontSize = 32;
             cancelLbl.color = Color.white;
             cancelLbl.font = font;
             cancelLbl.alignment = TextAnchor.MiddleCenter;
@@ -245,7 +248,7 @@ namespace Sandplay.UI
 
         private void StartCamera()
         {
-#if UNITY_IOS || UNITY_ANDROID
+#if UNITY_IOS || UNITY_ANDROID || UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX || UNITY_WEBGL
             if (!Application.HasUserAuthorization(UserAuthorization.WebCam))
             {
                 _statusText.text = Localization.Get("qr.requesting");

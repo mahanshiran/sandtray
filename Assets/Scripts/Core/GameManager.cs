@@ -19,6 +19,9 @@ namespace Sandplay.Core
             get => _networkRole;
             set
             {
+                // A previous editor's undo commands must never be replayed
+                // against a board another participant has since changed.
+                if (_networkRole != value) Sandplay.Data.UndoManager.Instance?.Clear();
                 _networkRole = value;
                 EventBus.Publish(new NetworkRoleAssignedEvent { Role = value });
             }

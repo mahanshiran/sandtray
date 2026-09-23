@@ -1,0 +1,521 @@
+# key|Español|Português (Brasil)|Français|Deutsch|日本語
+save.local|Guardado en este dispositivo · autoguardado activo|Salvo neste dispositivo · salvamento automático ativo|Enregistré sur cet appareil · enregistrement automatique actif|Auf diesem Gerät gespeichert · automatisches Speichern aktiv|この端末に保存済み · 自動保存オン
+quota.pending|Comprobación de cuota pendiente|Verificação de cota pendente|Vérification du quota en attente|Kontingentprüfung ausstehend|利用枠の確認待ち
+quota.confirmed|Cuota confirmada|Cota confirmada|Quota confirmé|Kontingent bestätigt|利用枠確認済み
+quota.full|Capacidad agotada · puedes seguir trabajando localmente|Capacidade esgotada · continue trabalhando localmente|Capacité atteinte · travail local toujours possible|Kapazität erreicht · lokale Arbeit weiterhin möglich|上限に達しました · 端末での作業は続行できます
+quota.signin|Inicia sesión para comprobar la cuota · el trabajo local puede continuar|Entre para verificar a cota · o trabalho local pode continuar|Connectez-vous pour vérifier le quota · travail local possible|Zur Kontingentprüfung anmelden · lokale Arbeit weiterhin möglich|利用枠の確認にはログインが必要です · 端末での作業は続行できます
+quota.offline|Cuota no disponible · se reintentará|Cota indisponível · nova tentativa em breve|Quota indisponible · nouvelle tentative prévue|Kontingentprüfung nicht verfügbar · erneuter Versuch folgt|利用枠を確認できません · 再試行します
+quota.recovery|La cuota requiere atención · archivos locales conservados|A cota precisa de atenção · arquivos locais preservados|Quota à vérifier · fichiers locaux conservés|Kontingent muss geprüft werden · lokale Dateien erhalten|利用枠の確認が必要です · 端末のファイルは保持されています
+quota.none|No se requiere registro de cuota local|Não é necessário registrar cota local|Aucun enregistrement de quota local requis|Keine lokale Kontingentregistrierung erforderlich|端末の利用枠登録は不要です
+quota.legacy|Tablero local existente|Tabuleiro local existente|Plateau local existant|Vorhandene lokale Szene|既存のローカルボード
+quota.retry|Toca para volver a comprobar la cuota|Toque para verificar a cota novamente|Touchez pour revérifier le quota|Tippen, um das Kontingent erneut zu prüfen|タップして利用枠を再確認
+backup.none|Sin copia en la nube|Sem backup na nuvem|Aucune sauvegarde cloud|Keine Cloud-Sicherung|クラウド未バックアップ
+backup.unknown|Estado de copia en la nube desconocido|Estado do backup na nuvem desconhecido|État de sauvegarde cloud inconnu|Status der Cloud-Sicherung unbekannt|クラウドバックアップの状態不明
+backup.uploading|Subiendo copia…|Enviando backup…|Envoi de la sauvegarde…|Sicherung wird hochgeladen…|バックアップをアップロード中…
+backup.saved|Versión guardada respaldada|Versão salva com backup|Version enregistrée sauvegardée|Gespeicherte Version gesichert|保存済みバージョンをバックアップ済み
+backup.changed|Cambios guardados sin copia en la nube|Alterações salvas sem backup|Modifications enregistrées non sauvegardées dans le cloud|Gespeicherte Änderungen noch nicht gesichert|保存済みの変更は未バックアップ
+backup.failed|Copia incompleta · archivo local conservado|Backup incompleto · arquivo local preservado|Sauvegarde incomplète · fichier local conservé|Sicherung unvollständig · lokale Datei erhalten|バックアップ未完了 · 端末のファイルは保持されています
+net.connection_error_title|Error de conexión de sesión|Falha na conexão da sessão|Échec de connexion à la session|Sitzungsverbindung fehlgeschlagen|セッションに接続できません
+net.dismiss|Cerrar|Fechar|Fermer|Schließen|閉じる
+reports.review_title|Revisar antes de exportar|Revisar antes de exportar|Vérifier avant d’exporter|Vor dem Export prüfen|エクスポート前の確認
+reports.review_notice|Revisa la precisión y los datos sensibles. El texto de IA no es un diagnóstico. Continuar envía el informe al servidor para exportar el PDF.|Revise a precisão e os dados sensíveis. O texto de IA não é um diagnóstico. Continuar envia o relatório ao servidor para exportar o PDF.|Vérifiez l’exactitude et les données sensibles. Le texte IA n’est pas un diagnostic. Continuer envoie le rapport au serveur pour exporter le PDF.|Prüfen Sie Richtigkeit und sensible Daten. KI-Text ist keine Diagnose. Beim Fortfahren wird der Bericht für den PDF-Export an den Server gesendet.|正確性と機密情報を確認してください。AIの文章は診断ではありません。続行するとPDF出力のためレポートがサーバーに送信されます。
+reports.review_confirm|Revisado · Exportar PDF|Revisado · Exportar PDF|Vérifié · Exporter le PDF|Geprüft · PDF exportieren|確認済み・PDF出力
+clients.history_no_matches|No hay tableros coincidentes. Borra la búsqueda para ver todos los registros.|Nenhum tabuleiro encontrado. Limpe a busca para ver todos os registros.|Aucun plateau correspondant. Effacez la recherche pour voir tous les dossiers.|Keine passenden Tableaus. Suche leeren, um alle Einträge zu sehen.|一致するボードがありません。検索を消去すると全記録を表示できます。
+clients.history|Historial de asignación|Histórico de atribuição|Historique d’attribution|Zuordnungsverlauf|割り当て履歴
+clients.history_unassigned|Sin asignar|Sem atribuição|Non attribué|Nicht zugeordnet|未割り当て
+clients.history_missing|Cliente no disponible ({0})|Cliente ausente ({0})|Client introuvable ({0})|Fehlender Klient ({0})|不明なクライアント（{0}）
+clients.history_local|Historial local, no un registro de auditoría verificado. Los nombres corresponden a las fichas actuales.|Histórico local, não um registro de auditoria verificado. Os nomes refletem os cadastros atuais.|Historique local, pas un journal d’audit vérifié. Les noms proviennent des fiches actuelles.|Lokaler Verlauf, kein verifiziertes Audit-Protokoll. Namen stammen aus aktuellen Datensätzen.|端末内の履歴です。検証済み監査ログではありません。名前は現在の記録に基づきます。
+clients.history_change|De: {0}\nA: {1}|De: {0}\nPara: {1}|De : {0}\nVers : {1}|Von: {0}\nZu: {1}|変更前：{0}\n変更後：{1}
+clients.history_unknown_date|Fecha desconocida|Data desconhecida|Date inconnue|Unbekanntes Datum|日時不明
+clients.history_empty|No hay cambios de asignación registrados.|Nenhuma alteração de atribuição registrada.|Aucun changement d’attribution enregistré.|Keine Zuordnungsänderungen aufgezeichnet.|割り当て変更の記録はありません。
+clients.search_tables|Buscar tableros por nombre…|Buscar tabuleiros pelo nome…|Rechercher des plateaux par nom…|Tableaus nach Namen suchen…|名前でボードを検索…
+clients.recovered|Registros de clientes restaurados desde una copia local. Revise los cambios recientes; podrían faltar.|Registros de clientes restaurados de um backup local. Alterações recentes podem estar ausentes; confira.|Dossiers clients restaurés depuis une sauvegarde locale. Vérifiez les modifications récentes : elles peuvent manquer.|Klientendaten aus lokaler Sicherung wiederhergestellt. Neueste Änderungen können fehlen; bitte prüfen.|ローカルバックアップからクライアント記録を復元しました。最近の変更がない可能性があるため確認してください。
+clients.search_reports|Buscar nombres de tableros o texto de informes…|Buscar nomes de tabuleiros ou texto de relatórios…|Rechercher dans les noms des plateaux ou les rapports…|Boardnamen oder Berichtstext durchsuchen…|ボード名やレポート本文を検索…
+clients.confirm_move|Confirmar traslado a {0}|Confirmar mudança para {0}|Confirmer le déplacement vers {0}|Verschieben zu {0} bestätigen|{0} への移動を確定
+session.paused|Edición pausada|Edição pausada|Modification en pause|Bearbeitung pausiert|編集を一時停止中
+session.paused_name|En pausa: {0}|Em pausa: {0}|En pause : {0}|Pausiert: {0}|一時停止：{0}
+session.waiting|Esperando editor|Aguardando editor|En attente d’un éditeur|Warten auf Bearbeiter|編集者を待っています
+session.editing_name|Editando: {0}|Editando: {0}|Modification : {0}|Bearbeitet: {0}|編集中：{0}
+session.you_edit|Puedes editar|Você edita|Vous modifiez|Sie bearbeiten|編集できます
+session.observing|Observando|Observando|Observation|Beobachten|見守り中
+session.manage|Gestionar|Gerenciar|Gérer|Verwalten|管理
+session.resume|Reanudar edición|Retomar edição|Reprendre|Bearbeitung fortsetzen|編集を再開
+session.pause|Pausar edición|Pausar edição|Mettre en pause|Bearbeitung pausieren|編集を一時停止
+session.take_control|Quiero editar|Quero editar|Me laisser modifier|Selbst bearbeiten|自分で編集
+session.editing|Editando|Editando|Modification|Bearbeitung|編集中
+session.approve|Permitir editar|Permitir edição|Autoriser à modifier|Bearbeitung erlauben|編集を許可
+session.give_control|Dar control|Dar controle|Donner le contrôle|Kontrolle übergeben|操作権を渡す
+session.decline|Rechazar edición|Recusar edição|Refuser la modification|Bearbeitung ablehnen|編集を拒否
+session.remove|Expulsar|Remover|Retirer|Entfernen|退出させる
+session.confirm_remove|Confirmar expulsión|Confirmar remoção|Confirmer le retrait|Entfernen bestätigen|退出を確定
+session.waiting_people|Esperando participantes…|Aguardando participantes…|En attente de participants…|Warten auf Teilnehmer…|参加者を待っています…
+session.loading_title|Cargando sesión|Carregando sessão|Chargement de la session|Sitzung wird geladen|セッションを読み込み中
+session.loading_receiving|Recibiendo sesión… 0%|Recebendo sessão… 0%|Réception de la session… 0 %|Sitzung wird empfangen… 0 %|セッションを受信中… 0%
+session.loading_objects|Cargando objetos… {0}/{1} ({2}%)|Carregando objetos… {0}/{1} ({2}%)|Chargement des objets… {0}/{1} ({2} %)|Objekte werden geladen… {0}/{1} ({2} %)|オブジェクトを読み込み中… {0}/{1}（{2}%）
+session.loading_success|Sesión lista · 100%|Sessão pronta · 100%|Session prête · 100 %|Sitzung bereit · 100 %|セッションの準備完了 · 100%
+session.loading_failed_title|No se pudo cargar la sesión|Não foi possível carregar a sessão|Impossible de charger la session|Sitzung konnte nicht geladen werden|セッションを読み込めません
+session.loading_failed|No se pudieron cargar algunos objetos de la sesión.|Não foi possível carregar alguns objetos da sessão.|Certains objets de la session n’ont pas pu être chargés.|Einige Sitzungsobjekte konnten nicht geladen werden.|一部のセッションオブジェクトを読み込めませんでした。
+session.loading_disconnected|La conexión terminó antes de finalizar la carga.|A conexão terminou antes do carregamento completo.|La connexion a pris fin avant la fin du chargement.|Die Verbindung wurde vor Abschluss des Ladens beendet.|読み込み完了前に接続が終了しました。
+session.loading_return|Volver al inicio|Voltar ao início|Retour à l’accueil|Zur Startseite|ホームに戻る
+session.removed|El anfitrión te expulsó de la sesión. Toca para cerrar.|O anfitrião removeu você da sessão. Toque para fechar.|L’hôte vous a retiré de la session. Touchez pour fermer.|Der Gastgeber hat Sie aus der Sitzung entfernt. Zum Schließen antippen.|ホストによりセッションから退出しました。タップで閉じます。
+social.google|Iniciar sesión con Google|Entrar com Google|Se connecter avec Google|Mit Google anmelden|Google でログイン
+social.apple|Iniciar sesión con Apple|Entrar com Apple|Se connecter avec Apple|Mit Apple anmelden|Apple でログイン
+social.open|Abrir inicio de sesión en el navegador|Abrir login no navegador|Ouvrir la connexion dans le navigateur|Anmeldung im Browser öffnen|ブラウザでログインを開く
+social.preparing|Preparando inicio de sesión…|Preparando login…|Préparation de la connexion…|Anmeldung wird vorbereitet…|ログインを準備中…
+social.waiting|Abre el navegador abajo, inicia sesión y vuelve aquí.|Abra o navegador abaixo, entre e volte aqui.|Ouvrez le navigateur ci-dessous, connectez-vous puis revenez ici.|Öffnen Sie unten den Browser, melden Sie sich an und kehren Sie zurück.|下のボタンでブラウザを開き、ログイン後に戻ってください。
+social.unavailable|El inicio de sesión social no está configurado o no está disponible. Puedes usar el correo.|O login social não está configurado ou está indisponível. Use seu e-mail.|La connexion sociale n’est pas configurée ou est indisponible. Utilisez votre e-mail.|Social-Login ist nicht eingerichtet oder nicht verfügbar. Die E-Mail-Anmeldung bleibt verfügbar.|ソーシャルログインは未設定か利用できません。メールでログインできます。
+social.existing|Este correo ya tiene una cuenta. Usa el método de acceso existente; la vinculación automática no está habilitada.|Este e-mail já tem uma conta. Use o método atual; a vinculação automática não está habilitada.|Ce courriel a déjà un compte. Utilisez la méthode existante ; l’association automatique n’est pas activée.|Für diese E-Mail besteht bereits ein Konto. Verwenden Sie die bisherige Anmeldung; automatische Verknüpfung ist nicht aktiviert.|このメールのアカウントは既にあります。以前の方法でログインしてください。自動連携は無効です。
+social.expired|El inicio de sesión caducó. Inténtalo de nuevo.|O login expirou. Tente novamente.|La connexion a expiré. Réessayez.|Anmeldung abgelaufen. Bitte erneut versuchen.|ログインの有効期限が切れました。再試行してください。
+social.cancelled|Inicio de sesión cancelado. Puedes reintentarlo.|Login cancelado. Tente novamente.|Connexion annulée. Vous pouvez réessayer.|Anmeldung abgebrochen. Sie können es erneut versuchen.|ログインをキャンセルしました。再試行できます。
+social.failed|No se pudo iniciar sesión. Inténtalo de nuevo.|Não foi possível entrar. Tente novamente.|Connexion impossible. Réessayez.|Anmeldung fehlgeschlagen. Bitte erneut versuchen.|ログインできませんでした。再試行してください。
+save.title|Guardado del tablero|Salvamento do tabuleiro|Enregistrement du plateau|Tableau speichern|ボードの保存
+save.automatic|Guardado automático · cada 30 segundos|Salvamento automático · a cada 30 segundos|Enregistrement automatique · toutes les 30 secondes|Automatisches Speichern · alle 30 Sekunden|自動保存オン · 30秒ごと
+save.host_managed|El anfitrión gestiona el guardado · sin copia local|O anfitrião gerencia o salvamento · sem cópia local|Enregistrement géré par l’hôte · aucune copie locale|Speichern wird vom Gastgeber verwaltet · keine lokale Kopie|保存はホストが管理 · ローカルコピーなし
+save.inactive|Guardado automático inactivo|Salvamento automático inativo|Enregistrement automatique inactif|Automatisches Speichern ist nicht aktiv|自動保存は無効です
+save.saved|Cambios guardados en este dispositivo|Alterações salvas neste dispositivo|Modifications enregistrées sur cet appareil|Änderungen auf diesem Gerät gespeichert|変更をこのデバイスに保存しました
+save.recovered|Se recuperó la copia guardada anterior|A cópia salva anterior foi recuperada|La copie précédente a été récupérée|Die vorherige gespeicherte Kopie wurde wiederhergestellt|前回の保存データを復元しました
+save.failed|No se pudo guardar. Mantén el tablero abierto, comprueba el espacio disponible y vuelve a intentarlo.|Não foi possível salvar. Mantenha o tabuleiro aberto, verifique o espaço disponível e tente novamente.|Impossible d’enregistrer. Gardez le plateau ouvert, vérifiez l’espace disponible et réessayez.|Speichern fehlgeschlagen. Lassen Sie das Tableau geöffnet, prüfen Sie den freien Speicherplatz und versuchen Sie es erneut.|保存できませんでした。ボードを開いたまま、空き容量を確認して再試行してください。
+save.load_failed|No se pudo abrir este tablero. Los archivos guardados se han conservado.|Não foi possível abrir este tabuleiro. Os arquivos salvos foram preservados.|Impossible d’ouvrir ce plateau. Les fichiers enregistrés ont été conservés.|Dieses Tableau konnte nicht geöffnet werden. Die gespeicherten Dateien wurden beibehalten.|このボードを開けませんでした。保存ファイルは保持されています。
+toolbar.sand|Arena|Areia|Sable|Sand|砂
+tool.raise|Elevar|Elevar|Élever|Anheben|盛り上げる
+tool.dig|Excavar|Escavar|Creuser|Graben|掘る
+tool.smooth|Suavizar|Suavizar|Lisser|Glätten|ならす
+tool.flatten|Aplanar|Nivelar|Aplanir|Einebnen|平らにする
+tool.walk|Caminar|Caminhar|Marcher|Begehen|歩く
+tool.settings|Ajustes|Configurações|Paramètres|Einstellungen|設定
+tool.ai_analysis|Reflexión\ncon IA|Reflexão\ncom IA|Réflexion\navec IA|KI-\nReflexion|AIによる\n振り返り
+tool.manual_analysis|Informe\nmanual|Relatório\nmanual|Rapport\nmanuel|Manueller\nBericht|手動\nレポート
+tool.exit|Salir|Sair|Quitter|Verlassen|終了
+tool.sand_material|Textura|Textura|Texture|Textur|テクスチャ
+mat.sand|Arena|Areia|Sable|Sand|砂
+mat.rock|Roca|Rocha|Roche|Fels|岩
+mat.grass|Césped|Grama|Herbe|Gras|草
+mat.snow|Nieve|Neve|Neige|Schnee|雪
+mat.mud|Barro|Lama|Boue|Schlamm|泥
+manual.title|Informe manual|Relatório manual|Rapport manuel|Manueller Bericht|手動レポート
+manual.placeholder|Escribe tus observaciones, notas o un resumen de la sesión…|Escreva suas observações, anotações ou um resumo da sessão…|Saisissez vos observations, notes ou un résumé de la séance…|Beobachtungen, Notizen oder eine Zusammenfassung der Sitzung eingeben…|観察したこと、メモ、セッションの要約を入力…
+manual.save|Guardar informe|Salvar relatório|Enregistrer le rapport|Bericht speichern|レポートを保存
+manual.saved|¡Informe guardado!|Relatório salvo!|Rapport enregistré !|Bericht gespeichert!|レポートを保存しました
+manual.empty|Escribe algo antes de guardar.|Escreva algo antes de salvar.|Veuillez écrire quelque chose avant d’enregistrer.|Bitte vor dem Speichern etwas eingeben.|保存する前に内容を入力してください。
+sub.vip_feature|Desbloquear esta función|Desbloquear este recurso|Débloquer cette fonctionnalité|Diese Funktion freischalten|この機能を利用する
+sub.upgrade|Cambiar a PRO|Assinar o PRO|Passer à PRO|Auf PRO upgraden|PROにアップグレード
+sub.paywall_subtitle|Organiza, conecta, crea y reflexiona en compañía.|Organize, conecte, crie e reflita em conjunto.|Animez, échangez, créez et réfléchissez ensemble.|Gemeinsam hosten, austauschen, gestalten und reflektieren.|主催し、つながり、一緒に創作して振り返る。
+sub.paywall_free_note|Gratis: 3 sesiones organizadas en total; 3 reflexiones con IA y 3 exportaciones PDF al mes.|Grátis: 3 sessões organizadas no total; 3 reflexões com IA e 3 exportações PDF por mês.|Gratuit : 3 séances hébergées au total ; 3 réflexions IA et 3 exports PDF par mois.|Kostenlos: insgesamt 3 gehostete Sitzungen; monatlich 3 KI-Reflexionen und 3 PDF-Exporte.|無料：主催は合計3回、AI振り返りとPDF出力は毎月各3回。
+sub.feature_ai|Reflexiones con IA ilimitadas|Reflexões com IA ilimitadas|Réflexions avec IA illimitées|Unbegrenzte KI-Reflexionen|AIによる振り返りが無制限
+sub.feature_host|Sesiones como anfitrión ilimitadas|Sessões como anfitrião ilimitadas|Hébergement de séances illimité|Unbegrenzt Sitzungen hosten|セッションの主催が無制限
+sub.feature_reports|Informes PDF ilimitados|Relatórios PDF ilimitados|Rapports PDF illimités|Unbegrenzte PDF-Berichte|PDFレポートが無制限
+sub.feature_replays|Historial completo de repeticiones|Histórico completo de reproduções|Historique complet des relectures|Vollständiger Wiedergabeverlauf|すべてのリプレイ履歴
+sub.feature_support|Soporte prioritario|Suporte prioritário|Assistance prioritaire|Bevorzugter Support|優先サポート
+sub.loading|Cargando planes…|Carregando planos…|Chargement des offres…|Tarife werden geladen…|プランを読み込み中…
+sub.subscribe|Suscribirse|Assinar|S’abonner|Abonnieren|登録する
+sub.restore|Restaurar compras|Restaurar compras|Restaurer les achats|Käufe wiederherstellen|購入を復元
+sub.restoring|Restaurando…|Restaurando…|Restauration…|Wird wiederhergestellt…|復元中…
+sub.restored_yes|¡Suscripción restaurada!|Assinatura restaurada!|Abonnement restauré !|Abonnement wiederhergestellt!|登録を復元しました
+sub.restored_no|No se encontró ninguna suscripción activa.|Nenhuma assinatura ativa encontrada.|Aucun abonnement actif trouvé.|Kein aktives Abonnement gefunden.|有効な登録が見つかりません。
+sub.purchasing|Procesando…|Processando…|Traitement…|Wird verarbeitet…|処理中…
+sub.purchase_ok|¡Bienvenido a Sandtray Pro!|Boas-vindas ao Sandtray Pro!|Bienvenue dans Sandtray Pro !|Willkommen bei Sandtray Pro!|Sandtray Proへようこそ！
+sub.purchase_err|Error en la compra: {0}|Falha na compra: {0}|Échec de l’achat : {0}|Kauf fehlgeschlagen: {0}|購入できませんでした：{0}
+sub.terms|Las suscripciones se renuevan automáticamente salvo cancelación 24 h antes de la renovación.|As assinaturas são renovadas automaticamente, a menos que sejam canceladas 24 h antes da renovação.|Les abonnements sont renouvelés automatiquement sauf annulation 24 h avant le renouvellement.|Abonnements verlängern sich automatisch, sofern sie nicht 24 Std. vor der Verlängerung gekündigt werden.|更新の24時間前までに解約しない限り、自動更新されます。
+sub.privacy|Política de privacidad|Política de privacidade|Politique de confidentialité|Datenschutzrichtlinie|プライバシーポリシー
+sub.terms_link|Condiciones de uso|Termos de uso|Conditions d’utilisation|Nutzungsbedingungen|利用規約
+sub.best_value|Mejor precio|Melhor custo-benefício|Meilleure offre|Bestes Angebot|最もお得
+sub.save_percent|Ahorra un {0}%|Economize {0}%|Économisez {0} %|{0} % sparen|{0}%お得
+sub.locked_ai|La reflexión asistida por IA es una función Pro. Suscríbete para desbloquearla.|A reflexão assistida por IA é um recurso Pro. Assine para desbloquear.|La réflexion assistée par IA est une fonctionnalité Pro. Abonnez-vous pour la débloquer.|KI-gestützte Reflexion ist eine Pro-Funktion. Zum Freischalten abonnieren.|AIによる振り返りはPro機能です。登録して利用できます。
+sub.locked_host|Inicia sesión para organizar una sesión. Las cuentas gratuitas incluyen 3 sesiones como anfitrión.|Entre para organizar uma sessão. Contas gratuitas incluem 3 sessões como anfitrião.|Connectez-vous pour héberger une séance. Les comptes gratuits incluent 3 séances hébergées.|Zum Hosten anmelden. Kostenlose Konten erhalten 3 gehostete Sitzungen.|セッションを主催するにはログインしてください。無料アカウントでは3回まで主催できます。
+sub.free_ai_limit|Has usado tus 3 reflexiones con IA gratuitas de este mes. Cambia a VIP para obtener reflexiones ilimitadas.|Você usou suas 3 reflexões com IA gratuitas deste mês. Assine o VIP para reflexões ilimitadas.|Vous avez utilisé vos 3 réflexions avec IA gratuites ce mois-ci. Passez à VIP pour un accès illimité.|Die 3 kostenlosen KI-Reflexionen dieses Monats sind aufgebraucht. Mit VIP unbegrenzt reflektieren.|今月の無料AI振り返り3回を使い切りました。VIPでは無制限に利用できます。
+sub.free_pdf_limit|Has usado tus 3 exportaciones PDF gratuitas de este mes. Cambia a VIP para exportaciones ilimitadas.|Você usou suas 3 exportações PDF gratuitas deste mês. Assine o VIP para exportações ilimitadas.|Vous avez utilisé vos 3 exports PDF gratuits ce mois-ci. Passez à VIP pour des exports illimités.|Die 3 kostenlosen PDF-Exporte dieses Monats sind aufgebraucht. Mit VIP unbegrenzt exportieren.|今月の無料PDF出力3回を使い切りました。VIPでは無制限に出力できます。
+sub.free_host_limit|Has usado tus 3 sesiones gratuitas como anfitrión. Cambia a VIP para organizar sesiones sin límites.|Você usou suas 3 sessões gratuitas como anfitrião. Assine o VIP para organizar sessões ilimitadas.|Vous avez utilisé vos 3 séances hébergées gratuites. Passez à VIP pour un hébergement illimité.|Die 3 kostenlosen gehosteten Sitzungen sind aufgebraucht. Mit VIP unbegrenzt hosten.|無料で主催できる3回のセッションを使い切りました。VIPでは無制限に主催できます。
+sub.locked_replay|Las cuentas gratuitas pueden ver la última repetición. Cambia a VIP para desbloquear las anteriores.|Contas gratuitas podem ver a reprodução mais recente. Assine o VIP para acessar as anteriores.|Les comptes gratuits peuvent lire la dernière séance. Passez à VIP pour accéder aux précédentes.|Kostenlose Konten können die neueste Aufzeichnung ansehen. VIP schaltet ältere Aufzeichnungen frei.|無料アカウントでは最新のリプレイを再生できます。過去のリプレイにはVIPが必要です。
+sub.period_month|/ mes|/ mês|/ mois|/ Monat|/ 月
+sub.period_year|/ año|/ ano|/ an|/ Jahr|/ 年
+sub.period_week|/ semana|/ semana|/ semaine|/ Woche|/ 週
+sub.period_once|pago único|pagamento único|paiement unique|einmalig|買い切り
+sub.no_plans|No hay planes disponibles.|Nenhum plano disponível.|Aucune offre disponible.|Keine Tarife verfügbar.|利用可能なプランがありません。
+sub.mobile_only|Las suscripciones están disponibles en iOS y Android.\nSuscríbete desde la aplicación móvil.|As assinaturas estão disponíveis no iOS e Android.\nAssine pelo aplicativo móvel.|Les abonnements sont disponibles sur iOS et Android.\nAbonnez-vous depuis l’application mobile.|Abonnements sind für iOS und Android verfügbar.\nBitte über die mobile App abonnieren.|登録はiOSとAndroidで利用できます。\nモバイルアプリから登録してください。
+sub.ok|Aceptar|OK|OK|OK|OK
+brush.radius|Radio|Raio|Rayon|Radius|半径
+brush.strength|Intensidad|Intensidade|Intensité|Stärke|強さ
+brush.radius_val|R:{0:F1}|R:{0:F1}|R:{0:F1}|R:{0:F1}|半径:{0:F1}
+brush.strength_val|I:{0:F1}|I:{0:F1}|I:{0:F1}|S:{0:F1}|強さ:{0:F1}
+catalog.title|Catálogo de objetos|Catálogo de objetos|Catalogue d’objets|Objektkatalog|オブジェクトカタログ
+button.catalog|Catálogo|Catálogo|Catalogue|Katalog|カタログ
+status.ready|Listo|Pronto|Prêt|Bereit|準備完了
+status.hint|Listo · Botón derecho: orbitar; rueda: zoom; botón central: desplazar|Pronto · Botão direito: orbitar; rolagem: zoom; botão do meio: mover câmera|Prêt · Clic droit : orbite ; molette : zoom ; clic central : déplacement|Bereit · Rechtsklick: drehen; Mausrad: zoomen; Mittelklick: verschieben|準備完了 · 右ドラッグ：回転、スクロール：ズーム、中ドラッグ：移動
+status.selected|Seleccionado: {0}|Selecionado: {0}|Sélection : {0}|Ausgewählt: {0}|選択中：{0}
+status.selected_many|{0} objetos seleccionados · Arrastra uno para mover el grupo|{0} objetos selecionados · Arraste um deles para mover o grupo|{0} objets sélectionnés · Faites-en glisser un pour déplacer le groupe|{0} Objekte ausgewählt · Ein ausgewähltes Objekt ziehen, um die Gruppe zu bewegen|{0}個選択中 · 選択したオブジェクトをドラッグしてまとめて移動
+selection.count|{0} seleccionados|{0} selecionados|{0} sélectionnés|{0} ausgewählt|{0}個選択中
+selection.hint|Arrastra sobre arena vacía para seleccionar · Mayús+clic para añadir o quitar|Arraste na areia vazia para selecionar · Shift+clique para adicionar ou remover|Glissez sur le sable vide pour sélectionner · Maj+clic pour ajouter ou retirer|Auf leerem Sand ziehen zum Auswählen · Umschalt+Klick zum Hinzufügen/Entfernen|何もない砂の上をドラッグして範囲選択 · Shift+クリックで追加・解除
+status.saved|Guardado: {0}|Salvo: {0}|Enregistré : {0}|Gespeichert: {0}|保存しました：{0}
+status.loaded|Cargado: {0}|Carregado: {0}|Chargé : {0}|Geladen: {0}|読み込みました：{0}
+status.object|Objeto|Objeto|Objet|Objekt|オブジェクト
+action.duplicate|Duplicar|Duplicar|Dupliquer|Duplizieren|複製
+analysis.title|Reflexión asistida por IA|Reflexão assistida por IA|Réflexion assistée par IA|KI-gestützte Reflexion|AIによる振り返り支援
+analysis.ask|Crear reflexión con IA|Criar reflexão com IA|Créer une réflexion avec IA|KI-Reflexion erstellen|AIによる振り返りを作成
+analysis.loading|Preparando la reflexión… Espera…|Preparando a reflexão… Aguarde…|Préparation de la réflexion… Veuillez patienter…|Reflexion wird vorbereitet… Bitte warten…|振り返りを準備中…お待ちください…
+analysis.login_required|Crea una cuenta gratuita o inicia sesión para usar la reflexión asistida por IA.|Crie uma conta gratuita ou entre para usar a reflexão assistida por IA.|Créez un compte gratuit ou connectez-vous pour utiliser la réflexion assistée par IA.|Kostenloses Konto erstellen oder anmelden, um die KI-gestützte Reflexion zu nutzen.|AIによる振り返りを利用するには、無料アカウントを作成するかログインしてください。
+analysis.disclaimer|Reflexión asistida por IA: no es un diagnóstico ni una conclusión clínica. Las observaciones y las hipótesis opcionales se presentan por separado; solo quien creó la escena puede confirmar su significado personal.|Reflexão assistida por IA: não é um diagnóstico nem uma conclusão clínica. Observações e hipóteses opcionais são separadas abaixo; só quem criou a cena pode confirmar seu significado pessoal.|Réflexion assistée par IA — ni diagnostic ni conclusion clinique. Les observations et les hypothèses facultatives sont séparées ci-dessous ; seule la personne ayant créé la scène peut confirmer son sens personnel.|KI-gestützte Reflexion – keine Diagnose oder klinische Schlussfolgerung. Beobachtungen und optionale Hypothesen werden getrennt dargestellt; nur die gestaltende Person kann die persönliche Bedeutung bestätigen.|AIによる振り返り支援であり、診断や臨床的な結論ではありません。観察と任意の仮説は分けて表示されます。個人的な意味を確かめられるのは、作品を作った本人だけです。
+analysis.error.capture|No se pudieron capturar los datos de la sesión.|Não foi possível capturar os dados da sessão.|Impossible de recueillir les données de la séance.|Sitzungsdaten konnten nicht erfasst werden.|セッションデータを取得できませんでした。
+analysis.error.manager|No se encontró AIAnalysisManager en la escena.|AIAnalysisManager não encontrado na cena.|AIAnalysisManager introuvable dans la scène.|AIAnalysisManager wurde in der Szene nicht gefunden.|シーンにAIAnalysisManagerが見つかりません。
+analysis.error|Error: {0}|Erro: {0}|Erreur : {0}|Fehler: {0}|エラー：{0}
+analysis.save|Guardar|Salvar|Enregistrer|Speichern|保存
+analysis.saved|Guardado|Salvo|Enregistré|Gespeichert|保存済み
+analysis.export_pdf|Exportar PDF|Exportar PDF|Exporter en PDF|PDF exportieren|PDFを出力
+analysis.save_not_logged_in|No has iniciado sesión|Você não está conectado|Non connecté|Nicht angemeldet|ログインしていません
+analysis.saving|Guardando en la nube…|Salvando na nuvem…|Enregistrement dans le cloud…|Wird in der Cloud gespeichert…|クラウドに保存中…
+analysis.save_done|Guardado en la nube|Salvo na nuvem|Enregistré dans le cloud|In der Cloud gespeichert|クラウドに保存しました
+analysis.save_fail|Error al guardar: {0}|Falha ao salvar: {0}|Échec de l’enregistrement : {0}|Speichern fehlgeschlagen: {0}|保存できませんでした：{0}
+analysis.pdf_login_required|Inicia sesión para usar PDF|Entre para usar PDF|Connexion requise pour le PDF|Für PDF bitte anmelden|PDFの利用にはログインが必要です
+analysis.wait_save|Espera…|Aguarde…|Veuillez patienter…|Bitte warten…|お待ちください…
+analysis.pdf_generating|Generando PDF…|Gerando PDF…|Création du PDF…|PDF wird erstellt…|PDFを作成中…
+analysis.pdf_saved|PDF guardado: {0}|PDF salvo: {0}|PDF enregistré : {0}|PDF gespeichert: {0}|PDFを保存しました：{0}
+analysis.pdf_fail|Error de PDF: {0}|Erro de PDF: {0}|Erreur PDF : {0}|PDF-Fehler: {0}|PDFエラー：{0}
+walk.exit|Salir del paseo|Sair da caminhada|Quitter la promenade|Begehung beenden|歩行モードを終了
+menu.subtitle|ESPACIO TERAPÉUTICO|ESPAÇO TERAPÊUTICO|ESPACE THÉRAPEUTIQUE|THERAPEUTISCHER ARBEITSRAUM|セラピーのためのワークスペース
+menu.welcome|Te damos la bienvenida, {0}|Boas-vindas de volta, {0}|Bon retour, {0}|Willkommen zurück, {0}|おかえりなさい、{0}
+menu.welcome_guest|Bienvenido|Boas-vindas|Bienvenue|Willkommen|ようこそ
+menu.welcome_sub|Crea, explora y reflexiona en tu mundo de arena.|Crie, explore e reflita no seu mundo de areia.|Créez, explorez et réfléchissez dans votre univers de sable.|Gestalten, erkunden und reflektieren Sie in Ihrer Sandwelt.|箱庭の世界で、作り、探求し、振り返りましょう。
+menu.workspace|TU ESPACIO DE TRABAJO|SEU ESPAÇO DE TRABALHO|VOTRE ESPACE DE TRAVAIL|IHR ARBEITSBEREICH|あなたのワークスペース
+menu.workspace_heading|Un espacio para crear y reflexionar|Um espaço para criar e refletir|Un espace pour créer et réfléchir|Ein Raum zum Gestalten und Reflektieren|創作と振り返りのための空間
+menu.workspace_sub|Inicia una nueva bandeja o continúa donde lo dejaste.|Comece uma nova caixa ou continue de onde parou.|Commencez un nouveau bac ou reprenez là où vous vous étiez arrêté.|Starten Sie einen neuen Sandkasten oder machen Sie dort weiter, wo Sie aufgehört haben.|新しい箱庭を始めるか、前回の続きから再開しましょう。
+menu.continue_playing|Bandejas recientes|Caixas recentes|Bacs récents|Letzte Sandkästen|最近の箱庭
+menu.view_all|Ver todo  >|Ver tudo  >|Tout voir  >|Alle anzeigen  >|すべて表示  >
+menu.nav_home|Inicio|Início|Accueil|Startseite|ホーム
+menu.nav_boards|Mis bandejas|Minhas caixas|Mes bacs|Meine Sandkästen|マイ箱庭
+menu.my_boards_sub|{0} bandejas|{0} caixas|{0} bacs|{0} Sandkästen|{0}個の箱庭
+menu.my_boards_open|Abrir|Abrir|Ouvrir|Öffnen|開く
+menu.nav_multiplayer|Multijugador|Multijogador|Multijoueur|Mehrspieler|マルチプレイ
+menu.nav_replays|Repeticiones|Reproduções|Relectures|Wiedergaben|リプレイ
+menu.nav_ai|Reflexión con IA|Reflexão com IA|Réflexion avec IA|KI-Reflexion|AIによる振り返り
+menu.nav_objects|Objetos|Objetos|Objets|Objekte|オブジェクト
+menu.nav_settings|Ajustes|Configurações|Paramètres|Einstellungen|設定
+menu.cta_new_desc|Crea un nuevo mundo de arena.|Crie um novo mundo de areia.|Créez un nouvel univers de sable.|Eine neue Sandwelt gestalten.|新しい箱庭の世界を作りましょう。
+menu.cta_host_desc|Crea una sesión e invita a otras personas.|Crie uma sessão e convide outras pessoas.|Créez une séance et invitez d’autres personnes.|Eine Sitzung erstellen und andere einladen.|セッションを作成して他の人を招待しましょう。
+menu.cta_join_desc|Únete a una sesión en curso de un amigo.|Entre na sessão em andamento de um amigo.|Rejoignez la séance en cours d’un ami.|An der laufenden Sitzung eines Freundes teilnehmen.|友だちの進行中のセッションに参加しましょう。
+menu.tile_replays|Repeticiones|Reproduções|Relectures|Wiedergaben|リプレイ
+menu.tile_replays_desc|Revisa tus sesiones anteriores y reflexiona.|Reveja suas sessões anteriores e reflita.|Revoyez vos séances passées et prenez du recul.|Vergangene Sitzungen ansehen und reflektieren.|過去のセッションを見て振り返りましょう。
+menu.tile_ai|Reflexión asistida por IA|Reflexão assistida por IA|Réflexion assistée par IA|KI-gestützte Reflexion|AIによる振り返り支援
+menu.tile_ai_desc|Explora observaciones, posibilidades y preguntas abiertas.|Explore observações, possibilidades e perguntas abertas.|Explorez des observations, des possibilités et des questions ouvertes.|Beobachtungen, Möglichkeiten und offene Fragen erkunden.|観察、可能性、自由に考えられる問いを探りましょう。
+menu.tile_objects|Biblioteca de objetos|Biblioteca de objetos|Bibliothèque d’objets|Objektbibliothek|オブジェクトライブラリ
+menu.tile_objects_desc|Desbloquea todos los objetos y construye tu mundo.|Desbloqueie todos os objetos e construa seu mundo.|Débloquez tous les objets et créez votre univers.|Alle Objekte freischalten und die eigene Welt gestalten.|すべてのオブジェクトを使って自分の世界を作りましょう。
+menu.tile_multiplayer|Multijugador|Multijogador|Multijoueur|Mehrspieler|マルチプレイ
+menu.tile_multiplayer_desc|Crea o únete a sesiones en tiempo real.|Crie ou entre em sessões em tempo real.|Créez ou rejoignez des séances en temps réel.|Echtzeitsitzungen erstellen oder ihnen beitreten.|リアルタイムのセッションを作成・参加できます。
+menu.new_board|Nueva bandeja|Nova caixa|Nouveau bac|Neuer Sandkasten|新しい箱庭
+menu.host_online|Organizar en línea|Organizar online|Héberger en ligne|Online hosten|オンラインで主催
+menu.join_session|Unirse a sesión|Entrar na sessão|Rejoindre une séance|Sitzung beitreten|セッションに参加
+menu.saved_boards|Bandejas guardadas|Caixas salvas|Bacs enregistrés|Gespeicherte Sandkästen|保存した箱庭
+menu.empty|Aún no hay bandejas guardadas.\nPulsa «+ Nueva bandeja» para crear una.|Nenhuma caixa salva ainda.\nToque em “+ Nova caixa” para criar uma.|Aucun bac enregistré.\nTouchez « + Nouveau bac » pour en créer un.|Noch keine gespeicherten Sandkästen.\nMit „+ Neuer Sandkasten“ einen erstellen.|保存した箱庭はまだありません。\n「＋新しい箱庭」で作成できます。
+menu.empty_title|Crea tu primera bandeja|Crie sua primeira caixa de areia|Créez votre premier bac|Erstellen Sie Ihren ersten Sandkasten|最初の箱庭を作成
+menu.empty_action|Crear una bandeja|Criar uma caixa|Créer un bac|Sandkasten erstellen|箱庭を作成
+menu.empty_join|Unirse con un código de sala|Entrar com um código de sala|Rejoindre avec un code de salle|Mit Raumcode beitreten|ルームコードで参加
+menu.no_results_title|Ninguna bandeja coincide con los filtros|Nenhuma caixa corresponde aos filtros|Aucun bac ne correspond aux filtres|Keine Sandkästen entsprechen den Filtern|フィルターに一致する箱庭がありません
+menu.no_results|Prueba otra búsqueda o muestra todas tus bandejas.|Tente outra busca ou mostre todas as suas caixas.|Essayez une autre recherche ou affichez tous vos bacs.|Versuchen Sie eine andere Suche oder zeigen Sie alle Sandkästen an.|別の検索を試すか、すべての箱庭を表示してください。
+menu.clear_filters|Borrar filtros|Limpar filtros|Effacer les filtres|Filter löschen|フィルターを解除
+menu.account|Cuenta|Conta|Compte|Konto|アカウント
+menu.replays|Repeticiones|Reproduções|Relectures|Wiedergaben|リプレイ
+replays.title|Repeticiones de sesiones|Reproduções de sessões|Relectures des séances|Sitzungswiedergaben|セッションのリプレイ
+replays.empty|Aún no hay sesiones grabadas.|Nenhuma sessão gravada ainda.|Aucune séance enregistrée.|Noch keine aufgezeichneten Sitzungen.|記録されたセッションはまだありません。
+replays.duration|{0} s, {1} eventos|{0} s, {1} eventos|{0} s, {1} événements|{0} s, {1} Ereignisse|{0}秒、{1}件のイベント
+replays.play|Reproducir|Reproduzir|Lire|Abspielen|再生
+replays.upgrade|Mejorar plan|Melhorar plano|Changer d’offre|Upgraden|アップグレード
+replays.delete|Eliminar|Excluir|Supprimer|Löschen|削除
+replays.close|Cerrar|Fechar|Fermer|Schließen|閉じる
+replays.confirm_delete|¿Eliminar esta repetición?|Excluir esta reprodução?|Supprimer cette relecture ?|Diese Aufzeichnung löschen?|このリプレイを削除しますか？
+replays.read_only|REPETICIÓN DE SOLO LECTURA|REPRODUÇÃO SOMENTE LEITURA|RELECTURE EN LECTURE SEULE|SCHREIBGESCHÜTZTE WIEDERGABE|閲覧専用リプレイ
+replays.stop|Detener|Parar|Arrêter|Stoppen|停止
+replays.quit|Salir|Sair|Quitter|Verlassen|終了
+replays.pause|Pausar|Pausar|Pause|Pause|一時停止
+replays.resume|Reproducir|Reproduzir|Lire|Abspielen|再生
+replays.finished|Repetición finalizada|Reprodução concluída|Relecture terminée|Wiedergabe beendet|リプレイが終了しました
+replays.replay_again|Volver a reproducir|Reproduzir novamente|Relire|Erneut abspielen|もう一度再生
+replays.back_list|Volver a la lista|Voltar à lista|Retour à la liste|Zurück zur Liste|一覧に戻る
+replays.free_note|Gratis: solo puedes reproducir la última sesión. Mejora tu plan para ver el historial completo.|Grátis: apenas a reprodução mais recente está disponível. Melhore seu plano para ver o histórico completo.|Gratuit : seule la dernière séance est accessible. Changez d’offre pour accéder à tout l’historique.|Kostenlos: Nur die neueste Aufzeichnung ist abspielbar. Für den gesamten Verlauf upgraden.|無料では最新のリプレイのみ再生できます。全履歴を利用するにはアップグレードしてください。
+replays.storage_note|Las repeticiones se guardan en este dispositivo. Elimina las antiguas para liberar espacio.|As reproduções ficam neste dispositivo. Exclua as antigas para liberar espaço.|Les relectures sont stockées sur cet appareil. Supprimez les anciennes pour libérer de l’espace.|Aufzeichnungen werden auf diesem Gerät gespeichert. Alte Aufzeichnungen löschen, um Speicherplatz freizugeben.|リプレイはこの端末に保存されます。古いものを削除すると空き容量を増やせます。
+replays.latest_badge|Última|Mais recente|La plus récente|Neueste|最新
+replays.reset_view|Restablecer vista|Redefinir visualização|Réinitialiser la vue|Ansicht zurücksetzen|視点をリセット
+replays.export_video|Exportar|Exportar|Exporter|Exportieren|出力
+replays.exporting|Exportando vídeo… {0}%|Exportando vídeo… {0}%|Export de la vidéo… {0} %|Video wird exportiert… {0} %|動画を出力中…{0}%
+replays.export_done|Vídeo listo para compartir|Vídeo pronto para compartilhar|Vidéo prête à partager|Video zum Teilen bereit|動画を共有できます
+replays.export_fail|Error al exportar: {0}|Falha ao exportar: {0}|Échec de l’export : {0}|Export fehlgeschlagen: {0}|出力できませんでした：{0}
+replays.export_too_long|La repetición es demasiado larga para exportar (máximo 5 min).|A reprodução é longa demais para exportar (máximo de 5 min).|La relecture est trop longue à exporter (5 min maximum).|Die Aufzeichnung ist zu lang für den Export (max. 5 Min.).|リプレイが長すぎて出力できません（最大5分）。
+login.title|Iniciar sesión|Entrar|Se connecter|Anmelden|ログイン
+login.email|Correo electrónico|E-mail|E-mail|E-Mail|メールアドレス
+login.password|Contraseña|Senha|Mot de passe|Passwort|パスワード
+login.sign_in|Iniciar sesión|Entrar|Se connecter|Anmelden|ログイン
+login.register|Crear cuenta|Criar conta|Créer un compte|Konto erstellen|アカウントを作成
+login.signing_in|Iniciando sesión…|Entrando…|Connexion…|Anmeldung läuft…|ログイン中…
+login.registering|Creando cuenta…|Criando conta…|Création du compte…|Konto wird erstellt…|アカウントを作成中…
+login.success|Bienvenido, {0}|Boas-vindas, {0}|Bienvenue, {0}|Willkommen, {0}|ようこそ、{0}
+login.error|Error: {0}|Erro: {0}|Erreur : {0}|Fehler: {0}|エラー：{0}
+login.logged_in_as|Sesión iniciada como {0}|Conectado como {0}|Connecté en tant que {0}|Angemeldet als {0}|{0}としてログイン中
+login.sign_out|Cerrar sesión|Sair da conta|Se déconnecter|Abmelden|ログアウト
+login.name|Nombre completo|Nome completo|Nom complet|Vollständiger Name|氏名
+login.user_type|Tipo de cuenta|Tipo de conta|Type de compte|Kontotyp|アカウントの種類
+login.type_normal|Usuario normal|Usuário comum|Utilisateur standard|Normales Benutzerkonto|一般ユーザー
+login.type_psychologist|Psicólogo|Psicólogo|Psychologue|Psychologe/Psychologin|心理専門職
+board.open|Abrir|Abrir|Ouvrir|Öffnen|開く
+board.rename|Renombrar|Renomear|Renommer|Umbenennen|名前を変更
+board.reports|Informes|Relatórios|Rapports|Berichte|レポート
+board.delete|Eliminar|Excluir|Supprimer|Löschen|削除
+board.loading|Abriendo bandeja…|Abrindo caixa…|Ouverture du bac…|Sandkasten wird geöffnet…|箱庭を開いています…
+board.loading_new|Preparando bandeja…|Preparando caixa…|Préparation du bac…|Sandkasten wird vorbereitet…|箱庭を準備中…
+board.loading_catalog|Cargando catálogo…|Carregando catálogo…|Chargement du catalogue…|Katalog wird geladen…|カタログを読み込み中…
+board.loading_prepare|Preparando el espacio de arena…|Preparando a caixa de areia…|Préparation du bac à sable…|Sandkasten wird eingerichtet…|箱庭を設定中…
+board.loading_restore|Restaurando bandeja…|Restaurando caixa…|Restauration du bac…|Sandkasten wird wiederhergestellt…|箱庭を復元中…
+board.loading_objects|Colocando objetos…|Posicionando objetos…|Placement des objets…|Objekte werden platziert…|オブジェクトを配置中…
+board.loading_ready|Casi listo…|Quase pronto…|Presque prêt…|Fast fertig…|もうすぐ完了…
+reports.title|Informes: {0}|Relatórios: {0}|Rapports : {0}|Berichte: {0}|レポート：{0}
+reports.empty|Aún no hay informes de reflexión con IA.\nAbre esta bandeja y crea una reflexión asistida por IA.|Ainda não há relatórios de reflexão com IA.\nAbra esta caixa e crie uma reflexão assistida por IA.|Aucun rapport de réflexion avec IA.\nOuvrez ce bac et créez une réflexion assistée par IA.|Noch keine KI-Reflexionsberichte.\nDiesen Sandkasten öffnen und eine KI-gestützte Reflexion erstellen.|AIによる振り返りレポートはまだありません。\nこの箱庭を開いて振り返りを作成してください。
+reports.view|Ver|Ver|Voir|Ansehen|表示
+reports.delete|Eliminar|Excluir|Supprimer|Löschen|削除
+reports.detail_title|Informe — {0}|Relatório — {0}|Rapport — {0}|Bericht — {0}|レポート — {0}
+reports.pdf_login|Inicia sesión para usar PDF|Entre para usar PDF|Connexion requise pour le PDF|Für PDF bitte anmelden|PDFの利用にはログインが必要です
+reports.pdf_uploading|Subiendo…|Enviando…|Envoi…|Wird hochgeladen…|アップロード中…
+reports.pdf_downloading|Generando PDF…|Gerando PDF…|Création du PDF…|PDF wird erstellt…|PDFを作成中…
+reports.pdf_saved|¡PDF guardado!|PDF salvo!|PDF enregistré !|PDF gespeichert!|PDFを保存しました
+reports.pdf_error|Error de PDF: {0}|Erro de PDF: {0}|Erreur PDF : {0}|PDF-Fehler: {0}|PDFエラー：{0}
+dialog.new_board|Nueva bandeja|Nova caixa|Nouveau bac|Neuer Sandkasten|新しい箱庭
+dialog.rename|Renombrar bandeja|Renomear caixa|Renommer le bac|Sandkasten umbenennen|箱庭の名前を変更
+dialog.ok|Aceptar|OK|OK|OK|OK
+dialog.cancel|Cancelar|Cancelar|Annuler|Abbrechen|キャンセル
+size.title|Elegir tamaño de la bandeja|Escolher tamanho da caixa|Choisir la taille du bac|Sandkastengröße wählen|箱庭のサイズを選択
+size.standard|Estándar (cuadrada)|Padrão (quadrada)|Standard (carré)|Standard (quadratisch)|標準（正方形）
+size.medium|Mediana (ancha)|Média (larga)|Moyen (large)|Mittel (breit)|中（横長）
+size.custom|Personalizado|Personalizado|Personnalisé|Benutzerdefiniert|カスタム
+size.width|Ancho:|Largura:|Larg. :|B:|幅：
+size.depth|Alto:|Altura:|Haut. :|H:|奥行き：
+host.title|Organizar sesión en línea|Organizar sessão online|Héberger une séance en ligne|Online-Sitzung hosten|オンラインセッションを主催
+host.info|Elige un modo de conexión y abre una bandeja.\nLa sala se creará al entrar en la bandeja.|Escolha um modo de conexão e abra uma caixa.\nA sala será criada quando você entrar na caixa.|Choisissez un mode d’hébergement, puis ouvrez un bac.\nLa salle sera créée à votre entrée.|Hosting-Modus wählen und einen Sandkasten öffnen.\nDer Raum wird beim Betreten erstellt.|接続方式を選び、箱庭を開いてください。\n箱庭に入るとルームが作成されます。
+host.cloud|☁ Sesión en la nube (código de sala; desde cualquier lugar)|☁ Sessão na nuvem (código da sala; de qualquer lugar)|☁ Séance cloud (code de salle — partout)|☁ Cloud-Sitzung (Raumcode — von überall)|☁ クラウドセッション（ルームコードでどこからでも）
+host.lan|⚡ Sesión LAN (misma Wi-Fi; IP: {0})|⚡ Sessão LAN (mesmo Wi-Fi; IP: {0})|⚡ Séance LAN (même Wi-Fi — IP : {0})|⚡ LAN-Sitzung (gleiches WLAN — IP: {0})|⚡ LANセッション（同じWi-Fi — IP：{0}）
+host.cancel|Cancelar|Cancelar|Annuler|Abbrechen|キャンセル
+join.title|Unirse a sesión|Entrar na sessão|Rejoindre une séance|Sitzung beitreten|セッションに参加
+join.role_label|Unirse como:|Entrar como:|Rejoindre en tant que :|Beitreten als:|参加する役割：
+join.observer|Observador|Observador|Observateur|Beobachter|見学者
+join.therapist|Terapeuta|Terapeuta|Thérapeute|Therapeut/in|セラピスト
+join.patient|Paciente|Paciente|Patient|Patient/in|クライエント
+host.therapist_mode|Modo terapeuta|Modo terapeuta|Mode thérapeute|Therapeutenmodus|セラピストモード
+host.therapist_mode_desc|Toca para cambiar. Aprueba la edición desde los controles de sesión.|Toque para alternar. Aprove a edição nos controles da sessão.|Touchez pour changer. Autorisez la modification dans les commandes de session.|Zum Wechseln antippen. Bearbeitung in der Sitzungsverwaltung freigeben.|タップで切り替え。セッション管理で編集を許可してください。
+net.patient_active|Paciente conectado|Paciente conectado|Patient connecté|Patient/in verbunden|クライエントが接続しました
+therapist.patient_acting|El paciente está modelando…|O paciente está modelando…|Le patient modèle le sable…|Patient/in gestaltet den Sand…|クライエントが砂を造形中…
+therapist.patient_painting|El paciente está pintando…|O paciente está pintando…|Le patient peint…|Patient/in malt…|クライエントが色を塗っています…
+therapist.patient_placing|El paciente ha colocado un objeto|O paciente posicionou um objeto|Le patient a placé un objet|Patient/in hat ein Objekt platziert|クライエントがオブジェクトを配置しました
+join.cloud_label|Unirse mediante código de sala|Entrar com código da sala|Rejoindre avec un code de salle|Mit Raumcode beitreten|ルームコードで参加
+join.scan_qr|Escanear QR|Ler QR|Scanner un QR|QR scannen|QRコードを読み取る
+join.join_room|Entrar en la sala|Entrar na sala|Rejoindre la salle|Raum beitreten|ルームに参加
+join.invalid_code|Introduce el código de sala (4–6 letras)|Digite o código da sala (4–6 letras)|Saisissez le code de salle (4 à 6 lettres)|Raumcode eingeben (4–6 Buchstaben)|ルームコードを入力してください（英字4〜6文字）
+join.joining|Uniéndose…|Entrando…|Connexion…|Beitritt läuft…|参加中…
+join.room_not_found|No se encontró la sala o falló la conexión|Sala não encontrada ou falha na conexão|Salle introuvable ou échec de connexion|Raum nicht gefunden oder Verbindung fehlgeschlagen|ルームが見つからないか、接続できませんでした
+join.or|o|ou|ou|oder|または
+join.lan_label|⚡ Unirse mediante IP (misma Wi-Fi)|⚡ Entrar pelo endereço IP (mesmo Wi-Fi)|⚡ Rejoindre par adresse IP (même Wi-Fi)|⚡ Über IP-Adresse beitreten (gleiches WLAN)|⚡ IPアドレスで参加（同じWi-Fi）
+join.connect|Conectar|Conectar|Se connecter|Verbinden|接続
+join.missing_ip|Introduce una dirección IP|Digite um endereço IP|Saisissez une adresse IP|Bitte eine IP-Adresse eingeben|IPアドレスを入力してください
+join.connecting|Conectando…|Conectando…|Connexion…|Verbindung wird hergestellt…|接続中…
+join.connection_failed|Error de conexión|Falha na conexão|Échec de connexion|Verbindung fehlgeschlagen|接続できませんでした
+join.cancel|Cancelar|Cancelar|Annuler|Abbrechen|キャンセル
+net.room|Sala: {0}|Sala: {0}|Salle : {0}|Raum: {0}|ルーム：{0}
+net.connecting|Conectando…|Conectando…|Connexion…|Verbindung wird hergestellt…|接続中…
+net.spectating|OBSERVANDO|OBSERVANDO|OBSERVATION|ZUSCHAUEN|見学中
+net.viewers|Espectadores: {0}{1}|Observadores: {0}{1}|Spectateurs : {0}{1}|Zuschauende: {0}{1}|見学者：{0}{1}
+net.viewers_s|||||
+reconnect.return|Volver al menú|Voltar ao menu|Retour au menu|Zurück zum Menü|メニューに戻る
+reconnect.message|Conexión perdida\nReconectando… ({0}/10)|Conexão perdida\nReconectando… ({0}/10)|Connexion perdue\nReconnexion… ({0}/10)|Verbindung unterbrochen\nErneuter Verbindungsaufbau… ({0}/10)|接続が切れました\n再接続中…（{0}/10）
+clients.title|Clientes|Clientes|Clients|Klienten|クライエント
+clients.new|+ Nuevo cliente|+ Novo cliente|+ Nouveau client|+ Neuer Klient|＋クライエントを追加
+clients.local_note|Los datos de clientes, bandejas e informes se guardan en este dispositivo. Sin sincronización en la nube.|Os registros de clientes, caixas e relatórios ficam neste dispositivo. Sem sincronização na nuvem.|Les dossiers clients, bacs et rapports sont enregistrés sur cet appareil. Sans synchronisation cloud.|Klientendaten, Sandkästen und Berichte werden auf diesem Gerät gespeichert. Keine Cloud-Synchronisierung.|クライエント情報、箱庭、レポートはこの端末に保存されます。クラウド同期はありません。
+clients.local_archived|Incluye clientes archivados · Guardado en este dispositivo, sin sincronización en la nube.|Inclui clientes arquivados · Salvo neste dispositivo, sem sincronização na nuvem.|Clients archivés inclus · Enregistré sur cet appareil, sans synchronisation cloud.|Archivierte Klienten eingeschlossen · Auf diesem Gerät gespeichert, ohne Cloud-Synchronisierung.|アーカイブ済みを含む · この端末に保存され、クラウドには同期されません。
+clients.search|Buscar por nombre o código de cliente…|Buscar por nome ou código do cliente…|Rechercher un nom ou un code client…|Nach Name oder Klientencode suchen…|名前・クライエントコードで検索…
+clients.archived_toggle|Mostrar/ocultar archivados|Mostrar/ocultar arquivados|Afficher/masquer les archives|Archivierte ein-/ausblenden|アーカイブ済みを表示・非表示
+clients.archived|Archivado|Arquivado|Archivé|Archiviert|アーカイブ済み
+clients.empty|No hay clientes que coincidan. Crea un cliente para organizar sus bandejas.|Nenhum cliente encontrado. Crie um cliente para organizar suas caixas.|Aucun client correspondant. Créez un client pour organiser ses bacs.|Keine passenden Klienten. Einen Klienten anlegen, um dessen Sandkästen zu organisieren.|該当するクライエントがいません。追加して箱庭を整理しましょう。
+clients.unassigned|Bandejas sin asignar|Caixas não atribuídas|Bacs non attribués|Nicht zugeordnete Sandkästen|未割り当ての箱庭
+clients.unassigned_help|Tus bandejas permanecen aquí hasta que las muevas al registro de un cliente. Al moverlas se conservan todos sus informes.|Suas caixas ficam aqui até serem movidas para o registro de um cliente. Todos os relatórios são mantidos.|Vos bacs restent ici jusqu’à leur transfert dans un dossier client. Le transfert conserve tous leurs rapports.|Vorhandene Sandkästen bleiben hier, bis sie einem Klienten zugeordnet werden. Alle Berichte bleiben dabei erhalten.|クライエントの記録に移動するまで、箱庭はここに表示されます。移動してもレポートはすべて保持されます。
+clients.counts|Bandejas: {0} · Informes: {1}|Caixas: {0} · Relatórios: {1}|Bacs : {0} · Rapports : {1}|Sandkästen: {0} · Berichte: {1}|箱庭：{0} · レポート：{1}
+clients.report_count|Informes: {0}|Relatórios: {0}|Rapports : {0}|Berichte: {0}|レポート：{0}
+clients.edit|Editar perfil|Editar perfil|Modifier le profil|Profil bearbeiten|プロフィールを編集
+clients.new_table|+ Nueva bandeja|+ Nova caixa|+ Nouveau bac|+ Neuer Sandkasten|＋新しい箱庭
+clients.archive|Archivar cliente|Arquivar cliente|Archiver le client|Klienten archivieren|クライエントをアーカイブ
+clients.restore|Restaurar cliente|Restaurar cliente|Restaurer le client|Klienten wiederherstellen|クライエントを復元
+clients.tables|Bandejas|Caixas|Bacs|Sandkästen|箱庭
+clients.reports|Informes|Relatórios|Rapports|Berichte|レポート
+clients.view|Ver|Ver|Voir|Ansehen|表示
+clients.open|Abrir|Abrir|Ouvrir|Öffnen|開く
+clients.move|Mover|Mover|Déplacer|Verschieben|移動
+clients.move_title|Mover a un cliente|Mover para um cliente|Déplacer vers un client|Einem Klienten zuordnen|クライエントに移動
+clients.no_tables|Aún no hay bandejas. Crea una para este cliente o mueve una desde «Bandejas sin asignar» o «Mis bandejas».|Ainda não há caixas. Crie uma para este cliente ou mova uma de “Caixas não atribuídas” ou “Minhas caixas”.|Aucun bac. Créez-en un pour ce client ou déplacez-en un depuis « Bacs non attribués » ou « Mes bacs ».|Noch keine Sandkästen. Einen für diesen Klienten erstellen oder aus „Nicht zugeordnete Sandkästen“ bzw. „Meine Sandkästen“ verschieben.|箱庭はまだありません。新規作成するか、「未割り当ての箱庭」「マイ箱庭」から移動してください。
+clients.no_reports|Aún no hay informes. Aquí aparecerán los informes guardados en las bandejas de este cliente.|Ainda não há relatórios. Os relatórios salvos nas caixas deste cliente aparecerão aqui.|Aucun rapport. Les rapports enregistrés dans les bacs de ce client apparaîtront ici.|Noch keine Berichte. Gespeicherte Berichte aus den Sandkästen dieses Klienten erscheinen hier.|レポートはまだありません。このクライエントの箱庭に保存したレポートがここに表示されます。
+clients.name|Nombre o alias *|Nome ou apelido *|Nom ou pseudonyme *|Name oder Alias *|名前または別名 *
+clients.reference|Código de cliente|Código do cliente|Code client|Klientencode|クライエントコード
+clients.dob|Fecha de nacimiento|Data de nascimento|Date de naissance|Geburtsdatum|生年月日
+clients.choose_date|Seleccionar fecha…|Selecionar data…|Choisir une date…|Datum auswählen…|日付を選択…
+clients.no_date|Sin fecha seleccionada · opcional|Nenhuma data selecionada · opcional|Aucune date sélectionnée · facultatif|Kein Datum ausgewählt · optional|日付未選択 · 任意
+clients.clear_date|Borrar|Limpar|Effacer|Leeren|クリア
+clients.done|Listo|Concluir|Terminé|Fertig|完了
+clients.select|Seleccionar|Selecionar|Sélectionner|Auswählen|選択
+clients.choose_photo|Elegir foto|Escolher foto|Choisir une photo|Foto auswählen|写真を選択
+clients.remove_photo|Quitar|Remover|Retirer|Entfernen|削除
+clients.photo_hint|Foto de perfil opcional · Vista previa recortada al centro. Se guarda en este dispositivo.|Foto de perfil opcional · Prévia com corte central. Salva neste dispositivo.|Photo de profil facultative · Aperçu recadré au centre. Enregistrée sur cet appareil.|Optionales Profilfoto · Mittig zugeschnittene Vorschau. Auf diesem Gerät gespeichert.|プロフィール写真は任意です。中央を切り抜いたプレビューを表示し、この端末に保存します。
+clients.photo_error|No se pudo abrir la foto. Revisa el acceso a las fotos o prueba un JPG/PNG de menos de 20 MB.|Não foi possível abrir a foto. Verifique o acesso às fotos ou tente um JPG/PNG com menos de 20 MB.|Impossible d’ouvrir la photo. Vérifiez les autorisations ou essayez un JPG/PNG de moins de 20 Mo.|Foto konnte nicht geöffnet werden. Fotozugriff prüfen oder eine JPG-/PNG-Datei unter 20 MB wählen.|写真を開けませんでした。写真へのアクセス権を確認するか、20MB未満のJPG・PNGをお試しください。
+clients.phone|Teléfono|Telefone|Téléphone|Telefon|電話番号
+clients.email|Correo electrónico|E-mail|E-mail|E-Mail|メールアドレス
+clients.optional|Solo se requiere un nombre o alias. El cliente no necesita una cuenta en la aplicación.|Apenas um nome ou apelido é obrigatório. O cliente não precisa de uma conta no aplicativo.|Seul un nom ou pseudonyme est requis. Le client n’a pas besoin d’un compte dans l’application.|Nur ein Name oder Alias ist erforderlich. Klienten benötigen kein App-Konto.|名前または別名のみ必須です。クライエント自身のアプリアカウントは不要です。
+clients.notes|Notas|Anotações|Notes|Notizen|メモ
+clients.save|Guardar cliente|Salvar cliente|Enregistrer le client|Klienten speichern|クライエントを保存
+clients.invalid_name|Introduce un nombre o alias (hasta 100 caracteres).|Digite um nome ou apelido (até 100 caracteres).|Saisissez un nom ou pseudonyme (100 caractères maximum).|Name oder Alias eingeben (max. 100 Zeichen).|名前または別名を100文字以内で入力してください。
+clients.rename_error|No se pudo renombrar la bandeja. Elige un nombre que no esté en uso.|Não foi possível renomear a caixa. Escolha um nome que ainda não esteja em uso.|Impossible de renommer le bac. Choisissez un nom qui n’est pas déjà utilisé.|Sandkasten konnte nicht umbenannt werden. Einen noch nicht verwendeten Namen wählen.|箱庭の名前を変更できませんでした。未使用の名前を選んでください。
+clients.invalid_dob|Usa una fecha válida: AAAA-MM-DD, que no sea futura.|Use uma data válida: AAAA-MM-DD, que não esteja no futuro.|Utilisez une date valide : AAAA-MM-JJ, pas dans le futur.|Gültiges Geburtsdatum verwenden: JJJJ-MM-TT, nicht in der Zukunft.|未来の日付ではない有効な生年月日をYYYY-MM-DD形式で指定してください。
+clients.duplicate_reference|Ese código de cliente ya está en uso. Elige otro o déjalo en blanco.|Esse código de cliente já está em uso. Escolha outro ou deixe em branco.|Ce code client est déjà utilisé. Choisissez-en un autre ou laissez le champ vide.|Dieser Klientencode wird bereits verwendet. Einen anderen wählen oder das Feld leer lassen.|このクライエントコードは使用済みです。別のコードを指定するか空欄にしてください。
+clients.storage_error|No se pudieron leer o guardar los registros locales. Revisa el almacenamiento del dispositivo e inténtalo de nuevo.|Não foi possível ler ou salvar os registros locais. Verifique o armazenamento do dispositivo e tente novamente.|Impossible de lire ou d’enregistrer les dossiers locaux. Vérifiez le stockage de l’appareil et réessayez.|Lokale Daten konnten nicht gelesen oder gespeichert werden. Gerätespeicher prüfen und erneut versuchen.|端末の記録を読み取り・保存できませんでした。空き容量を確認して再試行してください。
+settings.title|Ajustes|Configurações|Paramètres|Einstellungen|設定
+settings.sand_color|Color de la arena|Cor da areia|Couleur du sable|Sandfarbe|砂の色
+settings.box_outer|Exterior de la caja|Exterior da caixa|Extérieur du bac|Außenwand|箱の外側
+settings.box_inner|Interior de la caja|Interior da caixa|Intérieur du bac|Innenwand|箱の内側
+settings.floor|Suelo|Piso|Sol|Boden|床
+settings.allow_objects_in_air|Permitir objetos en el aire|Permitir objetos no ar|Autoriser les objets en l’air|Schwebende Objekte erlauben|オブジェクトの空中配置を許可
+settings.restore|Restaurar valores predeterminados|Restaurar padrões|Rétablir les valeurs par défaut|Standardwerte wiederherstellen|初期設定に戻す
+settings.pick|Elegir|Escolher|Choisir|Wählen|選択
+shortcuts.title|Atajos de teclado|Atalhos de teclado|Raccourcis clavier|Tastenkürzel|キーボードショートカット
+shortcuts.hint|Haz clic en un atajo para cambiarlo. Se guarda en este dispositivo. Mayús permite ajustes más precisos.|Clique em um atalho para alterá-lo. Salvo neste dispositivo. Shift permite ajustes mais precisos.|Cliquez sur un raccourci pour le modifier. Enregistré sur cet appareil. Maj permet des ajustements plus fins.|Zum Ändern auf ein Tastenkürzel klicken. Auf diesem Gerät gespeichert. Umschalt ermöglicht feinere Anpassungen.|キーの割り当てをクリックして変更します。この端末に保存されます。Shiftで細かく調整できます。
+shortcuts.search|Buscar acciones o teclas…|Buscar ações ou teclas…|Rechercher des actions ou des touches…|Aktionen oder Tasten suchen…|操作・キーを検索…
+shortcuts.default|Predeterminado|Padrão|Par défaut|Standard|標準
+shortcuts.custom|Personalizado|Personalizado|Personnalisé|Angepasst|変更済み
+shortcuts.reset|Restablecer|Redefinir|Réinitialiser|Zurücksetzen|リセット
+shortcuts.reset_all|Restablecer todo|Redefinir tudo|Tout réinitialiser|Alle zurücksetzen|すべてリセット
+shortcuts.reset_confirm|¿Restaurar todos los atajos predeterminados? Se eliminarán tus asignaciones personalizadas.|Restaurar todos os atalhos padrão? Suas combinações personalizadas serão removidas.|Rétablir tous les raccourcis par défaut ? Vos personnalisations seront supprimées.|Alle Standard-Tastenkürzel wiederherstellen? Eigene Belegungen werden entfernt.|すべてのショートカットを初期設定に戻しますか？変更した割り当ては削除されます。
+shortcuts.press|Pulsa una combinación de teclas y haz clic en Guardar. Esc cancela. Se requiere un teclado físico.|Pressione uma combinação de teclas e clique em Salvar. Esc cancela. É necessário um teclado físico.|Appuyez sur une combinaison, puis sur Enregistrer. Échap annule. Un clavier physique est nécessaire.|Tastenkombination drücken, dann Speichern wählen. Escape bricht ab. Eine physische Tastatur ist erforderlich.|キーの組み合わせを押し、「保存」を選んでください。Escでキャンセルします。物理キーボードが必要です。
+shortcuts.fine|Mayús se reserva para ajustes precisos en esta acción.|Shift é reservado para ajustes precisos nesta ação.|Maj est réservée aux ajustements fins pour cette action.|Umschalt ist bei dieser Aktion für die Feinjustierung reserviert.|この操作ではShiftは微調整用に予約されています。
+shortcuts.save|Guardar|Salvar|Enregistrer|Speichern|保存
+shortcuts.saved|Atajos guardados en este dispositivo.|Atalhos salvos neste dispositivo.|Raccourcis enregistrés sur cet appareil.|Tastenkürzel auf diesem Gerät gespeichert.|この端末にショートカットを保存しました。
+shortcuts.unassign|Quitar asignación|Remover atribuição|Supprimer l’affectation|Zuordnung aufheben|割り当てを解除
+shortcuts.reserved|Esta tecla se reserva para navegación, cámara o sistema. Elige otra combinación.|Esta tecla é reservada para navegação, câmera ou sistema. Escolha outra combinação.|Cette touche est réservée à la navigation, à la caméra ou au système. Choisissez une autre combinaison.|Diese Taste ist für Navigation, Kamera oder System reserviert. Eine andere Kombination wählen.|このキーは移動、カメラ、システム用です。別の組み合わせを選んでください。
+shortcuts.conflict|Ya lo usa {0}. Cambia o elimina primero la asignación de esa acción.|Já usado por {0}. Altere ou remova primeiro a atribuição dessa ação.|Déjà utilisé par {0}. Modifiez ou supprimez d’abord cette affectation.|Bereits von {0} verwendet. Diese Aktion zuerst neu zuweisen oder ihre Zuordnung aufheben.|{0}で使用中です。先にその操作の割り当てを変更・解除してください。
+shortcuts.save_error|No se pudieron guardar los atajos. Inténtalo de nuevo.|Não foi possível salvar os atalhos. Tente novamente.|Impossible d’enregistrer les raccourcis. Réessayez.|Tastenkürzel konnten nicht gespeichert werden. Bitte erneut versuchen.|ショートカットを保存できませんでした。再試行してください。
+shortcuts.empty|No hay atajos que coincidan.|Nenhum atalho encontrado.|Aucun raccourci correspondant.|Keine passenden Tastenkürzel.|該当するショートカットがありません。
+shortcuts.action.Raise|Elevar objeto|Elevar objeto|Élever l’objet|Objekt anheben|オブジェクトを上げる
+shortcuts.action.Lower|Bajar objeto|Abaixar objeto|Abaisser l’objet|Objekt absenken|オブジェクトを下げる
+shortcuts.action.RotateLeft|Girar a la izquierda|Girar à esquerda|Tourner à gauche|Nach links drehen|左に回転
+shortcuts.action.RotateRight|Girar a la derecha|Girar à direita|Tourner à droite|Nach rechts drehen|右に回転
+shortcuts.action.Enlarge|Ampliar objeto|Ampliar objeto|Agrandir l’objet|Objekt vergrößern|オブジェクトを拡大
+shortcuts.action.Shrink|Reducir objeto|Reduzir objeto|Réduire l’objet|Objekt verkleinern|オブジェクトを縮小
+shortcuts.action.Duplicate|Duplicar objeto|Duplicar objeto|Dupliquer l’objet|Objekt duplizieren|オブジェクトを複製
+shortcuts.action.Delete|Eliminar objeto|Excluir objeto|Supprimer l’objet|Objekt löschen|オブジェクトを削除
+shortcuts.action.Copy|Copiar objeto|Copiar objeto|Copier l’objet|Objekt kopieren|オブジェクトをコピー
+shortcuts.action.Paste|Pegar objeto|Colar objeto|Coller l’objet|Objekt einfügen|オブジェクトを貼り付け
+shortcuts.action.Undo|Deshacer|Desfazer|Annuler|Rückgängig|元に戻す
+shortcuts.action.Redo|Rehacer|Refazer|Rétablir|Wiederholen|やり直す
+settings.language|Idioma|Idioma|Langue|Sprache|言語
+settings.theme|Apariencia|Aparência|Apparence|Darstellung|外観
+settings.theme_light|Claro|Claro|Clair|Hell|ライト
+settings.theme_dark|Oscuro|Escuro|Sombre|Dunkel|ダーク
+board.client_label|Cliente: {0}|Cliente: {0}|Client : {0}|Klient: {0}|クライエント：{0}
+board.client_linked|Vinculada a un cliente|Vinculada a um cliente|Lié à un client|Einem Klienten zugeordnet|クライエントに関連付け済み
+settings.description|Adapta Sandtray a tu forma de trabajar.|Adapte o Sandtray ao seu jeito.|Adaptez Sandtray à votre façon de travailler.|Sandtray an Ihre Arbeitsweise anpassen.|自分の使い方に合わせてSandtrayを設定しましょう。
+settings.subscription|Suscripción|Assinatura|Abonnement|Abonnement|登録プラン
+settings.view_plans|Ver planes ›|Ver planos ›|Voir les offres ›|Tarife ansehen ›|プランを見る ›
+settings.configure|Personalizar ›|Personalizar ›|Personnaliser ›|Anpassen ›|カスタマイズ ›
+settings.view|Ver ›|Ver ›|Voir ›|Ansehen ›|表示 ›
+settings.sign_in|Iniciar sesión|Entrar|Se connecter|Anmelden|ログイン
+settings.managed|Cuenta administrada|Conta gerenciada|Compte géré|Verwaltetes Konto|管理対象アカウント
+settings.off|Desactivado|Desativado|Désactivé|Aus|オフ
+settings.on|Activado|Ativado|Activé|Ein|オン
+settings.reset|Restablecer|Redefinir|Réinitialiser|Zurücksetzen|リセット
+settings.custom_color|Color personalizado…|Cor personalizada…|Couleur personnalisée…|Eigene Farbe…|色を指定…
+credits.title|Créditos|Créditos|Crédits|Quellenangaben|クレジット
+credits.subtitle|Gracias a los creadores de nuestros objetos 3D|Agradecemos aos criadores dos nossos objetos 3D|Merci aux créateurs de nos objets 3D|Vielen Dank an die Urheber unserer 3D-Objekte|3Dオブジェクトの制作者の皆さまに感謝します
+credits.body|Los modelos 3D incluidos contienen obras de Poly by Google, obtenidas de Poly Pizza (poly.pizza).\nBajo licencia Creative Commons Atribución 3.0 Unported (CC BY 3.0).|Os modelos 3D incluídos contêm obras de Poly by Google, obtidas no Poly Pizza (poly.pizza).\nLicenciados sob Creative Commons Atribuição 3.0 Não Adaptada (CC BY 3.0).|Les modèles 3D intégrés comprennent des œuvres de Poly by Google, provenant de Poly Pizza (poly.pizza).\nSous licence Creative Commons Attribution 3.0 non transposé (CC BY 3.0).|Die integrierten 3D-Modelle enthalten Werke von Poly by Google, bezogen von Poly Pizza (poly.pizza).\nLizenziert unter Creative Commons Namensnennung 3.0 Unported (CC BY 3.0).|内蔵3Dモデルには、Poly Pizza（poly.pizza）から入手したPoly by Googleの作品が含まれます。\nCreative Commons 表示 3.0 非移植（CC BY 3.0）ライセンスに基づき使用しています。
+credits.changes|Adaptaciones: los modelos se importan en Unity y se ajusta su escala para Sandtray; los materiales y el renderizado pueden diferir de los originales.|Adaptações: os modelos são importados no Unity e redimensionados para o Sandtray; materiais e renderização podem diferir dos originais.|Adaptations : les modèles sont importés dans Unity et redimensionnés pour Sandtray ; les matériaux et le rendu peuvent différer des originaux.|Anpassungen: Modelle werden in Unity importiert und für Sandtray skaliert; Materialien und Darstellung können von den Originalen abweichen.|変更内容：Unityにインポートし、Sandtray用にサイズを調整しています。マテリアルや描画が原作と異なる場合があります。
+credits.disclaimer|No se implica patrocinio ni respaldo de Google o Poly Pizza. Estos créditos no cubren los objetos subidos por usuarios.|Não há patrocínio ou endosso implícito do Google ou Poly Pizza. Estes créditos não abrangem objetos enviados por usuários.|Aucun parrainage ni soutien de Google ou Poly Pizza n’est sous-entendu. Ces crédits ne couvrent pas les objets importés par les utilisateurs.|Es wird keine Förderung oder Unterstützung durch Google oder Poly Pizza behauptet. Diese Angaben gelten nicht für von Nutzern hochgeladene Objekte.|GoogleまたはPoly Pizzaによる支援・推奨を意味するものではありません。ユーザーがアップロードしたオブジェクトは対象外です。
+credits.creator|Perfil del creador|Perfil do criador|Profil du créateur|Urheberprofil|制作者プロフィール
+credits.models|Créditos de modelos|Créditos dos modelos|Crédits des modèles|Modellnachweise|モデルのクレジット
+account.type_title|Tipo de cuenta|Tipo de conta|Type de compte|Kontotyp|アカウントの種類
+account.type_hint|Cambia tu forma de usar Sandtray. Se conservan tus bandejas, registros de clientes e informes. No modifica tu suscripción ni verifica credenciales profesionales.|Mude sua forma de usar o Sandtray. Suas caixas, registros de clientes e relatórios são mantidos. Isso não altera sua assinatura nem verifica credenciais profissionais.|Changez votre façon d’utiliser Sandtray. Vos bacs, dossiers clients et rapports sont conservés. Cela ne modifie pas votre abonnement et ne vérifie pas les qualifications professionnelles.|Ändern Sie Ihre Nutzung von Sandtray. Sandkästen, Klientendaten und Berichte bleiben erhalten. Dies ändert weder Ihr Abonnement noch bestätigt es berufliche Qualifikationen.|Sandtrayの利用方法を切り替えます。箱庭、クライエント情報、レポートは保持されます。登録プランの変更や専門資格の確認は行われません。
+account.normal|Usuario normal|Usuário comum|Utilisateur standard|Normales Benutzerkonto|一般ユーザー
+account.therapist|Terapeuta|Terapeuta|Thérapeute|Therapeut/in|セラピスト
+account.current|Actual|Atual|Actuel|Aktuell|現在
+account.sign_in|Inicia sesión en «Cuenta» para cambiar tu tipo de cuenta.|Entre em “Conta” acima para alterar seu tipo de conta.|Connectez-vous via « Compte » ci-dessus pour changer de type de compte.|Oben unter „Konto“ anmelden, um den Kontotyp zu ändern.|上の「アカウント」からログインすると、種類を変更できます。
+account.managed|Un administrador gestiona este tipo de cuenta.|Este tipo de conta é gerenciado por um administrador.|Ce type de compte est géré par un administrateur.|Dieser Kontotyp wird von einem Administrator verwaltet.|このアカウントの種類は管理者が管理しています。
+account.saving|Guardando tipo de cuenta…|Salvando tipo de conta…|Enregistrement du type de compte…|Kontotyp wird gespeichert…|アカウントの種類を保存中…
+account.saved|Tipo de cuenta guardado.|Tipo de conta salvo.|Type de compte enregistré.|Kontotyp gespeichert.|アカウントの種類を保存しました。
+account.failed|No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.|Não foi possível salvar. Verifique sua conexão e tente novamente.|Enregistrement impossible. Vérifiez votre connexion et réessayez.|Speichern fehlgeschlagen. Verbindung prüfen und erneut versuchen.|保存できませんでした。接続を確認して再試行してください。
+colorpicker.title|Elegir color|Escolher cor|Choisir une couleur|Farbe auswählen|色を選択
+colorpicker.done|Listo|Concluir|Terminé|Fertig|完了
+qr.title|Escanear código QR|Ler código QR|Scanner un code QR|QR-Code scannen|QRコードを読み取る
+qr.instruction|Apunta la cámara al código QR de una sala|Aponte a câmera para o código QR de uma sala|Pointez la caméra vers le QR code d’une salle|Kamera auf den QR-Code eines Raums richten|カメラをルームのQRコードに向けてください
+qr.cancel|Cancelar|Cancelar|Annuler|Abbrechen|キャンセル
+qr.requesting|Solicitando permiso de cámara…|Solicitando acesso à câmera…|Demande d’accès à la caméra…|Kameraberechtigung wird angefordert…|カメラへのアクセスを要求中…
+qr.waiting|Esperando a la cámara…|Aguardando a câmera…|En attente de la caméra…|Warten auf Kamera…|カメラを待機中…
+qr.scanning|Escaneando…|Lendo…|Scan en cours…|Scan läuft…|読み取り中…
+qr.found|Encontrado: {0}|Encontrado: {0}|Trouvé : {0}|Gefunden: {0}|見つかりました：{0}
+qr.tap_close|Toca cualquier lugar para cerrar|Toque em qualquer lugar para fechar|Touchez n’importe où pour fermer|Zum Schließen irgendwo tippen|どこかをタップして閉じる
+hud.radius|Radio: {0:F1}|Raio: {0:F1}|Rayon : {0:F1}|Radius: {0:F1}|半径：{0:F1}
+hud.strength|Intensidad: {0:F1}|Intensidade: {0:F1}|Intensité : {0:F1}|Stärke: {0:F1}|強さ：{0:F1}
+hud.select|Seleccionar|Selecionar|Sélectionner|Auswählen|選択
+hud.raise_sand|Elevar arena|Elevar areia|Élever le sable|Sand anheben|砂を盛る
+hud.dig_sand|Excavar arena|Escavar areia|Creuser le sable|Sand ausheben|砂を掘る
+hud.smooth_sand|Suavizar arena|Suavizar areia|Lisser le sable|Sand glätten|砂をならす
+hud.flatten_sand|Aplanar arena|Nivelar areia|Aplanir le sable|Sand einebnen|砂を平らにする
+hud.place_object|Colocar objeto|Posicionar objeto|Placer un objet|Objekt platzieren|オブジェクトを配置
+hud.move_object|Mover objeto|Mover objeto|Déplacer l’objet|Objekt bewegen|オブジェクトを移動
+hud.rotate_object|Girar objeto|Girar objeto|Tourner l’objet|Objekt drehen|オブジェクトを回転
+hud.scale_object|Cambiar tamaño|Redimensionar objeto|Redimensionner l’objet|Objekt skalieren|オブジェクトのサイズ変更
+hud.none|Ninguno|Nenhum|Aucun|Keine|なし
+hud.saved|¡Sesión guardada!|Sessão salva!|Séance enregistrée !|Sitzung gespeichert!|セッションを保存しました
+hud.loaded|¡Sesión cargada!|Sessão carregada!|Séance chargée !|Sitzung geladen!|セッションを読み込みました
+hud.screenshot|¡Captura guardada!|Captura de tela salva!|Capture d’écran enregistrée !|Screenshot gespeichert!|スクリーンショットを保存しました
+hud.analysis|Reflexión solicitada…|Reflexão solicitada…|Réflexion demandée…|Reflexion angefordert…|振り返りをリクエストしました…
+agora.mic_on|Activar micrófono|Ativar microfone|Activer le micro|Mikrofon an|マイクをオン
+agora.mic_off|Silenciar|Silenciar|Couper le micro|Stummschalten|ミュート
+agora.cam_on|Activar cámara|Ativar câmera|Activer la caméra|Kamera an|カメラをオン
+agora.cam_off|Desactivar cámara|Desativar câmera|Couper la caméra|Kamera aus|カメラをオフ
+agora.show|Mostrar|Mostrar|Afficher|Anzeigen|表示
+agora.hide|Ocultar|Ocultar|Masquer|Ausblenden|非表示
+agora.leave|Finalizar llamada|Encerrar chamada|Terminer l’appel|Anruf beenden|通話を終了
+agora.connecting|Conectando audio…|Conectando áudio…|Connexion audio…|Audioverbindung wird hergestellt…|音声を接続中…
+agora.comm_title|Comunicación|Comunicação|Communication|Kommunikation|通話
+agora.you|Tú|Você|Vous|Sie|あなた
+cat.Animals|Animales|Animais|Animaux|Tiere|動物
+cat.People|Personas|Pessoas|Personnes|Menschen|人物
+cat.Buildings|Edificios|Edifícios|Bâtiments|Gebäude|建物
+cat.Nature|Naturaleza|Natureza|Nature|Natur|自然
+cat.Vehicles|Vehículos|Veículos|Véhicules|Fahrzeuge|乗り物
+cat.Abstract|Abstractos|Abstratos|Abstrait|Abstrakt|抽象
+text:Object library|Biblioteca de objetos|Biblioteca de objetos|Bibliothèque d’objets|Objektbibliothek|オブジェクトライブラリ
+text:Your collections, ready for every session.|Tus colecciones, listas para cada sesión.|Suas coleções, prontas para cada sessão.|Vos collections, prêtes pour chaque séance.|Ihre Sammlungen, bereit für jede Sitzung.|いつでもセッションで使えるコレクション。
+text:COLLECTION|COLECCIÓN|COLEÇÃO|COLLECTION|SAMMLUNG|コレクション
+text:SHARING|VISIBILIDAD|COMPARTILHAMENTO|PARTAGE|FREIGABE|共有範囲
+text:+ New collection|+ Nueva colección|+ Nova coleção|+ Nouvelle collection|+ Neue Sammlung|＋新しいコレクション
+text:Search objects by name or category|Buscar objetos por nombre o categoría|Buscar objetos por nome ou categoria|Rechercher des objets par nom ou catégorie|Objekte nach Name oder Kategorie suchen|名前・カテゴリでオブジェクトを検索
+text:Refresh|Actualizar|Atualizar|Actualiser|Aktualisieren|更新
+text:+ Upload object|+ Subir objeto|+ Enviar objeto|+ Importer un objet|+ Objekt hochladen|＋オブジェクトをアップロード
+text:Private|Privado|Privado|Privé|Privat|非公開
+text:Clinic|Clínica|Clínica|Cabinet|Praxis|施設内
+text:Public|Público|Público|Public|Öffentlich|公開
+text:Marketplace|Mercado|Mercado|Boutique|Marktplatz|マーケット
+text:Loading collections…|Cargando colecciones…|Carregando coleções…|Chargement des collections…|Sammlungen werden geladen…|コレクションを読み込み中…
+text:Sign in to view your collections.|Inicia sesión para ver tus colecciones.|Entre para ver suas coleções.|Connectez-vous pour voir vos collections.|Anmelden, um Ihre Sammlungen anzuzeigen.|コレクションを表示するにはログインしてください。
+text:No collections yet|Aún no hay colecciones|Ainda não há coleções|Aucune collection|Noch keine Sammlungen|コレクションはまだありません
+text:Create a collection to get started.|Crea una colección para empezar.|Crie uma coleção para começar.|Créez une collection pour commencer.|Zum Einstieg eine Sammlung erstellen.|コレクションを作成して始めましょう。
+text:Sharing updated.|Visibilidad actualizada.|Compartilhamento atualizado.|Partage mis à jour.|Freigabe aktualisiert.|共有範囲を更新しました。
+text:Loading objects…|Cargando objetos…|Carregando objetos…|Chargement des objets…|Objekte werden geladen…|オブジェクトを読み込み中…
+text:Up to date|Actualizado|Atualizado|À jour|Aktuell|最新です
+text:{0} objects|{0} objetos|{0} objetos|{0} objets|{0} Objekte|{0}個のオブジェクト
+text:No matching objects|No hay objetos que coincidan|Nenhum objeto encontrado|Aucun objet correspondant|Keine passenden Objekte|該当するオブジェクトがありません
+text:Make room for your imagination|Da espacio a tu imaginación|Dê espaço à sua imaginação|Laissez place à votre imagination|Raum für Ihre Fantasie|想像力を広げましょう
+text:Try a different name or category.|Prueba otro nombre o categoría.|Tente outro nome ou categoria.|Essayez un autre nom ou une autre catégorie.|Einen anderen Namen oder eine andere Kategorie versuchen.|別の名前やカテゴリをお試しください。
+text:Upload a model and a preview image to build your collection.|Sube un modelo y una imagen de vista previa para crear tu colección.|Envie um modelo e uma imagem de prévia para criar sua coleção.|Importez un modèle et une image d’aperçu pour créer votre collection.|Ein Modell und ein Vorschaubild hochladen, um Ihre Sammlung aufzubauen.|モデルとプレビュー画像をアップロードしてコレクションを作りましょう。
+text:Preview|Vista previa|Prévia|Aperçu|Vorschau|プレビュー
+text:Ready to use in your sandtray|Listo para usar en tu bandeja|Pronto para usar na sua caixa de areia|Prêt à utiliser dans votre bac à sable|Bereit für Ihren Sandkasten|箱庭で利用できます
+text:No preview|Sin vista previa|Sem prévia|Aucun aperçu|Keine Vorschau|プレビューなし
+text:New collection|Nueva colección|Nova coleção|Nouvelle collection|Neue Sammlung|新しいコレクション
+text:Give your collection a name|Ponle un nombre a tu colección|Dê um nome à sua coleção|Nommez votre collection|Geben Sie Ihrer Sammlung einen Namen|コレクション名を入力
+text:Create|Crear|Criar|Créer|Erstellen|作成
+text:Creating collection…|Creando colección…|Criando coleção…|Création de la collection…|Sammlung wird erstellt…|コレクションを作成中…
+host.client_edits|El cliente edita · Yo observo|O cliente edita · Eu observo|Le client modifie · J’observe|Klient bearbeitet · Ich beobachte|クライアントが編集・私は見守る
+host.i_edit|Yo edito · Los demás observan|Eu edito · Os outros observam|Je modifie · Les autres observent|Ich bearbeite · Andere beobachten|私が編集・他の人は見守る
+reports.edit|Editar informe|Editar relatório|Modifier le rapport|Bericht bearbeiten|レポートを編集
+reports.revisions|Versiones anteriores|Versões anteriores|Versions précédentes|Vorherige Versionen|以前のバージョン
+reports.revisions_notice|Texto anterior, más reciente primero. Las fechas indican cuándo se reemplazó. Este historial local no es una auditoría verificada.|Texto anterior, mais recente primeiro. As datas indicam quando foi substituído. Este histórico local não é uma auditoria verificada.|Textes précédents, du plus récent au plus ancien. Les dates indiquent leur remplacement. Cet historique local n’est pas une piste d’audit vérifiée.|Vorherige Texte, neueste zuerst. Das Datum zeigt den Ersetzungszeitpunkt. Dieser lokale Verlauf ist kein verifiziertes Auditprotokoll.|以前の文章を新しい順に表示します。日時は置換時点です。この端末内の履歴は検証済みの監査記録ではありません。
+reports.revisions_empty|No hay versiones anteriores.|Nenhuma versão anterior.|Aucune version précédente.|Keine vorherigen Versionen.|以前のバージョンはありません。
+reports.edit_notice|Los cambios se guardan localmente conservando el texto anterior. Debes exportar un nuevo PDF. El texto de IA no es un diagnóstico.|As alterações são salvas localmente, preservando o texto anterior. Exporte um novo PDF após editar. Texto de IA não é diagnóstico.|Les modifications sont enregistrées localement en conservant le texte précédent. Exportez un nouveau PDF après modification. Le texte IA n’est pas un diagnostic.|Änderungen werden lokal gespeichert; der vorherige Text bleibt erhalten. Danach muss ein neues PDF exportiert werden. KI-Text ist keine Diagnose.|変更は元の文章を保持して端末に保存されます。編集後はPDFを再出力してください。AIの文章は診断ではありません。
+reports.edit_stale|El informe o la cuenta cambió. Cierra y vuelve a abrir el informe antes de editar.|O relatório ou a conta mudou. Feche e reabra o relatório antes de editar.|Le rapport ou le compte a changé. Fermez puis rouvrez le rapport avant de le modifier.|Bericht oder Konto wurde geändert. Bericht vor dem Bearbeiten schließen und erneut öffnen.|レポートまたはアカウントが変更されました。閉じてから再度開いて編集してください。
+net.update_required|La aplicación y el servidor no son compatibles. Actualiza la aplicación; si ya está actualizada, contacta con soporte. Toca para cerrar.|O aplicativo e o servidor são incompatíveis. Atualize o aplicativo; se já estiver atualizado, contate o suporte. Toque para fechar.|L’application et le serveur sont incompatibles. Mettez l’application à jour ; sinon, contactez l’assistance. Touchez pour fermer.|App und Server sind nicht kompatibel. App aktualisieren; falls sie aktuell ist, Support kontaktieren. Zum Schließen antippen.|アプリとサーバーのバージョンが非対応です。アプリを更新してください。最新版の場合はサポートへお問い合わせください。タップで閉じます。
+sub.feature_calls|Videollamadas y llamadas de voz en las sesiones|Chamadas de vídeo e voz nas sessões|Appels vidéo et vocaux pendant les séances|Video- und Sprachanrufe in Sitzungen|セッション内のビデオ・音声通話

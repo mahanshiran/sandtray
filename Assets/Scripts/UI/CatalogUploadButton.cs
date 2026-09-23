@@ -50,14 +50,17 @@ namespace Sandplay.UI
                 return;
             }
 
-            // Check subscription if required
-            if (_requiresSubscription && !BackendClient.Instance.IsSubscribed)
+            BackendClient.Instance.FetchAccessSnapshot(snapshot =>
             {
-                Debug.LogWarning("[CatalogUploadButton] Subscription required to upload custom objects");
-                // Optionally show a subscription prompt here
-                return;
-            }
+                if (this == null) return;
+                if (AccessPolicy.Evaluate(snapshot, "catalog.custom.capacity") != AccessDecision.Allowed)
+                { Debug.LogWarning("[CatalogUploadButton] Custom object access or available capacity is required."); return; }
+                OpenUpload();
+            }, error => Debug.LogWarning("[CatalogUploadButton] " + error));
+        }
 
+        private void OpenUpload()
+        {
             // Use provided catalog ID or fetch user's first catalog
             string catalogId = _catalogId;
             if (string.IsNullOrEmpty(catalogId))
@@ -82,7 +85,7 @@ namespace Sandplay.UI
 
             if (_requiresSubscription && shouldShow)
             {
-                shouldShow = BackendClient.Instance.IsSubscribed;
+                shouldShow = BackendClient.Instance.IsLoggedIn; // Actual capability is checked on tap.
             }
 
             _button.gameObject.SetActive(shouldShow);

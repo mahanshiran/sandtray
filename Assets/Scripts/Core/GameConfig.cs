@@ -51,7 +51,9 @@ namespace Sandplay.Core
         [Tooltip("Apple App Store API key from the RevenueCat dashboard")]
         public string RevenueCatAppleApiKey = "appl_OARoUMFKxBwoZIimzOcXlDFgZBa"; // TODO: rotate before public release
         [Tooltip("Google Play API key from the RevenueCat dashboard")]
-        public string RevenueCatGoogleApiKey = "REPLACE_WITH_GOOGLE_KEY";
+        public string RevenueCatGoogleApiKey = "goog_kzahdHHKMaBOsClyHSWJKyUmdbk";
+        [Tooltip("Enable only after account inventory migration and backend local-capacity rollout.")]
+        public bool LocalTableCapacityEnforcement = false;
         [Tooltip("RevenueCat entitlement identifier (must match dashboard)")]
         public string RevenueCatEntitlementId = "premium";
     }

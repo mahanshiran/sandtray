@@ -5,7 +5,7 @@ using Sandplay.Objects;
 
 namespace Sandplay.UI
 {
-    public class ObjectActionPanel : MonoBehaviour
+    public partial class ObjectActionPanel : MonoBehaviour
     {
         private RectTransform _rt;
         private PlacedObject _target;
@@ -18,6 +18,39 @@ namespace Sandplay.UI
         private float _lastPointerY;
         private float _scaleMultiplier;
         private Vector3 _baseScale;
+        private ObjectPlacer _groupPlacer;
+        private bool _groupAction;
+        private float _groupAmount;
+        private TMPro.TMP_Text _selectionCount;
+
+        private bool HasGroup
+        {
+            get
+            {
+                if (_groupPlacer == null) _groupPlacer = FindAnyObjectByType<ObjectPlacer>();
+                return _groupPlacer != null && _groupPlacer.Selection.Count > 1 && _groupPlacer.GetSelected() == _target;
+            }
+        }
+        private void BeginSharedAction()
+        {
+            _groupAction = HasGroup;
+            _groupAmount = 0;
+            if (_groupAction) _groupPlacer.BeginGroupTransform();
+        }
+        private bool EndSharedAction(bool preserveBurial = false)
+        {
+            if (!_groupAction) return false;
+            _groupAction = false;
+            _groupPlacer.EndGroupTransform(preserveBurial);
+            return true;
+        }
+        private void OnApplicationFocus(bool focused)
+        {
+            if (focused || !_groupAction) return;
+            _groupPlacer.CancelGroupTransform();
+            _groupAction = _verticalHeld = _rotateHeld = _resizeHeld = false;
+        }
+        private void OnDisable() { OnApplicationFocus(false); }
 
         // Undo tracking for vertical move, rotate, and resize
         private Vector3 _actionStartPos;
@@ -36,16 +69,29 @@ namespace Sandplay.UI
 
             EventBus.Subscribe<ObjectSelectedEvent>(OnObjectSelected);
             EventBus.Subscribe<ObjectRemovedEvent>(OnObjectRemoved);
+            EventBus.Subscribe<NetworkRoleAssignedEvent>(OnEditingRoleChanged);
         }
 
         private void OnDestroy()
         {
+            KeyboardShortcuts.Changed -= RefreshKeyboardHints;
             EventBus.Unsubscribe<ObjectSelectedEvent>(OnObjectSelected);
             EventBus.Unsubscribe<ObjectRemovedEvent>(OnObjectRemoved);
+            EventBus.Unsubscribe<NetworkRoleAssignedEvent>(OnEditingRoleChanged);
+        }
+
+        private void OnEditingRoleChanged(NetworkRoleAssignedEvent evt)
+        {
+            if (evt.Role == PlayerRole.Patient) return;
+            if (_groupPlacer != null) _groupPlacer.StopEditingGesture();
+            _groupAction = _verticalHeld = _verticalDropping = _rotateHeld = _resizeHeld = false;
+            gameObject.SetActive(false);
         }
 
         private void OnObjectSelected(ObjectSelectedEvent evt)
         {
+            if (_groupAction) _groupPlacer.CancelGroupTransform();
+            _groupAction = false;
             _target = evt.PlacedObject;
             _verticalHeld = false;
             _verticalDropping = false;
@@ -72,6 +118,8 @@ namespace Sandplay.UI
 
         private void LateUpdate()
         {
+            if (_groupAction && (InputHelper.IsInputBlocked || InputHelper.IsTextInputFocused || Input.GetKeyDown(KeyCode.Escape)))
+                OnApplicationFocus(false);
             if (_target == null || _cam == null)
             {
                 gameObject.SetActive(false);
@@ -90,6 +138,33 @@ namespace Sandplay.UI
             // Position panel above the object in screen space
             float topY = GetObjectTopY(_target);
             Vector3 worldPos = _target.transform.position;
+            if (HasGroup)
+            {
+                var bounds = _groupPlacer.SelectionBounds();
+                worldPos = bounds.center;
+                topY = bounds.max.y;
+            }
+            if (_selectionCount == null && HasGroup)
+            {
+                var label = new GameObject("SelectionCount", typeof(RectTransform), typeof(LayoutElement));
+                label.transform.SetParent(transform, false);
+                label.GetComponent<LayoutElement>().ignoreLayout = true;
+                var rect = label.GetComponent<RectTransform>();
+                rect.anchorMin = rect.anchorMax = new Vector2(.5f, 0f);
+                rect.pivot = new Vector2(.5f, 1f);
+                rect.anchoredPosition = new Vector2(0, -4);
+                rect.sizeDelta = new Vector2(140, 15);
+                _selectionCount = label.AddComponent<TMPro.TextMeshProUGUI>();
+                _selectionCount.fontSize = 10;
+                _selectionCount.alignment = TMPro.TextAlignmentOptions.Center;
+                _selectionCount.raycastTarget = false;
+                label.AddComponent<Shadow>().effectColor = new Color(0,0,0,.9f);
+            }
+            if (_selectionCount != null)
+            {
+                _selectionCount.gameObject.SetActive(HasGroup);
+                if (HasGroup) _selectionCount.text = Localization.Get("selection.count", _groupPlacer.Selection.Count);
+            }
             worldPos.y = topY + 0.15f;
             Vector3 screenPos = _cam.WorldToScreenPoint(worldPos);
 
@@ -104,11 +179,11 @@ namespace Sandplay.UI
             // Keep the toolbar fully visible when objects are near a screen edge.
             var canvas = GetComponentInParent<Canvas>();
             float scaleFactor = canvas != null ? canvas.scaleFactor : 1f;
-            float panelWidth = _rt.rect.width * scaleFactor;
-            float panelHeight = _rt.rect.height * scaleFactor;
+            float panelWidth = _rt.rect.width * scaleFactor * Mathf.Abs(_rt.localScale.x);
+            float panelHeight = _rt.rect.height * scaleFactor * Mathf.Abs(_rt.localScale.y);
             screenPos.x = Mathf.Clamp(screenPos.x, panelWidth * 0.5f + 8f,
                 Screen.width - panelWidth * 0.5f - 8f);
-            screenPos.y = Mathf.Clamp(screenPos.y + 8f, 8f,
+            screenPos.y = Mathf.Clamp(screenPos.y + 8f + 42f * scaleFactor, HasGroup ? 24f * scaleFactor : 8f,
                 Screen.height - panelHeight - 8f);
             _rt.position = screenPos;
 
@@ -118,14 +193,16 @@ namespace Sandplay.UI
                 float dy = InputHelper.GetPointerPosition().y - _lastPointerY;
                 _lastPointerY = InputHelper.GetPointerPosition().y;
                 var placer = FindAnyObjectByType<ObjectPlacer>();
-                placer?.MoveObjectVertically(_target, dy * 0.01f);
+                if (_groupAction) { _groupAmount += dy * .01f; _groupPlacer.RaiseGroup(_groupAmount); }
+                else placer?.MoveObjectVertically(_target, dy * 0.01f);
             }
 
             // Drag-to-rotate while holding the rotate button
             if (_rotateHeld && _target != null)
             {
                 float dx = InputHelper.GetPointerPosition().x - _lastPointerX;
-                _target.transform.Rotate(Vector3.up, -dx * 0.5f, Space.World);
+                if (_groupAction) { _groupAmount -= dx * .5f; _groupPlacer.RotateGroup(_groupAmount); }
+                else _target.transform.Rotate(Vector3.up, -dx * 0.5f, Space.World);
                 _lastPointerX = InputHelper.GetPointerPosition().x;
             }
 
@@ -138,13 +215,15 @@ namespace Sandplay.UI
                 float sensitivity = 2f / Screen.height;
                 _scaleMultiplier += dy * sensitivity;
                 _scaleMultiplier = Mathf.Clamp(_scaleMultiplier, 0.1f, 5f);
-                _target.transform.localScale = _baseScale * _scaleMultiplier;
+                if (_groupAction) _groupPlacer.ResizeGroup(_scaleMultiplier);
+                else _target.transform.localScale = _baseScale * _scaleMultiplier;
             }
         }
 
         public void OnVerticalPointerDown()
         {
             if (_verticalDropping) return;
+            BeginSharedAction();
             _verticalHeld = true;
             _lastPointerY = InputHelper.GetPointerPosition().y;
             if (_target != null)
@@ -159,6 +238,7 @@ namespace Sandplay.UI
         {
             if (!_verticalHeld) return;
             _verticalHeld = false;
+            if (EndSharedAction(true)) return;
             if (_target == null) return;
 
             var droppedTarget = _target;
@@ -192,6 +272,7 @@ namespace Sandplay.UI
         public void OnRotatePointerDown()
         {
             if (_verticalDropping) return;
+            BeginSharedAction();
             _rotateHeld = true;
             _lastPointerX = InputHelper.GetPointerPosition().x;
             if (_target != null)
@@ -204,7 +285,9 @@ namespace Sandplay.UI
 
         public void OnRotatePointerUp()
         {
+            if (!_rotateHeld) return;
             _rotateHeld = false;
+            if (EndSharedAction()) return;
             if (_target != null && _target.transform.rotation != _actionStartRot)
             {
                 var cmd = new Sandplay.Data.MoveObjectCommand(_target, _actionStartPos, _actionStartRot,
@@ -218,6 +301,7 @@ namespace Sandplay.UI
         public void OnResizePointerDown()
         {
             if (_verticalDropping) return;
+            BeginSharedAction();
             _resizeHeld = true;
             _lastPointerY = InputHelper.GetPointerPosition().y;
             if (_target != null)
@@ -232,7 +316,9 @@ namespace Sandplay.UI
 
         public void OnResizePointerUp()
         {
+            if (!_resizeHeld) return;
             _resizeHeld = false;
+            if (EndSharedAction()) return;
             // Snap object back to ground after resize
             if (_target != null)
             {
@@ -253,14 +339,17 @@ namespace Sandplay.UI
 
         public void OnDeletePressed()
         {
-            if (_verticalDropping) return;
+            if (IsActionActive) return;
+            if (HasGroup) { _groupPlacer.DeleteSelection(); return; }
             if (_target != null)
             {
                 var placer = FindAnyObjectByType<ObjectPlacer>();
                 if (placer != null)
                 {
                     var cmd = new Sandplay.Data.RemoveObjectCommand(placer, _target);
-                    Sandplay.Data.UndoManager.Instance?.Execute(cmd);
+                    if (Sandplay.Data.UndoManager.Instance != null)
+                        Sandplay.Data.UndoManager.Instance.Execute(cmd);
+                    else cmd.Execute();
                 }
             }
         }
@@ -268,6 +357,7 @@ namespace Sandplay.UI
         public void OnDuplicatePressed()
         {
             if (_verticalDropping || IsActionActive || _target == null) return;
+            if (HasGroup) { _groupPlacer.DuplicateSelection(); return; }
             var placer = FindAnyObjectByType<ObjectPlacer>();
             placer?.DuplicateObject(_target);
         }

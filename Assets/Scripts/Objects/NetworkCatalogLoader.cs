@@ -14,6 +14,11 @@ namespace Sandplay.Objects
     /// </summary>
     public static class NetworkCatalogLoader
     {
+        // Mobile downloads from the current API can take more than 30 seconds
+        // for a 2 MB GLB. Keep this aligned with the API proxy's read timeout so
+        // a healthy, progressing transfer is not repeatedly restarted at 15 s.
+        internal const int ModelDownloadTimeoutSeconds = 120;
+
         static string GlbDir => Path.Combine(Application.persistentDataPath, "netcatalog", "glb");
         static string ThumbDir => Path.Combine(Application.persistentDataPath, "netcatalog", "thumb");
 
@@ -66,15 +71,52 @@ namespace Sandplay.Objects
         }
 
         /// <summary>
-        /// Ensure item.LoadedPrefab is populated (disk cache → download → cube fallback).
+        /// Load a real model from cache or network. Failures remain retryable.
         /// Call with StartCoroutine from any MonoBehaviour.
         /// </summary>
         public static IEnumerator PreloadGlb(MonoBehaviour host,
-            NetworkCatalogItem item, Action onDone = null)
+            NetworkCatalogItem item, Action onDone = null, Func<bool> shouldContinue = null)
         {
+            if (shouldContinue != null && !shouldContinue()) yield break;
             if (host == null || item == null) { onDone?.Invoke(); yield break; }
             if (item.LoadedPrefab != null) { onDone?.Invoke(); yield break; }
 
+            // A resumed snapshot can request many models at once (and the same
+            // model for several placements). Bound native import memory and recheck
+            // the cache after waiting, rather than decoding duplicate templates.
+            while (_modelLoadOwner != null)
+            {
+                if (shouldContinue != null && !shouldContinue()) yield break;
+                if (item.LoadedPrefab != null) { onDone?.Invoke(); yield break; }
+                yield return null;
+            }
+            if (item.LoadedPrefab != null) { onDone?.Invoke(); yield break; }
+            if (shouldContinue != null && !shouldContinue()) yield break;
+            var lease = new object();
+            _modelLoadLease = lease;
+            _modelLoadOwner = host;
+            var load = LoadGlbExclusive(host, item);
+            try
+            {
+                while (load.MoveNext()) yield return load.Current;
+            }
+            finally
+            {
+                (load as IDisposable)?.Dispose();
+                if (ReferenceEquals(_modelLoadLease, lease))
+                {
+                    _modelLoadOwner = null;
+                    _modelLoadLease = null;
+                }
+            }
+            onDone?.Invoke();
+        }
+
+        private static MonoBehaviour _modelLoadOwner;
+        private static object _modelLoadLease;
+
+        private static IEnumerator LoadGlbExclusive(MonoBehaviour host, NetworkCatalogItem item)
+        {
             Directory.CreateDirectory(GlbDir);
             string path = GlbPath(item);
 
@@ -96,6 +138,7 @@ namespace Sandplay.Objects
             else if (!string.IsNullOrEmpty(item.model_url))
             {
                 using var req = UnityWebRequest.Get(item.model_url);
+                req.timeout = ModelDownloadTimeoutSeconds;
                 yield return req.SendWebRequest();
 
                 if (req.result == UnityWebRequest.Result.Success)
@@ -121,21 +164,26 @@ namespace Sandplay.Objects
                     NormalizeTemplate(template, item.display_name);
                     template.SetActive(false);
                     item.LoadedPrefab = template;
+                    // A placed/restored object is a board dependency even if the
+                    // user never pressed the catalog's explicit download button.
+                    // Persist its metadata so disabling the source catalog cannot
+                    // break a later board restore.
+                    NetworkCatalogCache.MarkDownloaded(item);
                 }
             }
 
-            // Ultimate fallback: cube so placement always works
+            // Never cache a placeholder as a successful model. A temporary
+            // network failure must not permanently replace someone's objects.
             if (item.LoadedPrefab == null)
             {
-                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                cube.transform.localScale = Vector3.one * 0.15f;
-                cube.name = $"NetObj_{item.display_name}";
-                UnityEngine.Object.Destroy(cube.GetComponent<BoxCollider>());
-                cube.SetActive(false);
-                item.LoadedPrefab = cube;
+                if (bytes != null)
+                {
+                    // A corrupt cache must not prevent the next download.
+                    try { File.Delete(path); } catch { }
+                }
+                Debug.LogWarning($"[Catalog] Model unavailable; will retry: {item.display_name}");
             }
 
-            onDone?.Invoke();
         }
 
         /// <summary>
@@ -162,7 +210,7 @@ namespace Sandplay.Objects
                 {
                     var data = File.ReadAllBytes(path);
                     tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-                    if (!tex.LoadImage(data))
+                    if (!tex.LoadImage(data, markNonReadable: true))
                     {
                         Debug.LogWarning($"[Thumb Cache] Failed to load cached thumbnail: {path}");
                         UnityEngine.Object.Destroy(tex);
@@ -187,7 +235,7 @@ namespace Sandplay.Objects
                 {
                     var data = File.ReadAllBytes(legacyPath);
                     tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-                    if (!tex.LoadImage(data))
+                    if (!tex.LoadImage(data, markNonReadable: true))
                     {
                         UnityEngine.Object.Destroy(tex);
                         tex = null;
@@ -207,7 +255,8 @@ namespace Sandplay.Objects
             {
                 Debug.Log($"[Thumb Cache] Downloading: {item.display_name} from {item.thumbnail_url}");
 
-                using var req = UnityWebRequestTexture.GetTexture(item.thumbnail_url);
+                using var req = UnityWebRequestTexture.GetTexture(item.thumbnail_url, nonReadable: true);
+                req.timeout = 30;
                 yield return req.SendWebRequest();
 
                 if (req.result == UnityWebRequest.Result.Success)
@@ -253,33 +302,68 @@ namespace Sandplay.Objects
 
             GLTFSceneImporter importer = null;
             System.Threading.Tasks.Task task = null;
+            var cancellation = new System.Threading.CancellationTokenSource();
             try
             {
                 importer = new GLTFSceneImporter(new MemoryStream(bytes), opts);
                 importer.SceneParent = holder.transform;
-                importer.IsMultithreaded = true;
-                task = importer.LoadSceneAsync(showSceneObj: false);
+                // UnityGLTF's background importer can stall indefinitely on iOS.
+                // Keep the import on Unity's main thread there; other platforms can
+                // still use the faster multithreaded path.
+                importer.IsMultithreaded = Application.platform != RuntimePlatform.IPhonePlayer;
+                task = importer.LoadSceneAsync(showSceneObj: false, cancellationToken: cancellation.Token);
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[GLB] Init failed: {ex.Message}");
+                cancellation.Dispose();
                 UnityEngine.Object.Destroy(holder);
                 onDone(null);
                 yield break;
             }
 
-            while (task != null && !task.IsCompleted) yield return null;
+            const double importTimeoutSeconds = 30d;
+            double deadline = Time.realtimeSinceStartupAsDouble + importTimeoutSeconds;
+            while (task != null && !task.IsCompleted && Time.realtimeSinceStartupAsDouble < deadline)
+                yield return null;
 
-            if (task != null && task.IsFaulted)
+            if (task != null && !task.IsCompleted)
             {
-                Debug.LogError($"[GLB] Parse failed: {task.Exception?.GetBaseException().Message}");
+                Debug.LogError($"[GLB] Import timed out after {importTimeoutSeconds:0} seconds.");
+                cancellation.Cancel();
+                double cancelDeadline = Time.realtimeSinceStartupAsDouble + 1d;
+                while (!task.IsCompleted && Time.realtimeSinceStartupAsDouble < cancelDeadline)
+                    yield return null;
+                if (task.IsCompleted)
+                {
+                    importer?.Dispose();
+                    UnityEngine.Object.Destroy(holder);
+                }
+                else
+                {
+                    // Do not dispose resources still touched by a wedged importer.
+                    // The failed item has bounded retries, so this remains bounded too.
+                    Debug.LogError("[GLB] Import did not stop after cancellation.");
+                }
+                cancellation.Dispose();
+                onDone(null);
+                yield break;
+            }
+
+            if (task != null && (task.IsFaulted || task.IsCanceled))
+            {
+                Debug.LogError(task.IsCanceled
+                    ? "[GLB] Parse cancelled."
+                    : $"[GLB] Parse failed: {task.Exception?.GetBaseException().Message}");
                 importer?.Dispose();
+                cancellation.Dispose();
                 UnityEngine.Object.Destroy(holder);
                 onDone(null);
                 yield break;
             }
 
             importer?.Dispose();
+            cancellation.Dispose();
             var helper = holder.GetComponent<AsyncCoroutineHelper>();
             if (helper != null) UnityEngine.Object.Destroy(helper);
             // Activate scene children so they follow the parent's active state when toggled later.

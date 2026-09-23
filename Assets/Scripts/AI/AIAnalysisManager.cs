@@ -19,7 +19,8 @@ namespace Sandplay.AI
         }
 
         public void RequestAnalysis(AnalysisPayload payload, string screenshotBase64,
-            Action<string> onResult, Action<string> onError)
+            Action<string> onResult, Action<string> onError,
+            Action<AccessCapability> onQuotaChecked = null)
         {
             var client = BackendClient.Instance;
             if (client == null || !client.IsLoggedIn)
@@ -30,13 +31,29 @@ namespace Sandplay.AI
 
             string image = _useVisionModel ? screenshotBase64 : "";
             string language = Localization.Current == Language.Chinese ? "zh" : "en";
-            client.RequestAiReflection(payload, image, language,
-                (reflection, model) =>
+            client.FetchAccessSnapshot(snapshot =>
+            {
+                var capability = AccessPolicy.Find(snapshot.capabilities, "ai.analyze");
+                var decision = AccessPolicy.Evaluate(snapshot, "ai.analyze", 1, checkUsage: true);
+                if (decision != AccessDecision.Allowed)
                 {
-                    LastModelUsed = model ?? "";
-                    onResult?.Invoke(reflection);
-                },
-                onError);
+                    string message = decision == AccessDecision.NotIncluded
+                        ? (language == "zh" ? "当前方案不包含 AI 分析。" : "Your current plan does not include AI analyses.")
+                        : decision == AccessDecision.LimitReached
+                            ? (language == "zh" ? "本月 AI 分析额度已用完。" : "Your AI analysis allowance is used up for this month.")
+                            : (language == "zh" ? "暂时无法验证 AI 分析额度，请重试。" : "Your AI analysis allowance could not be verified. Please retry.");
+                    onError?.Invoke(message);
+                    return;
+                }
+                onQuotaChecked?.Invoke(capability);
+                client.RequestAiReflection(payload, image, language,
+                    (reflection, model) =>
+                    {
+                        LastModelUsed = model ?? "";
+                        onResult?.Invoke(reflection);
+                    },
+                    onError);
+            }, onError, force: true);
         }
 
         private void OnDestroy()

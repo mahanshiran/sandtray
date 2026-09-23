@@ -68,6 +68,50 @@ namespace Sandplay.Tests
 
         // ── Tests ──────────────────────────────────────────────────────────
 
+        [TestCase(.003f, .05f)]
+        [TestCase(.05f, .02f)]
+        [TestCase(.4f, 1f)]
+        public void BoardRestorePreservesSmallRelativeScales(float templateScale, float multiplier)
+        {
+            var root = new GameObject("Scale round trip"); root.SetActive(false);
+            var template = new GameObject("Template"); template.SetActive(false);
+            var catalog = ScriptableObject.CreateInstance<Sandplay.Objects.ObjectCatalog>();
+            var definition = ScriptableObject.CreateInstance<Sandplay.Objects.SandplayObject>();
+            Sandplay.Objects.PlacedObject placed = null;
+            try
+            {
+                template.transform.localScale = Vector3.one * templateScale;
+                definition.ObjectId = "scale-regression-local"; definition.Prefab = template;
+                catalog.Objects.Add(definition);
+                var placer = root.AddComponent<Sandplay.Objects.ObjectPlacer>();
+                var sand = root.AddComponent<Sandplay.Sand.SandMesh>();
+                var manager = root.AddComponent<Sandplay.Data.SessionManager>();
+                typeof(Sandplay.Data.SessionManager).GetField("_requireWorkspace",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    .SetValue(manager, (System.Action)(() => { }));
+                manager.Initialize(catalog, placer, sand);
+                var saved = new Sandplay.Objects.PlacedObjectData { ObjectId = definition.ObjectId, Scale = multiplier };
+                for (int cycle = 0; cycle < 3; cycle++)
+                {
+                    // Exercise the real board loader after a JSON disk-format round trip.
+                    var board = new Sandplay.Data.SessionData { SandboxWidth = 0, SandboxDepth = 0 };
+                    board.PlacedObjects.Add(saved);
+                    manager.ApplySession(JsonUtility.FromJson<Sandplay.Data.SessionData>(JsonUtility.ToJson(board)));
+                    placed = placer.PlacedObjects[0];
+                    Assert.That(placed.transform.localScale.x, Is.EqualTo(templateScale * multiplier).Within(.000001f));
+                    saved = placed.Serialize();
+                    Assert.That(saved.Scale, Is.EqualTo(multiplier).Within(.000001f));
+                    Object.DestroyImmediate(placed.gameObject); placed = null;
+                }
+            }
+            finally
+            {
+                if (placed) Object.DestroyImmediate(placed.gameObject);
+                Object.DestroyImmediate(root); Object.DestroyImmediate(template);
+                Object.DestroyImmediate(catalog); Object.DestroyImmediate(definition);
+            }
+        }
+
         [Test]
         public void Magic_IsExactlyEightBytes()
         {
@@ -193,12 +237,102 @@ namespace Sandplay.Tests
         }
 
         [Test]
+        public void SeekStopsDispatchingWhenItsCallbackSwitchesAccounts()
+        {
+            string path = WriteSyntheticLog(_tempDir, "private", new[] {
+                (0u, SessionRecorder.Direction.Outgoing, NetMsgType.MoveObject, new byte[] { 1 }),
+                (1u, SessionRecorder.Direction.Outgoing, NetMsgType.MoveObject, new byte[] { 2 })
+            });
+            var go = new GameObject("ScopedPlayer");
+            var epoch = typeof(Sandplay.Data.LocalAccountStorage).GetProperty("Epoch");
+            int original = (int)epoch.GetValue(null);
+            try
+            {
+                var player = go.AddComponent<SessionPlayer>();
+                Assert.IsTrue(player.Load(path));
+                int dispatched = 0;
+                player.SeekRebuild(10, (direction, type, payload) => {
+                    dispatched++; epoch.SetValue(null, original + 1);
+                });
+                Assert.AreEqual(1, dispatched);
+                Assert.IsFalse(player.HasCurrentWorkspace);
+                player.SeekRebuild(10, (direction, type, payload) => dispatched++);
+                player.Play();
+                Assert.AreEqual(1, dispatched); Assert.IsFalse(player.IsPlaying);
+            }
+            finally { epoch.SetValue(null, original); Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void ExportInterruptedByAccountChangeDiscardsOutputWithoutCompletion()
+        {
+            string path = WriteSyntheticLog(_tempDir, "private", new[] {
+                (100u, SessionRecorder.Direction.Outgoing, NetMsgType.MoveObject, new byte[] { 1 })
+            });
+            var initialized = Sandplay.Data.LocalAccountStorage.Root;
+            var statics = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic;
+            var scope = typeof(Sandplay.Data.LocalAccountStorage).GetField("scope", statics);
+            var enabled = typeof(Sandplay.Data.LocalAccountStorage).GetField("enabled", statics);
+            var epoch = typeof(Sandplay.Data.LocalAccountStorage).GetProperty("Epoch");
+            object oldScope = scope.GetValue(null), oldEnabled = enabled.GetValue(null);
+            int oldEpoch = (int)epoch.GetValue(null);
+            var go = new GameObject("InterruptedExport");
+            try
+            {
+                scope.SetValue(null, new Sandplay.Data.LocalStorageScope(_tempDir, 0, () => 0));
+                enabled.SetValue(null, false);
+                var player = go.AddComponent<SessionPlayer>(); Assert.IsTrue(player.Load(path));
+                typeof(SessionPlayer).GetProperty("IsPlaying").SetValue(player, true);
+                var exporter = go.AddComponent<ReplayVideoExporter>();
+                int completions = 0; exporter.OnCompletedPath = _ => completions++;
+                var routine = (System.Collections.IEnumerator)typeof(ReplayVideoExporter)
+                    .GetMethod("ExportCoroutine", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                    .Invoke(exporter, new object[] { player, "private" });
+                Assert.IsTrue(routine.MoveNext());
+                Assert.AreEqual(1, Directory.GetFiles(Path.Combine(_tempDir, "Exports")).Length);
+                epoch.SetValue(null, oldEpoch + 1);
+                Assert.IsFalse(routine.MoveNext());
+                Assert.IsFalse(exporter.IsExporting); Assert.AreEqual(0, completions);
+                Assert.IsEmpty(Directory.GetFiles(Path.Combine(_tempDir, "Exports")));
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+                scope.SetValue(null, oldScope); enabled.SetValue(null, oldEnabled); epoch.SetValue(null, oldEpoch);
+            }
+        }
+
+        [Test]
+        public void CancelExportClosesWriterAndRemovesOnlyPartialOutput()
+        {
+            string partial = Path.Combine(_tempDir, "partial.avi");
+            string saved = Path.Combine(_tempDir, "saved.avi");
+            File.WriteAllText(saved, "completed video");
+            var go = new GameObject("CancelledExporter");
+            try
+            {
+                var exporter = go.AddComponent<ReplayVideoExporter>();
+                var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+                typeof(ReplayVideoExporter).GetField("_avi", flags).SetValue(exporter, new MjpegAviWriter(partial, 16, 16, 15));
+                typeof(ReplayVideoExporter).GetField("_partialPath", flags).SetValue(exporter, partial);
+                exporter.CancelExport(); exporter.CancelExport();
+                Assert.IsFalse(File.Exists(partial)); Assert.IsFalse(exporter.IsExporting);
+                Assert.AreEqual("completed video", File.ReadAllText(saved));
+                using var reopened = new FileStream(partial, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
         public void Recorder_WritesParsableFile_EndToEnd()
         {
             var rec = SessionRecorder.GetOrCreate();
             string filePath = rec.StartRecording("EndToEndBoard");
             Assert.IsNotNull(filePath, "StartRecording should return a path.");
             Assert.IsTrue(rec.IsRecording);
+            // Model a retained recording without sleeping through the minimum duration.
+            typeof(SessionRecorder).GetField("_startMs", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .SetValue(rec, System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - SessionRecorder.MinSaveDurationMs - 1);
 
             rec.Record(SessionRecorder.Direction.Outgoing, NetMsgType.RoleRequest, new byte[] { (byte)PlayerRole.Patient });
             rec.Record(SessionRecorder.Direction.Incoming, NetMsgType.RoleAssignment, new byte[] { (byte)PlayerRole.Patient });

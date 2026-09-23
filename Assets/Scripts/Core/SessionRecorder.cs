@@ -62,7 +62,7 @@ namespace Sandplay.Core
 
             try
             {
-                string sessionsDir = Path.Combine(Application.persistentDataPath, "Sessions");
+                string sessionsDir = Path.Combine(Sandplay.Data.LocalAccountStorage.Root, "Sessions");
                 Directory.CreateDirectory(sessionsDir);
 
                 string safeBoard = MakeSafeFileName(boardName ?? "board");
@@ -91,6 +91,23 @@ namespace Sandplay.Core
                 EventsRecorded = 0;
                 BytesWritten = _stream.Position;
                 IsRecording = true;
+
+                // Keep replay object metadata self-contained. The GLB itself remains in
+                // the normal persistent cache, but a later app launch can still resolve
+                // every recorded object ID without depending on transient registry state.
+                try
+                {
+                    if (Sandplay.Objects.NetworkCatalogRegistry.IsLoaded)
+                    {
+                        var manifest = NetSerializer.WriteCatalogManifest(
+                            Sandplay.Objects.NetworkCatalogRegistry.Snapshot());
+                        Record(Direction.Outgoing, NetMsgType.CatalogManifest, manifest);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"[SessionRecorder] Could not embed catalog manifest: {ex.Message}");
+                }
 
                 Debug.Log($"[SessionRecorder] Recording started: {filePath}");
                 return filePath;
@@ -137,8 +154,12 @@ namespace Sandplay.Core
                     _writer = null;
                     IsRecording = false;
 
-                    // Drop short / empty recordings
-                    bool tooShort = durationMs < MinSaveDurationMs || finishedEvents <= 1;
+                    // Drop only recordings that were genuinely too short. A valid
+                    // offline replay may contain only its initial snapshot (for
+                    // example, when the user opens a board, observes it, and leaves
+                    // without making an edit), so event count must not decide whether
+                    // the replay is retained.
+                    bool tooShort = durationMs < MinSaveDurationMs;
                     if (!string.IsNullOrEmpty(finishedPath) && tooShort)
                     {
                         try
@@ -165,6 +186,7 @@ namespace Sandplay.Core
         /// </summary>
         public void Record(Direction dir, NetMsgType type, byte[] payload)
         {
+            if (type == NetMsgType.SessionProfiles || type == NetMsgType.SessionProfilesRequest) return;
             if (!IsRecording) return;
             lock (_lock)
             {

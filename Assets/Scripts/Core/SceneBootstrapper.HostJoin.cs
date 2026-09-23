@@ -20,13 +20,13 @@ namespace Sandplay.Core
     public partial class SceneBootstrapper : MonoBehaviour
     {
         // Relay server address (change to your Aliyun ECS public IP)
-        private const string RelayAddress = "43.99.51.164";
+        private const string RelayAddress = "api.sandtraypro.com";
 
         private void UpdateRoomCodeDisplay()
         {
             if (_roomCodeText == null) return;
             var net = NetworkBootstrapper.Instance;
-            if (net != null && !string.IsNullOrEmpty(net.RoomCode))
+            if (net != null && net.IsOnline && !string.IsNullOrEmpty(net.RoomCode))
             {
                 _roomCodeText.text = Localization.Get("net.room", net.RoomCode);
                 if (_netOverlayGo != null) _netOverlayGo.SetActive(true);
@@ -46,19 +46,116 @@ namespace Sandplay.Core
         }
 
         private Coroutine _enterSandboxRoutine;
+        private sealed class SessionInviteTarget
+        {
+            public int UserId;
+            public string Name;
+            public string AvatarUrl;
+            public string FriendCode;
+            public string OrganizationId;
+            public string OrganizationClientId;
+            public bool IsOrganization => !string.IsNullOrEmpty(OrganizationId) &&
+                !string.IsNullOrEmpty(OrganizationClientId);
+        }
+        private GameObject _contextInviteCard;
+        private Coroutine _contextInviteRoutine;
+        private bool _contextInviteSending;
+        private bool _contextInviteSent;
+        private string _contextInviteError;
+        private TMP_Text _contextInviteStatus;
+        private Button _contextInviteButton;
+
+        private SessionInviteTarget InviteTargetForClient(ClientRecord client)
+        {
+            if (client == null) return null;
+            var account = client.Account;
+            var person = account == null ? null : Array.Find(
+                FriendsClient.Instance.State?.people ?? Array.Empty<FriendPerson>(),
+                item => item != null && item.id == account.UserId);
+            return new SessionInviteTarget
+            {
+                UserId = account?.UserId ?? 0,
+                Name = client.Name,
+                AvatarUrl = person?.avatar_url,
+                FriendCode = person?.code ?? account?.IdentityCode,
+            };
+        }
+
+        private static SessionInviteTarget InviteTargetForFriend(FriendPerson person) => person == null ? null :
+            new SessionInviteTarget
+            {
+                UserId = person.id, Name = person.name, AvatarUrl = person.avatar_url,
+                FriendCode = person.code,
+            };
+
+        private static SessionInviteTarget InviteTargetForOrganizationClient(
+            BackendClient.OrganizationWorkspace workspace, BackendClient.OrganizationClient client) =>
+            workspace == null || client == null ? null : new SessionInviteTarget
+            {
+                UserId = client.linked_user_id,
+                Name = client.name,
+                AvatarUrl = client.avatar_url,
+                OrganizationId = workspace.id,
+                OrganizationClientId = client.id,
+            };
+        private void ShowConnectionError(string message)
+        {
+            _pendingScheduleStartId = null;
+            HideBoardLoadingOverlay();
+            HideReconnectOverlay();
+            if (_netOverlayGo != null) _netOverlayGo.SetActive(false);
+            var box = ClientDialog(Localization.Get("net.connection_error_title"), 560, 320);
+            var text = ClientText(box, message, 16, .06f, .28f, .88f, .50f, Color.white);
+            text.name = "ConnectionErrorMessage";
+            text.enableWordWrapping = true;
+            ClientButton(box, "net.dismiss", .60f, .07f, .34f, .15f, CloseClientDialog, true).name = "DismissConnectionError";
+        }
         private GameObject _boardLoadingOverlay;
         private CanvasGroup _boardLoadingGroup;
         private Image _boardLoadingProgressFill;
         private TextMeshProUGUI _boardLoadingStatusTxt;
+        private RectTransform _boardLoadingCard;
+        private GameObject _boardLoadingThumb;
+        private GameObject _boardLoadingSpinner;
+        private TextMeshProUGUI _boardLoadingTitleTxt;
+        private Button _boardLoadingActionButton;
+        private NetworkBootstrapper _sessionLoadingNetwork;
+        private Action<int, int> _sessionLoadProgressHandler;
+        private Action _sessionLoadReadyHandler;
+        private Action<string> _sessionLoadFailedHandler;
+        private Action _sessionLoadDisconnectedHandler;
+        private Coroutine _sessionReadyRoutine;
 
-        private void EnterSandbox(string boardName, bool isNew, float width = 10f, float depth = 10f)
+        private static string BoardOpenFailureMessage(bool isNew, string reason)
         {
-            if (_enterSandboxRoutine != null)
-                StopCoroutine(_enterSandboxRoutine);
-            _enterSandboxRoutine = StartCoroutine(EnterSandboxRoutine(boardName, isNew, width, depth));
+            string message = Localization.Get(isNew ? "save.create_failed" : "save.load_failed");
+            return isNew && !string.IsNullOrWhiteSpace(reason) ? message + "\n\n" + reason : message;
         }
 
-        private IEnumerator EnterSandboxRoutine(string boardName, bool isNew, float width, float depth)
+        private void EnterSandbox(string boardName, bool isNew, float width = 10f, float depth = 10f,
+            string clientId = null, string organizationId = null, string organizationClientId = null,
+            SessionInviteTarget inviteTarget = null)
+        {
+            if (isNew) { WithLocalBoardCreation(() => EnterAuthorizedSandbox(boardName, true, width, depth,
+                clientId, organizationId, organizationClientId, inviteTarget)); return; }
+            EnterAuthorizedSandbox(boardName, false, width, depth, clientId, organizationId, organizationClientId,
+                inviteTarget);
+        }
+
+        private void EnterAuthorizedSandbox(string boardName, bool isNew, float width, float depth,
+            string clientId, string organizationId, string organizationClientId, SessionInviteTarget inviteTarget)
+        {
+            if (LocalAccountStorage.RequiresRestart) { LocalAccountStorage.ShowRestartShield(); return; }
+            if (_enterSandboxRoutine != null)
+                StopCoroutine(_enterSandboxRoutine);
+            if (isNew && SessionManager.Instance != null)
+                boardName = SessionManager.Instance.GetAvailableSessionName(boardName);
+            _enterSandboxRoutine = StartCoroutine(EnterSandboxRoutine(boardName, isNew, width, depth,
+                clientId, organizationId, organizationClientId, inviteTarget));
+        }
+
+        private IEnumerator EnterSandboxRoutine(string boardName, bool isNew, float width, float depth,
+            string clientId, string organizationId, string organizationClientId, SessionInviteTarget inviteTarget)
         {
             // Game pattern: veil first so players never see a half-built board hitch.
             ShowBoardLoadingOverlay(boardName, isNew);
@@ -66,7 +163,11 @@ namespace Sandplay.Core
             yield return null;
 
             _currentBoardName = boardName;
-            if (SessionManager.Instance != null) SessionManager.Instance.CurrentBoardName = boardName;
+            if (SessionManager.Instance != null)
+            {
+                SessionManager.Instance.PrepareBoard(boardName, isNew ? clientId : null,
+                    isNew ? organizationId : null, isNew ? organizationClientId : null);
+            }
             if (_mainMenuPanel != null) _mainMenuPanel.SetActive(false);
             if (_mainMenuBackground != null) _mainMenuBackground.SetActive(false);
             if (_networkPanel != null) { Destroy(_networkPanel); _networkPanel = null; }
@@ -84,6 +185,8 @@ namespace Sandplay.Core
             SetBoardLoadingProgress(0.40f, Localization.Get(isNew ? "board.loading_prepare" : "board.loading_restore"));
             yield return null;
 
+            bool newScenePrepared = false;
+            string createError = null;
             try
             {
                 if (isNew)
@@ -104,17 +207,47 @@ namespace Sandplay.Core
                     SandMesh.Instance?.GenerateRandomTerrain();
                     Sandplay.Sand.SandMaterialController.Instance?.ClearSplatmap();
                     FindAnyObjectByType<ObjectPlacer>()?.ClearAll();
-                    SessionManager.Instance?.SaveSession(boardName);
+                    newScenePrepared = true;
+                    // First save is coordinated below, after preparing the scene.
                 }
                 else
                 {
                     SessionManager.Instance?.LoadSession(boardName);
+                    // Saved boards can have different dimensions from the menu's
+                    // default tray. Keep the room and its light ranges in sync.
+                    ApplyEnvironmentLighting();
+                    BuildTherapyRoom();
                 }
             }
             catch (System.Exception ex)
             {
-                Debug.LogWarning($"[Sandbox] Board load hit an error (continuing anyway): {ex.Message}");
+                if (isNew) createError = ex.Message;
+                Debug.LogWarning($"[Sandbox] Board preparation failed: {ex.Message}");
             }
+
+            if (isNew && newScenePrepared && SessionManager.Instance != null)
+            {
+                bool completed = false;
+                SessionManager.Instance.SaveNewSession(boardName, () => completed = true,
+                    error => { createError = error; completed = true; });
+                while (!completed) yield return null;
+                if (createError != null) Debug.LogWarning("[Sandbox] New table save failed: " + createError);
+            }
+
+            if (SessionManager.Instance == null || !SessionManager.Instance.BoardReady)
+            {
+                if (LocalAccountStorage.RequiresRestart) { LocalAccountStorage.ShowRestartShield(); yield break; }
+                HideBoardLoadingOverlay();
+                _currentBoardName = null;
+                SessionManager.Instance?.PrepareBoard(null, null);
+                _pendingHostMode = HostMode.None;
+                _pendingScheduleStartId = null;
+                ShowMainMenu();
+                ShowLockedFeatureDialog(BoardOpenFailureMessage(isNew, createError), "save.title", false);
+                _enterSandboxRoutine = null;
+                yield break;
+            }
+            SessionManager.Instance.BeginAutoSave();
 
             SetBoardLoadingProgress(0.62f, Localization.Get("board.loading_objects"));
             yield return null;
@@ -155,15 +288,24 @@ namespace Sandplay.Core
             }
             _pendingHostMode = HostMode.None;
 
-            var recorder = SessionRecorder.GetOrCreate();
-            recorder.StartRecording(boardName);
-            if (recorder.IsRecording && NetworkBootstrapper.Instance != null)
+            // Recording starts only after current capability policy is known.
+            int recordingEpoch = LocalAccountStorage.Epoch;
+            BackendClient.Instance.FetchAccessSnapshot(snapshot =>
             {
-                var initialState = NetworkBootstrapper.Instance.BuildFullStatePayload();
-                recorder.Record(SessionRecorder.Direction.Outgoing, NetMsgType.FullState, initialState);
-            }
+                if (this == null || _sandboxRoot == null || !_sandboxRoot.activeInHierarchy ||
+                    recordingEpoch != LocalAccountStorage.Epoch || _currentBoardName != boardName ||
+                    SessionManager.Instance == null || !SessionManager.Instance.BoardReady ||
+                    AccessPolicy.Evaluate(snapshot, "replays.record", checkUsage: false) != AccessDecision.Allowed) return;
+                _recordingPolicyDeadline = BackendClient.Instance.AccessCacheDeadline;
+                var recorder = SessionRecorder.GetOrCreate();
+                recorder.StartRecording(boardName);
+                if (recorder.IsRecording && NetworkBootstrapper.Instance != null)
+                    recorder.Record(SessionRecorder.Direction.Outgoing, NetMsgType.FullState, NetworkBootstrapper.Instance.BuildFullStatePayload());
+            }, error => Debug.LogWarning($"[Replay] Recording access could not be verified: {error}"),
+                force: false);
 
             if (_sandboxUI != null) _sandboxUI.SetActive(true);
+            ShowContextInviteCard(inviteTarget);
 
             // Hold the door-outside view under the veil so the tray overview never flashes first.
             var cam = FindAnyObjectByType<Sandplay.Camera.SandboxCamera>();
@@ -176,6 +318,138 @@ namespace Sandplay.Core
             cam?.PlayIntro();
 
             _enterSandboxRoutine = null;
+        }
+
+        private void ShowContextInviteCard(SessionInviteTarget target)
+        {
+            ClearContextInviteCard();
+            if (target == null || _sandboxUI == null) return;
+            _contextInviteCard = new GameObject("ContextInviteCard", typeof(RectTransform));
+            _contextInviteCard.transform.SetParent(_sandboxUI.transform, false);
+            var rect = (RectTransform)_contextInviteCard.transform;
+            rect.anchorMin = rect.anchorMax = new Vector2(1, 0);
+            rect.pivot = new Vector2(1, 0);
+            rect.sizeDelta = new Vector2(360, 76);
+            rect.anchoredPosition = new Vector2(-18, 88);
+            var background = _contextInviteCard.AddComponent<Image>();
+            background.color = new Color(.07f, .08f, .085f, .90f);
+            ApplyHomeRoundedCorners(background, 14f);
+            var outline = _contextInviteCard.AddComponent<Outline>();
+            outline.effectColor = new Color(1, 1, 1, .13f);
+            outline.effectDistance = new Vector2(1, -1);
+
+            var avatar = ClientRect(rect, "Avatar", 0, .5f, 0, 0);
+            avatar.pivot = new Vector2(0, .5f);
+            avatar.anchoredPosition = new Vector2(12, 0);
+            avatar.sizeDelta = new Vector2(50, 50);
+            var circle = avatar.gameObject.AddComponent<Image>();
+            circle.sprite = SessionAvatars.Circle();
+            circle.color = new Color(.13f, .35f, .36f);
+            string initial = string.IsNullOrWhiteSpace(target.Name) ? "?" :
+                System.Globalization.StringInfo.GetNextTextElement(target.Name.Trim()).ToUpperInvariant();
+            var avatarLabel = ClientText(avatar, initial, 20, 0, 0, 1, 1, Color.white);
+            avatarLabel.alignment = TextAlignmentOptions.Center;
+            if (target.UserId > 0 || !string.IsNullOrWhiteSpace(target.AvatarUrl))
+                avatar.gameObject.AddComponent<AccountAvatar>().SetPerson(target.UserId, target.AvatarUrl, avatarLabel);
+
+            var name = ClientText(rect, target.Name ?? F("Client", "来访者"), 15, 0, .46f, 1, .34f, Color.white);
+            name.rectTransform.offsetMin = new Vector2(74, 0);
+            name.rectTransform.offsetMax = new Vector2(-112, 0);
+            name.fontStyle = FontStyles.Bold;
+            name.enableWordWrapping = false;
+            name.overflowMode = TextOverflowModes.Ellipsis;
+            _contextInviteStatus = ClientText(rect, F("Connecting…", "连接中…"), 11, 0, .15f, 1, .27f,
+                new Color(1, 1, 1, .67f));
+            _contextInviteStatus.rectTransform.offsetMin = new Vector2(74, 0);
+            _contextInviteStatus.rectTransform.offsetMax = new Vector2(-112, 0);
+            _contextInviteButton = ClientButton(rect, F("Invite", "邀请"), 1, .5f, 0, 0,
+                () => SendContextInvitation(target), true);
+            var buttonRect = (RectTransform)_contextInviteButton.transform;
+            buttonRect.pivot = new Vector2(1, .5f);
+            buttonRect.anchoredPosition = new Vector2(-10, 0);
+            buttonRect.sizeDelta = new Vector2(94, 48);
+            _contextInviteButton.GetComponent<Image>().color = new Color(.025f, .43f, .40f, 1);
+            ApplyHomeRoundedCorners(_contextInviteButton.GetComponent<Image>(), 10f);
+            _contextInviteButton.interactable = false;
+            _contextInviteRoutine = StartCoroutine(UpdateContextInviteCard(target));
+        }
+
+        private IEnumerator UpdateContextInviteCard(SessionInviteTarget target)
+        {
+            while (_contextInviteCard != null)
+            {
+                var network = NetworkBootstrapper.Instance;
+                bool roomReady = network != null && network.IsOnline && network.IsHost &&
+                    IsValidJoinRoomCode(network.RoomCode);
+                bool recipientReady = target.IsOrganization || IsAcceptedFriend(target);
+                if (!_contextInviteSending && !_contextInviteSent && _contextInviteButton != null)
+                    _contextInviteButton.interactable = roomReady && recipientReady;
+                if (!_contextInviteSending && !_contextInviteSent && _contextInviteStatus != null &&
+                    string.IsNullOrEmpty(_contextInviteError))
+                    _contextInviteStatus.text = !roomReady ? F("Connecting…", "连接中…") :
+                        recipientReady ? F("Ready to invite", "可以邀请") :
+                        F("Friend connection required", "需要先建立好友连接");
+                yield return new WaitForSecondsRealtime(.35f);
+            }
+        }
+
+        private static bool IsAcceptedFriend(SessionInviteTarget target)
+        {
+            var people = FriendsClient.Instance.State?.people ?? Array.Empty<FriendPerson>();
+            return Array.Exists(people, person => person != null && person.state == "accepted" &&
+                ((target.UserId > 0 && person.id == target.UserId) ||
+                 (!string.IsNullOrEmpty(target.FriendCode) && person.code == target.FriendCode)));
+        }
+
+        private void SendContextInvitation(SessionInviteTarget target)
+        {
+            var network = NetworkBootstrapper.Instance;
+            if (_contextInviteSending || _contextInviteSent || network == null || !network.IsOnline ||
+                !network.IsHost || !IsValidJoinRoomCode(network.RoomCode)) return;
+            _contextInviteSending = true;
+            _contextInviteError = null;
+            _contextInviteButton.interactable = false;
+            _contextInviteStatus.text = F("Sending invitation…", "正在发送邀请…");
+            void Sent()
+            {
+                if (_contextInviteCard == null) return;
+                _contextInviteSending = false;
+                _contextInviteSent = true;
+                _contextInviteStatus.text = F("Invitation sent", "邀请已发送");
+                _contextInviteButton.GetComponentInChildren<TMP_Text>().text = F("Sent", "已发送");
+            }
+            void Failed(string error)
+            {
+                if (_contextInviteCard == null) return;
+                _contextInviteSending = false;
+                _contextInviteError = string.IsNullOrWhiteSpace(error) ? F("Could not send", "发送失败") : error;
+                _contextInviteStatus.text = _contextInviteError;
+            }
+            if (target.IsOrganization)
+            {
+                BackendClient.Instance.InviteOrganizationClientToSession(target.OrganizationId,
+                    target.OrganizationClientId, network.RoomCode, Sent, Failed);
+                return;
+            }
+            var person = Array.Find(FriendsClient.Instance.State?.people ?? Array.Empty<FriendPerson>(), item =>
+                item != null && item.state == "accepted" &&
+                ((target.UserId > 0 && item.id == target.UserId) || item.code == target.FriendCode));
+            if (person == null) { Failed(F("Friend connection required", "需要先建立好友连接")); return; }
+            FriendsClient.Instance.Request<FriendMessage>("conversation/" + person.code + "/",
+                new FriendSend { nonce = Guid.NewGuid().ToString(), room = network.RoomCode },
+                _ => Sent(), Failed);
+        }
+
+        private void ClearContextInviteCard()
+        {
+            if (_contextInviteRoutine != null) StopCoroutine(_contextInviteRoutine);
+            _contextInviteRoutine = null;
+            if (_contextInviteCard != null) Destroy(_contextInviteCard);
+            _contextInviteCard = null;
+            _contextInviteButton = null;
+            _contextInviteStatus = null;
+            _contextInviteSending = _contextInviteSent = false;
+            _contextInviteError = null;
         }
 
         private void ShowBoardLoadingOverlay(string boardName, bool isNew)
@@ -211,12 +485,14 @@ namespace Sandplay.Core
             cardImg.color = new Color(0.10f, 0.12f, 0.16f, 0.96f);
             ApplyRoundedCorners(cardImg);
             var cardRT = card.GetComponent<RectTransform>();
+            _boardLoadingCard = cardRT;
             cardRT.anchorMin = new Vector2(0.5f, 0.5f);
             cardRT.anchorMax = new Vector2(0.5f, 0.5f);
             cardRT.pivot = new Vector2(0.5f, 0.5f);
             cardRT.sizeDelta = new Vector2(360f, 320f);
 
             var thumbGo = new GameObject("Thumb", typeof(RectTransform));
+            _boardLoadingThumb = thumbGo;
             thumbGo.transform.SetParent(card.transform, false);
             var thumbImg = thumbGo.AddComponent<Image>();
             thumbImg.preserveAspect = true;
@@ -236,6 +512,7 @@ namespace Sandplay.Core
             var titleGo = new GameObject("Title", typeof(RectTransform));
             titleGo.transform.SetParent(card.transform, false);
             var titleTxt = titleGo.AddComponent<TextMeshProUGUI>();
+            _boardLoadingTitleTxt = titleTxt;
             titleTxt.text = boardName ?? "";
             titleTxt.font = GetUIFont();
             titleTxt.fontSize = 20;
@@ -285,6 +562,7 @@ namespace Sandplay.Core
             fillRT.offsetMax = Vector2.zero;
 
             var spinGo = new GameObject("Spinner", typeof(RectTransform));
+            _boardLoadingSpinner = spinGo;
             spinGo.transform.SetParent(card.transform, false);
             spinGo.AddComponent<LoadingSpinner>();
             var spinImg = spinGo.AddComponent<Image>();
@@ -308,6 +586,124 @@ namespace Sandplay.Core
             spinRT.sizeDelta = new Vector2(28f, 28f);
         }
 
+        private void BeginJoinedSessionLoading(NetworkBootstrapper network)
+        {
+            ClearJoinedSessionLoadingHandlers();
+            _sessionLoadingNetwork = network;
+            ShowBoardLoadingOverlay(Localization.Get("session.loading_title"), true);
+
+            var bg = _boardLoadingOverlay != null ? _boardLoadingOverlay.GetComponent<Image>() : null;
+            if (bg != null) bg.color = new Color(0.02f, 0.04f, 0.05f, 0.76f);
+            if (_boardLoadingCard != null) _boardLoadingCard.sizeDelta = new Vector2(440f, 240f);
+            if (_boardLoadingThumb != null) _boardLoadingThumb.SetActive(false);
+            if (_boardLoadingTitleTxt != null)
+            {
+                _boardLoadingTitleTxt.rectTransform.anchorMin = new Vector2(0.08f, 0.70f);
+                _boardLoadingTitleTxt.rectTransform.anchorMax = new Vector2(0.92f, 0.88f);
+            }
+            if (_boardLoadingStatusTxt != null)
+            {
+                _boardLoadingStatusTxt.rectTransform.anchorMin = new Vector2(0.08f, 0.48f);
+                _boardLoadingStatusTxt.rectTransform.anchorMax = new Vector2(0.92f, 0.64f);
+            }
+            var track = _boardLoadingProgressFill != null
+                ? _boardLoadingProgressFill.transform.parent.GetComponent<RectTransform>() : null;
+            if (track != null)
+            {
+                track.anchorMin = new Vector2(0.10f, 0.33f);
+                track.anchorMax = new Vector2(0.90f, 0.40f);
+            }
+            if (_boardLoadingSpinner != null)
+            {
+                var spinnerRT = _boardLoadingSpinner.GetComponent<RectTransform>();
+                spinnerRT.anchorMin = spinnerRT.anchorMax = new Vector2(0.5f, 0.13f);
+                spinnerRT.anchoredPosition = Vector2.zero;
+            }
+            SetBoardLoadingProgress(0f, Localization.Get("session.loading_receiving"));
+
+            _sessionLoadProgressHandler = (loaded, total) =>
+            {
+                float progress = total <= 0 ? 0f : (float)loaded / total;
+                string status = total <= 0
+                    ? Localization.Get("session.loading_receiving")
+                    : Localization.Get("session.loading_objects", loaded, total, Mathf.RoundToInt(progress * 100f));
+                SetBoardLoadingProgress(progress, status);
+            };
+            _sessionLoadReadyHandler = () =>
+            {
+                if (_sessionReadyRoutine != null) StopCoroutine(_sessionReadyRoutine);
+                _sessionReadyRoutine = StartCoroutine(CompleteJoinedSessionLoading());
+            };
+            _sessionLoadFailedHandler = ShowJoinedSessionLoadFailure;
+            _sessionLoadDisconnectedHandler = () => ShowJoinedSessionLoadFailure(Localization.Get("session.loading_disconnected"));
+            network.OnSnapshotLoadProgress += _sessionLoadProgressHandler;
+            network.OnSnapshotReady += _sessionLoadReadyHandler;
+            network.OnSnapshotLoadFailed += _sessionLoadFailedHandler;
+            network.OnDisconnected += _sessionLoadDisconnectedHandler;
+        }
+
+        private IEnumerator CompleteJoinedSessionLoading()
+        {
+            SetBoardLoadingProgress(1f, Localization.Get("session.loading_success"));
+            if (_boardLoadingSpinner != null) _boardLoadingSpinner.SetActive(false);
+            yield return new WaitForSecondsRealtime(0.35f);
+            ClearJoinedSessionLoadingHandlers();
+            if (_sandboxUI != null) _sandboxUI.SetActive(true);
+            UpdateRoomCodeDisplay();
+            yield return FadeBoardLoadingOverlay(0f, 0.18f);
+            HideBoardLoadingOverlay();
+            _sessionReadyRoutine = null;
+        }
+
+        private void ShowJoinedSessionLoadFailure(string reason)
+        {
+            if (!string.IsNullOrWhiteSpace(reason))
+                Debug.LogWarning("[Session] Join failed while loading snapshot: " + reason);
+            if (_sessionReadyRoutine != null)
+            {
+                StopCoroutine(_sessionReadyRoutine);
+                _sessionReadyRoutine = null;
+            }
+            ClearJoinedSessionLoadingHandlers();
+            if (_boardLoadingTitleTxt != null)
+                _boardLoadingTitleTxt.text = Localization.Get("session.loading_failed_title");
+            if (_boardLoadingStatusTxt != null)
+                _boardLoadingStatusTxt.text = Localization.Get("session.loading_failed");
+            if (_boardLoadingProgressFill != null)
+                _boardLoadingProgressFill.color = new Color(0.86f, 0.30f, 0.28f, 1f);
+            if (_boardLoadingSpinner != null) _boardLoadingSpinner.SetActive(false);
+            if (_boardLoadingGroup != null) _boardLoadingGroup.interactable = true;
+            if (_boardLoadingCard == null || _boardLoadingActionButton != null) return;
+            _boardLoadingActionButton = CreateMenuButton(_boardLoadingCard, "Btn_ReturnFromFailedSession",
+                Localization.Get("session.loading_return"), new Vector2(0.24f, 0.08f),
+                new Vector2(0.76f, 0.25f), new Color(0.05f, 0.47f, 0.43f, 1f));
+            _boardLoadingActionButton.onClick.AddListener(() =>
+            {
+                HideBoardLoadingOverlay();
+                ReturnToMenu();
+            });
+        }
+
+        private void ClearJoinedSessionLoadingHandlers()
+        {
+            if (_sessionLoadingNetwork != null)
+            {
+                if (_sessionLoadProgressHandler != null)
+                    _sessionLoadingNetwork.OnSnapshotLoadProgress -= _sessionLoadProgressHandler;
+                if (_sessionLoadReadyHandler != null)
+                    _sessionLoadingNetwork.OnSnapshotReady -= _sessionLoadReadyHandler;
+                if (_sessionLoadFailedHandler != null)
+                    _sessionLoadingNetwork.OnSnapshotLoadFailed -= _sessionLoadFailedHandler;
+                if (_sessionLoadDisconnectedHandler != null)
+                    _sessionLoadingNetwork.OnDisconnected -= _sessionLoadDisconnectedHandler;
+            }
+            _sessionLoadingNetwork = null;
+            _sessionLoadProgressHandler = null;
+            _sessionLoadReadyHandler = null;
+            _sessionLoadFailedHandler = null;
+            _sessionLoadDisconnectedHandler = null;
+        }
+
         private void SetBoardLoadingProgress(float progress01, string status)
         {
             if (_boardLoadingStatusTxt != null && !string.IsNullOrEmpty(status))
@@ -316,7 +712,7 @@ namespace Sandplay.Core
             float p = Mathf.Clamp01(progress01);
             var fillRT = _boardLoadingProgressFill.rectTransform;
             fillRT.anchorMin = Vector2.zero;
-            fillRT.anchorMax = new Vector2(Mathf.Max(0.04f, p), 1f);
+            fillRT.anchorMax = new Vector2(p, 1f);
             fillRT.offsetMin = Vector2.zero;
             fillRT.offsetMax = Vector2.zero;
         }
@@ -329,6 +725,7 @@ namespace Sandplay.Core
             duration = Mathf.Max(0.01f, duration);
             while (t < duration)
             {
+                if (_boardLoadingGroup == null) yield break;
                 t += Time.unscaledDeltaTime;
                 float u = Mathf.Clamp01(t / duration);
                 float ease = 1f - Mathf.Pow(1f - u, 3f);
@@ -342,17 +739,59 @@ namespace Sandplay.Core
         {
             if (_boardLoadingOverlay != null)
             {
-                Destroy(_boardLoadingOverlay);
+                _boardLoadingOverlay.SetActive(false);
+                if (Application.isPlaying) Destroy(_boardLoadingOverlay);
+                else DestroyImmediate(_boardLoadingOverlay);
                 _boardLoadingOverlay = null;
             }
             _boardLoadingGroup = null;
             _boardLoadingProgressFill = null;
             _boardLoadingStatusTxt = null;
+            _boardLoadingCard = null;
+            _boardLoadingThumb = null;
+            _boardLoadingSpinner = null;
+            _boardLoadingTitleTxt = null;
+            _boardLoadingActionButton = null;
+        }
+
+        private void ShowSandboxExitConfirmation(Action confirmed)
+        {
+            var box = ClientDialog(Localization.Get("exit.title"), 480, 280);
+            // Short dialogs need enough title height for the CJK font's line metrics.
+            var title = box.GetComponentInChildren<TMP_Text>();
+            title.rectTransform.anchorMin = new Vector2(.05f, .78f);
+            title.rectTransform.anchorMax = new Vector2(.83f, .96f);
+            var dialog = _clientDialog;
+            string board = _currentBoardName;
+            int epoch = LocalAccountStorage.Epoch;
+            // Sandbox toolbar controls have their own canvas at order 50.
+            // Keep both the modal and its blocking backdrop above those controls.
+            var canvas = dialog.AddComponent<Canvas>();
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = 60;
+            dialog.AddComponent<GraphicRaycaster>();
+            ClientText(box, Localization.Get("exit.confirm"), 18, .07f, .35f, .86f, .40f, HomeText);
+            ClientButton(box, "dialog.cancel", .07f, .09f, .40f, .18f, CloseClientDialog);
+            ClientButton(box, "tool.exit", .53f, .09f, .40f, .18f, () =>
+            {
+                if (dialog == null || _clientDialog != dialog) return;
+                CloseClientDialog();
+                if (epoch != LocalAccountStorage.Epoch || board != _currentBoardName) return;
+                confirmed?.Invoke();
+            }, true);
         }
 
         private void ReturnToMenu()
 
         {
+            ClearJoinedSessionLoadingHandlers();
+            // Keep the board open if persistence fails; do not silently discard this session.
+            if (_currentBoardName != null && SessionManager.Instance != null &&
+                SessionManager.Instance.AutoSaveActive && !SessionManager.Instance.TrySaveCurrentBoard())
+            {
+                ShowLockedFeatureDialog(Localization.Get("save.failed"), "save.title", false);
+                return;
+            }
             if (_enterSandboxRoutine != null)
             {
                 StopCoroutine(_enterSandboxRoutine);
@@ -361,6 +800,7 @@ namespace Sandplay.Core
             HideBoardLoadingOverlay();
 
             _pendingHostMode = HostMode.None;
+            _pendingScheduleStartId = null;
 
             // Exit walk mode if active
             if (WalkModeController.Instance != null && WalkModeController.Instance.IsActive)
@@ -369,19 +809,26 @@ namespace Sandplay.Core
             // Auto-save current board + thumbnail
             if (_currentBoardName != null)
             {
-                SessionManager.Instance?.SaveSession(_currentBoardName);
-                ScreenshotManager.Instance?.SaveThumbnail(_currentBoardName);
+                try { ScreenshotManager.Instance?.SaveThumbnail(_currentBoardName); }
+                catch (Exception ex) { Debug.LogWarning("[Session] Preview save failed: " + ex.GetType().Name); }
             }
+            SessionManager.Instance?.EndAutoSave();
+            if (SessionManager.Instance != null) SessionManager.Instance.CurrentBoardName = null;
+            _currentBoardName = null;
 
             // Capture replay preview while the sandbox is still visible
             var recorder = SessionRecorder.Instance;
             string sandlogPath = (recorder != null && recorder.IsRecording) ? recorder.CurrentFilePath : null;
             if (!string.IsNullOrEmpty(sandlogPath))
-                ScreenshotManager.Instance?.SaveReplayPreview(sandlogPath);
+                TrySaveReplayPreview(sandlogPath);
 
             // Disconnect from network if online
             if (NetworkBootstrapper.Instance != null && NetworkBootstrapper.Instance.IsOnline)
                 NetworkBootstrapper.Instance.Disconnect();
+
+            CompleteActiveScheduledSession();
+
+            ClearHostingWarningAfterBoardExit();
 
             // Finalize the .sandlog (if any)
             SessionRecorder.Instance?.StopRecording();
@@ -393,238 +840,179 @@ namespace Sandplay.Core
             ShowMainMenu();
         }
 
-        // ======================= Network UI =======================
-
-        private void ShowHostPanel()
+        private static void TrySaveReplayPreview(string path, Action<string> save = null)
         {
-            if (_networkPanel != null) Destroy(_networkPanel);
-
-            _networkPanel = new GameObject("HostPanel");
-            _networkPanel.transform.SetParent(_safeArea.transform, false);
-            _networkPanel.AddComponent<Image>().color = new Color(0.11f, 0.11f, 0.14f, 0.97f);
-            var panelRT = _networkPanel.GetComponent<RectTransform>();
-            panelRT.anchorMin = Vector2.zero;
-            panelRT.anchorMax = Vector2.one;
-            panelRT.offsetMin = Vector2.zero;
-            panelRT.offsetMax = Vector2.zero;
-
-            bool embedded = TryEmbedNetworkPanelInHome(_networkPanel);
-
-            var font = GetUIFont();
-
-            // ── Header ───────────────────────────────────────────────────────
-            var headerBg = new GameObject("Header");
-            headerBg.transform.SetParent(_networkPanel.transform, false);
-            headerBg.AddComponent<Image>().color = new Color(0.10f, 0.10f, 0.20f, 1f);
-            var headerRT = headerBg.GetComponent<RectTransform>();
-            headerRT.anchorMin = new Vector2(0f, 0.91f);
-            headerRT.anchorMax = new Vector2(1f, 1.00f);
-            headerRT.offsetMin = Vector2.zero;
-            headerRT.offsetMax = Vector2.zero;
-
-            var titleGo = new GameObject("Title");
-            titleGo.transform.SetParent(headerBg.transform, false);
-            var titleTxt = titleGo.AddComponent<TextMeshProUGUI>();
-            titleTxt.text = Localization.Get("host.title");
-            titleTxt.font = font; titleTxt.fontSize = 20; titleTxt.fontStyle = FontStyles.Bold;
-            titleTxt.alignment = TextAlignmentOptions.Center;
-            titleTxt.color = new Color(0.72f, 0.64f, 0.44f, 1f);
-            var titleRT = titleGo.GetComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0.1f, 0f); titleRT.anchorMax = new Vector2(embedded ? 0.95f : 0.8f, 1f);
-            titleRT.offsetMin = Vector2.zero; titleRT.offsetMax = Vector2.zero;
-
-            // Close only for standalone overlay (sidebar nav replaces cancel).
-            if (!embedded)
+            try
             {
-                var closeBtn = CreateMenuButton(_networkPanel.transform, "Btn_Close",
-                    Localization.Get("dialog.cancel"),
-                    new Vector2(0.80f, 0.92f), new Vector2(0.98f, 0.99f),
-                    new Color(0.48f, 0.22f, 0.22f, 1f));
-                closeBtn.onClick.AddListener(() =>
-                {
-                    _pendingHostMode = HostMode.None;
-                    Destroy(_networkPanel);
-                    _networkPanel = null;
-                });
+                if (save != null) save(path);
+                else ScreenshotManager.Instance?.SaveReplayPreview(path);
             }
-
-            // ── New Board button ─────────────────────────────────────────────
-            var newBoardBtn = CreateMenuButton(_networkPanel.transform, "Btn_NewBoard",
-                Localization.Get("menu.new_board"),
-                new Vector2(0.04f, 0.84f), new Vector2(0.96f, 0.90f),
-                new Color(0.24f, 0.42f, 0.32f, 1f));
-            newBoardBtn.GetComponentInChildren<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
-            newBoardBtn.onClick.AddListener(() =>
+            catch (Exception ex)
             {
-                Destroy(_networkPanel);
-                _networkPanel = null;
-                _pendingHostMode = HostMode.Cloud;
-                ShowNameDialog(Localization.Get("dialog.new_board"), "",
-                    name => { if (!string.IsNullOrEmpty(name)) ShowSizeDialog(name); });
-            });
-
-            // ── Therapist Mode toggle ───────────────────────────────────────
-            Color tmOff = new Color(0.22f, 0.22f, 0.28f, 1f);
-            Color tmOn = new Color(0.36f, 0.28f, 0.50f, 1f);
-            var therapistToggleBtn = CreateMenuButton(_networkPanel.transform, "Btn_TherapistMode",
-                (_hostTherapistMode ? "[X] " : "[ ] ") + Localization.Get("host.therapist_mode"),
-                new Vector2(0.04f, 0.775f), new Vector2(0.55f, 0.835f),
-                _hostTherapistMode ? tmOn : tmOff);
-            var therapistToggleLbl = therapistToggleBtn.GetComponentInChildren<TextMeshProUGUI>();
-            therapistToggleLbl.fontSize = 14;
-            therapistToggleBtn.onClick.AddListener(() =>
-            {
-                _hostTherapistMode = !_hostTherapistMode;
-                therapistToggleBtn.GetComponent<Image>().color = _hostTherapistMode ? tmOn : tmOff;
-                therapistToggleLbl.text = (_hostTherapistMode ? "[X] " : "[ ] ") + Localization.Get("host.therapist_mode");
-            });
-
-            var therapistDescGo = new GameObject("TherapistModeDesc");
-            therapistDescGo.transform.SetParent(_networkPanel.transform, false);
-            var therapistDescTxt = therapistDescGo.AddComponent<TextMeshProUGUI>();
-            therapistDescTxt.text = Localization.Get("host.therapist_mode_desc");
-            therapistDescTxt.font = font; therapistDescTxt.fontSize = 11;
-            therapistDescTxt.color = new Color(0.55f, 0.55f, 0.62f, 1f);
-            therapistDescTxt.alignment = TextAlignmentOptions.Left;
-            therapistDescTxt.enableWordWrapping = true;
-            var therapistDescRT = therapistDescGo.GetComponent<RectTransform>();
-            therapistDescRT.anchorMin = new Vector2(0.57f, 0.775f);
-            therapistDescRT.anchorMax = new Vector2(0.96f, 0.835f);
-            therapistDescRT.offsetMin = new Vector2(6, 0); therapistDescRT.offsetMax = Vector2.zero;
-
-            // ── Scrollable board list ────────────────────────────────────────
-            var listArea = new GameObject("HostBoardListArea");
-            listArea.transform.SetParent(_networkPanel.transform, false);
-            listArea.AddComponent<Image>().color = new Color(0.12f, 0.12f, 0.15f, 1f);
-            ApplyRoundedCorners(listArea.GetComponent<Image>());
-            var listAreaRT = listArea.GetComponent<RectTransform>();
-            listAreaRT.anchorMin = new Vector2(0.02f, 0.02f);
-            listAreaRT.anchorMax = new Vector2(0.98f, 0.77f);
-            listAreaRT.offsetMin = Vector2.zero;
-            listAreaRT.offsetMax = Vector2.zero;
-            listArea.AddComponent<RectMask2D>();
-
-            var listContent = new GameObject("HostBoardListContent");
-            listContent.transform.SetParent(listArea.transform, false);
-            var contentRT = listContent.AddComponent<RectTransform>();
-            contentRT.anchorMin = new Vector2(0, 1);
-            contentRT.anchorMax = new Vector2(1, 1);
-            contentRT.pivot = new Vector2(0.5f, 1);
-            contentRT.anchoredPosition = Vector2.zero;
-
-            var scrollRect = listArea.AddComponent<ScrollRect>();
-            scrollRect.content = contentRT;
-            scrollRect.viewport = listAreaRT;
-            scrollRect.horizontal = false;
-            scrollRect.vertical = true;
-            scrollRect.movementType = ScrollRect.MovementType.Elastic;
-
-            // Populate boards
-            var sessions = SessionManager.Instance?.GetSavedSessions();
-
-            if (sessions == null || sessions.Count == 0)
-            {
-                var emptyGo = new GameObject("Empty");
-                emptyGo.transform.SetParent(listContent.transform, false);
-                var emptyTxt = emptyGo.AddComponent<TextMeshProUGUI>();
-                emptyTxt.text = Localization.Get("menu.empty");
-                emptyTxt.font = font; emptyTxt.fontSize = 16;
-                emptyTxt.alignment = TextAlignmentOptions.Center;
-                emptyTxt.color = new Color(0.5f, 0.5f, 0.5f);
-                emptyTxt.enableWordWrapping = true;
-                var emptyRT = emptyGo.GetComponent<RectTransform>();
-                emptyRT.anchorMin = new Vector2(0, 1); emptyRT.anchorMax = new Vector2(1, 1);
-                emptyRT.pivot = new Vector2(0.5f, 1);
-                emptyRT.anchoredPosition = new Vector2(0, -60);
-                emptyRT.sizeDelta = new Vector2(0, 80);
-                contentRT.sizeDelta = new Vector2(0, 150);
-            }
-            else
-            {
-                sessions.Sort((a, b) => string.Compare(b.ModifiedAt, a.ModifiedAt, System.StringComparison.Ordinal));
-
-                float entryH = 60f, spacing = 6f, yPos = -spacing;
-
-                foreach (var entry in sessions)
-                {
-                    var row = new GameObject($"HostRow_{entry.SessionName}");
-                    row.transform.SetParent(listContent.transform, false);
-                    var rowImg = row.AddComponent<Image>();
-                    rowImg.color = new Color(0.18f, 0.18f, 0.22f, 1f);
-                    ApplyRoundedCorners(rowImg);
-
-                    var rowRT = row.GetComponent<RectTransform>();
-                    rowRT.anchorMin = new Vector2(0, 1); rowRT.anchorMax = new Vector2(1, 1);
-                    rowRT.pivot = new Vector2(0.5f, 1);
-                    rowRT.anchoredPosition = new Vector2(0, yPos);
-                    rowRT.sizeDelta = new Vector2(-20, entryH);
-
-                    // Thumbnail
-                    var thumbGo = new GameObject("Thumb");
-                    thumbGo.transform.SetParent(row.transform, false);
-                    var thumbImg = thumbGo.AddComponent<Image>();
-                    thumbImg.preserveAspect = true;
-                    var sprite = ScreenshotManager.LoadThumbnail(entry.SessionName);
-                    if (sprite != null) thumbImg.sprite = sprite;
-                    else thumbImg.color = new Color(0.3f, 0.3f, 0.35f, 1f);
-                    ApplyRoundedCorners(thumbImg);
-                    var thumbRT = thumbGo.GetComponent<RectTransform>();
-                    thumbRT.anchorMin = new Vector2(0, 0.05f); thumbRT.anchorMax = new Vector2(0, 0.95f);
-                    thumbRT.pivot = new Vector2(0, 0.5f);
-                    thumbRT.anchoredPosition = new Vector2(5, 0);
-                    thumbRT.sizeDelta = new Vector2(54, 0);
-
-                    // Board name
-                    var nameGo = new GameObject("Name");
-                    nameGo.transform.SetParent(row.transform, false);
-                    var nameTxt = nameGo.AddComponent<TextMeshProUGUI>();
-                    nameTxt.text = entry.SessionName;
-                    nameTxt.font = font; nameTxt.fontSize = 16; nameTxt.color = Color.white;
-                    nameTxt.alignment = TextAlignmentOptions.Left;
-                    var nameRT = nameGo.GetComponent<RectTransform>();
-                    nameRT.anchorMin = new Vector2(0, 0.5f); nameRT.anchorMax = new Vector2(1f, 1f);
-                    nameRT.offsetMin = new Vector2(68, 0); nameRT.offsetMax = Vector2.zero;
-
-                    // Modified date
-                    string dateStr = "";
-                    if (System.DateTime.TryParse(entry.ModifiedAt, out var dt))
-                        dateStr = dt.ToLocalTime().ToString("MMM dd, yyyy  HH:mm");
-                    var dateGo = new GameObject("Date");
-                    dateGo.transform.SetParent(row.transform, false);
-                    var dateTxt = dateGo.AddComponent<TextMeshProUGUI>();
-                    dateTxt.text = dateStr;
-                    dateTxt.font = font; dateTxt.fontSize = 12;
-                    dateTxt.color = new Color(0.6f, 0.6f, 0.6f);
-                    dateTxt.alignment = TextAlignmentOptions.Left;
-                    var dateRT = dateGo.GetComponent<RectTransform>();
-                    dateRT.anchorMin = new Vector2(0, 0f); dateRT.anchorMax = new Vector2(1f, 0.5f);
-                    dateRT.offsetMin = new Vector2(68, 0); dateRT.offsetMax = Vector2.zero;
-
-                    // Tap row → host this board via cloud
-                    string loadName = entry.SessionName;
-                    var rowBtn = row.AddComponent<Button>();
-                    rowBtn.targetGraphic = rowImg;
-                    var rowColors = rowBtn.colors;
-                    rowColors.highlightedColor = new Color(0.25f, 0.27f, 0.32f, 1f);
-                    rowColors.pressedColor = new Color(0.15f, 0.15f, 0.18f, 1f);
-                    rowBtn.colors = rowColors;
-                    rowBtn.onClick.AddListener(() =>
-                    {
-                        _pendingHostMode = HostMode.Cloud;
-                        Destroy(_networkPanel);
-                        _networkPanel = null;
-                        EnterSandbox(loadName, isNew: false);
-                    });
-
-                    yPos -= (entryH + spacing);
-                }
-
-                contentRT.sizeDelta = new Vector2(0, Mathf.Abs(yPos) + spacing);
+                // A preview is optional; the board has already been persisted.
+                Debug.LogWarning("[Session] Replay preview failed: " + ex.GetType().Name);
             }
         }
 
-        private void ShowJoinPanel()
+        // ======================= Network UI =======================
+
+        private bool RequireMultiplayerAccount(System.Action resume)
         {
+            if (BackendClient.Instance != null && BackendClient.Instance.IsLoggedIn) return true;
+            OpenLoginScreen(() =>
+            {
+                if (this != null && BackendClient.Instance != null && BackendClient.Instance.IsLoggedIn)
+                    resume?.Invoke();
+            });
+            return false;
+        }
+
+        private void ShowHostPanel()
+        {
+            if (!RequireMultiplayerAccount(ShowHostPanel)) return;
+            if (_networkPanel != null) Destroy(_networkPanel);
+            _networkPanel = new GameObject("HostPanel");
+            _networkPanel.transform.SetParent(_safeArea.transform, false);
+            _networkPanel.AddComponent<Image>().color = HomeBg;
+            StretchFull(_networkPanel);
+            bool embedded = TryEmbedNetworkPanelInHome(_networkPanel);
+            var root = _networkPanel.transform;
+            var hostPanel = _networkPanel;
+
+            RectTransform Card(string name,float x,float w)
+            {
+                var card=ClientRect(root,name,x,.035f,w,.895f);
+                var image=card.gameObject.AddComponent<Image>();image.color=HomeCard;
+                ApplyHomeRoundedCorners(image,12f);
+                var border=card.gameObject.AddComponent<Outline>();border.effectColor=HomeCardBorder;border.effectDistance=new Vector2(1,-1);
+                return card;
+            }
+            var chooser=Card("ChooseBoard",.02f,.57f);
+            var setup=Card("SessionSetup",.61f,.37f);
+            ClientText(chooser,F("Choose a board", "选择沙盘"),21,.04f,.88f,.64f,.09f,HomeText).fontStyle=FontStyles.Bold;
+            ClientText(setup,F("Session setup", "会话设置"),21,.06f,.88f,.88f,.09f,HomeText).fontStyle=FontStyles.Bold;
+            ClientButton(chooser,F("+ New board", "+ 新建沙盘"),.73f,.885f,.23f,.075f,()=>
+            {
+                if (!RequireMultiplayerAccount(ShowHostPanel)) return;
+                Destroy(_networkPanel);_networkPanel=null;_pendingHostMode=HostMode.None;
+                ShowNameDialog(Localization.Get("dialog.new_board"),"",name=>
+                {if(!string.IsNullOrEmpty(name))ShowSizeDialog(name,hostOnline:true);});
+            });
+            var search=ClientInput(chooser,"",Localization.Get("menu.search_boards"),.04f,.775f,.65f,.08f,100);
+            var list=ClientScroll(chooser,"Boards",.02f,.025f,.96f,.72f);
+            list.parent.GetComponent<Image>().color=HomeCard;
+            var sessions=SessionManager.Instance?.GetSavedSessions();
+            sessions?.Sort((a,b)=>string.Compare(b.ModifiedAt,a.ModifiedAt,StringComparison.Ordinal));
+            string selected=sessions!=null && sessions.Count>0?sessions[0].SessionName:null;
+            bool sortByName=false;
+            var preview=ClientRect(setup,"SelectedThumbnail",.06f,.635f,.38f,.24f).gameObject.AddComponent<Image>();
+            preview.preserveAspect=true;
+            ClientText(setup,F("Selected board", "已选沙盘"),12,.48f,.77f,.46f,.05f,HomeMuted);
+            var selectedName=ClientText(setup,"",18,.48f,.66f,.46f,.11f,HomeText);selectedName.fontStyle=FontStyles.Bold;
+            var separator=ClientRect(setup,"Separator",.06f,.61f,.88f,.002f);separator.gameObject.AddComponent<Image>().color=HomeCardBorder;
+            ClientText(setup,F("Editing mode", "编辑模式"),14,.06f,.535f,.88f,.055f,HomeText);
+            var mode=ClientButton(setup,Localization.Get(_hostTherapistMode?"host.client_edits":"host.i_edit"),.06f,.425f,.88f,.095f,()=>{});
+            var modeDescription=ClientText(setup,Localization.Get(_hostTherapistMode?"host.client_edits_desc":"host.therapist_mode_desc"),12,.06f,.305f,.88f,.10f,HomeMuted);
+            mode.onClick.AddListener(()=>
+            {
+                _hostTherapistMode=!_hostTherapistMode;
+                mode.GetComponentInChildren<TextMeshProUGUI>().text=Localization.Get(_hostTherapistMode?"host.client_edits":"host.i_edit");
+                modeDescription.text=Localization.Get(_hostTherapistMode?"host.client_edits_desc":"host.therapist_mode_desc");
+            });
+            var start=ClientButton(setup,F("Start session", "开始会话"),.06f,.11f,.88f,.10f,()=>
+            {
+                if(selected==null || hostPanel==null || _networkPanel!=hostPanel)return;
+                if(!RequireMultiplayerAccount(ShowHostPanel))return;
+                _pendingHostMode=HostMode.Cloud;
+                Destroy(_networkPanel);_networkPanel=null;
+                EnterSandbox(selected,isNew:false);
+            },true);
+            ClientText(setup,F("Create the room, then share its code.", "创建房间后，分享房间码。"),11,.06f,.04f,.88f,.055f,HomeMuted).alignment=TextAlignmentOptions.Center;
+            void Render()
+            {
+                ClearClientChildren(list);
+                selectedName.text=selected??F("Choose a board", "选择沙盘");
+                preview.sprite=selected==null?null:ScreenshotManager.LoadThumbnail(selected);
+                preview.color=preview.sprite==null?HomeTeal:Color.white;
+                start.interactable=selected!=null;
+                int count=0;
+                if(sessions!=null)foreach(var entry in sessions)
+                {
+                    if(entry.SessionName.IndexOf(search.text.Trim(),StringComparison.CurrentCultureIgnoreCase)<0)continue;
+                    count++;
+                    string board=entry.SessionName;
+                    var row=ClientRow(list,"Board "+board,64);
+                    var image=row.GetComponent<Image>();image.color=board==selected?HomeTeal:HomeCard;ApplyHomeRoundedCorners(image,8f);
+                    var border=row.gameObject.AddComponent<Outline>();border.effectColor=board==selected?HomePrimary:HomeCardBorder;border.effectDistance=new Vector2(1,-1);
+                    var thumb=ClientRect(row,"Thumbnail",0,.08f,0,.84f);
+                    thumb.pivot=new Vector2(0,.5f);thumb.anchoredPosition=new Vector2(6,0);thumb.sizeDelta=new Vector2(58,0);
+                    var photo=thumb.gameObject.AddComponent<Image>();photo.sprite=ScreenshotManager.LoadThumbnail(board);photo.preserveAspect=true;photo.color=photo.sprite==null?HomeTeal:Color.white;
+                    var name=ClientText(row,board,15,0,.45f,1,.48f,HomeText);name.rectTransform.offsetMin=new Vector2(76,0);name.rectTransform.offsetMax=new Vector2(-36,0);name.enableWordWrapping=false;
+                    string date=DateTime.TryParse(entry.ModifiedAt,out var dt)?dt.ToLocalTime().ToString("g",Localization.Culture):"";
+                    var modified=ClientText(row,date,11,0,.1f,1,.3f,HomeMuted);modified.rectTransform.offsetMin=new Vector2(76,0);modified.rectTransform.offsetMax=new Vector2(-36,0);
+                    var radio=ClientRect(row,"Selection",1,.5f,0,0);radio.anchoredPosition=new Vector2(-20,0);radio.sizeDelta=new Vector2(18,18);
+                    var ring=radio.gameObject.AddComponent<Image>();ring.sprite=SessionAvatars.Circle();ring.color=board==selected?HomePrimary:HomeMuted;
+                    var inner=ClientRect(radio,"Inner",.1f,.1f,.8f,.8f).gameObject.AddComponent<Image>();inner.sprite=SessionAvatars.Circle();inner.color=image.color;
+                    if(board==selected){var dot=ClientRect(radio,"Dot",.25f,.25f,.5f,.5f).gameObject.AddComponent<Image>();dot.sprite=SessionAvatars.Circle();dot.color=HomePrimary;}
+                    var button=row.gameObject.AddComponent<Button>();button.targetGraphic=image;button.onClick.AddListener(()=>{selected=board;Render();});
+                }
+                if(count==0)ClientText(ClientRow(list,"Empty",70),F("No boards found. Create a new board or change your search.", "未找到沙盘，请新建沙盘或修改搜索。"),13,.04f,0,.92f,1,HomeMuted);
+            }
+            var sort=ClientButton(chooser,Localization.Get("menu.sort_updated"),.71f,.775f,.25f,.08f,()=>{});
+            sort.onClick.AddListener(()=>
+            {
+                sortByName=!sortByName;
+                sessions?.Sort((a,b)=>sortByName?string.Compare(a.SessionName,b.SessionName,StringComparison.CurrentCultureIgnoreCase):string.Compare(b.ModifiedAt,a.ModifiedAt,StringComparison.Ordinal));
+                sort.GetComponentInChildren<TextMeshProUGUI>().text=Localization.Get(sortByName?"menu.sort_name":"menu.sort_updated");Render();
+            });
+            search.onValueChanged.AddListener(_=>Render());Render();
+            var join=ClientButton(root,F("Have a room code? Join a session", "已有房间码？加入会话"),.25f,.01f,.50f,.06f,ShowJoinPanel);
+            join.GetComponent<Image>().color=Color.clear;join.GetComponentInChildren<TextMeshProUGUI>().color=HomePrimary;
+            if(!embedded)ClientButton(root,Localization.Get("dialog.cancel"),.02f,.01f,.18f,.06f,()=>{Destroy(_networkPanel);_networkPanel=null;});
+        }
+
+        private static void SetScanButtonIcon(Button button)
+        {
+            var label = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (label != null) label.gameObject.SetActive(false);
+            var icon = new GameObject("ScanIcon", typeof(RectTransform));
+            icon.transform.SetParent(button.transform, false);
+            var rt = icon.GetComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(28, 28);
+            void Stroke(float x, float y, float width, float height)
+            {
+                var part = new GameObject("Stroke", typeof(RectTransform), typeof(Image));
+                part.transform.SetParent(icon.transform, false);
+                var rect = part.GetComponent<RectTransform>();
+                rect.anchorMin = rect.anchorMax = Vector2.zero;
+                rect.pivot = Vector2.zero;
+                rect.anchoredPosition = new Vector2(x, y);
+                rect.sizeDelta = new Vector2(width, height);
+                part.GetComponent<Image>().raycastTarget = false;
+            }
+            foreach (float x in new[] { 0f, 20f })
+                foreach (float y in new[] { 0f, 20f })
+                {
+                    Stroke(x, y == 0 ? 0 : 25, 8, 3);
+                    Stroke(x == 0 ? 0 : 25, y, 3, 8);
+                }
+            Stroke(6, 12.5f, 16, 3);
+        }
+
+        internal static bool IsValidJoinRoomCode(string code)
+        {
+            if (string.IsNullOrEmpty(code) || code.Length < 4 || code.Length > 6) return false;
+            foreach (char c in code)
+                if (!(c >= 'A' && c <= 'Z') && !(c >= '0' && c <= '9')) return false;
+            return true;
+        }
+
+        private void ShowJoinPanel() => ShowJoinPanel(false);
+
+        private void ShowJoinPanel(bool scanImmediately)
+        {
+            if (!RequireMultiplayerAccount(() => ShowJoinPanel(scanImmediately))) return;
             if (_networkPanel != null) Destroy(_networkPanel);
 
             // ── Full-screen dim overlay (or embedded multiplayer page) ───────
@@ -640,19 +1028,19 @@ namespace Sandplay.Core
 
             bool embedded = TryEmbedNetworkPanelInHome(_networkPanel);
             if (embedded)
-                overlay.color = new Color(0.09f, 0.10f, 0.13f, 1f);
+                overlay.color = HomeBg;
 
             // ── Card ─────────────────────────────────────────────────────────
             var panel = new GameObject("Card");
             panel.transform.SetParent(_networkPanel.transform, false);
             var panelImg = panel.AddComponent<Image>();
-            panelImg.color = new Color(0.075f, 0.09f, 0.13f, 0.99f);
+            panelImg.color = HomeCard;
             ApplyRoundedCorners(panelImg);
             var panelOutline = panel.AddComponent<Outline>();
-            panelOutline.effectColor = new Color(0.45f, 0.65f, 0.78f, 0.18f);
+            panelOutline.effectColor = HomeCardBorder;
             panelOutline.effectDistance = new Vector2(1f, -1f);
             var panelShadow = panel.AddComponent<Shadow>();
-            panelShadow.effectColor = new Color(0f, 0f, 0f, 0.55f);
+            panelShadow.effectColor = new Color(0f, 0f, 0f, 0.08f);
             panelShadow.effectDistance = new Vector2(0f, -10f);
             var panelRT = panel.GetComponent<RectTransform>();
             if (embedded)
@@ -723,68 +1111,6 @@ namespace Sandplay.Core
             headerSepRT.offsetMin = Vector2.zero;
             headerSepRT.offsetMax = Vector2.zero;
 
-            // ── Role row ─────────────────────────────────────────────────────
-            PlayerRole selectedRole = PlayerRole.Observer;
-
-            var roleCaptionGo = new GameObject("RoleCaption");
-            roleCaptionGo.transform.SetParent(panel.transform, false);
-            var roleCaptionTxt = roleCaptionGo.AddComponent<TextMeshProUGUI>();
-            roleCaptionTxt.text = Localization.Get("join.role_label").ToUpper();
-            roleCaptionTxt.font = f;
-            roleCaptionTxt.fontSize = 11;
-            roleCaptionTxt.alignment = TextAlignmentOptions.Left;
-            roleCaptionTxt.color = new Color(0.56f, 0.61f, 0.70f);
-            var roleCaptionRT = roleCaptionGo.GetComponent<RectTransform>();
-            roleCaptionRT.anchorMin = new Vector2(0.07f, 0.70f);
-            roleCaptionRT.anchorMax = new Vector2(0.50f, 0.79f);
-            roleCaptionRT.offsetMin = Vector2.zero;
-            roleCaptionRT.offsetMax = Vector2.zero;
-
-            var observerBtn = CreateMenuButton(panel.transform, "Btn_Observer",
-                Localization.Get("join.observer"),
-                new Vector2(0.07f, 0.57f), new Vector2(0.34f, 0.70f),
-                new Color(0.18f, 0.48f, 0.38f, 1f));   // active sage
-            var observerImg = observerBtn.GetComponent<Image>();
-
-            var therapistBtn = CreateMenuButton(panel.transform, "Btn_Therapist",
-                Localization.Get("join.therapist"),
-                new Vector2(0.365f, 0.57f), new Vector2(0.635f, 0.70f),
-                new Color(0.16f, 0.18f, 0.24f, 1f));   // inactive
-            var therapistImg = therapistBtn.GetComponent<Image>();
-
-            var patientBtn = CreateMenuButton(panel.transform, "Btn_Patient",
-                Localization.Get("join.patient"),
-                new Vector2(0.66f, 0.57f), new Vector2(0.93f, 0.70f),
-                new Color(0.16f, 0.18f, 0.24f, 1f));   // inactive
-            var patientImg = patientBtn.GetComponent<Image>();
-
-            Color roleActive = new Color(0.18f, 0.48f, 0.38f, 1f);
-            Color roleInactive = new Color(0.16f, 0.18f, 0.24f, 1f);
-            Color therapistActive = new Color(0.38f, 0.28f, 0.58f, 1f);
-            Color patientActive = new Color(0.54f, 0.36f, 0.20f, 1f);
-
-            observerBtn.onClick.AddListener(() =>
-            {
-                selectedRole = PlayerRole.Observer;
-                observerImg.color = roleActive;
-                therapistImg.color = roleInactive;
-                patientImg.color = roleInactive;
-            });
-            therapistBtn.onClick.AddListener(() =>
-            {
-                selectedRole = PlayerRole.Psychologist;
-                therapistImg.color = therapistActive;
-                observerImg.color = roleInactive;
-                patientImg.color = roleInactive;
-            });
-            patientBtn.onClick.AddListener(() =>
-            {
-                selectedRole = PlayerRole.Patient;
-                patientImg.color = patientActive;
-                observerImg.color = roleInactive;
-                therapistImg.color = roleInactive;
-            });
-
             // ── Section: Cloud ────────────────────────────────────────────────
             var cloudCaption = new GameObject("CloudCaption");
             cloudCaption.transform.SetParent(panel.transform, false);
@@ -796,8 +1122,8 @@ namespace Sandplay.Core
             cloudCaptionTxt.alignment = TextAlignmentOptions.Left;
             cloudCaptionTxt.color = new Color(0.44f, 0.76f, 0.88f, 1f);
             var cloudCaptionRT = cloudCaption.GetComponent<RectTransform>();
-            cloudCaptionRT.anchorMin = new Vector2(0.07f, 0.46f);
-            cloudCaptionRT.anchorMax = new Vector2(0.93f, 0.55f);
+            cloudCaptionRT.anchorMin = new Vector2(0.07f, 0.65f);
+            cloudCaptionRT.anchorMax = new Vector2(0.93f, 0.74f);
             cloudCaptionRT.offsetMin = Vector2.zero;
             cloudCaptionRT.offsetMax = Vector2.zero;
 
@@ -810,8 +1136,8 @@ namespace Sandplay.Core
             inputOutline.effectColor = new Color(0.40f, 0.60f, 0.72f, 0.28f);
             inputOutline.effectDistance = new Vector2(1f, -1f);
             var roomInputRT = roomInputBg.GetComponent<RectTransform>();
-            roomInputRT.anchorMin = new Vector2(0.21f, 0.29f);
-            roomInputRT.anchorMax = new Vector2(0.68f, 0.45f);
+            roomInputRT.anchorMin = new Vector2(0.07f, 0.46f);
+            roomInputRT.anchorMax = new Vector2(0.93f, 0.63f);
             roomInputRT.offsetMin = Vector2.zero;
             roomInputRT.offsetMax = Vector2.zero;
 
@@ -845,7 +1171,7 @@ namespace Sandplay.Core
             roomInput.contentType = TMP_InputField.ContentType.Alphanumeric;
             roomInput.onValueChanged.AddListener(val =>
             {
-                string upper = val.ToUpper();
+                string upper = val.ToUpperInvariant();
                 if (upper != val) { roomInput.text = upper; roomInput.caretPosition = upper.Length; }
             });
 
@@ -853,7 +1179,7 @@ namespace Sandplay.Core
             TextMeshProUGUI cloudStatusTxt;
             var cloudJoinBtn = CreateMenuButton(panel.transform, "Btn_CloudJoin",
                 Localization.Get("join.join_room"),
-                new Vector2(0.70f, 0.29f), new Vector2(0.93f, 0.45f),
+                new Vector2(0.52f, 0.28f), new Vector2(0.93f, 0.42f),
                 new Color(0.16f, 0.45f, 0.60f, 1f));
             var cloudJoinLbl = cloudJoinBtn.GetComponentInChildren<TextMeshProUGUI>();
             cloudJoinLbl.fontSize = 17; cloudJoinLbl.fontStyle = FontStyles.Bold;
@@ -866,70 +1192,96 @@ namespace Sandplay.Core
             cloudStatusTxt.alignment = TextAlignmentOptions.Left;
             cloudStatusTxt.color = new Color(0.85f, 0.50f, 0.40f, 1f);
             var cloudStatusRT = cloudStatusGo.GetComponent<RectTransform>();
-            cloudStatusRT.anchorMin = new Vector2(0.07f, 0.22f);
-            cloudStatusRT.anchorMax = new Vector2(0.93f, 0.29f);
+            cloudStatusRT.anchorMin = new Vector2(0.07f, 0.18f);
+            cloudStatusRT.anchorMax = new Vector2(0.93f, 0.27f);
             cloudStatusRT.offsetMin = Vector2.zero; cloudStatusRT.offsetMax = Vector2.zero;
 
+            var joinPanel = _networkPanel;
             cloudJoinBtn.onClick.AddListener(() =>
             {
-                string code = roomInput.text.Trim().ToUpper();
-                if (code.Length < 4)
+                if (joinPanel == null || _networkPanel != joinPanel || !cloudJoinBtn.interactable) return;
+                if (!RequireMultiplayerAccount(ShowJoinPanel)) return;
+                string code = roomInput.text.Trim().ToUpperInvariant();
+                if (!IsValidJoinRoomCode(code))
                 {
                     cloudStatusTxt.text = Localization.Get("join.invalid_code");
+                    return;
+                }
+                var network = NetworkBootstrapper.Instance;
+                if (network == null)
+                {
+                    cloudStatusTxt.text = Localization.Get("join.room_not_found");
                     return;
                 }
                 cloudStatusTxt.text = Localization.Get("join.joining");
                 cloudJoinBtn.interactable = false;
 
-                if (NetworkBootstrapper.Instance != null)
+                if (network != null)
                 {
-                    NetworkBootstrapper.Instance.RequestedRole = selectedRole;
+                    network.RequestedRole = PlayerRole.Observer;
                     System.Action onConnect = null, onDisconnect = null;
                     onConnect = () =>
                     {
-                        NetworkBootstrapper.Instance.OnConnected -= onConnect;
-                        NetworkBootstrapper.Instance.OnDisconnected -= onDisconnect;
+                        network.OnConnected -= onConnect;
+                        network.OnDisconnected -= onDisconnect;
+                        if (joinPanel == null || _networkPanel != joinPanel) return;
                         Destroy(_networkPanel); _networkPanel = null;
                         _mainMenuPanel.SetActive(false);
                         if (_mainMenuBackground != null) _mainMenuBackground.SetActive(false);
                         _sandboxRoot.SetActive(true);
-                        _sandboxUI.SetActive(true);
-                        UpdateRoomCodeDisplay();
+                        _sandboxUI.SetActive(false);
+                        BeginJoinedSessionLoading(network);
                         // Load the API catalog so API objects in FullState can be spawned.
                         if (_networkCatalogItems == null)
                             LoadCatalogFromAPI();
                     };
                     onDisconnect = () =>
                     {
-                        NetworkBootstrapper.Instance.OnConnected -= onConnect;
-                        NetworkBootstrapper.Instance.OnDisconnected -= onDisconnect;
+                        network.OnConnected -= onConnect;
+                        network.OnDisconnected -= onDisconnect;
+                        if (joinPanel == null || _networkPanel != joinPanel) return;
                         cloudStatusTxt.text = Localization.Get("join.room_not_found");
                         cloudJoinBtn.interactable = true;
                     };
-                    NetworkBootstrapper.Instance.OnConnected += onConnect;
-                    NetworkBootstrapper.Instance.OnDisconnected += onDisconnect;
-                    NetworkBootstrapper.Instance.StartClientRelay(RelayAddress, code, selectedRole);
+                    network.OnConnected += onConnect;
+                    network.OnDisconnected += onDisconnect;
+                    network.StartClientRelay(RelayAddress, code, PlayerRole.Observer);
                 }
             });
 
             var scanQrBtn = CreateMenuButton(panel.transform, "Btn_ScanQR",
                 Localization.Get("join.scan_qr"),
-                new Vector2(0.07f, 0.29f), new Vector2(0.19f, 0.45f),
+                new Vector2(0.07f, 0.28f), new Vector2(0.48f, 0.42f),
                 new Color(0.16f, 0.36f, 0.48f, 1f));
+            SetScanButtonIcon(scanQrBtn);
+            GameObject activeScanner = null;
             scanQrBtn.onClick.AddListener(() =>
             {
-#if UNITY_IOS || UNITY_ANDROID
+                if (activeScanner != null) return;
+                if (joinPanel == null || _networkPanel != joinPanel || !cloudJoinBtn.interactable) return;
                 var scannerGo = new GameObject("QRScanner");
+                activeScanner = scannerGo;
                 scannerGo.transform.SetParent(_canvasGo.transform, false);
                 var scanner = scannerGo.AddComponent<Sandplay.UI.QRCodeScannerOverlay>();
                 scanner.OnCodeScanned = code =>
                 {
-                    if (!string.IsNullOrEmpty(code))
-                        roomInput.text = code.Trim().ToUpper();
+                    if (joinPanel == null || _networkPanel != joinPanel || !cloudJoinBtn.interactable) return;
+                    string scannedCode = (code ?? "").Trim().ToUpperInvariant();
+                    // Validate before assigning: the input's character limit must not
+                    // turn an unrelated/oversized QR payload into a valid room code.
+                    if (!IsValidJoinRoomCode(scannedCode))
+                    {
+                        cloudStatusTxt.text = Localization.Get("join.invalid_code");
+                        return;
+                    }
+                    roomInput.text = scannedCode;
+                    cloudJoinBtn.onClick.Invoke();
                 };
                 scanner.Initialize();
-#endif
             });
+
+            roomInput.onSubmit.AddListener(_ => cloudJoinBtn.onClick.Invoke());
+            if (scanImmediately) scanQrBtn.onClick.Invoke();
 
             // ── Bottom cancel ─────────────────────────────────────────────────
             var cancelBtn = CreateMenuButton(panel.transform, "Btn_Cancel",
@@ -943,6 +1295,58 @@ namespace Sandplay.Core
                 Destroy(_networkPanel);
                 _networkPanel = null;
             });
+            // Use the workspace palette and a compact, centered form in both themes.
+            void Place(RectTransform rect, float x, float y, float w, float h)
+            {
+                rect.anchorMin = new Vector2(x,y); rect.anchorMax = new Vector2(x+w,y+h);
+                rect.offsetMin = rect.offsetMax = Vector2.zero;
+            }
+            Place(panelRT, .19f, .07f, .62f, embedded ? .73f : .86f);
+            headerBg.SetActive(false); headerSep.SetActive(false);
+            if (embedded)
+            {
+                ClientText(_networkPanel.transform, F("YOUR WORKSPACE", "您的工作空间"), 11, .025f,.94f,.65f,.04f,HomeMuted);
+                var pageTitle = ClientText(_networkPanel.transform,F("Join a session", "加入会话"),30,.025f,.865f,.7f,.075f,HomeText);
+                pageTitle.fontStyle = FontStyles.Bold;
+                ClientText(_networkPanel.transform,F("Connect with someone in a shared sandtray.", "与他人连接，共同创作沙盘。"),14,.025f,.815f,.9f,.05f,HomeMuted);
+            }
+            var iconPlate = ClientRect(panel.transform,"JoinIcon",.065f,.805f,.125f,.135f);
+            var iconFill = iconPlate.gameObject.AddComponent<Image>(); iconFill.color=HomeTeal;
+            ApplyHomeRoundedCorners(iconFill,10f);
+            AddHomeIconGraphic(iconPlate,"join",new Vector2(.25f,.25f),new Vector2(.75f,.75f),HomePrimary);
+            titleTxt.text=F("Enter your room code", "输入房间码"); titleTxt.color=HomeText;
+            titleTxt.alignment=TextAlignmentOptions.Left; titleTxt.fontSize=21;
+            Place(titleRT,.24f,.855f,.70f,.065f);
+            ClientText(panel.transform,F("Ask your host for the code to their session.", "请向主持人索取会话房间码。"),13,.24f,.795f,.70f,.06f,HomeMuted);
+            cloudCaptionTxt.text=F("Room code", "房间码"); cloudCaptionTxt.color=HomeMuted;
+            Place(cloudCaptionRT,.065f,.705f,.87f,.04f);
+            roomInputBg.GetComponent<Image>().color=HomeBg; inputOutline.effectColor=HomePrimary;
+            Place(roomInputRT,.065f,.575f,.87f,.115f);
+            roomTxt.color=HomeText; roomTxt.alignment=TextAlignmentOptions.Left;
+            roomPhTxt.color=HomeMuted; roomPhTxt.alignment=TextAlignmentOptions.Left;
+            ClientText(panel.transform,F("Enter the code exactly as shared by your host.", "请输入主持人分享的完整房间码。"),11,.065f,.52f,.87f,.045f,HomeMuted);
+            Place(cloudStatusRT,.065f,.475f,.87f,.04f);
+            Place((RectTransform)cloudJoinBtn.transform,.065f,.365f,.87f,.105f);
+            cloudJoinBtn.GetComponent<Image>().color=HomePrimary;
+            cloudJoinLbl.text=F("Join session", "加入会话");
+            var separator=ClientRect(panel.transform,"OrDivider",.065f,.307f,.87f,.002f);
+            separator.gameObject.AddComponent<Image>().color=HomeCardBorder;
+            var orPlate=ClientRect(panel.transform,"Or",.455f,.275f,.09f,.065f);
+            orPlate.gameObject.AddComponent<Image>().color=HomeCard;
+            ClientText(orPlate,F("or", "或"),13,0,0,1,1,HomeMuted).alignment=TextAlignmentOptions.Center;
+            Place((RectTransform)scanQrBtn.transform,.065f,.145f,.87f,.105f);
+            scanQrBtn.GetComponent<Image>().color=HomeCard;
+            var scanBorder=scanQrBtn.gameObject.AddComponent<Outline>();scanBorder.effectColor=HomePrimary;scanBorder.effectDistance=new Vector2(1,-1);
+            var scanLabel=scanQrBtn.GetComponentInChildren<TextMeshProUGUI>(true);
+            scanLabel.gameObject.SetActive(true);scanLabel.text=F("Scan QR code", "扫描二维码");scanLabel.color=HomePrimary;
+            scanLabel.rectTransform.offsetMin=new Vector2(35,0);
+            var scanIcon=(RectTransform)scanQrBtn.transform.Find("ScanIcon");scanIcon.anchorMin=scanIcon.anchorMax=new Vector2(.20f,.5f);
+            foreach(var stroke in scanIcon.GetComponentsInChildren<Image>())stroke.color=HomePrimary;
+            Place((RectTransform)cancelBtn.transform,.3f,.025f,.4f,.075f);
+            cancelBtn.GetComponent<Image>().color=Color.clear;
+            cancelBtn.GetComponentInChildren<TextMeshProUGUI>().color=HomeMuted;
+            if (embedded) cancelBtn.onClick.AddListener(() => ShowHomeSection("home"));
+
         }
 
         /// <summary>
@@ -971,7 +1375,20 @@ namespace Sandplay.Core
             if (_colorRows.ContainsKey(materialName))
             {
                 var row = _colorRows[materialName];
-                if (row.preview != null) row.preview.color = color;
+                if (row.preview != null)
+                {
+                    row.preview.color = color;
+                    var dropdown = row.preview.transform.parent.GetComponentInChildren<TMPro.TMP_Dropdown>(true);
+                    if (dropdown != null)
+                    {
+                        string hex = "#" + ColorUtility.ToHtmlStringRGB(color);
+                        int current = dropdown.options.Count - 2;
+                        dropdown.options[current].text = hex;
+                        int index = dropdown.options.FindIndex(option => option.text == hex);
+                        dropdown.SetValueWithoutNotify(index >= 0 ? index : current);
+                        dropdown.captionText.text = hex;
+                    }
+                }
             }
         }
 

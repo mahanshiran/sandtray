@@ -26,6 +26,12 @@
 # Generated .NET output at any depth
 **/[Bb]in/
 **/[Oo]bj/
+**/[Bb]in.meta
+**/[Oo]bj.meta
+
+# Python caches used by relay validation tools
+__pycache__/
+*.py[cod]
 
 # The backend is maintained in its own Git repository
 /api_backend/
@@ -136,3 +142,14 @@ InitTestScene*.unity*
 # See API_KEY_SECURITY.md for setup instructions.
 /[Aa]ssets/[Rr]esources/GameConfig.asset
 /[Aa]ssets/[Rr]esources/GameConfig.asset.meta
+
+# EMAS SDK configuration and Apple/server push credentials
+AliyunEmasServices-Info.plist
+SandtrayPushConfig.plist
+AuthKey_*.p8
+
+# Local planning notes and generated store artwork. Store-art source belongs in
+# the release system that publishes it, not in the Unity player source tree.
+/todo.md
+/subscription_access_todo.md
+/exports/

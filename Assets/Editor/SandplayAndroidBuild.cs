@@ -16,7 +16,7 @@ namespace Sandplay.Editor
         public static void Configure()
         {
             ApplySettings(switchTarget: true);
-            Debug.Log("[Sandplay] Android settings configured (ARM64, IL2CPP, target API automatic).");
+            Debug.Log("[Sandplay] Android settings configured (ARM64, IL2CPP, target API 36).");
         }
 
         [MenuItem("Sandplay/Build Android APK")]
@@ -73,8 +73,8 @@ namespace Sandplay.Editor
                 ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel23;
-            // Uses the newest platform installed with the selected Unity Editor.
-            PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
+            // Pin the Play submission target rather than depending on installed SDK order.
+            PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)36;
             PlayerSettings.Android.forceInternetPermission = true;
             PlayerSettings.Android.forceSDCardPermission = false;
             PlayerSettings.Android.androidIsGame = false;
@@ -129,8 +129,7 @@ namespace Sandplay.Editor
             }
 
             Debug.Log(
-                "[Sandplay] Android target API is Automatic. This Editor currently uses the " +
-                "highest installed Android SDK; install API 36 before Google Play's August 31, 2026 deadline.");
+                "[Sandplay] Android target API is 36. Ensure Android SDK platform 36 is installed.");
         }
     }
 }

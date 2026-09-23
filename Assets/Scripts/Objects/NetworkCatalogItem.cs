@@ -11,6 +11,7 @@ namespace Sandplay.Objects
     public class NetworkCatalogItem
     {
         public string id;           // UUID from API
+        public string catalog;      // Source catalog UUID (used for offline enable/disable filtering)
         public string display_name;
         public string category;
         public string model_url;

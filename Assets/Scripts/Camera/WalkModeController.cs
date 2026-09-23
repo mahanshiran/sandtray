@@ -28,6 +28,7 @@ namespace Sandplay.Camera
         private SandboxCamera _orbitCamera;
         private Transform _camTransform;
         private float _savedNearClip;
+        private CharacterController _body;
 
         // Joystick input set by UI (mobile only — movement)
         private Vector2 _moveInput;
@@ -47,6 +48,12 @@ namespace Sandplay.Camera
         }
 
         public void SetMoveInput(Vector2 input) => _moveInput = input;
+        public void Jump()
+        {
+            if (!_active || !_grounded) return;
+            _verticalVelocity = JumpForce;
+            _grounded = false;
+        }
 
         public void EnterWalkMode()
         {
@@ -69,6 +76,27 @@ namespace Sandplay.Camera
             if (SandMesh.Instance != null)
                 sandY = SandMesh.Instance.SampleWorldHeight(_position);
             _position.y = sandY + EyeHeight;
+            Physics.SyncTransforms();
+            // Start above any model occupying the centre instead of inside it.
+            foreach (var hit in Physics.RaycastAll(new Vector3(0, 100, 0), Vector3.down, 200,
+                Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+                if (hit.collider.GetComponentInParent<Sandplay.Objects.PlacedObject>() != null)
+                    _position.y = Mathf.Max(_position.y, hit.point.y + EyeHeight + .02f);
+            if (_body == null)
+            {
+                var bodyObject = new GameObject("WalkPlayerCollision");
+                _body = bodyObject.AddComponent<CharacterController>();
+                _body.height = .7f;
+                _body.radius = .12f;
+                _body.center = new Vector3(0, .35f, 0);
+                _body.skinWidth = .01f;
+                _body.stepOffset = .08f;
+                _body.slopeLimit = 50;
+                _body.minMoveDistance = 0;
+            }
+            _body.enabled = false;
+            _body.transform.position = _position - Vector3.up * EyeHeight;
+            _body.enabled = true;
 
             _yaw = 0f;
             _pitch = 0f;
@@ -93,6 +121,7 @@ namespace Sandplay.Camera
         {
             if (!_active) return;
             _active = false;
+            if (_body != null) _body.enabled = false;
 
             // Unlock cursor
             if (!IsTouchDevice)
@@ -138,8 +167,7 @@ namespace Sandplay.Camera
                 // Jump (Space)
                 if (_grounded && Input.GetKeyDown(KeyCode.Space))
                 {
-                    _verticalVelocity = JumpForce;
-                    _grounded = false;
+                    Jump();
                 }
 
                 // Escape to exit walk mode
@@ -161,7 +189,7 @@ namespace Sandplay.Camera
                 Vector3 forward = Quaternion.Euler(0, _yaw, 0) * Vector3.forward;
                 Vector3 right = Quaternion.Euler(0, _yaw, 0) * Vector3.right;
                 Vector3 delta = (forward * move.y + right * move.x) * MoveSpeed * Time.deltaTime;
-                _position += delta;
+                MoveWithCollision(delta);
 
                 // Clamp to sandbox bounds
                 float halfW = GetHalfWidth();
@@ -184,7 +212,10 @@ namespace Sandplay.Camera
 
                 // Apply gravity / jump
                 _verticalVelocity -= Gravity * Time.deltaTime;
-                _position.y += _verticalVelocity * Time.deltaTime;
+                var flags = MoveWithCollision(Vector3.up * (_verticalVelocity * Time.deltaTime));
+                if ((flags & CollisionFlags.Above) != 0 && _verticalVelocity > 0) _verticalVelocity = 0;
+                _grounded = (flags & CollisionFlags.Below) != 0;
+                if (_grounded && _verticalVelocity < 0) _verticalVelocity = 0;
 
                 // Land on terrain
                 if (_position.y <= groundY)
@@ -196,6 +227,15 @@ namespace Sandplay.Camera
             }
 
             ApplyCamera();
+        }
+
+        private CollisionFlags MoveWithCollision(Vector3 delta)
+        {
+            // Terrain sampling / tray clamping may have corrected the last position.
+            _body.transform.position = _position - Vector3.up * EyeHeight;
+            var flags = _body.Move(delta);
+            _position = _body.transform.position + Vector3.up * EyeHeight;
+            return flags;
         }
 
         private void ApplyCamera()
@@ -218,7 +258,9 @@ namespace Sandplay.Camera
                 if (t.phase == TouchPhase.Began)
                 {
                     // Skip touches that start in the joystick zone (bottom-left 200×200 px)
-                    if (t.position.x < 200f && t.position.y < 200f)
+                    if (t.position.x < Screen.width * .45f ||
+                        (UnityEngine.EventSystems.EventSystem.current != null &&
+                         UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject(t.fingerId)))
                         continue;
 
                     // Claim this touch for look if we don't already have one
@@ -263,6 +305,7 @@ namespace Sandplay.Camera
 
         private void OnDestroy()
         {
+            if (_body != null) Destroy(_body.gameObject);
             if (Instance == this)
                 Instance = null;
         }

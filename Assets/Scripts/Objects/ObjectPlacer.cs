@@ -8,7 +8,7 @@ using Sandplay.Sand;
 
 namespace Sandplay.Objects
 {
-    public class ObjectPlacer : MonoBehaviour
+    public partial class ObjectPlacer : MonoBehaviour
     {
         private const string AllowObjectsInAirPrefKey = "sandplay_allow_objects_in_air";
 
@@ -47,7 +47,6 @@ namespace Sandplay.Objects
         private Quaternion _moveStartRot;
 
         // Copy/paste clipboard
-        private PlacedObject _copiedObject;
 
         public void Initialize(ObjectCatalog catalog)
         {
@@ -58,12 +57,31 @@ namespace Sandplay.Objects
         {
             EventBus.Subscribe<CatalogObjectSelectedEvent>(OnCatalogObjectSelected);
             EventBus.Subscribe<ToolModeChangedEvent>(OnToolModeChanged);
+            EventBus.Subscribe<NetworkRoleAssignedEvent>(OnEditingRoleChanged);
         }
 
         private void OnDisable()
         {
+            CancelSelectionGesture();
             EventBus.Unsubscribe<CatalogObjectSelectedEvent>(OnCatalogObjectSelected);
             EventBus.Unsubscribe<ToolModeChangedEvent>(OnToolModeChanged);
+            EventBus.Unsubscribe<NetworkRoleAssignedEvent>(OnEditingRoleChanged);
+        }
+
+        private void OnEditingRoleChanged(NetworkRoleAssignedEvent evt)
+        {
+            if (evt.Role != PlayerRole.Patient) StopEditingGesture();
+        }
+
+        public void StopEditingGesture()
+        {
+            _isDraggingObject = _dragStarted = false;
+            // Do not restore old poses over state received from the new editor.
+            _groupStart = null;
+            _boxSelecting = _movingGroup = false;
+            if (_selectionRectangle != null) _selectionRectangle.gameObject.SetActive(false);
+            _selectedCatalogObject = null;
+            if (_ghostPreview != null) Destroy(_ghostPreview);
         }
 
         private void Start()
@@ -75,7 +93,8 @@ namespace Sandplay.Objects
         private void Update()
         {
             if (_cam == null || _sandMesh == null) return;
-            if (InputHelper.IsInputBlocked) return;
+            if (InputHelper.IsInputBlocked || InputHelper.IsTextInputFocused) { CancelSelectionGesture(); return; }
+            if (HandleActiveSelectionGesture()) return;
 
             // Handle keyboard shortcuts first (works globally when keyboard is available)
             HandleKeyboardShortcuts();
@@ -97,6 +116,9 @@ namespace Sandplay.Objects
             var sandTool = FindAnyObjectByType<Sandplay.Sand.SandToolController>();
             if (sandTool != null && sandTool.IsDrawing) return;
             if (Sandplay.Camera.WalkModeController.Instance != null && Sandplay.Camera.WalkModeController.Instance.IsActive) return;
+
+            // Psychologists cannot drag or modify objects
+            if (!isPsychologist && HandleMultiSelectionPointer()) return;
 
             // Psychologists cannot drag or modify objects
             if (isPsychologist)
@@ -328,52 +350,70 @@ namespace Sandplay.Objects
         /// </summary>
         private void HandleKeyboardShortcuts()
         {
-            // Skip if UI element has focus (e.g., text input)
-            if (InputHelper.IsPointerOverUI()) return;
+            if (!Input.anyKeyDown) return;
+            if (InputHelper.IsInputBlocked || InputHelper.IsTextInputFocused) return;
+            if (_isDraggingObject || Sandplay.UI.CatalogDragHandler.IsDragging) return;
+            if (Sandplay.Camera.WalkModeController.Instance != null && Sandplay.Camera.WalkModeController.Instance.IsActive) return;
+            var sandTool = FindAnyObjectByType<Sandplay.Sand.SandToolController>();
+            if (sandTool != null && sandTool.IsDrawing) return;
+            if (_actionPanel == null) _actionPanel = FindAnyObjectByType<Sandplay.UI.ObjectActionPanel>();
+            if (_actionPanel != null && !_actionPanel.transform.parent.gameObject.activeInHierarchy) return;
+            if (_actionPanel != null && _actionPanel.IsActionActive) return;
+            // Do not steal arrow keys from other UI controls. Toolbar buttons are allowed.
+            var focused = UnityEngine.EventSystems.EventSystem.current?.currentSelectedGameObject;
+            if (focused != null && focused.activeInHierarchy &&
+                focused.GetComponentInParent<Sandplay.UI.ObjectActionPanel>() == null) return;
+            if (InputHelper.IsPointerOverUI())
+            {
+                var events = UnityEngine.EventSystems.EventSystem.current;
+                var hits = new List<UnityEngine.EventSystems.RaycastResult>();
+                events.RaycastAll(new UnityEngine.EventSystems.PointerEventData(events)
+                    { position = Input.mousePosition }, hits);
+                if (hits.Count == 0 || hits[0].gameObject.GetComponentInParent<Sandplay.UI.ObjectActionPanel>() == null) return;
+            }
 
             // Check if user is psychologist or observer (no edit permissions)
             bool isPsychologist = GameManager.Instance != null && GameManager.Instance.IsPsychologist;
             bool isObserver = GameManager.Instance != null && GameManager.Instance.IsObserver;
             if (isPsychologist || isObserver) return;
 
-            // Detect Ctrl (Windows/Linux) or Cmd (Mac)
-            bool modifier = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) ||
-                           Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand);
-
-            // Copy: Ctrl/Cmd+C
-            if (modifier && Input.GetKeyDown(KeyCode.C))
+            if (KeyboardShortcuts.Pressed(ShortcutAction.Copy))
             {
-                if (_selectedPlaced != null &&
-                    (_selectedPlaced.ObjectData != null || _selectedPlaced.NetworkItem != null))
-                {
-                    _copiedObject = _selectedPlaced;
-                    Debug.Log($"[ObjectPlacer] Copied object: {GetObjectDisplayName(_copiedObject)}");
-                }
+                CopySelection();
+                return;
             }
-
-            // Paste: Ctrl/Cmd+V
-            if (modifier && Input.GetKeyDown(KeyCode.V))
+            if (KeyboardShortcuts.Pressed(ShortcutAction.Paste))
             {
-                if (_copiedObject != null && _copiedObject.gameObject != null)
-                {
-                    DuplicateObject(_copiedObject);
-                }
+                PasteSelection();
+                return;
             }
-
-            // Delete: Delete key or Backspace
-            if (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace))
+            if (KeyboardShortcuts.Pressed(ShortcutAction.Duplicate))
             {
-                if (_selectedPlaced != null && _selectedPlaced.ObjectData != null)
+                if (_selectedPlaced != null)
                 {
-                    string objectName = _selectedPlaced.ObjectData.DisplayName;
-                    var cmd = new RemoveObjectCommand(this, _selectedPlaced);
-                    UndoManager.Instance?.Execute(cmd);
-                    Debug.Log($"[ObjectPlacer] Deleted object: {objectName}");
+                    _actionPanel?.ShowKeyboardHints();
+                    if (_selection.Count > 1) DuplicateSelection();
+                    else DuplicateObject(_selectedPlaced);
                 }
+                return;
             }
+            if (KeyboardShortcuts.Pressed(ShortcutAction.Delete))
+            {
+                if (_selectedPlaced != null && (_selectedPlaced.ObjectData != null || _selectedPlaced.NetworkItem != null))
+                    DeleteSelection();
+                return;
+            }
+            if (_selectedPlaced == null || _actionPanel == null || !_actionPanel.isActiveAndEnabled) return;
+            bool fine = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            if (KeyboardShortcuts.Pressed(ShortcutAction.Raise)) _actionPanel.ApplyKeyboardStep(0, 1, fine);
+            else if (KeyboardShortcuts.Pressed(ShortcutAction.Lower)) _actionPanel.ApplyKeyboardStep(0, -1, fine);
+            else if (KeyboardShortcuts.Pressed(ShortcutAction.RotateLeft)) _actionPanel.ApplyKeyboardStep(1, -1, fine);
+            else if (KeyboardShortcuts.Pressed(ShortcutAction.RotateRight)) _actionPanel.ApplyKeyboardStep(1, 1, fine);
+            else if (KeyboardShortcuts.Pressed(ShortcutAction.Enlarge)) _actionPanel.ApplyKeyboardStep(2, 1, fine);
+            else if (KeyboardShortcuts.Pressed(ShortcutAction.Shrink)) _actionPanel.ApplyKeyboardStep(2, -1, fine);
         }
 
-        public PlacedObject PlaceObject(SandplayObject data, Vector3 position, Quaternion rotation, float scale, bool skipOffset = false)
+        public PlacedObject PlaceObject(SandplayObject data, Vector3 position, Quaternion rotation, float scale, bool skipOffset = false, bool placementFeedback = true)
         {
             if (data == null || data.Prefab == null) return null;
 
@@ -434,8 +474,10 @@ namespace Sandplay.Objects
                     bounds.size.z / go.transform.lossyScale.z);
             }
 
+            ModelCollision.Install(go);
             _placedObjects.Add(placed);
             EventBus.Publish(new ObjectPlacedEvent { PlacedObject = placed });
+            if (placementFeedback) Sandplay.UI.UITapHaptics.ObjectPlaced();
 
             return placed;
         }
@@ -445,7 +487,7 @@ namespace Sandplay.Objects
         /// The <paramref name="item"/> reference is stored on the resulting PlacedObject
         /// so the session serializer can record the API UUID.
         /// </summary>
-        public PlacedObject PlaceNetworkObject(NetworkCatalogItem item, Vector3 position, Quaternion rotation, float scale, bool skipOffset = false)
+        public PlacedObject PlaceNetworkObject(NetworkCatalogItem item, Vector3 position, Quaternion rotation, float scale, bool skipOffset = false, bool placementFeedback = true)
         {
             if (item?.LoadedPrefab == null) return null;
 
@@ -490,8 +532,10 @@ namespace Sandplay.Objects
                     b.size.z / go.transform.lossyScale.z);
             }
 
+            ModelCollision.Install(go);
             _placedObjects.Add(placed);
             EventBus.Publish(new ObjectPlacedEvent { PlacedObject = placed });
+            if (placementFeedback) Sandplay.UI.UITapHaptics.ObjectPlaced();
             return placed;
         }
 
@@ -500,7 +544,7 @@ namespace Sandplay.Objects
         /// the exact rotation, scale, and vertical placement; it prefers screen-right and
         /// automatically uses screen-left when the right side is too close to a tray wall.
         /// </summary>
-        public PlacedObject DuplicateObject(PlacedObject source)
+        public PlacedObject DuplicateObject(PlacedObject source, Vector3? sharedOffset = null, bool select = true)
         {
             if (source == null || source.gameObject == null) return null;
             if (source.ObjectData == null && source.NetworkItem == null) return null;
@@ -528,6 +572,7 @@ namespace Sandplay.Objects
                 new Vector2(source.transform.position.x, source.transform.position.z),
                 new Vector2(left.x, left.z));
             Vector3 duplicatePosition = rightDistance >= leftDistance ? right : left;
+            if (sharedOffset.HasValue) duplicatePosition = source.transform.position + sharedOffset.Value;
 
             float relativeScale = source.Serialize().Scale;
             PlacedObject duplicate;
@@ -548,7 +593,7 @@ namespace Sandplay.Objects
 
             if (duplicate != null)
             {
-                SelectObject(duplicate);
+                if (select) SelectObject(duplicate);
                 if (duplicate.NetworkId != 0)
                     NetworkBootstrapper.Instance?.SendObjectSelection(duplicate.NetworkId);
                 Debug.Log($"[ObjectPlacer] Duplicated object: {GetObjectDisplayName(source)}");
@@ -575,8 +620,12 @@ namespace Sandplay.Objects
         public void RemoveObject(PlacedObject obj)
         {
             if (obj == null) return;
-            if (_selectedPlaced == obj)
-                SelectObject(null);
+            if (_selection.Contains(obj))
+            {
+                var remaining = new List<PlacedObject>(_selection);
+                remaining.Remove(obj);
+                SetSelection(remaining);
+            }
             _placedObjects.Remove(obj);
             EventBus.Publish(new ObjectRemovedEvent { PlacedObject = obj });
 
@@ -588,7 +637,7 @@ namespace Sandplay.Objects
             else
                 DestroyImmediate(obj.gameObject);
 
-            SettleFloatingObjects();
+            if (!_batchMembership) SettleFloatingObjects();
         }
 
         /// <summary>
@@ -644,21 +693,7 @@ namespace Sandplay.Objects
 
         public void SelectObject(PlacedObject obj)
         {
-            if (_selectedPlaced != null)
-                _selectedPlaced.SetSelected(false);
-
-            _selectedPlaced = obj;
-
-            if (_selectedPlaced != null)
-            {
-                _selectedPlaced.SetSelected(true);
-                // Deactivate sand tools when an object is selected.
-                // Don't interrupt walk mode — selection is allowed while walking.
-                if (GameManager.Instance != null && GameManager.Instance.CurrentTool != ToolMode.WalkMode)
-                    GameManager.Instance.SetToolMode(ToolMode.ObjectSelect);
-            }
-
-            EventBus.Publish(new ObjectSelectedEvent { PlacedObject = _selectedPlaced });
+            SetSelection(obj == null ? new PlacedObject[0] : new[] { obj });
         }
 
         /// <summary>
@@ -667,17 +702,7 @@ namespace Sandplay.Objects
         /// </summary>
         public void SelectNetworkObject(PlacedObject obj)
         {
-            if (_selectedPlaced != null)
-                _selectedPlaced.SetSelected(false);
-
-            _selectedPlaced = obj;
-
-            if (_selectedPlaced != null)
-            {
-                _selectedPlaced.SetSelected(true);
-            }
-
-            EventBus.Publish(new ObjectSelectedEvent { PlacedObject = _selectedPlaced });
+            SetSelection(obj == null ? new PlacedObject[0] : new[] { obj }, false);
         }
 
         /// <summary>
@@ -685,12 +710,7 @@ namespace Sandplay.Objects
         /// </summary>
         public void DeselectNetworkSelection()
         {
-            if (_selectedPlaced != null)
-            {
-                _selectedPlaced.SetSelected(false);
-                _selectedPlaced = null;
-                EventBus.Publish(new ObjectSelectedEvent { PlacedObject = null });
-            }
+            SetSelection(new PlacedObject[0], false);
         }
 
         private float GetObjectTopY(PlacedObject obj)
@@ -877,6 +897,8 @@ namespace Sandplay.Objects
 
         private void OnToolModeChanged(ToolModeChangedEvent evt)
         {
+            if (evt.NewMode != ToolMode.ObjectSelect && evt.NewMode != ToolMode.None)
+                CancelSelectionGesture();
             if (evt.NewMode != ToolMode.ObjectPlace)
             {
                 _selectedCatalogObject = null;

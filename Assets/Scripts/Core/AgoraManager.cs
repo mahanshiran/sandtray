@@ -29,7 +29,7 @@ namespace Sandplay.Core
 
         // ── Public state ───────────────────────────────────────────────────────
         public bool IsInChannel { get; private set; }
-        public bool MicMuted { get; private set; }
+        public bool MicMuted { get; private set; } = true;
         public bool VideoEnabled { get; private set; }
         public string ChannelName { get; private set; }
 
@@ -59,6 +59,36 @@ namespace Sandplay.Core
         private readonly HashSet<uint> _remoteUids = new HashSet<uint>();
         public IReadOnlyCollection<uint> RemoteUids => _remoteUids;
 
+        private int _channelGeneration;
+        private int _micRequestGeneration, _videoRequestGeneration;
+        private bool _micPermissionPending, _videoPermissionPending;
+
+        private void CancelPendingMediaActions()
+        {
+            ++_micRequestGeneration;
+            ++_videoRequestGeneration;
+            _micPermissionPending = _videoPermissionPending = false;
+        }
+
+        internal int ChannelGeneration => System.Threading.Volatile.Read(ref _channelGeneration);
+
+        internal bool IsCurrentChannel(string channel, int generation)
+        {
+            return this != null && IsInChannel && generation == ChannelGeneration &&
+                !string.IsNullOrEmpty(channel) && ChannelName == channel;
+        }
+
+        private void EnqueueChannelCallback(string channel, System.Action callback)
+        {
+            // Room names can be reused. A queued event must also belong to the
+            // same local join/leave lifetime when the main thread processes it.
+            int generation = ChannelGeneration;
+            UnityMainThreadDispatcher.Enqueue(() =>
+            {
+                if (IsCurrentChannel(channel, generation)) callback();
+            });
+        }
+
         // ── Internal ───────────────────────────────────────────────────────────
 #if AGORA_INSTALLED
         private Agora.Rtc.IRtcEngine _engine;
@@ -84,7 +114,7 @@ namespace Sandplay.Core
 
             public override void OnJoinChannelSuccess(Agora.Rtc.RtcConnection connection, int elapsed)
             {
-                UnityMainThreadDispatcher.Enqueue(() =>
+                _mgr.EnqueueChannelCallback(connection.channelId, () =>
                 {
                     _mgr.IsInChannel = true;
                     Debug.Log($"[Agora] Channel join confirmed: {connection.channelId} " +
@@ -96,9 +126,10 @@ namespace Sandplay.Core
 
             public override void OnUserJoined(Agora.Rtc.RtcConnection conn, uint uid, int elapsed)
             {
-                UnityMainThreadDispatcher.Enqueue(() =>
+                _mgr.EnqueueChannelCallback(conn.channelId, () =>
                 {
-                    _mgr._remoteUids.Add(uid);
+                    if (uid == conn.localUid) return;
+                    if (!_mgr._remoteUids.Add(uid)) return;
                     // Ensure we actually subscribe to this peer's camera if they turn it on later.
                     _mgr._engine?.MuteRemoteVideoStream(uid, false);
                     _mgr.OnRemoteUserJoined?.Invoke(uid);
@@ -109,9 +140,9 @@ namespace Sandplay.Core
             public override void OnUserOffline(Agora.Rtc.RtcConnection conn, uint uid,
                 Agora.Rtc.USER_OFFLINE_REASON_TYPE reason)
             {
-                UnityMainThreadDispatcher.Enqueue(() =>
+                _mgr.EnqueueChannelCallback(conn.channelId, () =>
                 {
-                    _mgr._remoteUids.Remove(uid);
+                    if (!_mgr._remoteUids.Remove(uid)) return;
                     _mgr.OnRemoteUserLeft?.Invoke(uid);
                     Debug.Log($"[Agora] Remote user left: {uid}");
                 });
@@ -128,7 +159,10 @@ namespace Sandplay.Core
                 if (state == Agora.Rtc.REMOTE_VIDEO_STATE.REMOTE_VIDEO_STATE_DECODING ||
                     state == Agora.Rtc.REMOTE_VIDEO_STATE.REMOTE_VIDEO_STATE_STARTING)
                 {
-                    UnityMainThreadDispatcher.Enqueue(() => _mgr.OnRemoteVideoReady?.Invoke(uid));
+                    _mgr.EnqueueChannelCallback(conn.channelId, () =>
+                    {
+                        if (_mgr._remoteUids.Contains(uid)) _mgr.OnRemoteVideoReady?.Invoke(uid);
+                    });
                 }
             }
 
@@ -136,14 +170,20 @@ namespace Sandplay.Core
                 int width, int height, int elapsed)
             {
                 Debug.Log($"[Agora] First remote video frame uid={uid} {width}x{height}");
-                UnityMainThreadDispatcher.Enqueue(() => _mgr.OnRemoteVideoReady?.Invoke(uid));
+                _mgr.EnqueueChannelCallback(conn.channelId, () =>
+                {
+                    if (_mgr._remoteUids.Contains(uid)) _mgr.OnRemoteVideoReady?.Invoke(uid);
+                });
             }
 
             public override void OnFirstLocalVideoFrame(Agora.Rtc.VIDEO_SOURCE_TYPE source,
                 int width, int height, int elapsed)
             {
                 Debug.Log($"[Agora] First local video frame source={source} {width}x{height}");
-                UnityMainThreadDispatcher.Enqueue(() => _mgr.OnLocalVideoReady?.Invoke());
+                _mgr.EnqueueChannelCallback(_mgr.ChannelName, () =>
+                {
+                    if (_mgr.VideoEnabled) _mgr.OnLocalVideoReady?.Invoke();
+                });
             }
 
             public override void OnLocalVideoStateChanged(Agora.Rtc.VIDEO_SOURCE_TYPE source,
@@ -154,7 +194,7 @@ namespace Sandplay.Core
 
             public override void OnTokenPrivilegeWillExpire(Agora.Rtc.RtcConnection connection, string token)
             {
-                UnityMainThreadDispatcher.Enqueue(() =>
+                _mgr.EnqueueChannelCallback(connection.channelId, () =>
                 {
                     Debug.Log("[Agora] Token privilege will expire; requesting renewal.");
                     _mgr.OnTokenPrivilegeWillExpire?.Invoke();
@@ -210,6 +250,13 @@ namespace Sandplay.Core
             _engine.InitEventHandler(_handler);
             _engine.EnableAudio();
             _engine.EnableVideo();          // engine-wide video on, local camera starts after permission.
+#if UNITY_EDITOR_OSX || (UNITY_STANDALONE_OSX && !UNITY_EDITOR)
+            int orientationRet = _engine.RegisterVideoFrameObserver(new MacCameraFrameOrientation(),
+                Agora.Rtc.VIDEO_OBSERVER_FRAME_TYPE.FRAME_TYPE_YUV420,
+                Agora.Rtc.VIDEO_MODULE_POSITION.POSITION_POST_CAPTURER,
+                Agora.Rtc.OBSERVER_MODE.INTPTR);
+            Debug.Log($"[Agora] Mac camera source rotation registration: {orientationRet}");
+#endif
             _engine.EnableLocalVideo(false);
             ApplyVideoOrientation();
             string appIdTag = appId.Length <= 6 ? appId : appId.Substring(appId.Length - 6);
@@ -224,21 +271,20 @@ namespace Sandplay.Core
         /// <summary>Join a channel. channelName should match the room code.</summary>
         public void JoinChannel(string channelName, string token = null)
         {
+            if (IsInChannel && ChannelName == channelName) return;
+            if (IsInChannel) LeaveChannel();
             StartCoroutine(JoinChannelRoutine(channelName, token));
         }
 
         private IEnumerator JoinChannelRoutine(string channelName, string token)
         {
+            System.Threading.Interlocked.Increment(ref _channelGeneration);
             ChannelName = channelName;
 #if AGORA_INSTALLED
             if (_engine == null) yield break;
-            if (IsInChannel) LeaveChannel();
-
-            // Mic only at join — camera stays off until the user taps Cam On.
-            yield return EnsureMicrophonePermission();
-
-            bool canUseMic = HasMicrophonePermission();
-            MicMuted = !canUseMic;
+            // Joining must never publish audio or prompt for permission. Only
+            // the explicit Mic On action may enable the microphone.
+            MicMuted = true;
             VideoEnabled = false;
 
             _engine.EnableLocalVideo(false);
@@ -246,7 +292,7 @@ namespace Sandplay.Core
             _engine.MuteAllRemoteVideoStreams(false);
 
             var opts = new Agora.Rtc.ChannelMediaOptions();
-            opts.publishMicrophoneTrack.SetValue(canUseMic);
+            opts.publishMicrophoneTrack.SetValue(false);
             opts.publishCameraTrack.SetValue(false);
             opts.autoSubscribeAudio.SetValue(true);
             opts.autoSubscribeVideo.SetValue(true);      // always pull remote video
@@ -258,25 +304,31 @@ namespace Sandplay.Core
                 Debug.LogError($"[Agora] JoinChannel failed: {ret}");
                 yield break;
             }
-            _engine.MuteLocalAudioStream(!canUseMic);
+            _engine.MuteLocalAudioStream(true);
 #else
-            MicMuted = false;
+            MicMuted = true;
             VideoEnabled = false;
 #endif
             IsInChannel = true;
             Debug.Log($"[Agora] Join requested: {channelName} token={(string.IsNullOrEmpty(token) ? "none" : "present")} " +
                       "(camera off by default)");
             OnStateChanged?.Invoke();
+            yield break;
         }
 
         public void LeaveChannel()
         {
+            System.Threading.Interlocked.Increment(ref _channelGeneration);
+            CancelPendingMediaActions();
+            StopAllCoroutines(); // Cancel pending permission prompts/actions too.
 #if AGORA_INSTALLED
             if (_engine != null && IsInChannel) _engine.LeaveChannel();
 #endif
             IsInChannel = false;
             VideoEnabled = false;
             MicMuted = true;
+            foreach (var uid in new System.Collections.Generic.List<uint>(_remoteUids))
+                OnRemoteUserLeft?.Invoke(uid);
             _remoteUids.Clear();
             ChannelName = null;
             Debug.Log("[Agora] Left channel.");
@@ -294,6 +346,14 @@ namespace Sandplay.Core
 
         public void ToggleMic()
         {
+            if (!IsInChannel) return;
+            if (_micPermissionPending)
+            {
+                ++_micRequestGeneration;
+                _micPermissionPending = false;
+                SetMicMuted(true);
+                return;
+            }
             if (MicMuted)
             {
                 StartCoroutine(EnableMicWhenPermitted());
@@ -305,8 +365,14 @@ namespace Sandplay.Core
 
         private IEnumerator EnableMicWhenPermitted()
         {
+            int request = ++_micRequestGeneration;
+            int generation = ChannelGeneration;
+            string channel = ChannelName;
+            _micPermissionPending = true;
             yield return EnsureMicrophonePermission();
 
+            if (request != _micRequestGeneration || !IsCurrentChannel(channel, generation)) yield break;
+            _micPermissionPending = false;
             if (!HasMicrophonePermission())
             {
                 Debug.LogWarning("[Agora] Microphone permission denied; mic remains muted.");
@@ -334,6 +400,14 @@ namespace Sandplay.Core
 
         public void ToggleVideo()
         {
+            if (!IsInChannel) return;
+            if (_videoPermissionPending)
+            {
+                ++_videoRequestGeneration;
+                _videoPermissionPending = false;
+                SetVideoEnabled(false);
+                return;
+            }
             if (!VideoEnabled)
             {
                 StartCoroutine(EnableVideoWhenPermitted());
@@ -345,8 +419,14 @@ namespace Sandplay.Core
 
         private IEnumerator EnableVideoWhenPermitted()
         {
+            int request = ++_videoRequestGeneration;
+            int generation = ChannelGeneration;
+            string channel = ChannelName;
+            _videoPermissionPending = true;
             yield return EnsureCameraPermission();
 
+            if (request != _videoRequestGeneration || !IsCurrentChannel(channel, generation)) yield break;
+            _videoPermissionPending = false;
             if (!HasCameraPermission())
             {
                 Debug.LogWarning("[Agora] Camera permission denied; video remains off.");
@@ -368,9 +448,16 @@ namespace Sandplay.Core
                 if (VideoEnabled)
                 {
                     ApplyVideoOrientation();
-                    _engine.EnableLocalVideo(true);
-                    _engine.MuteLocalVideoStream(false);
-                    _engine.StartPreview();
+                    int captureRet = _engine.EnableLocalVideo(true);
+                    int unmuteRet = _engine.MuteLocalVideoStream(false);
+                    int previewRet = _engine.StartPreview();
+                    Debug.Log($"[Agora] Camera start: capture={captureRet}, unmute={unmuteRet}, preview={previewRet}");
+                    if (captureRet != 0 || unmuteRet != 0 || previewRet != 0)
+                    {
+                        Debug.LogWarning("[Agora] Camera could not start. Check camera permission and whether another app is using it.");
+                        SetVideoEnabled(false);
+                        return;
+                    }
                 }
                 else
                 {
@@ -461,6 +548,8 @@ namespace Sandplay.Core
         // ── Helpers ────────────────────────────────────────────────────────────
         private void CleanupEngine()
         {
+            System.Threading.Interlocked.Increment(ref _channelGeneration);
+            CancelPendingMediaActions();
 #if AGORA_INSTALLED
             if (_engine != null)
             {
@@ -493,7 +582,7 @@ namespace Sandplay.Core
                 frames++;
                 yield return null;
             }
-#elif (UNITY_IOS || UNITY_STANDALONE_OSX) && !UNITY_EDITOR
+#elif UNITY_EDITOR_OSX || ((UNITY_IOS || UNITY_STANDALONE_OSX) && !UNITY_EDITOR)
             if (!Application.HasUserAuthorization(UserAuthorization.Microphone))
                 yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
 #else
@@ -513,7 +602,7 @@ namespace Sandplay.Core
                 frames++;
                 yield return null;
             }
-#elif (UNITY_IOS || UNITY_STANDALONE_OSX) && !UNITY_EDITOR
+#elif UNITY_EDITOR_OSX || ((UNITY_IOS || UNITY_STANDALONE_OSX) && !UNITY_EDITOR)
             if (!Application.HasUserAuthorization(UserAuthorization.WebCam))
                 yield return Application.RequestUserAuthorization(UserAuthorization.WebCam);
 #else
@@ -525,7 +614,7 @@ namespace Sandplay.Core
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
             return Permission.HasUserAuthorizedPermission(Permission.Microphone);
-#elif (UNITY_IOS || UNITY_STANDALONE_OSX) && !UNITY_EDITOR
+#elif UNITY_EDITOR_OSX || ((UNITY_IOS || UNITY_STANDALONE_OSX) && !UNITY_EDITOR)
             return Application.HasUserAuthorization(UserAuthorization.Microphone);
 #else
             return true;
@@ -536,7 +625,7 @@ namespace Sandplay.Core
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
             return Permission.HasUserAuthorizedPermission(Permission.Camera);
-#elif (UNITY_IOS || UNITY_STANDALONE_OSX) && !UNITY_EDITOR
+#elif UNITY_EDITOR_OSX || ((UNITY_IOS || UNITY_STANDALONE_OSX) && !UNITY_EDITOR)
             return Application.HasUserAuthorization(UserAuthorization.WebCam);
 #else
             return true;
@@ -544,4 +633,3 @@ namespace Sandplay.Core
         }
     }
 }
-

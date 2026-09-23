@@ -1,6 +1,6 @@
 // Assets/Editor/macOSPostBuild.cs
 // Automatically patches the macOS app's Info.plist after every Standalone macOS build.
-// Adds camera/microphone usage descriptions so Agora can access local media without a TCC crash.
+// Adds camera/microphone descriptions and the Sandtray link scheme.
 
 #if UNITY_EDITOR
 using System.IO;
@@ -44,10 +44,19 @@ public static class macOSPostBuild
             changed = true;
         }
 
+        if (!content.Contains("<string>sandtray</string>"))
+        {
+            content = content.Replace(
+                "</dict>\n</plist>",
+                "\t<key>CFBundleURLTypes</key>\n\t<array>\n\t\t<dict>\n\t\t\t<key>CFBundleURLName</key>\n\t\t\t<string>Sandtray links</string>\n\t\t\t<key>CFBundleURLSchemes</key>\n\t\t\t<array>\n\t\t\t\t<string>sandtray</string>\n\t\t\t</array>\n\t\t</dict>\n\t</array>\n</dict>\n</plist>"
+            );
+            changed = true;
+        }
+
         if (changed)
         {
             File.WriteAllText(infoPlistPath, content);
-            Debug.Log("[macOSPostBuild] Ensured camera/microphone usage descriptions in Info.plist.");
+            Debug.Log("[macOSPostBuild] Ensured permissions and Sandtray links in Info.plist.");
         }
     }
 }

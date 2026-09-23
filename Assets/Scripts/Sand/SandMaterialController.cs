@@ -5,20 +5,20 @@ namespace Sandplay.Sand
 {
     /// <summary>
     /// Manages a splatmap-based paint system for the sand surface.
-    /// 5 material presets (Sand, Rock, Grass, Snow, Mud) can be painted
+    /// 7 material presets (Sand, Rock, Grass, Snow, Mud, Water, Clay) can be painted
     /// onto specific areas using PaintAt(). Uses the Sandplay/SandSplat shader.
     ///
-    /// Splat map channel layout: R=Rock G=Grass B=Snow A=Mud (Sand = remainder).
+    /// Primary splat: R=Rock G=Grass B=Snow A=Mud. Extra splat: R=Water G=Clay.
+    /// Sand is the unpainted remainder across both maps.
     /// </summary>
     public class SandMaterialController : MonoBehaviour
     {
         public static SandMaterialController Instance { get; private set; }
 
-        public static readonly string[] PresetNames = { "Sand", "Rock", "Grass", "Snow", "Mud" };
+        public static readonly string[] PresetNames = { "Sand", "Rock", "Grass", "Snow", "Mud", "Water", "Clay" };
 
-        // Channel index in the RGBA splat map for each preset (Sand has no channel — it's the base)
-        // -1 = Sand (erase other channels), 0=R, 1=G, 2=B, 3=A
-        private static readonly int[] SplatChannel = { -1, 0, 1, 2, 3 };
+        // -1 = Sand; 0-3 = primary RGBA; 4-5 = extra RG.
+        private static readonly int[] SplatChannel = { -1, 0, 1, 2, 3, 4, 5 };
 
         public static readonly Color[] PresetColors = {
             new Color(0.70f, 0.60f, 0.45f),  // 0 Sand
@@ -26,15 +26,19 @@ namespace Sandplay.Sand
             new Color(0.24f, 0.46f, 0.22f),  // 2 Grass
             new Color(0.88f, 0.92f, 0.96f),  // 3 Snow
             new Color(0.32f, 0.24f, 0.16f),  // 4 Mud
+            new Color(0.16f, 0.52f, 0.76f),  // 5 Water
+            new Color(0.62f, 0.34f, 0.22f),  // 6 Clay
         };
 
-        private static readonly float[] PresetSmoothness = { 0.08f, 0.20f, 0.12f, 0.55f, 0.35f };
+        private static readonly float[] PresetSmoothness = { 0.08f, 0.20f, 0.12f, 0.55f, 0.35f, 0.82f, 0.18f };
 
         public const int SplatResolution = 512;
 
         private Material _sandMaterial;
         private Texture2D _splatMap;
         private Color[] _splatPixels; // CPU-side copy for painting
+        private Texture2D _extraSplatMap;
+        private Color[] _extraSplatPixels;
 
         private int _selectedPreset = 1; // preset to paint with (default: Rock)
         public int SelectedPreset
@@ -74,11 +78,15 @@ namespace Sandplay.Sand
             sandMat.SetColor("_Color2", PresetColors[2]);
             sandMat.SetColor("_Color3", PresetColors[3]);
             sandMat.SetColor("_Color4", PresetColors[4]);
+            sandMat.SetColor("_Color5", PresetColors[5]);
+            sandMat.SetColor("_Color6", PresetColors[6]);
             sandMat.SetFloat("_Smooth0", PresetSmoothness[0]);
             sandMat.SetFloat("_Smooth1", PresetSmoothness[1]);
             sandMat.SetFloat("_Smooth2", PresetSmoothness[2]);
             sandMat.SetFloat("_Smooth3", PresetSmoothness[3]);
             sandMat.SetFloat("_Smooth4", PresetSmoothness[4]);
+            sandMat.SetFloat("_Smooth5", PresetSmoothness[5]);
+            sandMat.SetFloat("_Smooth6", PresetSmoothness[6]);
 
             // Create splatmap (all black = pure sand)
             _splatMap = new Texture2D(SplatResolution, SplatResolution, TextureFormat.RGBA32, false);
@@ -90,10 +98,20 @@ namespace Sandplay.Sand
             _splatMap.SetPixels(_splatPixels);
             _splatMap.Apply();
             sandMat.SetTexture("_SplatMap", _splatMap);
+            _extraSplatMap = new Texture2D(SplatResolution, SplatResolution, TextureFormat.RGBA32, false);
+            _extraSplatMap.filterMode = FilterMode.Bilinear;
+            _extraSplatMap.wrapMode = TextureWrapMode.Clamp;
+            _extraSplatPixels = new Color[SplatResolution * SplatResolution];
+            for (int i = 0; i < _extraSplatPixels.Length; i++) _extraSplatPixels[i] = Color.clear;
+            _extraSplatMap.SetPixels(_extraSplatPixels);
+            _extraSplatMap.Apply();
+            sandMat.SetTexture("_ExtraSplatMap", _extraSplatMap);
             // Force splatmap UV scaling to cover the mesh exactly once,
             // independent of the base sand texture's tiling.
             sandMat.SetTextureScale("_SplatMap", Vector2.one);
             sandMat.SetTextureOffset("_SplatMap", Vector2.zero);
+            sandMat.SetTextureScale("_ExtraSplatMap", Vector2.one);
+            sandMat.SetTextureOffset("_ExtraSplatMap", Vector2.zero);
         }
 
         /// <summary>
@@ -103,13 +121,13 @@ namespace Sandplay.Sand
         /// </summary>
         public void PaintAt(Vector2 uv, float radius, float strength)
         {
-            if (_splatMap == null || _splatPixels == null) return;
+            if (_splatMap == null || _splatPixels == null || _extraSplatMap == null || _extraSplatPixels == null) return;
 
             int px = Mathf.RoundToInt(uv.x * SplatResolution);
             int py = Mathf.RoundToInt(uv.y * SplatResolution);
             int pixelRadius = Mathf.CeilToInt(radius * SplatResolution);
 
-            int ch = SplatChannel[_selectedPreset]; // -1 for Sand (erase)
+            int ch = SplatChannel[_selectedPreset]; // -1 for Sand, 0-3 primary, 4-5 extra
 
             bool dirty = false;
             for (int dy = -pixelRadius; dy <= pixelRadius; dy++)
@@ -128,24 +146,25 @@ namespace Sandplay.Sand
 
                     int idx = y * SplatResolution + x;
                     Color c = _splatPixels[idx];
+                    Color extra = _extraSplatPixels[idx];
 
                     if (ch == -1)
                     {
-                        // Sand — erase all channels
-                        c.r = Mathf.Max(0, c.r - delta);
-                        c.g = Mathf.Max(0, c.g - delta);
-                        c.b = Mathf.Max(0, c.b - delta);
-                        c.a = Mathf.Max(0, c.a - delta);
+                        // Sand — erase all six painted layers.
+                        c.r = Mathf.Max(0, c.r - delta); c.g = Mathf.Max(0, c.g - delta);
+                        c.b = Mathf.Max(0, c.b - delta); c.a = Mathf.Max(0, c.a - delta);
+                        extra.r = Mathf.Max(0, extra.r - delta); extra.g = Mathf.Max(0, extra.g - delta);
                     }
                     else
                     {
                         // Raise selected channel, reduce others so total ≤ 1
-                        float existing = GetChannel(c, ch);
+                        float existing = ch < 4 ? GetChannel(c, ch) : GetChannel(extra, ch - 4);
                         float newVal = Mathf.Min(1f, existing + delta);
                         float added = newVal - existing;
-                        c = SetChannel(c, ch, newVal);
+                        if (ch < 4) c = SetChannel(c, ch, newVal);
+                        else extra = SetChannel(extra, ch - 4, newVal);
                         // Reduce other channels proportionally
-                        float others = (c.r + c.g + c.b + c.a) - newVal;
+                        float others = c.r + c.g + c.b + c.a + extra.r + extra.g - newVal;
                         if (others > 0f)
                         {
                             float scale = Mathf.Max(0, (others - added)) / others;
@@ -153,9 +172,12 @@ namespace Sandplay.Sand
                             if (ch != 1) c.g *= scale;
                             if (ch != 2) c.b *= scale;
                             if (ch != 3) c.a *= scale;
+                            if (ch != 4) extra.r *= scale;
+                            if (ch != 5) extra.g *= scale;
                         }
                     }
                     _splatPixels[idx] = c;
+                    _extraSplatPixels[idx] = extra;
                     dirty = true;
                 }
             }
@@ -164,6 +186,8 @@ namespace Sandplay.Sand
             {
                 _splatMap.SetPixels(_splatPixels);
                 _splatMap.Apply(false);
+                _extraSplatMap.SetPixels(_extraSplatPixels);
+                _extraSplatMap.Apply(false);
                 // Notify network sync about the modified pixel region
                 EventBus.Publish(new SplatPaintedEvent
                 {
@@ -177,64 +201,98 @@ namespace Sandplay.Sand
 
         /// <summary>Reset the entire splatmap to blank (pure sand, no paint).</summary>
         /// <summary>Returns a copy of the current splatmap pixel array for undo/redo snapshots.</summary>
-        public Color[] SplatPixelsCopy => (Color[])_splatPixels.Clone();
+        public Color[] SplatPixelsCopy
+        {
+            get
+            {
+                var copy = new Color[_splatPixels.Length * 2];
+                _splatPixels.CopyTo(copy, 0);
+                _extraSplatPixels.CopyTo(copy, _splatPixels.Length);
+                return copy;
+            }
+        }
 
         /// <summary>Overwrites the splatmap with a previously-snapshotted pixel array.</summary>
         public void ApplySplatPixels(Color[] pixels)
         {
-            if (_splatMap == null || pixels == null || pixels.Length != _splatPixels.Length) return;
-            pixels.CopyTo(_splatPixels, 0);
+            if (_splatMap == null || pixels == null ||
+                (pixels.Length != _splatPixels.Length && pixels.Length != _splatPixels.Length * 2)) return;
+            System.Array.Copy(pixels, 0, _splatPixels, 0, _splatPixels.Length);
+            if (pixels.Length == _splatPixels.Length * 2)
+                System.Array.Copy(pixels, _splatPixels.Length, _extraSplatPixels, 0, _extraSplatPixels.Length);
+            else System.Array.Clear(_extraSplatPixels, 0, _extraSplatPixels.Length);
             _splatMap.SetPixels(_splatPixels);
             _splatMap.Apply();
+            _extraSplatMap.SetPixels(_extraSplatPixels);
+            _extraSplatMap.Apply();
         }
 
         public void ClearSplatmap()
         {
-            if (_splatMap == null || _splatPixels == null) return;
+            if (_splatMap == null || _splatPixels == null || _extraSplatPixels == null) return;
             for (int i = 0; i < _splatPixels.Length; i++)
-                _splatPixels[i] = Color.clear;
+                _splatPixels[i] = _extraSplatPixels[i] = Color.clear;
             _splatMap.SetPixels(_splatPixels);
             _splatMap.Apply();
+            _extraSplatMap.SetPixels(_extraSplatPixels);
+            _extraSplatMap.Apply();
         }
 
-        /// <summary>Return a dirty region as RGBA byte-encoded pixels (1 byte per channel, 0-255).</summary>
+        /// <summary>Return primary and extra RGBA maps interleaved (8 bytes per pixel).</summary>
         public byte[] GetSplatmapRegionBytes(int startX, int startY, int width, int height)
         {
-            byte[] data = new byte[width * height * 4];
+            byte[] data = new byte[width * height * 8];
             for (int row = 0; row < height; row++)
             {
                 for (int col = 0; col < width; col++)
                 {
                     Color c = _splatPixels[(startY + row) * SplatResolution + (startX + col)];
-                    int i = (row * width + col) * 4;
+                    Color e = _extraSplatPixels[(startY + row) * SplatResolution + (startX + col)];
+                    int i = (row * width + col) * 8;
                     data[i] = (byte)(c.r * 255f);
                     data[i + 1] = (byte)(c.g * 255f);
                     data[i + 2] = (byte)(c.b * 255f);
                     data[i + 3] = (byte)(c.a * 255f);
+                    data[i + 4] = (byte)(e.r * 255f);
+                    data[i + 5] = (byte)(e.g * 255f);
+                    data[i + 6] = data[i + 7] = 0;
                 }
             }
             return data;
         }
 
-        /// <summary>Apply a received RGBA byte-encoded splatmap region onto the local texture.</summary>
+        /// <summary>Apply a legacy 4-byte or current 8-byte splatmap region.</summary>
         public void ApplySplatmapRegion(int startX, int startY, int width, int height, byte[] data)
         {
             if (_splatMap == null || _splatPixels == null) return;
             if (data == null || width <= 0 || height <= 0) return;
             if (startX < 0 || startY < 0) return;
             if (startX + width > SplatResolution || startY + height > SplatResolution) return;
-            int expectedBytes = width * height * 4;
-            if (expectedBytes <= 0 || data.Length < expectedBytes) return;
+            int pixelsCount = width * height;
+            int bytesPerPixel = data.Length == pixelsCount * 8 ? 8 : data.Length == pixelsCount * 4 ? 4 : 0;
+            if (bytesPerPixel == 0) return;
 
             var regionColors = new Color[width * height];
+            var extraColors = new Color[width * height];
             for (int i = 0; i < regionColors.Length; i++)
-                regionColors[i] = new Color(data[i * 4] / 255f, data[i * 4 + 1] / 255f,
-                                            data[i * 4 + 2] / 255f, data[i * 4 + 3] / 255f);
+            {
+                int offset = i * bytesPerPixel;
+                regionColors[i] = new Color(data[offset] / 255f, data[offset + 1] / 255f,
+                                            data[offset + 2] / 255f, data[offset + 3] / 255f);
+                extraColors[i] = bytesPerPixel == 8
+                    ? new Color(data[offset + 4] / 255f, data[offset + 5] / 255f, 0, 0)
+                    : Color.clear;
+            }
             for (int row = 0; row < height; row++)
                 for (int col = 0; col < width; col++)
+                {
                     _splatPixels[(startY + row) * SplatResolution + (startX + col)] = regionColors[row * width + col];
+                    _extraSplatPixels[(startY + row) * SplatResolution + (startX + col)] = extraColors[row * width + col];
+                }
             _splatMap.SetPixels(startX, startY, width, height, regionColors);
             _splatMap.Apply(false);
+            _extraSplatMap.SetPixels(startX, startY, width, height, extraColors);
+            _extraSplatMap.Apply(false);
         }
 
         private static float GetChannel(Color c, int ch)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -19,10 +20,36 @@ namespace Sandplay.UI
         IInitializePotentialDragHandler, IScrollHandler
     {
         public static bool IsDragging { get; private set; }
+        private static CatalogDragHandler _dragOwner;
+        private int _dragGeneration;
+        private bool CanEdit => GameManager.Instance == null || !GameManager.Instance.IsSpectator;
+
+        private void OnEnable() { EventBus.Subscribe<NetworkRoleAssignedEvent>(OnRoleChanged); }
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<NetworkRoleAssignedEvent>(OnRoleChanged);
+            CancelDrag();
+        }
+        private void OnRoleChanged(NetworkRoleAssignedEvent evt)
+        {
+            if (evt.Role != PlayerRole.Patient) CancelDrag();
+        }
+        public void CancelDrag()
+        {
+            if (_passingToScroll && _parentScroll != null && _activeEvent != null)
+                _parentScroll.OnEndDrag(_activeEvent);
+            if (_ghost != null) Destroy(_ghost);
+            _ghost = null;
+            _canPlace = false;
+            _dragScale = 1;
+            ResetDragState();
+        }
 
         // Set one of these — not both
         public SandplayObject ObjectData { get; set; }
         public NetworkCatalogItem NetworkItem { get; set; }
+        public Action OnDownloadStarted { get; set; }
+        public Action<bool> OnDownloadFinished { get; set; }
 
         private GameObject _ghost;
         private UnityEngine.Camera _cam;
@@ -62,6 +89,8 @@ namespace Sandplay.UI
 
         public void OnBeginDrag(PointerEventData eventData)
         {
+            if (!CanEdit) { CancelDrag(); return; }
+            _dragGeneration++;
             _pressPos = eventData.position;
             _dragDecided = false;
             _passingToScroll = false;
@@ -73,6 +102,7 @@ namespace Sandplay.UI
 
         public void OnDrag(PointerEventData eventData)
         {
+            if (!CanEdit) { CancelDrag(); return; }
             _activeEvent = eventData;
 
             if (!_dragDecided)
@@ -117,6 +147,7 @@ namespace Sandplay.UI
 
         public void OnEndDrag(PointerEventData eventData)
         {
+            if (!CanEdit) { CancelDrag(); return; }
             if (_passingToScroll && _parentScroll != null)
             {
                 ExecuteEvents.Execute(_parentScroll.gameObject, eventData,
@@ -132,7 +163,9 @@ namespace Sandplay.UI
 
         private void BeginObjectDrag()
         {
-            if (_objectDragStarted) return;
+            if (_objectDragStarted || !CanEdit) return;
+            if (_dragOwner != null && _dragOwner != this) _dragOwner.CancelDrag();
+            _dragOwner = this;
             _objectDragStarted = true;
             IsDragging = true;
             _cam = UnityEngine.Camera.main;
@@ -145,15 +178,14 @@ namespace Sandplay.UI
                 {
                     StartDragWithGO(NetworkItem.LoadedPrefab);
                 }
-                else if (NetworkCatalogLoader.IsGlbCached(NetworkItem))
-                {
-                    StartCoroutine(LoadThenDrag(NetworkItem));
-                }
                 else
                 {
-                    // Not downloaded — cancel silently
-                    IsDragging = false;
-                    _objectDragStarted = false;
+                    // A drag is also an explicit request to use the object.
+                    // Start the same cache/network load used by the download
+                    // button; once it finishes, the ghost is created at the
+                    // current pointer position and the drag can continue.
+                    OnDownloadStarted?.Invoke();
+                    StartCoroutine(LoadThenDrag(NetworkItem, _dragGeneration));
                 }
                 return;
             }
@@ -191,7 +223,8 @@ namespace Sandplay.UI
 
         private void ResetDragState()
         {
-            IsDragging = false;
+            _dragGeneration++;
+            if (_dragOwner == this) { IsDragging = false; _dragOwner = null; }
             _dragDecided = false;
             _passingToScroll = false;
             _objectDragStarted = false;
@@ -207,11 +240,14 @@ namespace Sandplay.UI
                 panel, eventData.position, eventData.pressEventCamera);
         }
 
-        private IEnumerator LoadThenDrag(NetworkCatalogItem item)
+        private IEnumerator LoadThenDrag(NetworkCatalogItem item, int generation)
         {
             yield return StartCoroutine(
                 NetworkCatalogLoader.PreloadGlb(this, item, null));
-            if (item.LoadedPrefab != null && IsDragging && _objectDragStarted)
+            bool loaded = item.LoadedPrefab != null;
+            OnDownloadFinished?.Invoke(loaded);
+            if (generation != _dragGeneration || _dragOwner != this || !CanEdit) yield break;
+            if (loaded && IsDragging && _objectDragStarted)
                 StartDragWithGO(item.LoadedPrefab);
             else
                 IsDragging = false;
@@ -232,6 +268,7 @@ namespace Sandplay.UI
 
         private void StartDragWithGO(GameObject prefab)
         {
+            if (!CanEdit || !_objectDragStarted || _dragOwner != this) return;
             GameManager.Instance?.SetToolMode(ToolMode.ObjectPlace);
 
             _ghost = Instantiate(prefab);
@@ -257,6 +294,7 @@ namespace Sandplay.UI
 
         private void PlaceAtPosition(Vector3 pos)
         {
+            if (!CanEdit) return;
             var placer = FindAnyObjectByType<ObjectPlacer>();
             if (placer == null) return;
 

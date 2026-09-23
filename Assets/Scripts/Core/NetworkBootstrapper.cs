@@ -16,20 +16,29 @@ namespace Sandplay.Core
     /// Messages use length-prefixed binary format (see NetSerializer).
     /// Works entirely with built-in .NET — no external packages needed.
     /// </summary>
-    public class NetworkBootstrapper : MonoBehaviour
+    public partial class NetworkBootstrapper : MonoBehaviour
     {
         public static NetworkBootstrapper Instance { get; private set; }
 
         private bool _isOnline;
         private bool _isHost;
 
+        private readonly System.Diagnostics.Stopwatch _sessionElapsed = new System.Diagnostics.Stopwatch();
+        public double SessionElapsedSeconds => _sessionElapsed.Elapsed.TotalSeconds;
         public bool IsOnline => _isOnline;
         public bool IsHost => _isHost;
 
         // Callbacks for UI updates
         public event Action OnConnected;
         public event Action OnDisconnected;
+        public event Action<string> OnConnectionError;
         public event Action<int> OnClientCountChanged;
+        /// <summary>Client snapshot objects resolved so far and total objects expected.</summary>
+        public event Action<int, int> OnSnapshotLoadProgress;
+        /// <summary>Raised only after every required snapshot object has loaded and the snapshot is acknowledged.</summary>
+        public event Action OnSnapshotReady;
+        /// <summary>Raised when the client cannot construct a complete session snapshot.</summary>
+        public event Action<string> OnSnapshotLoadFailed;
 
         private int _connectedClients;
         public int ConnectedClients => _connectedClients;
@@ -61,7 +70,7 @@ namespace Sandplay.Core
         // ── Relay state ──
         private bool _relayMode;
         private TcpClient _relaySocket;
-        private NetworkStream _relayStream;
+        private Stream _relayStream;
         private string _roomCode;
         private string _lastRelayAddress;
         private string _lastRoomCode;
@@ -81,6 +90,7 @@ namespace Sandplay.Core
 
         // ── Therapist mode (host plays as Psychologist; patient client gets Patient role) ──
         private bool _therapistMode;
+        private bool _autoAssignJoinerEditor;
         private bool _patientAssigned; // host-side: whether a Patient role has already been granted to a client
         public bool TherapistMode => _therapistMode;
 
@@ -119,6 +129,7 @@ namespace Sandplay.Core
 
         private void Update()
         {
+            UpdateRelayHeartbeat();
             // Drain queued actions on the main thread
             while (true)
             {
@@ -154,6 +165,12 @@ namespace Sandplay.Core
         public void RegisterNetworkObject(uint netId, PlacedObject obj)
         {
             _networkObjects[netId] = obj;
+            EndModelLoad(netId);
+            if (_loadingMoves.TryGetValue(netId, out var move))
+            {
+                _loadingMoves.Remove(netId);
+                HandleClientMessage(NetMsgType.MoveObject, move);
+            }
         }
 
         public void UnregisterNetworkObject(uint netId)
@@ -184,6 +201,7 @@ namespace Sandplay.Core
         {
             if (!_isOnline || !_isHost || !NetworkCatalogRegistry.IsLoaded) return;
             var payload = NetSerializer.WriteCatalogManifest(NetworkCatalogRegistry.Snapshot());
+            RecordOutgoingIfActive(NetMsgType.CatalogManifest, payload);
             var packet = NetSerializer.Pack(NetMsgType.CatalogManifest, payload);
             if (_relayMode)
                 SendToRelay(packet);
@@ -222,6 +240,7 @@ namespace Sandplay.Core
                 _acceptThread = new Thread(AcceptLoop) { IsBackground = true };
                 _acceptThread.Start();
 
+                _sessionElapsed.Start();
                 OnConnected?.Invoke();
                 Debug.Log("[Network] Started as Host on port " + Port);
             }
@@ -271,6 +290,7 @@ namespace Sandplay.Core
 
         public void StartHostRelay(string relayAddress, bool therapistMode = false)
         {
+            int attempt = ++_relayAttempt;
             try
             {
                 _relayMode = true;
@@ -279,14 +299,16 @@ namespace Sandplay.Core
                 _isHost = true;
                 _connectedClients = 0;
                 _therapistMode = therapistMode;
+                _autoAssignJoinerEditor = therapistMode;
                 _patientAssigned = false;
+                ResetSessionControl();
                 // In Therapist mode the host acts as the Psychologist (can select but not sculpt);
                 // the patient client will be assigned the Patient role on join.
                 GameManager.Instance.NetworkRole = therapistMode
                     ? PlayerRole.Psychologist
                     : PlayerRole.Patient;
 
-                var thread = new Thread(() => RelayHostConnect(relayAddress)) { IsBackground = true };
+                var thread = new Thread(() => RelayHostConnect(relayAddress, attempt)) { IsBackground = true };
                 thread.Start();
 
                 Debug.Log($"[Network] Connecting to relay at {relayAddress}:{Port}... (TherapistMode={therapistMode})");
@@ -300,27 +322,26 @@ namespace Sandplay.Core
             }
         }
 
-        private void RelayHostConnect(string relayAddress)
+        private void RelayHostConnect(string relayAddress, int attempt)
         {
+            TcpClient socket = null;
             try
             {
-                var socket = new TcpClient();
+                string ticket = UseAuthenticatedRelay ? FetchRelayTicket(null, attempt) : null;
+                if (attempt != _relayAttempt) return;
+                socket = new TcpClient();
                 socket.Connect(relayAddress, Port);
                 socket.NoDelay = true;
-                var stream = socket.GetStream();
-
-                // Send CreateRoom
-                var createPayload = NetSerializer.WriteCreateRoom();
+                var stream = OpenRelayStream(socket, relayAddress);
+                if (attempt != _relayAttempt) { socket.Close(); return; }
+                var createPayload = RelayControlPayload(ticket, null);
                 var createPacket = NetSerializer.Pack(NetMsgType.CreateRoom, createPayload);
                 stream.Write(createPacket, 0, createPacket.Length);
                 stream.Flush();
 
                 // Read RoomCreated response
-                byte[] lenBuf = new byte[4];
-                if (!ReadExact(stream, lenBuf, 4)) throw new Exception("Failed to read relay response");
-                int msgLen = BitConverter.ToInt32(lenBuf, 0);
-                byte[] body = new byte[msgLen];
-                if (!ReadExact(stream, body, msgLen)) throw new Exception("Failed to read relay response body");
+                byte[] body = RelayCompatibility.ReadControlResponse(stream);
+                int msgLen = body.Length;
 
                 NetMsgType type = (NetMsgType)body[0];
                 byte[] payload = new byte[msgLen - 1];
@@ -333,10 +354,12 @@ namespace Sandplay.Core
 
                 EnqueueMain(() =>
                 {
+                    if (attempt != _relayAttempt) { socket.Close(); return; }
                     _relaySocket = socket;
                     _relayStream = stream;
                     _roomCode = roomCode;
 
+                    _sessionElapsed.Start();
                     OnConnected?.Invoke();
                     OnRoomCreated?.Invoke(roomCode);
                     Debug.Log($"[Network] Relay host ready! Room code: {roomCode}");
@@ -347,9 +370,14 @@ namespace Sandplay.Core
             }
             catch (Exception ex)
             {
+                socket?.Close();
                 Debug.LogError("[Network] Relay host connect failed: " + ex.Message);
+                if (ex is RelayLoginRequiredException) EnqueueMain(() =>
+                { if (attempt == _relayAttempt) OnConnectionError?.Invoke(ex.Message); });
+                if (ex is RelayVersionException) EnqueueMain(() => OnConnectionError?.Invoke(Localization.Get("net.update_required")));
                 EnqueueMain(() =>
                 {
+                    if (attempt != _relayAttempt) return;
                     _isOnline = false;
                     _isHost = false;
                     _relayMode = false;
@@ -358,7 +386,7 @@ namespace Sandplay.Core
             }
         }
 
-        private void RelayHostReceiveLoop(TcpClient socket, NetworkStream stream)
+        private void RelayHostReceiveLoop(TcpClient socket, Stream stream)
         {
             try
             {
@@ -379,56 +407,38 @@ namespace Sandplay.Core
                     // Mirror to session recorder (background-thread safe).
                     // On the host, we tag relay-forwarded messages as Incoming so a replay
                     // can distinguish "this came from a peer" from "this was generated locally".
-                    SessionRecorder.Instance?.Record(SessionRecorder.Direction.Incoming, type, payload);
+                    if (type != NetMsgType.SessionProfiles && type != NetMsgType.HostingLeaseStatus)
+                        SessionRecorder.Instance?.Record(SessionRecorder.Direction.Incoming, type, payload);
 
-                    // Handle client-to-host messages (forwarded by relay)
-                    if (type == NetMsgType.RoleRequest)
+                    if (type == NetMsgType.HostingLeaseStatus)
                     {
-                        var requestedRole = NetSerializer.ReadRoleRequest(payload);
-                        // In Therapist mode, the FIRST client requesting Patient gets it.
-                        // Subsequent Patient requests are downgraded to Observer.
-                        // Outside Therapist mode, Patient is reserved for the host (so always downgrade).
-                        PlayerRole assignedRole;
-                        if (requestedRole == PlayerRole.Patient)
-                        {
-                            if (_therapistMode && !_patientAssigned)
-                            {
-                                assignedRole = PlayerRole.Patient;
-                                _patientAssigned = true;
-                            }
-                            else
-                            {
-                                assignedRole = PlayerRole.Observer;
-                            }
-                        }
-                        else
-                        {
-                            assignedRole = requestedRole;
-                        }
-                        var rolePayload = NetSerializer.WriteRoleAssignment(assignedRole);
-                        EnqueueMain(() =>
-                        {
-                            try { SendToRelay(NetSerializer.Pack(NetMsgType.RoleAssignment, rolePayload)); }
-                            catch { }
-                        });
-
-                        // Also send full state to the newly joined client
-                        // In relay mode, we broadcast — the relay sends to all clients.
-                        // The new client needs the full state.
-                        EnqueueMain(() =>
-                        {
-                            try { SendFullStateViaRelay(); }
-                            catch { }
-                            _connectedClients++;
-                            OnClientCountChanged?.Invoke(_connectedClients);
-                        });
-
-                        Debug.Log($"[Network] Relay: client requested {requestedRole}, assigned {assignedRole}");
+                        EnqueueCurrentRelay(socket, () => ReceiveHostingLeaseStatus(payload));
+                        continue;
+                    }
+                    // Handle client-to-host messages (forwarded by relay)
+                    if (type == NetMsgType.SessionProfiles)
+                    {
+                        EnqueueCurrentRelay(socket, () => ReceiveSessionProfiles(payload));
+                        continue;
+                    }
+                    if (type == NetMsgType.RevisionEdit)
+                    {
+                        EnqueueCurrentRelay(socket, () => ReceiveRevisionMessage(type, payload));
+                    }
+                    else if (type == NetMsgType.ParticipantLeft)
+                    {
+                        var departure = payload;
+                        EnqueueCurrentRelay(socket, () => HandleSessionDeparture(departure));
+                    }
+                    else if (type == NetMsgType.RoleRequest)
+                    {
+                        var request = payload;
+                        EnqueueCurrentRelay(socket, () => HandleSessionRoleRequest(request));
                     }
                     else if (type == NetMsgType.ObjectSelection)
                     {
                         // Client sent object selection, broadcast to all clients
-                        EnqueueMain(() =>
+                        EnqueueCurrentRelay(socket, () =>
                         {
                             try { SendToRelay(NetSerializer.Pack(NetMsgType.ObjectSelection, payload)); }
                             catch { }
@@ -439,54 +449,54 @@ namespace Sandplay.Core
                         // Patient drew sand — apply locally on host, then broadcast as
                         // HeightmapRegion to all peers (so observers + the patient see it).
                         var capturedPayload = payload;
-                        EnqueueMain(() =>
+                        EnqueueCurrentRelay(socket, () =>
                         {
-                            try { ApplyAndRebroadcastHeightmap(capturedPayload); }
+                            try { if (!EditingPaused && _editorToken != null) ApplyAndRebroadcastHeightmap(capturedPayload); }
                             catch (Exception ex) { Debug.LogWarning("[Net] HeightmapPaint apply: " + ex.Message); }
                         });
                     }
                     else if (type == NetMsgType.ClientSplatPaint)
                     {
                         var capturedPayload = payload;
-                        EnqueueMain(() =>
+                        EnqueueCurrentRelay(socket, () =>
                         {
-                            try { ApplyAndRebroadcastSplat(capturedPayload); }
+                            try { if (!EditingPaused && _editorToken != null) ApplyAndRebroadcastSplat(capturedPayload); }
                             catch (Exception ex) { Debug.LogWarning("[Net] SplatPaint apply: " + ex.Message); }
                         });
                     }
                     else if (type == NetMsgType.ClientSpawnRequest)
                     {
                         var capturedPayload = payload;
-                        EnqueueMain(() =>
+                        EnqueueCurrentRelay(socket, () =>
                         {
-                            try { ApplyAndRebroadcastSpawn(capturedPayload); }
+                            try { if (!EditingPaused && _editorToken != null) ApplyAndRebroadcastSpawn(capturedPayload); }
                             catch (Exception ex) { Debug.LogWarning("[Net] SpawnRequest apply: " + ex.Message); }
                         });
                     }
                     else if (type == NetMsgType.ClientMoveObject)
                     {
                         var capturedPayload = payload;
-                        EnqueueMain(() =>
+                        EnqueueCurrentRelay(socket, () =>
                         {
-                            try { ApplyAndRebroadcastMove(capturedPayload); }
+                            try { if (!EditingPaused && _editorToken != null) ApplyAndRebroadcastMove(capturedPayload); }
                             catch (Exception ex) { Debug.LogWarning("[Net] MoveObject apply: " + ex.Message); }
                         });
                     }
                     else if (type == NetMsgType.ClientRemoveObject)
                     {
                         var capturedPayload = payload;
-                        EnqueueMain(() =>
+                        EnqueueCurrentRelay(socket, () =>
                         {
-                            try { ApplyAndRebroadcastRemove(capturedPayload); }
+                            try { if (!EditingPaused && _editorToken != null) ApplyAndRebroadcastRemove(capturedPayload); }
                             catch (Exception ex) { Debug.LogWarning("[Net] RemoveObject apply: " + ex.Message); }
                         });
                     }
                     else if (type == NetMsgType.ClientColorChange)
                     {
                         var capturedPayload = payload;
-                        EnqueueMain(() =>
+                        EnqueueCurrentRelay(socket, () =>
                         {
-                            try { ApplyAndRebroadcastColor(capturedPayload); }
+                            try { if (!EditingPaused && _editorToken != null) ApplyAndRebroadcastColor(capturedPayload); }
                             catch (Exception ex) { Debug.LogWarning("[Net] ColorChange apply: " + ex.Message); }
                         });
                     }
@@ -495,7 +505,7 @@ namespace Sandplay.Core
                         // Cheap, idempotent: fire local event for HUD on host AND
                         // re-broadcast so observers can also see the patient cursor.
                         var capturedPayload = payload;
-                        EnqueueMain(() =>
+                        EnqueueCurrentRelay(socket, () =>
                         {
                             try
                             {
@@ -511,7 +521,7 @@ namespace Sandplay.Core
             catch (Exception) { /* disconnected from relay */ }
             finally
             {
-                EnqueueMain(() =>
+                EnqueueCurrentRelay(socket, () =>
                 {
                     if (_isOnline)
                     {
@@ -590,11 +600,14 @@ namespace Sandplay.Core
                 placedObjects.ToArray(), colors.ToArray());
         }
 
-        private void SendFullStateViaRelay()
+        private void SendFullStateViaRelay(string recipientToken)
         {
-            BroadcastCatalogManifest();
+            long snapshotId = ++_revisionCounter;
+            SendSnapshotPart(recipientToken, NetMsgType.SnapshotBegin, BitConverter.GetBytes(snapshotId));
+            SendSnapshotPart(recipientToken, NetMsgType.CatalogManifest,
+                NetSerializer.WriteCatalogManifest(NetworkCatalogRegistry.Snapshot()));
             var payload = BuildFullStatePayload();
-            SendToRelay(NetSerializer.Pack(NetMsgType.FullState, payload));
+            SendSnapshotPart(recipientToken, NetMsgType.FullState, payload);
 
             // Also send the current splatmap to the relay so joining clients get painted areas
             var smc = SandMaterialController.Instance;
@@ -603,8 +616,9 @@ namespace Sandplay.Core
                 int sr = SandMaterialController.SplatResolution;
                 byte[] splatPixels = smc.GetSplatmapRegionBytes(0, 0, sr, sr);
                 var splatPayload = NetSerializer.WriteSplatmapRegion(0, 0, sr, sr, splatPixels);
-                SendToRelay(NetSerializer.Pack(NetMsgType.SplatmapRegion, splatPayload));
+                SendSnapshotPart(recipientToken, NetMsgType.SplatmapRegion, splatPayload);
             }
+            SendSnapshotPart(recipientToken, NetMsgType.SnapshotComplete, BitConverter.GetBytes(snapshotId));
         }
 
         // ──────────────────────────────────────────────
@@ -613,6 +627,17 @@ namespace Sandplay.Core
 
         public void StartClientRelay(string relayAddress, string roomCode, PlayerRole requestedRole = PlayerRole.Observer)
         {
+            _snapshotReady = _snapshotApplied = false;
+            _editRevision = _editSequence = _snapshotId = 0;
+            _pendingEditorRole = PlayerRole.Observer;
+            int attempt = ++_relayAttempt;
+            _removedFromSession = false;
+            SessionEditorName = "";
+            SessionWaitingForEditor = true;
+            EditingPaused = false;
+            _participantName = BackendClient.Instance?.UserName ?? "Participant";
+            if (_participantName.Length > 100) _participantName = _participantName.Substring(0, 100);
+            if (GameManager.Instance != null) GameManager.Instance.NetworkRole = PlayerRole.Observer;
             try
             {
                 _relayMode = true;
@@ -622,7 +647,7 @@ namespace Sandplay.Core
                 _isOnline = true;
                 _isHost = false;
 
-                var thread = new Thread(() => RelayClientConnect(relayAddress, roomCode)) { IsBackground = true };
+                var thread = new Thread(() => RelayClientConnect(relayAddress, roomCode, attempt)) { IsBackground = true };
                 thread.Start();
 
                 Debug.Log($"[Network] Joining room {roomCode} via relay {relayAddress}:{Port}...");
@@ -636,27 +661,27 @@ namespace Sandplay.Core
             }
         }
 
-        private void RelayClientConnect(string relayAddress, string roomCode)
+        private void RelayClientConnect(string relayAddress, string roomCode, int attempt)
         {
+            TcpClient socket = null;
             try
             {
-                var socket = new TcpClient();
+                string ticket = UseAuthenticatedRelay ? FetchRelayTicket(roomCode, attempt) : null;
+                if (attempt != _relayAttempt) return;
+                socket = new TcpClient();
                 socket.Connect(relayAddress, Port);
                 socket.NoDelay = true;
-                var stream = socket.GetStream();
-
+                var stream = OpenRelayStream(socket, relayAddress);
+                if (attempt != _relayAttempt) { socket.Close(); return; }
                 // Send JoinRoom
-                var joinPayload = NetSerializer.WriteJoinRoom(roomCode);
+                var joinPayload = RelayControlPayload(ticket, roomCode);
                 var joinPacket = NetSerializer.Pack(NetMsgType.JoinRoom, joinPayload);
                 stream.Write(joinPacket, 0, joinPacket.Length);
                 stream.Flush();
 
                 // Read JoinResult
-                byte[] lenBuf = new byte[4];
-                if (!ReadExact(stream, lenBuf, 4)) throw new Exception("Failed to read relay response");
-                int msgLen = BitConverter.ToInt32(lenBuf, 0);
-                byte[] body = new byte[msgLen];
-                if (!ReadExact(stream, body, msgLen)) throw new Exception("Failed to read relay response body");
+                byte[] body = RelayCompatibility.ReadControlResponse(stream);
+                int msgLen = body.Length;
 
                 NetMsgType type = (NetMsgType)body[0];
                 byte[] payload = new byte[msgLen - 1];
@@ -671,11 +696,13 @@ namespace Sandplay.Core
 
                 EnqueueMain(() =>
                 {
+                    if (attempt != _relayAttempt) { socket.Close(); return; }
                     _relaySocket = socket;
                     _relayStream = stream;
                     _clientSocket = socket; // so existing code paths work
                     _roomCode = roomCode;
 
+                    _sessionElapsed.Start();
                     OnConnected?.Invoke();
                     EventBus.Publish(new NetworkConnectedEvent());
                     Debug.Log($"[Network] Joined room {roomCode} via relay");
@@ -688,15 +715,21 @@ namespace Sandplay.Core
                 // Reuse the existing ClientReceiveLoop by setting _clientSocket
                 EnqueueMain(() =>
                 {
+                    if (attempt != _relayAttempt) { socket.Close(); return; }
                     _clientReceiveThread = new Thread(() => RelayClientReceiveLoop(socket, stream)) { IsBackground = true };
                     _clientReceiveThread.Start();
                 });
             }
             catch (Exception ex)
             {
+                socket?.Close();
                 Debug.LogError("[Network] Relay client connect failed: " + ex.Message);
+                if (ex is RelayLoginRequiredException) EnqueueMain(() =>
+                { if (attempt == _relayAttempt) OnConnectionError?.Invoke(ex.Message); });
+                if (ex is RelayVersionException) EnqueueMain(() => OnConnectionError?.Invoke(Localization.Get("net.update_required")));
                 EnqueueMain(() =>
                 {
+                    if (attempt != _relayAttempt) return;
                     _isOnline = false;
                     _relayMode = false;
                     OnDisconnected?.Invoke();
@@ -705,7 +738,7 @@ namespace Sandplay.Core
             }
         }
 
-        private void RelayClientReceiveLoop(TcpClient socket, NetworkStream stream)
+        private void RelayClientReceiveLoop(TcpClient socket, Stream stream)
         {
             try
             {
@@ -724,9 +757,14 @@ namespace Sandplay.Core
                     Buffer.BlockCopy(body, 1, payload, 0, payload.Length);
 
                     // Mirror to session recorder (background-thread safe)
-                    SessionRecorder.Instance?.Record(SessionRecorder.Direction.Incoming, type, payload);
+                    if (type != NetMsgType.SessionProfiles && type != NetMsgType.HostingLeaseStatus)
+                        SessionRecorder.Instance?.Record(SessionRecorder.Direction.Incoming, type, payload);
 
-                    EnqueueMain(() => HandleClientMessage(type, payload));
+                    EnqueueMain(() =>
+                    {
+                        // A queued message from an old connection must not change the recovered session.
+                        if (_relaySocket == socket && _isOnline) HandleClientMessage(type, payload);
+                    });
                 }
             }
             catch (Exception) { /* disconnected */ }
@@ -734,33 +772,43 @@ namespace Sandplay.Core
             {
                 EnqueueMain(() =>
                 {
-                    if (_isOnline)
+                    if (_isOnline && _relaySocket == socket)
                     {
                         string addr = _lastRelayAddress;
                         string code = _lastRoomCode;
+                        StopRelay();
                         Cleanup();
+                        if (GameManager.Instance != null) GameManager.Instance.NetworkRole = PlayerRole.Observer;
                         _relayMode = false;
+                        SessionEditorName = "";
+                        SessionWaitingForEditor = true;
                         OnDisconnected?.Invoke();
                         EventBus.Publish(new NetworkDisconnectedEvent());
                         Debug.Log("[Network] Disconnected from relay");
 
                         // Attempt auto-reconnection via relay
-                        if (!string.IsNullOrEmpty(addr) && !string.IsNullOrEmpty(code))
+                        if (!_removedFromSession && !string.IsNullOrEmpty(addr) && !string.IsNullOrEmpty(code))
                             StartRelayReconnection(addr, code);
                     }
                 });
             }
         }
 
-        private void SendToRelay(byte[] packet)
+        private bool SendToRelay(byte[] packet)
         {
-            if (_relayStream == null) return;
+            var stream = _relayStream;
+            if (stream == null) return false;
+            if (!_isHost && packet.Length >= 5 && packet[4] >= 16 && packet[4] <= 21)
+            {
+                packet = WrapRevisionEdit(packet);
+                if (packet == null) return false;
+            }
             try
             {
-                lock (_relayStream)
+                lock (stream)
                 {
-                    _relayStream.Write(packet, 0, packet.Length);
-                    _relayStream.Flush();
+                    stream.Write(packet, 0, packet.Length);
+                    stream.Flush();
                 }
                 // Mirror outgoing traffic to the session recorder if active.
                 // packet layout: [4-byte len][1-byte type][payload]
@@ -773,10 +821,12 @@ namespace Sandplay.Core
                     if (payloadLen > 0) Buffer.BlockCopy(packet, 5, payload, 0, payloadLen);
                     rec.Record(SessionRecorder.Direction.Outgoing, type, payload);
                 }
+                return true;
             }
             catch (Exception ex)
             {
                 Debug.LogWarning("[Network] Failed to send to relay: " + ex.Message);
+                return false;
             }
         }
 
@@ -913,6 +963,7 @@ namespace Sandplay.Core
 
                 EnqueueMain(() =>
                 {
+                    _sessionElapsed.Start();
                     OnConnected?.Invoke();
                     EventBus.Publish(new NetworkConnectedEvent());
                     Debug.Log("[Network] Connected to server");
@@ -990,12 +1041,34 @@ namespace Sandplay.Core
         {
             switch (type)
             {
+                case NetMsgType.HostingLeaseStatus:
+                    ReceiveHostingLeaseStatus(payload);
+                    break;
+                case NetMsgType.SessionProfiles:
+                    ReceiveSessionProfiles(payload);
+                    break;
+                case NetMsgType.RevisionRole:
+                case NetMsgType.RevisionEdit:
+                case NetMsgType.SnapshotBegin:
+                case NetMsgType.SnapshotComplete:
+                    ReceiveRevisionMessage(type, payload);
+                    break;
+                case NetMsgType.SessionStatus:
+                    ReceiveSessionStatus(payload);
+                    break;
+                case NetMsgType.SessionRemoved:
+                    if (!_relayMode || _isHost) break;
+                    _removedFromSession = true;
+                    if (GameManager.Instance != null) GameManager.Instance.NetworkRole = PlayerRole.Observer;
+                    OnConnectionError?.Invoke(Localization.Get("session.removed"));
+                    break;
                 case NetMsgType.RoleAssignment:
                     {
                         // During replay, ignore role flips — they can re-mark the
                         // viewer as Patient and drop subsequent sand events.
                         if (SessionPlayer.IsReplayActive)
                             break;
+                        if (_relayMode && !IsRoleAssignmentForThisParticipant(payload)) break;
                         var role = NetSerializer.ReadRoleAssignment(payload);
                         if (GameManager.Instance != null)
                             GameManager.Instance.NetworkRole = role;
@@ -1004,6 +1077,7 @@ namespace Sandplay.Core
                     }
                 case NetMsgType.FullState:
                     {
+                        _snapshotApplied = false;
                         NetSerializer.ReadFullState(payload, out float bw, out float bd,
                             out int res, out byte[] hm, out SpawnObjectData[] objs, out ColorSyncData[] cols);
                         if (!IsValidNetworkBoard(bw, bd, res))
@@ -1024,7 +1098,10 @@ namespace Sandplay.Core
                         // alongside the objects received from the host.
                         var placer = FindAnyObjectByType<ObjectPlacer>();
                         placer?.ClearAll();
+                        Sandplay.Data.UndoManager.Instance?.Clear();
+                        ResetPendingModels();
                         _networkObjects.Clear();
+                        BeginSnapshotObjectProgress(objs);
 
                         // Resize board to match host
                         if (SandMesh.Instance != null && res > 0)
@@ -1063,12 +1140,21 @@ namespace Sandplay.Core
                             SandMesh.Instance?.SetHeightmap(heightmap);
                             Sandplay.Sand.SandSyncManager.SuppressNetworkSync = false;
                         }
-                        if (objs != null)
-                            foreach (var o in objs)
-                                SpawnObjectLocally(o.ObjectId, o.NetId, o.Position, o.Rotation, o.Scale);
-                        if (cols != null)
-                            foreach (var c in cols)
-                                ApplyColorLocally(c.MaterialName, c.Color);
+                        _snapshotApplied = true;
+                        try
+                        {
+                            if (objs != null)
+                                foreach (var o in objs)
+                                    SpawnObjectLocally(o.ObjectId, o.NetId, o.Position, o.Rotation, o.Scale);
+                            if (cols != null)
+                                foreach (var c in cols)
+                                    ApplyColorLocally(c.MaterialName, c.Color);
+                        }
+                        catch
+                        {
+                            _snapshotApplied = false;
+                            throw;
+                        }
 
                         Debug.Log("[Network] Full state applied");
                         break;
@@ -1076,9 +1162,12 @@ namespace Sandplay.Core
                 case NetMsgType.CatalogManifest:
                     {
                         var items = NetSerializer.ReadCatalogManifest(payload);
-                        NetworkCatalogRegistry.Merge(items);
                         var scene = FindAnyObjectByType<SceneBootstrapper>();
-                        scene?.ApplySharedCatalog(items);
+                        if (!_isHost)
+                        {
+                            if (scene != null) scene.ApplySharedCatalog(items);
+                            else NetworkCatalogRegistry.Register(items);
+                        }
                         Debug.Log($"[Network] Shared catalog received ({items.Length} items)");
                         break;
                     }
@@ -1123,7 +1212,7 @@ namespace Sandplay.Core
                     {
                         NetSerializer.ReadSpawnObject(payload, out uint nid, out string oid,
                             out Vector3 pos, out Quaternion rot, out float scale);
-                        SpawnObjectLocally(oid, nid, pos, rot, scale);
+                        SpawnObjectLocally(oid, nid, pos, rot, scale, placementFeedback: !_relayMode || _snapshotReady);
                         break;
                     }
                 case NetMsgType.MoveObject:
@@ -1132,6 +1221,7 @@ namespace Sandplay.Core
                             out Vector3 pos, out Quaternion rot, out float scale);
                         scale = SanitizeNetworkScale(scale);
                         var obj = GetNetworkObject(nid);
+                        if (obj == null && _loadingObjects.Contains(nid)) _loadingMoves[nid] = payload;
                         if (obj != null)
                         {
                             obj.transform.position = pos;
@@ -1150,6 +1240,8 @@ namespace Sandplay.Core
                 case NetMsgType.RemoveObject:
                     {
                         uint nid = NetSerializer.ReadRemoveObject(payload);
+                        EndModelLoad(nid);
+                        _loadingMoves.Remove(nid);
                         var obj = GetNetworkObject(nid);
                         if (obj != null)
                         {
@@ -1358,6 +1450,7 @@ namespace Sandplay.Core
             try
             {
                 var payload = NetSerializer.WriteRoleRequest(role);
+                if (_relayMode) payload = WriteSessionRole(role, _participantToken, _participantName);
                 var packet = NetSerializer.Pack(NetMsgType.RoleRequest, payload);
 
                 if (_relayMode)
@@ -1515,7 +1608,7 @@ namespace Sandplay.Core
             // Allocate authoritative NetId on host
             uint newId = NextNetId();
             // Spawn locally on host
-            SpawnObjectLocally(oid, newId, pos, rot, scale);
+            SpawnObjectLocally(oid, newId, pos, rot, scale, placementFeedback: true);
             // Broadcast to all clients (including the originating patient) so they
             // can match-or-spawn with this NetId.
             var outPayload = NetSerializer.WriteSpawnObject(newId, oid, pos, rot, scale);
@@ -1646,7 +1739,7 @@ namespace Sandplay.Core
             stream.Flush();
         }
 
-        private static bool ReadExact(NetworkStream stream, byte[] buffer, int count)
+        private static bool ReadExact(Stream stream, byte[] buffer, int count)
         {
             int offset = 0;
             while (offset < count)
@@ -1662,10 +1755,18 @@ namespace Sandplay.Core
         // Local application helpers
         // ──────────────────────────────────────────────
 
-        private void SpawnObjectLocally(string objectId, uint netId, Vector3 pos, Quaternion rot, float scale)
+        private void SpawnObjectLocally(string objectId, uint netId, Vector3 pos, Quaternion rot, float scale, bool placementFeedback = false)
         {
+            if (_loadingObjects.Contains(netId)) return;
+            if (GetNetworkObject(netId) != null)
+            {
+                ResolveSnapshotObject(netId, true);
+                return;
+            }
             if (string.IsNullOrEmpty(objectId))
             {
+                _snapshotApplied = false;
+                ResolveSnapshotObject(netId, false, "A session object has no catalog ID.");
                 Debug.LogWarning("[Network] Ignoring spawn with missing object id.");
                 return;
             }
@@ -1673,7 +1774,13 @@ namespace Sandplay.Core
             scale = SanitizeNetworkScale(scale);
 
             var placer = FindAnyObjectByType<ObjectPlacer>();
-            if (placer == null) return;
+            if (placer == null)
+            {
+                _snapshotApplied = false;
+                ResolveSnapshotObject(netId, false, "The object placer is unavailable.");
+                Debug.LogWarning("[Network] Cannot restore object without an object placer.");
+                return;
+            }
 
             // ── Patient match-or-spawn: a Patient client may have placed this object
             //    locally already (with NetworkId=0) before the host echoed it back with
@@ -1686,28 +1793,38 @@ namespace Sandplay.Core
                 {
                     existing.NetworkId = netId;
                     RegisterNetworkObject(netId, existing);
+                    ResolveSnapshotObject(netId, true);
                     return;
                 }
             }
 
             // 1. Try local ScriptableObject catalog first (matched by ObjectId or DisplayName)
-            if (placer.Catalog != null)
+            if (placer.Catalog != null && placer.Catalog.Objects != null)
             {
                 SandplayObject catalogObj = null;
                 foreach (var obj in placer.Catalog.Objects)
                 {
+                    if (obj == null) continue;
                     if (obj.ObjectId == objectId || obj.DisplayName == objectId)
                     { catalogObj = obj; break; }
                 }
                 if (catalogObj != null && catalogObj.Prefab != null)
                 {
-                    Sandplay.Objects.ObjectSyncManager.SuppressNetworkSync = true;
-                    var placed = placer.PlaceObject(catalogObj, pos, rot, scale, skipOffset: true);
-                    Sandplay.Objects.ObjectSyncManager.SuppressNetworkSync = false;
+                    bool previousSuppression = ObjectSyncManager.SuppressNetworkSync;
+                    PlacedObject placed;
+                    ObjectSyncManager.SuppressNetworkSync = true;
+                    try { placed = placer.PlaceObject(catalogObj, pos, rot, scale, skipOffset: true, placementFeedback: placementFeedback); }
+                    finally { ObjectSyncManager.SuppressNetworkSync = previousSuppression; }
                     if (placed != null)
                     {
                         placed.NetworkId = netId;
                         RegisterNetworkObject(netId, placed);
+                        ResolveSnapshotObject(netId, true);
+                    }
+                    else
+                    {
+                        _snapshotApplied = false;
+                        ResolveSnapshotObject(netId, false, $"Could not place {objectId}.");
                     }
                     return;
                 }
@@ -1716,7 +1833,8 @@ namespace Sandplay.Core
             // 2. Try API catalog (objectId is the UUID from the server)
             if (NetworkCatalogRegistry.TryGet(objectId, out var netItem))
             {
-                StartCoroutine(SpawnNetworkItemCoroutine(netItem, netId, pos, rot, scale));
+                var ticket = BeginModelLoad(netId);
+                StartCoroutine(SpawnNetworkItemCoroutine(netItem, netId, pos, rot, scale, ticket, placementFeedback));
                 return;
             }
 
@@ -1724,11 +1842,14 @@ namespace Sandplay.Core
             // Queue a retry that waits up to 20 s for the registry to become ready.
             if (!NetworkCatalogRegistry.IsLoaded)
             {
-                StartCoroutine(SpawnObjectWhenRegistryReady(objectId, netId, pos, rot, scale));
+                var ticket = BeginModelLoad(netId);
+                StartCoroutine(SpawnObjectWhenRegistryReady(objectId, netId, pos, rot, scale, ticket, placementFeedback));
                 return;
             }
 
             Debug.LogWarning($"[Network] Could not find catalog object: {objectId}");
+            _snapshotApplied = false;
+            ResolveSnapshotObject(netId, false, $"Catalog object unavailable: {objectId}");
         }
 
         /// <summary>
@@ -1759,36 +1880,76 @@ namespace Sandplay.Core
         }
 
         private System.Collections.IEnumerator SpawnObjectWhenRegistryReady(
-            string objectId, uint netId, Vector3 pos, Quaternion rot, float scale)
+            string objectId, uint netId, Vector3 pos, Quaternion rot, float scale, object ticket, bool placementFeedback)
         {
-            float elapsed = 0f;
-            while (!NetworkCatalogRegistry.IsLoaded && elapsed < 20f)
+            double deadline = Time.realtimeSinceStartupAsDouble + 20;
+            while (IsCurrentModelLoad(netId, ticket) && !NetworkCatalogRegistry.IsLoaded &&
+                Time.realtimeSinceStartupAsDouble < deadline)
             {
-                elapsed += Time.deltaTime;
                 yield return null;
             }
             // Re-enter the normal spawn path now that the registry should be populated.
-            SpawnObjectLocally(objectId, netId, pos, rot, scale);
+            if (!IsCurrentModelLoad(netId, ticket)) yield break;
+            EndModelLoad(netId);
+            if (!NetworkCatalogRegistry.IsLoaded)
+            {
+                _loadingMoves.Remove(netId);
+                Debug.LogWarning("[Network] Catalog loading timed out; model unavailable.");
+                _snapshotApplied = false;
+                ResolveSnapshotObject(netId, false, $"Catalog timed out while loading {objectId}.");
+                yield break;
+            }
+            SpawnObjectLocally(objectId, netId, pos, rot, scale, placementFeedback);
         }
 
         private System.Collections.IEnumerator SpawnNetworkItemCoroutine(
-            NetworkCatalogItem item, uint netId, Vector3 pos, Quaternion rot, float scale)
+            NetworkCatalogItem item, uint netId, Vector3 pos, Quaternion rot, float scale, object ticket, bool placementFeedback)
         {
             scale = SanitizeNetworkScale(scale);
 
-            // Wait until the GLB model is downloaded/cached
-            yield return StartCoroutine(NetworkCatalogRegistry.EnsureLoaded(this, item));
+            // Bound retries so a corrupt or unsupported asset ends in a clear
+            // failure instead of leaving the client in a partial session.
+            const int maxAttempts = 3;
+            int attempts = 0;
+            float retryDelay = 1f;
+            while (IsCurrentModelLoad(netId, ticket) && item.LoadedPrefab == null && attempts < maxAttempts)
+            {
+                attempts++;
+                yield return StartCoroutine(NetworkCatalogRegistry.EnsureLoaded(this, item, () => IsCurrentModelLoad(netId, ticket)));
+                if (item.LoadedPrefab == null && IsCurrentModelLoad(netId, ticket) && attempts < maxAttempts)
+                {
+                    yield return new WaitForSecondsRealtime(retryDelay);
+                    retryDelay = Mathf.Min(retryDelay * 2f, 15f);
+                }
+            }
+            if (!IsCurrentModelLoad(netId, ticket)) yield break;
 
             var placer = FindAnyObjectByType<ObjectPlacer>();
-            if (placer == null || item.LoadedPrefab == null) yield break;
+            if (placer == null || item.LoadedPrefab == null)
+            {
+                _snapshotApplied = false;
+                EndModelLoad(netId); _loadingMoves.Remove(netId);
+                ResolveSnapshotObject(netId, false, $"Could not load {item.display_name}.");
+                yield break;
+            }
 
+            PlacedObject placed;
+            bool previousSuppression = Sandplay.Objects.ObjectSyncManager.SuppressNetworkSync;
             Sandplay.Objects.ObjectSyncManager.SuppressNetworkSync = true;
-            var placed = placer.PlaceNetworkObject(item, pos, rot, scale);
-            Sandplay.Objects.ObjectSyncManager.SuppressNetworkSync = false;
+            try { placed = placer.PlaceNetworkObject(item, pos, rot, scale, skipOffset: true, placementFeedback: placementFeedback); }
+            finally { Sandplay.Objects.ObjectSyncManager.SuppressNetworkSync = previousSuppression; }
             if (placed != null)
             {
                 placed.NetworkId = netId;
                 RegisterNetworkObject(netId, placed);
+                ResolveSnapshotObject(netId, true);
+            }
+            else
+            {
+                _snapshotApplied = false;
+                EndModelLoad(netId);
+                _loadingMoves.Remove(netId);
+                ResolveSnapshotObject(netId, false, $"Could not place {item.display_name}.");
             }
         }
 
@@ -1840,6 +2001,7 @@ namespace Sandplay.Core
         /// </summary>
         private void ApplyUndoRedoState(byte[] heightmapBytes, SpawnObjectData[] objects)
         {
+            ResetPendingModels();
             // Apply heightmap
             if (heightmapBytes != null && heightmapBytes.Length > 0)
             {
@@ -1880,9 +2042,12 @@ namespace Sandplay.Core
                     {
                         existing.transform.position = o.Position;
                         existing.transform.rotation = o.Rotation;
-                        existing.transform.localScale = (existing.ObjectData != null && existing.ObjectData.Prefab != null)
-                            ? existing.ObjectData.Prefab.transform.localScale * o.Scale
-                            : Vector3.one * o.Scale;
+                        Vector3 templateScale = Vector3.one;
+                        if (existing.ObjectData != null && existing.ObjectData.Prefab != null)
+                            templateScale = existing.ObjectData.Prefab.transform.localScale;
+                        else if (existing.NetworkItem != null && existing.NetworkItem.LoadedPrefab != null)
+                            templateScale = existing.NetworkItem.LoadedPrefab.transform.localScale;
+                        existing.transform.localScale = templateScale * SanitizeNetworkScale(o.Scale);
                     }
                     else
                     {
@@ -1969,6 +2134,7 @@ namespace Sandplay.Core
                             _clientReceiveThread = new Thread(ClientReceiveLoop) { IsBackground = true };
                             _clientReceiveThread.Start();
 
+                            _sessionElapsed.Start();
                             OnConnected?.Invoke();
                             EventBus.Publish(new NetworkConnectedEvent());
                             SendRoleRequest(_requestedRole);
@@ -2026,6 +2192,11 @@ namespace Sandplay.Core
 
         private void Cleanup()
         {
+            _sessionElapsed.Reset();
+            ClearSessionProfiles();
+            _snapshotReady = _snapshotApplied = false;
+            _pendingEditorRole = PlayerRole.Observer;
+            ResetPendingModels();
             _isOnline = false;
             _isHost = false;
             _connectedClients = 0;
@@ -2033,6 +2204,7 @@ namespace Sandplay.Core
             _networkObjects.Clear();
             _materialColors.Clear();
             _therapistMode = false;
+            _autoAssignJoinerEditor = false;
             _patientAssigned = false;
             if (GameManager.Instance != null)
                 GameManager.Instance.NetworkRole = PlayerRole.Patient;
@@ -2040,6 +2212,8 @@ namespace Sandplay.Core
 
         public void Disconnect()
         {
+            _sessionElapsed.Reset();
+            ++_relayAttempt;
             StopReconnection();
             if (!_isOnline) return;
 
@@ -2064,24 +2238,32 @@ namespace Sandplay.Core
             if (_isReconnecting) return;
             _isReconnecting = true;
 
-            _reconnectThread = new Thread(() => RelayReconnectLoop(relayAddress, roomCode)) { IsBackground = true };
+            int generation = _relayAttempt;
+            _reconnectThread = new Thread(() => RelayReconnectLoop(relayAddress, roomCode, generation)) { IsBackground = true };
             _reconnectThread.Start();
         }
 
-        private void RelayReconnectLoop(string relayAddress, string roomCode)
+        private bool IsCurrentRelayReconnect(int generation) => _isReconnecting && generation == _relayAttempt;
+
+        private void RelayReconnectLoop(string relayAddress, string roomCode, int generation)
         {
-            for (int attempt = 1; attempt <= MaxReconnectAttempts && _isReconnecting; attempt++)
+            for (int attempt = 1; attempt <= MaxReconnectAttempts && IsCurrentRelayReconnect(generation); attempt++)
             {
                 int a = attempt;
                 EnqueueMain(() =>
                 {
+                    if (!IsCurrentRelayReconnect(generation)) return;
                     OnReconnectAttempt?.Invoke(a);
                     Debug.Log($"[Network] Relay reconnect attempt {a}/{MaxReconnectAttempts}...");
                 });
 
+                TcpClient socket = null;
+                bool handedOff = false;
                 try
                 {
-                    var socket = new TcpClient();
+                    string ticket = UseAuthenticatedRelay ? FetchRelayTicket(roomCode, generation) : null;
+                    if (!IsCurrentRelayReconnect(generation)) return;
+                    socket = new TcpClient();
                     var result = socket.BeginConnect(relayAddress, Port, null, null);
                     bool connected = result.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(ReconnectIntervalSec));
 
@@ -2089,10 +2271,21 @@ namespace Sandplay.Core
                     {
                         socket.EndConnect(result);
                         socket.NoDelay = true;
-                        var stream = socket.GetStream();
-
+                        Stream stream;
+                        try { stream = OpenRelayStream(socket, relayAddress); }
+                        catch (RelayVersionException)
+                        {
+                            socket.Close();
+                            EnqueueMain(() =>
+                            {
+                                if (generation != _relayAttempt) return;
+                                OnConnectionError?.Invoke(Localization.Get("net.update_required"));
+                            });
+                            break;
+                        }
+                        if (!IsCurrentRelayReconnect(generation)) { socket.Close(); return; }
                         // Send JoinRoom
-                        var joinPayload = NetSerializer.WriteJoinRoom(roomCode);
+                        var joinPayload = RelayControlPayload(ticket, roomCode);
                         var joinPacket = NetSerializer.Pack(NetMsgType.JoinRoom, joinPayload);
                         stream.Write(joinPacket, 0, joinPacket.Length);
                         stream.Flush();
@@ -2101,6 +2294,7 @@ namespace Sandplay.Core
                         byte[] lenBuf = new byte[4];
                         if (!ReadExact(stream, lenBuf, 4)) { socket.Close(); continue; }
                         int msgLen = BitConverter.ToInt32(lenBuf, 0);
+                        if (msgLen < 1 || msgLen > 4096) { socket.Close(); continue; }
                         byte[] body = new byte[msgLen];
                         if (!ReadExact(stream, body, msgLen)) { socket.Close(); continue; }
 
@@ -2113,8 +2307,10 @@ namespace Sandplay.Core
                             NetSerializer.ReadJoinResult(payload, out bool success, out string reason);
                             if (success)
                             {
+                                handedOff = true;
                                 EnqueueMain(() =>
                                 {
+                                    if (!IsCurrentRelayReconnect(generation)) { socket.Close(); return; }
                                     _isReconnecting = false;
                                     _relaySocket = socket;
                                     _relayStream = stream;
@@ -2123,10 +2319,12 @@ namespace Sandplay.Core
                                     _relayMode = true;
                                     _isOnline = true;
                                     _isHost = false;
+                                    if (GameManager.Instance != null) GameManager.Instance.NetworkRole = PlayerRole.Observer;
 
                                     _clientReceiveThread = new Thread(() => RelayClientReceiveLoop(socket, stream)) { IsBackground = true };
                                     _clientReceiveThread.Start();
 
+                                    _sessionElapsed.Start();
                                     OnConnected?.Invoke();
                                     EventBus.Publish(new NetworkConnectedEvent());
                                     SendRoleRequest(_requestedRole);
@@ -2142,14 +2340,24 @@ namespace Sandplay.Core
                         socket.Close();
                     }
                 }
-                catch { /* retry */ }
+                catch (RelayLoginRequiredException ex)
+                {
+                    EnqueueMain(() =>
+                    {
+                        if (IsCurrentRelayReconnect(generation)) OnConnectionError?.Invoke(ex.Message);
+                    });
+                    break;
+                }
+                catch { /* retry transient transport failures */ }
+                finally { if (!handedOff) socket?.Close(); }
 
                 Thread.Sleep((int)(ReconnectIntervalSec * 1000));
             }
 
-            _isReconnecting = false;
             EnqueueMain(() =>
             {
+                if (!IsCurrentRelayReconnect(generation)) return;
+                _isReconnecting = false;
                 OnReconnectGaveUp?.Invoke();
                 Debug.Log("[Network] Gave up relay reconnecting");
             });

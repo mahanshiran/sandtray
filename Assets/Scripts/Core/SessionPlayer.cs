@@ -33,6 +33,16 @@ namespace Sandplay.Core
         public static bool IsReplayActive { get; private set; }
 
         // ── Public state ───────────────────────────────────────────────────────
+        private Action _requireWorkspace;
+        public bool HasCurrentWorkspace
+        {
+            get
+            {
+                if (_requireWorkspace == null) return false;
+                try { _requireWorkspace(); return true; }
+                catch (UnauthorizedAccessException) { return false; }
+            }
+        }
         public string FilePath { get; private set; }
         public string BoardName { get; private set; }
         public long StartUnixMs { get; private set; }
@@ -156,6 +166,7 @@ namespace Sandplay.Core
         public bool Load(string filePath)
         {
             Stop();
+            _requireWorkspace = Sandplay.Data.LocalAccountStorage.CaptureGuard();
             _events.Clear();
             CurrentIndex = 0;
             HasFinished = false;
@@ -230,7 +241,7 @@ namespace Sandplay.Core
         /// <summary>Start (or resume) playback from <see cref="CurrentIndex"/>.</summary>
         public void Play()
         {
-            if (IsPlaying || _events.Count == 0) return;
+            if (!HasCurrentWorkspace || IsPlaying || _events.Count == 0) return;
             if (HasFinished || CurrentIndex >= _events.Count)
             {
                 CurrentIndex = 0;
@@ -277,8 +288,10 @@ namespace Sandplay.Core
             HasFinished = false;
             CurrentIndex = 0;
 
+            if (!HasCurrentWorkspace) return;
             while (CurrentIndex < _events.Count && _events[CurrentIndex].OffsetMs <= targetMs)
             {
+                if (!HasCurrentWorkspace) return;
                 var ev = _events[CurrentIndex];
                 try { apply?.Invoke(ev.Direction, ev.Type, ev.Payload); }
                 catch (Exception ex) { Debug.LogWarning($"[SessionPlayer] Seek apply threw: {ex.Message}"); }
@@ -301,10 +314,11 @@ namespace Sandplay.Core
 
                 while (DisplayTimeMs + 0.5f < ev.OffsetMs)
                 {
-                    if (!IsPlaying) yield break;
+                    if (!IsPlaying || !HasCurrentWorkspace) { IsPlaying = false; yield break; }
                     yield return null;
                 }
 
+                if (!HasCurrentWorkspace) { IsPlaying = false; yield break; }
                 // Snap clock to event time to avoid tiny drift before dispatch
                 SyncClock(ev.OffsetMs);
 
@@ -314,6 +328,7 @@ namespace Sandplay.Core
                 CurrentIndex++;
             }
 
+            if (!HasCurrentWorkspace) { IsPlaying = false; yield break; }
             SyncClock(DurationMs);
             IsPlaying = false;
             HasFinished = true;
