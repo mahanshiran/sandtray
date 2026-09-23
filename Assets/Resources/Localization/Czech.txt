@@ -73,7 +73,10 @@ sub.period_year|/ rok
 sub.period_week|/ týden
 sub.period_once|jednorázově
 sub.no_plans|Žádné dostupné tarify.
-sub.mobile_only|Předplatné je dostupné pro iOS a Android.\nPředplaťte si jej prosím v mobilní aplikaci.
+sub.mobile_only|Předplatné je nyní dostupné pouze v aplikaci pro iOS.\nPředplaťte si jej na iPhonu nebo iPadu pomocí stejného účtu.
+sub.phone_purchase_title|Předplatit na zařízení iOS
+sub.phone_purchase_message|Předplatné je nyní dostupné pouze v aplikaci pro iOS. Nainstalujte nebo otevřete Sandtray na iPhonu či iPadu, přihlaste se ke stejnému účtu a zakupte si tarif. Po ověření se VIP přístup zobrazí na všech zařízeních, kde používáte tento účet.
+sub.open_app_store|Otevřít v App Storu
 sub.ok|OK
 brush.radius|Poloměr
 brush.strength|Síla

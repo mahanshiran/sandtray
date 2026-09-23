@@ -204,6 +204,30 @@ namespace Sandplay.Core
             ClientButton(box,F("Close","关闭"),.52f,.08f,.42f,.16f,CloseClientDialog);
         }
 
+        private void ShowPhoneSubscriptionDialog()
+        {
+            var box = ClientDialog(Localization.Get("sub.phone_purchase_title"), 660, 450);
+            var description = ClientText(box, Localization.Get("sub.phone_purchase_message"),
+                16, .07f, .48f, .86f, .30f, HomeMuted);
+            description.enableWordWrapping = true;
+            description.alignment = TextAlignmentOptions.TopLeft;
+
+            var appId = ClientText(box, "Apple ID 6761878322", 13,
+                .07f, .38f, .86f, .07f, HomeMuted);
+            appId.alignment = TextAlignmentOptions.MidlineLeft;
+
+            var store = ClientButton(box, Localization.Get("sub.open_app_store"),
+                .07f, .12f, .54f, .16f, () => Application.OpenURL(IosAppStoreUrl));
+            store.GetComponent<Image>().color = HomePrimary;
+            store.GetComponentInChildren<TMP_Text>().color = Color.white;
+            store.GetComponentInChildren<TMP_Text>().fontStyle = FontStyles.Bold;
+            ApplyHomeRoundedCorners(store.GetComponent<Image>(), 10);
+
+            var close = ClientButton(box, Localization.Get("sub.ok"),
+                .65f, .12f, .28f, .16f, CloseClientDialog);
+            ApplyHomeRoundedCorners(close.GetComponent<Image>(), 10);
+        }
+
         private TMP_Text _paywallStatusTxt;
         private Transform _paywallPackageContainer;
         private Button _paywallRestoreBtn;
@@ -211,6 +235,7 @@ namespace Sandplay.Core
 
         private static readonly Color PaywallGold = new Color(0.90f, 0.72f, 0.32f, 1f);
         private static readonly Color PaywallGoldDark = new Color(0.72f, 0.54f, 0.18f, 1f);
+        private const string IosAppStoreUrl = "https://apps.apple.com/app/id6761878322";
         private Color PaywallPanelBg => HomeCard;
         private Color PaywallCardBg => HomeIsLight ? new Color(.985f,.972f,.94f) : HomeChromeButton;
         private Color PaywallMuted => HomeMuted;
@@ -372,7 +397,12 @@ namespace Sandplay.Core
                     var select = ClientButton(card,"",.07f,.055f,.86f,.09f,()=>
                     {
                         if (selectedSection == 2) { ShowOrganizationPlanContact(); return; }
-                        if (!Application.isMobilePlatform || backend.AccessSource == "manual_contract") return;
+                        if (!Application.isMobilePlatform)
+                        {
+                            if (planCode != "free") ShowPhoneSubscriptionDialog();
+                            return;
+                        }
+                        if (backend.AccessSource == "manual_contract") return;
                         if (store == null) return;
                         if ((chosen && currentPlan?.IsStorePurchase == true) || planCode == "free")
                         { if (currentPlan?.IsStorePurchase == true) store.ManageSubscription(); return; }
@@ -393,6 +423,7 @@ namespace Sandplay.Core
                         (currentPlan != null && !currentPlan.IsStorePurchase);
                     bool accountReady = !backend.IsLoggedIn || backend.AccessSource == "revenuecat";
                     select.interactable = selectedSection == 2 ||
+                        (!Application.isMobilePlatform && planCode != "free") ||
                         (Application.isMobilePlatform && accountReady && !manualAccount && planCatalog?.Find(planCode) != null &&
                          (chosen || (planCode == "free" ? currentPlan?.IsStorePurchase == true : package != null)));
                     select.GetComponentInChildren<TMP_Text>().text = selectedSection == 2 ? F("Contact us", "联系我们")

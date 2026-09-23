@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using NUnit.Framework;
 using Sandplay.Core;
 
@@ -43,6 +44,15 @@ namespace Sandplay.Tests
             Assert.IsNull(SubscriptionPlans.ActivePlan(new AccessSnapshot { sources = Array.Empty<AccessSource>() }, store, now));
             Assert.AreEqual("personal_pro", SubscriptionPlans.ActivePlan(null, store, now).Code);
             Assert.IsNull(SubscriptionPlans.ActivePlan(null, store, DateTimeOffset.Parse("2026-10-02T00:00:00Z")));
+        }
+
+        [Test]
+        public void DesktopPurchaseDialogUsesRequestedAppStoreListing()
+        {
+            var field = typeof(SceneBootstrapper).GetField("IosAppStoreUrl",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(field);
+            Assert.AreEqual("https://apps.apple.com/app/id6761878322", field.GetRawConstantValue());
         }
     }
 }

@@ -137,7 +137,10 @@ namespace Sandplay.Core
             ["sub.period_week"] = "/ week",
             ["sub.period_once"] = "once",
             ["sub.no_plans"] = "No plans available.",
-            ["sub.mobile_only"] = "Subscriptions are available on iOS and Android.\nPlease subscribe from the mobile app.",
+            ["sub.mobile_only"] = "Subscriptions are currently available only in the iOS app.\nPlease subscribe on your iPhone or iPad using the same account.",
+            ["sub.phone_purchase_title"] = "Subscribe on your iOS device",
+            ["sub.phone_purchase_message"] = "Subscriptions are currently available only in the iOS app. On your iPhone or iPad, install or open Sandtray, sign in to this same account, then purchase your plan. After verification, your VIP access will appear on every device where you use this account.",
+            ["sub.open_app_store"] = "Open in the App Store",
             ["sub.ok"] = "OK",
 
             // Brush
@@ -752,7 +755,10 @@ namespace Sandplay.Core
             ["sub.period_week"] = "/ 周",
             ["sub.period_once"] = "一次性",
             ["sub.no_plans"] = "暂无可用方案。",
-            ["sub.mobile_only"] = "订阅仅支持 iOS 与 Android。\n请在手机 App 中完成订阅。",
+            ["sub.mobile_only"] = "订阅目前仅可在 iOS App 中购买。\n请在 iPhone 或 iPad 上使用同一个账户完成订阅。",
+            ["sub.phone_purchase_title"] = "在 iOS 设备上订阅",
+            ["sub.phone_purchase_message"] = "订阅目前仅可在 iOS App 中购买。请在 iPhone 或 iPad 上安装或打开 Sandtray，登录同一个账户，然后购买方案。验证完成后，使用此账户登录的所有设备都会显示您的 VIP 权益。",
+            ["sub.open_app_store"] = "在 App Store 中打开",
             ["sub.ok"] = "好的",
 
             // Brush
