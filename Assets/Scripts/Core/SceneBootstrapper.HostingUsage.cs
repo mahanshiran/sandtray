@@ -55,10 +55,22 @@ namespace Sandplay.Core
                     // With no workspace switcher, reclaim the unused title band.
                     ((RectTransform)list.parent).anchorMax=new Vector2(.96f,.84f);
                 }
-                RenderHostingWallet(box,list,status,wallet,offset,wallet.scope);
+                // Hosting has its own detailed ledger. The access snapshot adds every
+                // other measurable plan allowance to the same usage screen.
+                BackendClient.Instance.FetchAccessSnapshot(
+                    snapshot =>
+                    {
+                        if(dialog==null||dialog!=_clientDialog)return;
+                        RenderHostingWallet(box,list,status,wallet,offset,wallet.scope,snapshot);
+                    },
+                    _ =>
+                    {
+                        if(dialog==null||dialog!=_clientDialog)return;
+                        RenderHostingWallet(box,list,status,wallet,offset,wallet.scope,null);
+                    });
             },error=>{if(dialog!=null&&dialog==_clientDialog)status.text=error;});
         }
-        void RenderHostingWallet(Transform box,Transform list,TMP_Text status,HostingWallet wallet,int offset,string scope)
+        void RenderHostingWallet(Transform box,Transform list,TMP_Text status,HostingWallet wallet,int offset,string scope,AccessSnapshot access)
         {
                 string workspace=scope=="organization"&&!string.IsNullOrEmpty(wallet.workspace_name)?wallet.workspace_name+" · ":"";
                 status.text=wallet.mode=="off"?F("Usage tracking is not active yet.","用量统计尚未启用。"):"";
@@ -132,18 +144,72 @@ namespace Sandplay.Core
                     ClientText(row,session.status=="active"?F("Active","进行中"):F("Ended","已结束"),11,.49f,.10f,.18f,.80f,session.status=="active"?HomePrimary:HomeMuted);
                     var duration=ClientText(row,AccessDuration(session.used_seconds),13,.68f,.10f,.29f,.80f,HomeText);duration.alignment=TextAlignmentOptions.MidlineRight;
                 }
-                // Keep a plain-language allowance list at the bottom so users do
-                // not have to infer limits from the bars or chart alone.
-                var breakdown=ClientRow(list,"Usage breakdown",112);
-                ClientText(breakdown,F("Usage details","用量详情"),13,.025f,.69f,.45f,.22f,HomeText);
-                string onlineLimit=wallet.monthly_unlimited?F("Unlimited","无限制"):AccessDuration(wallet.monthly_limit_seconds);
-                string offlineLimit=wallet.offline_limit_seconds>0?AccessDuration(wallet.offline_limit_seconds):F("Unlimited","无限制");
-                ClientText(breakdown,F("Online hosting","线上主持"),12,.025f,.30f,.44f,.23f,HomeMuted);
-                var onlineValue=ClientText(breakdown,AccessDuration(wallet.used_seconds)+" / "+onlineLimit,12,.53f,.30f,.44f,.23f,HomePrimary);onlineValue.alignment=TextAlignmentOptions.MidlineRight;
-                ClientText(breakdown,F("Offline hosting","线下主持"),12,.025f,.06f,.44f,.23f,HomeMuted);
-                var offlineValue=ClientText(breakdown,AccessDuration(wallet.offline_used_seconds)+" / "+offlineLimit,12,.53f,.06f,.44f,.23f,orange);offlineValue.alignment=TextAlignmentOptions.MidlineRight;
+                RenderPlanUsageDetails(list,wallet,access,orange);
                 if(offset>0)ClientButton(box,"‹",.05f,.025f,.2f,.065f,()=>ShowHostingUsage(Math.Max(0,offset-50),scope));
                 if(wallet.has_more)ClientButton(box,"›",.29f,.025f,.2f,.065f,()=>ShowHostingUsage(offset+50,scope));
+        }
+
+        static readonly string[] PlanUsageOrder =
+        {
+            "tables.capacity", "reports.capacity", "clients.capacity", "catalog.custom.capacity",
+            "ai.analyze", "pdf.export", "sessions.host_minutes", "sessions.offline_minutes",
+            "sessions.session_minutes", "sessions.participants", "cloud.records.capacity", "cloud.storage_bytes"
+        };
+
+        internal static AccessCapability[] PlanUsageCapabilities(AccessSnapshot snapshot)
+        {
+            var measurable=(snapshot?.capabilities??Array.Empty<AccessCapability>())
+                .Where(item=>item!=null && item.kind!="boolean")
+                .ToDictionary(item=>item.key,item=>item);
+            return PlanUsageOrder.Where(measurable.ContainsKey).Select(key=>measurable[key])
+                .Concat(measurable.Values.Where(item=>!PlanUsageOrder.Contains(item.key)).OrderBy(item=>item.key))
+                .ToArray();
+        }
+
+        internal static string PlanUsageValue(AccessCapability item,HostingWallet wallet)
+        {
+            if(item==null)return Localization.Get("access.unknown");
+            if(item.key=="sessions.host_minutes" && wallet!=null)
+                return AccessDuration(wallet.used_seconds)+" / "+(wallet.monthly_unlimited
+                    ? Localization.Get("access.unlimited") : AccessDuration(wallet.monthly_limit_seconds));
+            if(item.key=="sessions.offline_minutes" && wallet!=null)
+                return AccessDuration(wallet.offline_used_seconds)+" / "+(wallet.offline_limit_seconds>0
+                    ? AccessDuration(wallet.offline_limit_seconds) : Localization.Get("access.unlimited"));
+            string limit=item.unlimited?Localization.Get("access.unlimited"):
+                item.unit=="bytes"?AccessBytes(item.limit):item.limit.ToString(Localization.Culture);
+            if(!item.entitled && !item.unlimited && item.limit==0)
+                return Localization.Text("Not included","不包含");
+            if(item.key=="sessions.session_minutes" || item.key=="sessions.participants")
+                return Localization.Text("Limit ","上限 ")+limit;
+            if(!item.usage_ready)return Localization.Get("access.unknown")+" / "+limit;
+            string used=item.usage_unit=="seconds"?AccessDuration(item.used):
+                item.unit=="bytes"?AccessBytes(item.used):item.used.ToString(Localization.Culture);
+            return used+" / "+limit;
+        }
+
+        void RenderPlanUsageDetails(Transform list,HostingWallet wallet,AccessSnapshot access,Color offlineColor)
+        {
+            ClientText(ClientRow(list,"Usage details heading",44),F("Usage details","用量详情"),16,.025f,.05f,.95f,.90f,HomeText);
+            var capabilities=PlanUsageCapabilities(access);
+            if(capabilities.Length==0)
+            {
+                capabilities=new[]
+                {
+                    new AccessCapability{key="sessions.host_minutes",kind="monthly",entitled=true},
+                    new AccessCapability{key="sessions.offline_minutes",kind="monthly",entitled=true}
+                };
+            }
+            foreach(var item in capabilities)
+            {
+                var row=ClientRow(list,"Usage detail "+item.key,42);
+                string label=item.key=="sessions.host_minutes"?F("Online hosting","线上主持"):
+                    item.key=="sessions.offline_minutes"?F("Offline hosting","线下主持"):
+                    Localization.Get("access."+item.key);
+                ClientText(row,label,12,.025f,.08f,.49f,.84f,HomeMuted);
+                var color=item.key=="sessions.offline_minutes"?offlineColor:HomePrimary;
+                var value=ClientText(row,PlanUsageValue(item,wallet),12,.52f,.08f,.455f,.84f,color);
+                value.alignment=TextAlignmentOptions.MidlineRight;
+            }
         }
     }
 }

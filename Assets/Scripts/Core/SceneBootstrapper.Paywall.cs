@@ -212,10 +212,6 @@ namespace Sandplay.Core
             description.enableWordWrapping = true;
             description.alignment = TextAlignmentOptions.TopLeft;
 
-            var appId = ClientText(box, "Apple ID 6761878322", 13,
-                .07f, .38f, .86f, .07f, HomeMuted);
-            appId.alignment = TextAlignmentOptions.MidlineLeft;
-
             var store = ClientButton(box, Localization.Get("sub.open_app_store"),
                 .07f, .12f, .54f, .16f, () => Application.OpenURL(IosAppStoreUrl));
             store.GetComponent<Image>().color = HomePrimary;

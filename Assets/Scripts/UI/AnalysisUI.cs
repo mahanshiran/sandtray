@@ -581,7 +581,7 @@ namespace Sandplay.UI
             retry.interactable = true;
             retry.GetComponentInChildren<TextMeshProUGUI>().text = Localization.Current == Language.Chinese ? "重试" : "Retry";
             var rt = retry.GetComponent<RectTransform>();
-            rt.anchorMin = rt.anchorMax = new Vector2(allowanceSpent ? .39f : .5f, .2f);
+            rt.anchorMin = rt.anchorMax = new Vector2(allowanceSpent ? .36f : .5f, .2f);
             rt.anchoredPosition = Vector2.zero; rt.sizeDelta = new Vector2(180, 44);
 
             if (allowanceSpent)
@@ -598,7 +598,7 @@ namespace Sandplay.UI
                 if (vipImage) vipImage.color = new Color(.31f, .19f, .58f, 1f);
                 vip.GetComponentInChildren<TextMeshProUGUI>().text = Localization.Get("analysis.become_vip");
                 var vipRt = vip.GetComponent<RectTransform>();
-                vipRt.anchorMin = vipRt.anchorMax = new Vector2(.61f, .2f);
+                vipRt.anchorMin = vipRt.anchorMax = new Vector2(.64f, .2f);
                 vipRt.anchoredPosition = Vector2.zero; vipRt.sizeDelta = new Vector2(180, 44);
             }
         }

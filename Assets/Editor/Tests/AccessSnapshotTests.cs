@@ -110,5 +110,37 @@ namespace Sandplay.Tests
             Assert.AreEqual("1 GiB",method.Invoke(null,new object[]{1073741824L}));
             Assert.AreEqual("0 B",method.Invoke(null,new object[]{0L}));
         }
+        [Test] public void PlanUsageIncludesEveryMeasurableCapabilityInFriendlyOrder()
+        {
+            var method=typeof(SceneBootstrapper).GetMethod("PlanUsageCapabilities",
+                System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Static);
+            var snapshot=new AccessSnapshot{capabilities=new[]
+            {
+                new AccessCapability{key="pdf.export",kind="monthly"},
+                new AccessCapability{key="objects.builtin.read",kind="boolean"},
+                new AccessCapability{key="cloud.storage_bytes",kind="capacity"},
+                new AccessCapability{key="tables.capacity",kind="capacity"},
+                new AccessCapability{key="future.meter",kind="monthly"}
+            }};
+            var result=(AccessCapability[])method.Invoke(null,new object[]{snapshot});
+            CollectionAssert.AreEqual(new[]{"tables.capacity","pdf.export","cloud.storage_bytes","future.meter"},
+                System.Array.ConvertAll(result,item=>item.key));
+        }
+        [Test] public void PlanUsageShowsAuthoritativeUsedOverLimitAndHostingLedger()
+        {
+            var method=typeof(SceneBootstrapper).GetMethod("PlanUsageValue",
+                System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Static);
+            var wallet=new HostingWallet{used_seconds=300,monthly_limit_seconds=600,
+                offline_used_seconds=120,offline_limit_seconds=0};
+            var host=new AccessCapability{key="sessions.host_minutes",kind="monthly",entitled=true};
+            Assert.AreEqual(Localization.Get("access.duration",0,5,0)+" / "+Localization.Get("access.duration",0,10,0),
+                method.Invoke(null,new object[]{host,wallet}));
+            var ai=new AccessCapability{key="ai.analyze",kind="monthly",unit="analyses",entitled=true,
+                usage_ready=true,used=2,limit=1};
+            Assert.AreEqual("2 / 1",method.Invoke(null,new object[]{ai,wallet}));
+            var tables=new AccessCapability{key="tables.capacity",kind="capacity",unit="tables",entitled=true,
+                usage_ready=false,limit=5};
+            Assert.AreEqual(Localization.Get("access.unknown")+" / 5",method.Invoke(null,new object[]{tables,wallet}));
+        }
     }
 }
