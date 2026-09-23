@@ -1,0 +1,15 @@
+{
+  "catalog_id": "aac4b15a-00c2-496b-8126-f40896ee3415",
+  "creator": "Poly by Google",
+  "creator_url": "https://poly.pizza/u/Poly%20by%20Google",
+  "license": "CC BY 3.0",
+  "license_url": "https://creativecommons.org/licenses/by/3.0/",
+  "changes": "Original downloaded GLB files retained unchanged. Preview images rendered in Unity; application scales models for display.",
+  "models": [
+    {"file": "Cat", "title": "Cat", "source_url": "https://poly.pizza/m/6dM1J6f6pm9", "category": "animals", "tags": ["cat", "pet", "feline", "animal"]},
+    {"file": "Bed", "title": "Bed", "source_url": "https://poly.pizza/m/5_1VV3ExWC9", "category": "abstract", "tags": ["bed", "furniture", "bedroom", "home"]},
+    {"file": "Key", "title": "Key", "source_url": "https://poly.pizza/m/b1XMMDEWe1i", "category": "abstract", "tags": ["key", "lock", "door", "household"]},
+    {"file": "Gate", "title": "Gate", "source_url": "https://poly.pizza/m/9LXddGLPnRF", "category": "buildings", "tags": ["gate", "entrance", "fence", "garden"]},
+    {"file": "Cloud", "title": "Cloud", "source_url": "https://poly.pizza/m/44cGXp6_8WD", "category": "nature", "tags": ["cloud", "sky", "weather", "cumulus"]}
+  ]
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Chair",
+    "id": "d34932d3-6701-4b51-a117-5dd172a50adc",
+    "status": "created",
+    "sha256": "28a32b2da2c9276c67e96e06c2c968f5124e83f9780ccbb581b5f138d33d4b3a",
+    "model": "https://api.sandtraypro.com/api/catalogs/files/20d679df-2c5c-4c00-8095-9b7dc580f4bb/",
+    "thumbnail": "https://api.sandtraypro.com/api/catalogs/files/1d376bdb-da9e-4159-9ad2-c1c5bfe47589/"
+  },
+  {
+    "title": "Couch",
+    "id": "0b26bb9a-08f9-4e77-95e5-951d5f66f0db",
+    "status": "created",
+    "sha256": "b90d008fac11be41b4f82c85fd8a4d541bdacf5525fabf654798266d2d9aee91",
+    "model": "https://api.sandtraypro.com/api/catalogs/files/f2b3610c-dac0-4e8b-bbfa-aef536b9eb2a/",
+    "thumbnail": "https://api.sandtraypro.com/api/catalogs/files/139e1c15-bfca-47a3-802a-5c747cd92ff2/"
+  },
+  {
+    "title": "Fence",
+    "id": "c05af8c8-b81f-4755-8661-f178650b3e9f",
+    "status": "created",
+    "sha256": "be992f179099a0d8d4a813113de7974dbccdecf0d570063dc6a2d5703db2b1d6",
+    "model": "https://api.sandtraypro.com/api/catalogs/files/24cee76a-7199-472d-a196-a4fdc6cd4c49/",
+    "thumbnail": "https://api.sandtraypro.com/api/catalogs/files/38cc16a5-bff0-4846-9d54-d3dea1670c81/"
+  },
+  {
+    "title": "Swing set",
+    "id": "580b6c15-e8bc-4736-bca7-2ed0d3d026e4",
+    "status": "created",
+    "sha256": "0f52984c52698edd1e8806f8a53468cf7c7a9a735de9597367e087f6f3aa6599",
+    "model": "https://api.sandtraypro.com/api/catalogs/files/0dbffdeb-3f51-44b1-8ae0-35754cab9995/",
+    "thumbnail": "https://api.sandtraypro.com/api/catalogs/files/421c8cb1-7319-4f1b-9a53-396f4009a42b/"
+  },
+  {
+    "title": "Fireplace",
+    "id": "a04805e0-e5fb-473e-aca3-c32eabfa2ab3",
+    "status": "created",
+    "sha256": "73693c679149ddec40a5d3b4a4054620e71e8e4bd84cb11b5c2a388d37385895",
+    "model": "https://api.sandtraypro.com/api/catalogs/files/70ae1ea6-7927-4b39-9a11-efcab43c80bd/",
+    "thumbnail": "https://api.sandtraypro.com/api/catalogs/files/95b86aea-18fe-4530-9cf9-82763fc93c5d/"
+  }
+]

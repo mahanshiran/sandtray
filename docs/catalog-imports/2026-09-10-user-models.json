@@ -1,0 +1,244 @@
+{
+  "catalog_id": "aac4b15a-00c2-496b-8126-f40896ee3415",
+  "creator": "Poly by Google",
+  "creator_url": "https://poly.pizza/u/Poly%20by%20Google",
+  "license": "CC BY 3.0",
+  "license_url": "https://creativecommons.org/licenses/by/3.0/",
+  "changes": "Supplied GLB retained unchanged. Supplied preview retained where available; otherwise rendered in Unity. Application scales models for display.",
+  "models": [
+    {
+      "file": "Beachumbrella",
+      "title": "Beach umbrella",
+      "source_url": "https://poly.pizza/m/936irBEUnpu",
+      "sha256": "fc205c8e9ce32a5832b72b5ebbf5b8f36b40c2de4dc19b1fb8fbfa04769bf76d",
+      "category": "abstract",
+      "tags": [
+        "beach",
+        "umbrella",
+        "abstract"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Bench",
+      "title": "Bench",
+      "source_url": "https://poly.pizza/m/2EvQDFgG1H3",
+      "sha256": "bc1f1d514a2c9f44b73876f9300d6fa0ef3acbac7bbd81684e19c89cd5955dd9",
+      "category": "abstract",
+      "tags": [
+        "bench",
+        "abstract"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Bicycle",
+      "title": "Bicycle",
+      "source_url": "https://poly.pizza/m/b6USSQA731J",
+      "sha256": "1ea41b6121ca7835bc75748dafa38a39f56efe34e18f2cbc36de780367f0751f",
+      "category": "vehicles",
+      "tags": [
+        "bicycle",
+        "vehicles"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Chimney",
+      "title": "Chimney",
+      "source_url": "https://poly.pizza/m/1aFJU-Pqpn8",
+      "sha256": "23bca59ce351821e7c40933f077f29386289e72e7534700de176a8a39c9e3c65",
+      "category": "buildings",
+      "tags": [
+        "chimney",
+        "buildings"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Club",
+      "title": "Club",
+      "source_url": "https://poly.pizza/m/bnNROJXnfsP",
+      "sha256": "7185e4aed1ec3197705e070337d18029255ccc9f1b0fde66ff58edafe4e40a3c",
+      "category": "buildings",
+      "tags": [
+        "club",
+        "nightclub",
+        "building"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Crow",
+      "title": "Crow",
+      "source_url": "https://poly.pizza/m/1MIvWQ5Q3R9",
+      "sha256": "e7077e3fcd834feaf7ec7e47153b6200c239256a025f6886199d0b9189ea6790",
+      "category": "animals",
+      "tags": [
+        "crow",
+        "animals"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Crown",
+      "title": "Crown",
+      "source_url": "https://poly.pizza/m/aIW687xg5M4",
+      "sha256": "c197c3c1c2d96909c13a119b95048853e405cfc0029aa45dea28903b8b259fc8",
+      "category": "abstract",
+      "tags": [
+        "crown",
+        "abstract"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Flyinggull",
+      "title": "Flying gull",
+      "source_url": "https://poly.pizza/m/eMNhHDZakYp",
+      "sha256": "60e65ec7e29102289e0e755aae0c19361f4a577c911861e93572bfeca2564975",
+      "category": "animals",
+      "tags": [
+        "flying",
+        "gull",
+        "animals"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Giraffe",
+      "title": "Giraffe",
+      "source_url": "https://poly.pizza/m/80w8kwQU0QH",
+      "sha256": "d84775c1562e70cbf7d2c39cfb325df62c5cbc1723766fae3b8afa462aabf1ef",
+      "category": "animals",
+      "tags": [
+        "giraffe",
+        "animals"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Hen",
+      "title": "Hen",
+      "source_url": "https://poly.pizza/m/8Unya0rw9tR",
+      "sha256": "6d6f0514bc020ce6afc33ebbc47d33bc2b1308b643062ff15f60c3918ffa5585",
+      "category": "animals",
+      "tags": [
+        "hen",
+        "animals"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Laptop",
+      "title": "Laptop",
+      "source_url": "https://poly.pizza/m/fEYeMIiRNHM",
+      "sha256": "12cd7bc8a8d4aa6ee0a8d0dd11320ef05986144e43eeb3f35d64a78389fcf803",
+      "category": "abstract",
+      "tags": [
+        "laptop",
+        "abstract"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Moon",
+      "title": "Moon",
+      "source_url": "https://poly.pizza/m/9OPocAqXM0u",
+      "sha256": "cb962e31e1643eac69e8ff643f92c8d69309778421f3b6afbc6622f9ebbae3b5",
+      "category": "nature",
+      "tags": [
+        "moon",
+        "nature"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Oilpump",
+      "title": "Oil pump",
+      "source_url": "https://poly.pizza/m/fZykGFywa5D",
+      "sha256": "2e10cf3d7b6d93b7b04017fe598cc262dacb40ed6cbc2921316e84508154c6a9",
+      "category": "abstract",
+      "tags": [
+        "oil",
+        "pump",
+        "abstract"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Sandcastle",
+      "title": "Sand castle",
+      "source_url": "https://poly.pizza/m/5iuHHfVoaza",
+      "sha256": "5ca49fd2646e26748eb775d4613011584464628e5d263f87d9db1514e1e91fd7",
+      "category": "buildings",
+      "tags": [
+        "sand",
+        "castle",
+        "buildings"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Sparrow",
+      "title": "Sparrow",
+      "source_url": "https://poly.pizza/m/3rTjKefT184",
+      "sha256": "c37ab6840d187d67bd14c7529ce5bb39a10139a47388049cdc086de971608a47",
+      "category": "animals",
+      "tags": [
+        "sparrow",
+        "animals"
+      ],
+      "thumbnail_ext": ".png"
+    },
+    {
+      "file": "Star",
+      "title": "Star",
+      "source_url": "https://poly.pizza/m/9NXf-SDxJny",
+      "sha256": "44dd651406c904a47945eb66472c48436d925f547e92d6cfd2e6937cbde7170a",
+      "category": "nature",
+      "tags": [
+        "star",
+        "nature"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Sun",
+      "title": "Sun",
+      "source_url": "https://poly.pizza/m/77wHkzwlpOq",
+      "sha256": "5ccfe3b7c09dcd510eecd37acdc75a1fa78575d12ca6aa0ce2e89ee8d386bc10",
+      "category": "nature",
+      "tags": [
+        "sun",
+        "nature"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Well",
+      "title": "Well",
+      "source_url": "https://poly.pizza/m/3SVPY3nu1G9",
+      "sha256": "be0fe390d6521b9e009df5ffba195f8db56257f0ec63160b03c1b234ed4c3fe7",
+      "category": "buildings",
+      "tags": [
+        "well",
+        "buildings"
+      ],
+      "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "Tent",
+      "title": "Tent",
+      "source_url": "https://poly.pizza/m/9Ob6OO8HMjX",
+      "sha256": "caac1b551bea389c17b8e8d901de8a058807d232b3ba09ead7aacdf41aba9c3f",
+      "changes": "Converted supplied OBJ/MTL to GLB, embedded texture, corrected diffuse tint and converted centimetres to metres.",
+      "category": "buildings",
+      "tags": [
+        "tent",
+        "buildings"
+      ],
+      "thumbnail_ext": ".jpg"
+    }
+  ]
+}

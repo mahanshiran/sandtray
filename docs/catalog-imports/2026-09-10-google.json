@@ -1,0 +1,15 @@
+{
+  "catalog_id": "aac4b15a-00c2-496b-8126-f40896ee3415",
+  "creator": "Poly by Google",
+  "creator_url": "https://poly.pizza/u/Poly%20by%20Google",
+  "license": "CC BY 3.0",
+  "license_url": "https://creativecommons.org/licenses/by/3.0/",
+  "changes": "Original downloaded GLB files retained unchanged. Preview images rendered in Unity; application scales models for display.",
+  "models": [
+    {"file": "Chair", "title": "Chair", "source_url": "https://poly.pizza/m/49lEx3gLfn9", "category": "abstract", "tags": ["chair", "furniture", "home", "seat"]},
+    {"file": "Couch", "title": "Couch", "source_url": "https://poly.pizza/m/4QKlmmd0v2b", "category": "abstract", "tags": ["couch", "sofa", "furniture", "home"]},
+    {"file": "Fence", "title": "Fence", "source_url": "https://poly.pizza/m/8r5ZAEhrppD", "category": "buildings", "tags": ["fence", "garden", "wood", "boundary"]},
+    {"file": "SwingSet", "title": "Swing set", "source_url": "https://poly.pizza/m/e-IJdcqZH4p", "category": "abstract", "tags": ["swing", "playground", "park", "outdoors"]},
+    {"file": "Fireplace", "title": "Fireplace", "source_url": "https://poly.pizza/m/fBHV3AYiitX", "category": "buildings", "tags": ["fireplace", "home", "hearth", "fire"]}
+  ]
+}

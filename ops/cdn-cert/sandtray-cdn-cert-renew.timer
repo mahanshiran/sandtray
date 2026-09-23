@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Sandtray CDN TLS certificate renewal check
+
+[Timer]
+OnCalendar=*-*-* 03:17:00
+RandomizedDelaySec=45m
+Persistent=true
+Unit=sandtray-cdn-cert-renew.service
+
+[Install]
+WantedBy=timers.target

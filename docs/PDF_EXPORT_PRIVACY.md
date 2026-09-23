@@ -1,0 +1,9 @@
+# PDF export privacy
+
+Saved-report PDF export now shows the exact copy to be uploaded. Structured practitioner notes and AI reflection are excluded by default, with separate explicit inclusion controls. AI-only reports require AI inclusion before export becomes available. Unstructured legacy text cannot be automatically separated; the existing warning and literal preview require the user to review it.
+
+Confirmation persists the exact export text, source fingerprint and review timestamp independently of friend-sharing approval. Text edits invalidate this approval. Stale content, a changed account, cancellation or an empty copy cannot confirm export. Persisted report fingerprints are checked across asynchronous export callbacks.
+
+The PDF service receives only the selected text. Export never reuses the report's older CloudId, which may represent a full private copy, and never attaches a reduced export's cloud ID as the full report ID. Each export therefore creates a fresh cloud analysis record; prior uploaded records are not deleted. The screen explains that export uploads the selected copy to the PDF service. This change covers saved-report exports; live AI results retain their separate explicit review flow. Local device storage ownership/isolation remains separate work.
+
+Automated validation: Unity compilation and 50 checks passed, including four PDF privacy tests covering default exclusion, explicit inclusion, literal read-only preview, cancellation/account changes, exact persisted approval, stale edits and AI-only reports. Existing sharing, history and board-storage regressions also passed. English/Chinese phone and desktop previews were generated for visual inspection. Live service PDF generation, native share dialogs and device keyboard/accessibility checks remain release validation; no production deployment or app build was performed.

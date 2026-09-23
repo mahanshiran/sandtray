@@ -1,0 +1,18 @@
+{
+  "catalog_id": "aac4b15a-00c2-496b-8126-f40896ee3415",
+  "creator": "Quaternius",
+  "creator_url": "https://poly.pizza/u/Quaternius",
+  "changes": "User-supplied GLBs converted to static meshes by baking a standing/neutral idle pose; all animation clips, skeletons and skin weights removed. Geometry and materials retained; previews rendered in Unity. Application scales models for display. Originals retained unchanged.",
+  "models": [
+    {"file":"Man in Long Sleeves","title":"Man in Long Sleeves","original_title":"Man in Long Sleeves","source_url":"https://poly.pizza/m/DLptRuewTn","category":"people","tags":["people","man","adult","static"],"license":"CC0 1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/"},
+    {"file":"Man in Suit","title":"Man in Suit","original_title":"Man in Suit","source_url":"https://poly.pizza/m/mQnGoME1ez","category":"people","tags":["people","man","suit","static"],"license":"CC0 1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/"},
+    {"file":"Man Casual 2","title":"Man Casual 2","original_title":"Man","source_url":"https://poly.pizza/m/fjHyMd5Wxw","category":"people","tags":["people","man","casual","static"],"license":"CC0 1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/"},
+    {"file":"Man Casual 1","title":"Man Casual 1","original_title":"Man","source_url":"https://poly.pizza/m/HMnuH5geEG","category":"people","tags":["people","man","casual","static"],"license":"CC0 1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/"},
+    {"file":"Zombie","title":"Zombie","original_title":"Zombie","source_url":"https://poly.pizza/m/VlXjG0N8Eg","category":"people","tags":["people","zombie","fantasy","static"],"license":"CC0 1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/"},
+    {"file":"SWAT","title":"SWAT","original_title":"SWAT","source_url":"https://poly.pizza/m/Btfn3G5Xv4","category":"people","tags":["people","swat","uniform","static"],"license":"CC0 1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/"},
+    {"file":"King","title":"King","original_title":"King","source_url":"https://poly.pizza/m/I1gTjmuK2m","category":"people","tags":["people","king","royalty","static"],"license":"CC0 1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/"},
+    {"file":"Witch","title":"Witch","original_title":"Witch","source_url":"https://poly.pizza/m/QBEOV9ZUT8","category":"people","tags":["people","witch","fantasy","static"],"license":"CC BY 3.0","license_url":"https://creativecommons.org/licenses/by/3.0/"},
+    {"file":"Woman in Dress","title":"Woman in Dress","original_title":"Animated Woman","source_url":"https://poly.pizza/m/nIItLV9nxS","category":"people","tags":["people","woman","dress","static"],"license":"CC0 1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/"},
+    {"file":"Woman in Long Sleeves","title":"Woman in Long Sleeves","original_title":"Animated Woman","source_url":"https://poly.pizza/m/qJ2gsTUBHL","category":"people","tags":["people","woman","casual","static"],"license":"CC0 1.0","license_url":"https://creativecommons.org/publicdomain/zero/1.0/"}
+  ]
+}
