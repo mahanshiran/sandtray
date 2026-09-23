@@ -139,6 +139,12 @@ namespace Sandplay.Core
         // Short, account-bound in-memory cache for display. Actions always request fresh policy.
         public void FetchAccessSnapshot(Action<AccessSnapshot> success, Action<string> failure, bool force = true)
         {
+            FetchAccessSnapshotAttempt(success, failure, force, 0);
+        }
+
+        private void FetchAccessSnapshotAttempt(Action<AccessSnapshot> success,
+            Action<string> failure, bool force, int refreshAttempt)
+        {
             if (!IsLoggedIn || UserId <= 0) { failure?.Invoke("Sign in to view access."); return; }
             if (!force && CurrentAccess != null) { success?.Invoke(CurrentAccess); return; }
             int user = UserId, generation = _accessGeneration; string token = AccessToken;
@@ -147,7 +153,21 @@ namespace Sandplay.Core
             StartCoroutine(Get(BaseUrl + "/auth/access/me/", token, json =>
             {
                 if (!Current()) return;
-                if (generation != _accessGeneration) { failure?.Invoke("Access changed. Please retry."); return; }
+                if (generation != _accessGeneration)
+                {
+                    // A successful background mutation invalidates the display cache.
+                    // That is not an entitlement denial. Prefer a newer snapshot that
+                    // another request already loaded, otherwise silently refresh.
+                    var latest = CurrentAccess;
+                    if (latest != null) { success?.Invoke(latest); return; }
+                    if (refreshAttempt < 3)
+                    {
+                        FetchAccessSnapshotAttempt(success, failure, true, refreshAttempt + 1);
+                        return;
+                    }
+                    failure?.Invoke("Access is still updating. Please retry.");
+                    return;
+                }
                 if (AccessSnapshot.TryParse(json, user, out var snapshot))
                 {
                     var ttl = Math.Min(30, (DateTimeOffset.Parse(snapshot.valid_until) - DateTimeOffset.Parse(snapshot.server_time)).TotalSeconds);
