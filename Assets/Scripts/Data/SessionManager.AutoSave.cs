@@ -19,6 +19,10 @@ namespace Sandplay.Data
         public bool HasOpenBoard => _objectPlacer != null && _objectPlacer.gameObject.activeInHierarchy && !string.IsNullOrWhiteSpace(CurrentBoardName);
         private bool _boardReady;
         private float _nextAutoSave;
+        public float SecondsUntilNextAutoSave => AutoSaveActive
+            ? Mathf.Max(0, _nextAutoSave - Time.realtimeSinceStartup)
+            : -1;
+        public DateTimeOffset? LastLocalSaveAt { get; private set; }
         private string _lastSavedContent;
         private bool? _lastRemoteSaveMode;
         public string CurrentSaveStatusKey { get; private set; } = "save.inactive";
@@ -33,6 +37,7 @@ namespace Sandplay.Data
             _boardReady = false;
             LastLoadRecovered = false;
             _lastSavedContent = null;
+            LastLocalSaveAt = null;
             CurrentBoardName = name;
             CurrentClientId = clientId;
             CurrentOrganizationId = organizationId;
@@ -129,6 +134,13 @@ namespace Sandplay.Data
                 HeightmapBase64 = data.HeightmapBase64, SplatmapBase64 = data.SplatmapBase64,
                 PlacedObjects = data.PlacedObjects
             })).ToString();
+        }
+
+        private void RecordLastLocalSave(string modifiedAt)
+        {
+            LastLocalSaveAt = DateTimeOffset.TryParse(modifiedAt, out var saved)
+                ? saved.ToUniversalTime()
+                : DateTimeOffset.UtcNow;
         }
 
         private void OnApplicationPause(bool paused) { if (paused && CanSaveActiveBoard) TrySaveCurrentBoard(); }

@@ -144,6 +144,7 @@ namespace Sandplay.Data
             WriteTableRecord(filePath, json);
             _boardReady = true;
             _lastSavedContent = SceneSignature(data);
+            RecordLastLocalSave(data.ModifiedAt);
             RefreshBoardPersistenceStatus(data);
 
             EventBus.Publish(new SessionSavedEvent { SessionName = sessionName });
@@ -172,6 +173,7 @@ namespace Sandplay.Data
                 }
 
                 ApplySession(data);
+                RecordLastLocalSave(data.ModifiedAt);
                 _boardReady = _sandMesh != null && _objectPlacer != null;
                 LastLoadRecovered = recovered;
                 RefreshBoardPersistenceStatus(data);

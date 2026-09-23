@@ -26,6 +26,7 @@ namespace Sandplay.Data
                 LocalRecordFile.Write(path, JsonUtility.ToJson(data, true), createOnly: true);
                 _boardReady = true;
                 _lastSavedContent = SceneSignature(data);
+                RecordLastLocalSave(data.ModifiedAt);
                 RefreshBoardPersistenceStatus(data);
                 _nextBoardQuotaScan = 0;
                 }

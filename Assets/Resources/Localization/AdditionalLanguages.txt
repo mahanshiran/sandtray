@@ -146,6 +146,13 @@ status.selected_many|{0} objetos seleccionados · Arrastra uno para mover el gru
 selection.count|{0} seleccionados|{0} selecionados|{0} sélectionnés|{0} ausgewählt|{0}個選択中
 selection.hint|Arrastra sobre arena vacía para seleccionar · Mayús+clic para añadir o quitar|Arraste na areia vazia para selecionar · Shift+clique para adicionar ou remover|Glissez sur le sable vide pour sélectionner · Maj+clic pour ajouter ou retirer|Auf leerem Sand ziehen zum Auswählen · Umschalt+Klick zum Hinzufügen/Entfernen|何もない砂の上をドラッグして範囲選択 · Shift+クリックで追加・解除
 status.saved|Guardado: {0}|Salvo: {0}|Enregistré : {0}|Gespeichert: {0}|保存しました：{0}
+status.autosaved_now|Guardado automáticamente ahora|Salvo automaticamente agora|Enregistrement automatique à l’instant|Gerade automatisch gespeichert|たった今、自動保存しました
+status.autosaved_ago|Guardado automáticamente hace {0}|Salvo automaticamente há {0}|Enregistré automatiquement il y a {0}|Vor {0} automatisch gespeichert|{0}前に自動保存しました
+status.will_save_in|Se guardará en {0}|Será salvo em {0}|Enregistrement dans {0}|Speicherung in {0}|{0}後に保存します
+status.one_second|{0} segundo|{0} segundo|{0} seconde|{0} Sekunde|{0}秒
+status.seconds|{0} segundos|{0} segundos|{0} secondes|{0} Sekunden|{0}秒
+status.one_minute|{0} minuto|{0} minuto|{0} minute|{0} Minute|{0}分
+status.minutes|{0} minutos|{0} minutos|{0} minutes|{0} Minuten|{0}分
 status.loaded|Cargado: {0}|Carregado: {0}|Chargé : {0}|Geladen: {0}|読み込みました：{0}
 status.object|Objeto|Objeto|Objet|Objekt|オブジェクト
 action.duplicate|Duplicar|Duplicar|Dupliquer|Duplizieren|複製

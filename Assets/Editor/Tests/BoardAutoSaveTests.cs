@@ -421,6 +421,22 @@ namespace Sandplay.Tests
                 StringAssert.StartsWith(Localization.Get("save.local"), go.GetComponentInChildren<TMPro.TextMeshProUGUI>().text);
                 StringAssert.Contains(Localization.Get("backup.unknown"), go.GetComponentInChildren<TMPro.TextMeshProUGUI>().text);
                 Assert.IsFalse(go.GetComponent<UnityEngine.UI.Image>().raycastTarget);
+                Invoke("PublishSaveStatus", "save.saved");
+                Refresh();
+                typeof(Sandplay.UI.BoardSaveIndicator).GetField("hideAt", Private).SetValue(indicator, -1f);
+                Refresh();
+                Assert.IsFalse(go.GetComponentInChildren<TMPro.TextMeshProUGUI>().enabled,
+                    "An unchanged autosave status must hide after its timeout.");
+                typeof(SessionManager).GetProperty("CurrentBoardQuotaKey").SetValue(manager, "quota.full");
+                Refresh();
+                Assert.IsTrue(go.GetComponentInChildren<TMPro.TextMeshProUGUI>().enabled);
+                Assert.IsTrue(go.GetComponent<UnityEngine.UI.Image>().raycastTarget);
+                typeof(Sandplay.UI.BoardSaveIndicator).GetField("hideAt", Private).SetValue(indicator, -1f);
+                Refresh();
+                Assert.IsFalse(go.GetComponentInChildren<TMPro.TextMeshProUGUI>().enabled);
+                Assert.IsFalse(go.GetComponent<UnityEngine.UI.Image>().enabled);
+                Assert.IsFalse(go.GetComponent<UnityEngine.UI.Image>().raycastTarget);
+                Assert.IsFalse(go.GetComponent<UnityEngine.UI.Button>().interactable);
             }
             finally { UnityEngine.Object.DestroyImmediate(canvas); }
         }

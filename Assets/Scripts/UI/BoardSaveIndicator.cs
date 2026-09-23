@@ -1,4 +1,5 @@
 using TMPro;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using Sandplay.Core;
@@ -12,7 +13,9 @@ namespace Sandplay.UI
         private TextMeshProUGUI label;
         private Image background;
         private string messageKey;
+        private string lastStatus;
         private float hideAt;
+        private const float DisplaySeconds = 5f;
         private static Sprite rounded;
         private Button retry;
 
@@ -21,19 +24,26 @@ namespace Sandplay.UI
         {
             EventBus.Unsubscribe<BoardSaveStatusEvent>(OnStatus);
             messageKey = null;
+            lastStatus = null;
             SetVisible(false);
         }
 
         private void OnStatus(BoardSaveStatusEvent evt)
         {
+            if (messageKey != evt.LocalizationKey)
+                hideAt = Time.unscaledTime + DisplaySeconds;
             messageKey = evt.LocalizationKey;
-            hideAt = Time.unscaledTime + 3f;
         }
 
         private void SetVisible(bool visible)
         {
             if (label != null) label.enabled = visible;
             if (background != null) background.enabled = visible;
+            if (!visible)
+            {
+                if (background != null) background.raycastTarget = false;
+                if (retry != null) retry.interactable = false;
+            }
         }
 
         private static Sprite RoundedBackground()
@@ -81,10 +91,19 @@ namespace Sandplay.UI
             if (label == null) return;
             var manager = SessionManager.Instance;
             bool local = manager != null && manager.AutoSaveActive && manager.CurrentSaveStatusKey != "save.host_managed";
-            bool visible = local || (!string.IsNullOrEmpty(messageKey) && messageKey != "save.inactive" && Time.unscaledTime < hideAt);
+            string key = local ? manager.CurrentSaveStatusKey : messageKey;
+            string status = local
+                ? manager.CurrentBoardName + "|" + key + "|" + manager.CurrentBoardQuotaKey + "|" + manager.CurrentBoardBackupKey
+                : key;
+            if (status != lastStatus)
+            {
+                lastStatus = status;
+                hideAt = Time.unscaledTime + DisplaySeconds;
+            }
+            bool visible = !string.IsNullOrEmpty(key) && key != "save.inactive" &&
+                (Time.unscaledTime < hideAt || (local && key == "save.failed"));
             SetVisible(visible);
             if (!visible) return;
-            string key = local ? manager.CurrentSaveStatusKey : messageKey;
             label.text = Localization.Get(key);
             if (local)
             {
@@ -107,6 +126,89 @@ namespace Sandplay.UI
             bool online = NetworkBootstrapper.Instance != null && NetworkBootstrapper.Instance.IsOnline;
             rect.anchoredPosition = new Vector2(84, online ? 82 : 30);
             rect.sizeDelta = new Vector2(width, height);
+        }
+    }
+
+    /// <summary>Shows the last local save or the approaching autosave deadline.</summary>
+    public sealed class AutoSaveStatusLabel : MonoBehaviour
+    {
+        private TextMeshProUGUI label;
+        private bool showTiming;
+        private float refreshAt;
+
+        public void Initialize(TextMeshProUGUI text)
+        {
+            label = text;
+            label.text = Localization.Get("status.hint");
+        }
+
+        private void OnEnable()
+        {
+            EventBus.Subscribe<SessionSavedEvent>(OnSaved);
+            EventBus.Subscribe<SessionLoadedEvent>(OnLoaded);
+            EventBus.Subscribe<ObjectSelectedEvent>(OnSelected);
+        }
+
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<SessionSavedEvent>(OnSaved);
+            EventBus.Unsubscribe<SessionLoadedEvent>(OnLoaded);
+            EventBus.Unsubscribe<ObjectSelectedEvent>(OnSelected);
+        }
+
+        private void OnSaved(SessionSavedEvent _) { showTiming = true; refreshAt = 0; }
+        private void OnLoaded(SessionLoadedEvent _) { showTiming = true; refreshAt = 0; }
+
+        private void OnSelected(ObjectSelectedEvent evt)
+        {
+            showTiming = false;
+            if (label == null) return;
+            var selected = FindAnyObjectByType<Sandplay.Objects.ObjectPlacer>();
+            label.text = selected != null && selected.Selection.Count > 1
+                ? Localization.Get("status.selected_many", selected.Selection.Count)
+                : evt.PlacedObject != null
+                    ? Localization.Get("status.selected", evt.PlacedObject.ObjectData?.DisplayName ??
+                        evt.PlacedObject.NetworkItem?.display_name ?? Localization.Get("status.object"))
+                    : Localization.Get("selection.hint");
+        }
+
+        private void LateUpdate()
+        {
+            if (!showTiming || label == null || Time.unscaledTime < refreshAt) return;
+            refreshAt = Time.unscaledTime + .25f;
+            var manager = SessionManager.Instance;
+            if (manager == null) return;
+            if (manager.CurrentSaveStatusKey == "save.host_managed")
+            {
+                label.text = Localization.Get("save.host_managed");
+                return;
+            }
+
+            float remaining = manager.SecondsUntilNextAutoSave;
+            if (remaining >= 0 && (remaining <= 10 || !manager.LastLocalSaveAt.HasValue))
+            {
+                label.text = Localization.Get("status.will_save_in", Duration(remaining, true));
+                return;
+            }
+
+            if (manager.LastLocalSaveAt.HasValue)
+            {
+                double elapsed = Math.Max(0, (DateTimeOffset.UtcNow - manager.LastLocalSaveAt.Value).TotalSeconds);
+                label.text = elapsed < 1
+                    ? Localization.Get("status.autosaved_now")
+                    : Localization.Get("status.autosaved_ago", Duration(elapsed, false));
+            }
+        }
+
+        private static string Duration(double seconds, bool future)
+        {
+            if (seconds < 60)
+            {
+                int value = Math.Max(1, future ? (int)Math.Ceiling(seconds) : (int)Math.Floor(seconds));
+                return Localization.Get(value == 1 ? "status.one_second" : "status.seconds", value);
+            }
+            int minutes = Math.Max(1, future ? (int)Math.Ceiling(seconds / 60) : (int)Math.Floor(seconds / 60));
+            return Localization.Get(minutes == 1 ? "status.one_minute" : "status.minutes", minutes);
         }
     }
 }

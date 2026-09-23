@@ -2099,28 +2099,8 @@ namespace Sandplay.Core
 
             var statusText = CreateText(statusBar.transform, "StatusText", Localization.Get("status.hint"), 12,
                 new Vector2(10, 0), new Vector2(800, 25));
-            TrackLocalized(statusText.GetComponent<TextMeshProUGUI>(), "status.hint");
-
-            EventBus.Subscribe<ObjectSelectedEvent>(evt =>
-            {
-                var txt = statusText.GetComponent<TextMeshProUGUI>();
-                var selected = FindAnyObjectByType<ObjectPlacer>();
-                txt.text = selected != null && selected.Selection.Count > 1
-                    ? Localization.Get("status.selected_many", selected.Selection.Count)
-                    : evt.PlacedObject != null
-                        ? Localization.Get("status.selected", evt.PlacedObject.ObjectData?.DisplayName ?? evt.PlacedObject.NetworkItem?.display_name ?? Localization.Get("status.object"))
-                        : Localization.Get("selection.hint");
-            });
-
-            EventBus.Subscribe<SessionSavedEvent>(evt =>
-            {
-                statusText.GetComponent<TextMeshProUGUI>().text = Localization.Get("status.saved", evt.SessionName);
-            });
-
-            EventBus.Subscribe<SessionLoadedEvent>(evt =>
-            {
-                statusText.GetComponent<TextMeshProUGUI>().text = Localization.Get("status.loaded", evt.SessionName);
-            });
+            statusText.AddComponent<AutoSaveStatusLabel>()
+                .Initialize(statusText.GetComponent<TextMeshProUGUI>());
 
             var saveIndicator = new GameObject("BoardSaveIndicator", typeof(RectTransform));
             saveIndicator.transform.SetParent(_sandboxUI.transform, false);

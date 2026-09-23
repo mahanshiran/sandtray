@@ -88,6 +88,13 @@ status.selected_many|Vybrané objekty: {0} · Přetažením libovolného vybran�
 selection.count|Vybráno: {0}
 selection.hint|Tažením po prázdném písku vyberete oblast · Shift + kliknutí přidá nebo odebere objekt
 status.saved|Uloženo: {0}
+status.autosaved_now|Právě automaticky uloženo
+status.autosaved_ago|Automaticky uloženo před {0}
+status.will_save_in|Uloží se za {0}
+status.one_second|{0} sekundu
+status.seconds|{0} sekund
+status.one_minute|{0} minutu
+status.minutes|{0} minut
 save.title|Ukládání pískoviště
 social.google|Přihlásit se přes Google
 social.apple|Přihlásit se přes Apple
