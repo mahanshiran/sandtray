@@ -29,6 +29,10 @@ namespace Sandplay.UI
         private GameObject _nameLabel, _emailLabel, _passwordLabel, _divider;
         private Button _passwordToggle;
         private bool _passwordVisible;
+        private GameObject _marketingConsentRow;
+        private Image _marketingConsentBox;
+        private TextMeshProUGUI _marketingConsentMark;
+        private bool _marketingEmailConsent;
         private bool _googleEnabled, _appleEnabled, _socialBusy;
         private bool _emailBusy;
         private string _pendingRegistrationEmail, _pendingRegistrationPassword;
@@ -160,6 +164,34 @@ namespace Sandplay.UI
             _passwordToggle.GetComponentInChildren<TextMeshProUGUI>().fontSize = 18;
             _passwordToggle.onClick.AddListener(TogglePasswordVisibility);
 
+            _marketingConsentRow = MakePanel("MarketingEmailConsent", card.transform,
+                Vector2.zero, Vector2.zero, Color.clear);
+            var consentButton = _marketingConsentRow.AddComponent<Button>();
+            consentButton.targetGraphic = _marketingConsentRow.GetComponent<Image>();
+            consentButton.onClick.AddListener(() =>
+            {
+                _marketingEmailConsent = !_marketingEmailConsent;
+                RefreshMarketingConsentVisual();
+            });
+            var consentBox = MakePanel("Checkbox", _marketingConsentRow.transform,
+                new Vector2(0f, .5f), new Vector2(0f, .5f), Field);
+            var consentBoxRt = consentBox.GetComponent<RectTransform>();
+            consentBoxRt.pivot = new Vector2(0f, .5f);
+            consentBoxRt.anchoredPosition = Vector2.zero;
+            consentBoxRt.sizeDelta = new Vector2(28f, 28f);
+            _marketingConsentBox = consentBox.GetComponent<Image>();
+            AddRoundedBorder(consentBox, Border);
+            _marketingConsentMark = MakeText("Checkmark", consentBox.transform, font, "✓", 18,
+                FontStyles.Bold, Color.white, Vector2.zero, Vector2.one);
+            _marketingConsentMark.raycastTarget = false;
+            var consentText = MakeText("ConsentText", _marketingConsentRow.transform, font,
+                AuthText("login.marketing_consent"), 12, FontStyles.Normal, Ink,
+                new Vector2(.075f, 0f), Vector2.one);
+            consentText.alignment = TextAlignmentOptions.MidlineLeft;
+            consentText.enableWordWrapping = true;
+            consentText.raycastTarget = false;
+            RefreshMarketingConsentVisual();
+
             var statusGo = new GameObject("Status");
             statusGo.transform.SetParent(card.transform, false);
             _statusText = statusGo.AddComponent<TextMeshProUGUI>();
@@ -287,9 +319,10 @@ namespace Sandplay.UI
         private void ApplyAuthModeLayout()
         {
             bool register = _isRegisterMode;
-            _authCard.sizeDelta = new Vector2(556f, register ? 720f : 700f);
+            _authCard.sizeDelta = new Vector2(556f, register ? 820f : 700f);
             _nameRow.SetActive(register);
             _nameLabel.SetActive(register);
+            _marketingConsentRow.SetActive(register);
 
             _headingText.text = AuthText(register ? "login.create_heading" : "login.welcome_back");
             _headingText.gameObject.SetActive(register);
@@ -314,13 +347,14 @@ namespace Sandplay.UI
                 SetRect(_emailRowRt, new Vector2(.07f,.58f), new Vector2(.93f,.65f));
                 SetRect(_passwordLabel.GetComponent<RectTransform>(), new Vector2(.07f,.51f), new Vector2(.93f,.545f));
                 SetRect(_passRowRt, new Vector2(.07f,.43f), new Vector2(.93f,.50f));
-                SetRect(_statusText.rectTransform, new Vector2(.07f,.39f), new Vector2(.93f,.42f));
-                SetRect(_submitBtn.GetComponent<RectTransform>(), new Vector2(.07f,.30f), new Vector2(.93f,.37f));
-                SetRect(_divider.GetComponent<RectTransform>(), new Vector2(.07f,.255f), new Vector2(.93f,.28f));
-                SetRect(_googleBtn.GetComponent<RectTransform>(), new Vector2(.07f,.17f), new Vector2(.93f,.235f));
-                SetRect(_appleBtn.GetComponent<RectTransform>(), new Vector2(.07f,.09f), new Vector2(.93f,.155f));
-                SetRect(_footerPrompt.rectTransform, new Vector2(.17f,.03f), new Vector2(.58f,.07f));
-                SetRect(_toggleModeBtn.GetComponent<RectTransform>(), new Vector2(.58f,.03f), new Vector2(.83f,.07f));
+                SetRect(_marketingConsentRow.GetComponent<RectTransform>(), new Vector2(.07f,.365f), new Vector2(.93f,.425f));
+                SetRect(_statusText.rectTransform, new Vector2(.07f,.335f), new Vector2(.93f,.36f));
+                SetRect(_submitBtn.GetComponent<RectTransform>(), new Vector2(.07f,.265f), new Vector2(.93f,.325f));
+                SetRect(_divider.GetComponent<RectTransform>(), new Vector2(.07f,.225f), new Vector2(.93f,.245f));
+                SetRect(_googleBtn.GetComponent<RectTransform>(), new Vector2(.07f,.155f), new Vector2(.93f,.215f));
+                SetRect(_appleBtn.GetComponent<RectTransform>(), new Vector2(.07f,.085f), new Vector2(.93f,.145f));
+                SetRect(_footerPrompt.rectTransform, new Vector2(.17f,.025f), new Vector2(.58f,.065f));
+                SetRect(_toggleModeBtn.GetComponent<RectTransform>(), new Vector2(.58f,.025f), new Vector2(.83f,.065f));
             }
             else
             {
@@ -345,6 +379,14 @@ namespace Sandplay.UI
                 ? TMP_InputField.InputType.Standard
                 : TMP_InputField.InputType.Password;
             _passwordField.ForceLabelUpdate();
+        }
+
+        private void RefreshMarketingConsentVisual()
+        {
+            if (_marketingConsentBox == null || _marketingConsentMark == null) return;
+            var color = _marketingEmailConsent ? Primary : Field;
+            ApplyRoundedImage(_marketingConsentBox, color);
+            _marketingConsentMark.gameObject.SetActive(_marketingEmailConsent);
         }
 
         private void LateUpdate()
@@ -392,7 +434,7 @@ namespace Sandplay.UI
                 SetStatus(AuthText("login.registering"), false);
                 _pendingRegistrationEmail = email;
                 _pendingRegistrationPassword = password;
-                BackendClient.Instance.Register(email, name, password, "normal",
+                BackendClient.Instance.Register(email, name, password, "normal", _marketingEmailConsent,
                     OnRegistrationCreated, error =>
                     {
                         ClearPendingRegistrationCredentials();
@@ -470,6 +512,9 @@ namespace Sandplay.UI
                     case "login.email_placeholder": text = "you@example.com"; break;
                     case "login.password_placeholder": text = Localization.Text("Enter your password", "输入密码"); break;
                     case "login.name_placeholder": text = Localization.Text("Enter your full name", "输入您的姓名"); break;
+                    case "login.marketing_consent": text = Localization.Text(
+                        "Email me Sandtray product updates, helpful tips, and occasional offers. Optional — unsubscribe anytime in Edit profile.",
+                        "向我发送 Sandtray 产品更新、实用提示和不定期优惠。此项可选，可随时在“编辑个人资料”中取消订阅。"); break;
                     case "login.or": text = Localization.Text("or", "或"); break;
                     case "login.have_account": text = Localization.Text("Already have an account?", "已有账户？"); break;
                     case "login.create_account": text = Localization.Text("Create account", "创建账户"); break;

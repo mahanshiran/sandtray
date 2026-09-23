@@ -1586,6 +1586,33 @@ namespace Sandplay.Core
                 Field(F("Emergency contact — name, relationship, phone", "紧急联系人 — 姓名、关系、电话"),data.emergency_contact,300,v=>data.emergency_contact=v,true);
                 Field(F("What would you like support with?", "希望获得哪些支持？"),data.goals,2000,v=>data.goals=v,true);
                 Field(F("Accessibility / communication preferences", "无障碍 / 沟通偏好"),data.accessibility,1000,v=>data.accessibility=v,true);
+                var consentRow = ClientRow(content,"MarketingEmailConsent",104);
+                var consentTitle = ClientText(consentRow,F("Marketing emails", "营销邮件"),13,.025f,.60f,.69f,.27f,HomeText);
+                consentTitle.fontStyle = FontStyles.Bold;
+                var consentDescription = ClientText(consentRow,
+                    F("Product updates, helpful tips, and occasional offers. Optional; you can withdraw consent anytime.",
+                      "产品更新、实用提示和不定期优惠。此项可选，您可以随时撤回同意。"),
+                    10,.025f,.08f,.69f,.48f,HomeMuted);
+                consentDescription.alignment = TextAlignmentOptions.TopLeft;
+                consentDescription.enableWordWrapping = true;
+                Button consentToggle = null;
+                void RefreshConsentToggle()
+                {
+                    if (consentToggle == null) return;
+                    consentToggle.GetComponent<Image>().color = data.marketing_email_consent ? HomePrimary : HomeChromeButton;
+                    var label = consentToggle.GetComponentInChildren<TextMeshProUGUI>();
+                    label.text = data.marketing_email_consent ? F("On", "已开启") : F("Off", "已关闭");
+                    label.color = data.marketing_email_consent ? Color.white : HomeText;
+                }
+                consentToggle = ClientButton(consentRow,"",.74f,.25f,.23f,.50f,()=>
+                {
+                    if (saving) return;
+                    data.marketing_email_consent = !data.marketing_email_consent;
+                    RefreshConsentToggle();
+                });
+                consentToggle.gameObject.name = "MarketingEmailConsentToggle";
+                ApplyHomeRoundedCorners(consentToggle.GetComponent<Image>(),10f);
+                RefreshConsentToggle();
             }, error => { if (Current()) status.text = error; });
         }
 

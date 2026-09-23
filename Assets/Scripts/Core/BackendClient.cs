@@ -345,11 +345,13 @@ namespace Sandplay.Core
             }, onError));
         }
 
-        public void Register(string email, string name, string password, string userType,
+        public void Register(string email, string name, string password, string userType, bool marketingEmailConsent,
             Action<string> onSuccess, Action<string> onError)
         {
             var body = $"{{\"email\":\"{Escape(email)}\",\"name\":\"{Escape(name)}\"," +
-                       $"\"password\":\"{Escape(password)}\",\"user_type\":\"{Escape(userType)}\",\"language\":\"{(Localization.Current == Language.Chinese ? "zh" : "en")}\"}}";
+                       $"\"password\":\"{Escape(password)}\",\"user_type\":\"{Escape(userType)}\"," +
+                       $"\"language\":\"{(Localization.Current == Language.Chinese ? "zh" : "en")}\"," +
+                       $"\"marketing_email_consent\":{(marketingEmailConsent ? "true" : "false")}}}";
             StartCoroutine(Post($"{BaseUrl}/auth/register/", body, null, json =>
             {
                 // No tokens until email ownership has been verified.
@@ -376,6 +378,7 @@ namespace Sandplay.Core
             public string name = "", email = "", preferred_name = "", age = "", gender = "", pronouns = "";
             public string languages = "", country = "", city = "", occupation = "", phone = "";
             public string emergency_contact = "", goals = "", accessibility = "", image_data = "";
+            public bool marketing_email_consent;
         }
 
         public void PersonalProfile(PersonalProfileData data, Action<PersonalProfileData> success, Action<string> failure) =>

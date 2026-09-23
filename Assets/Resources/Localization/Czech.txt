@@ -222,6 +222,7 @@ login.sign_in|Přihlásit se
 login.register|Vytvořit účet
 login.signing_in|Přihlašování…
 login.registering|Vytváření účtu…
+login.marketing_consent|Posílejte mi e-mailem novinky o Sandtray, užitečné tipy a příležitostné nabídky. Volitelné — odběr lze kdykoli zrušit v části Upravit profil.
 login.success|Vítejte, {0}
 login.error|Chyba: {0}
 login.logged_in_as|Přihlášeni jako {0}
@@ -543,3 +544,7 @@ text:All|Vše
 text:General|Obecné
 text:Search by name or tag|Hledat podle názvu nebo štítku
 sub.feature_calls|Videohovory a hlasové hovory během sezení
+text:Marketing emails|Marketingové e-maily
+text:Product updates, helpful tips, and occasional offers. Optional; you can withdraw consent anytime.|Novinky o produktu, užitečné tipy a příležitostné nabídky. Volitelné; souhlas můžete kdykoli odvolat.
+text:On|Zapnuto
+text:Off|Vypnuto
