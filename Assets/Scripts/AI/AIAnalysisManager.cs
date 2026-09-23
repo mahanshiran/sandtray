@@ -35,6 +35,9 @@ namespace Sandplay.AI
             {
                 var capability = AccessPolicy.Find(snapshot.capabilities, "ai.analyze");
                 var decision = AccessPolicy.Evaluate(snapshot, "ai.analyze", 1, checkUsage: true);
+                // Surface the authoritative counters even when the request is denied so
+                // the error UI can explain a spent allowance instead of showing a dead end.
+                onQuotaChecked?.Invoke(capability);
                 if (decision != AccessDecision.Allowed)
                 {
                     string message = decision == AccessDecision.NotIncluded
@@ -45,7 +48,6 @@ namespace Sandplay.AI
                     onError?.Invoke(message);
                     return;
                 }
-                onQuotaChecked?.Invoke(capability);
                 client.RequestAiReflection(payload, image, language,
                     (reflection, model) =>
                     {

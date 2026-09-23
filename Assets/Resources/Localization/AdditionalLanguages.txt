@@ -164,6 +164,8 @@ analysis.disclaimer|Reflexión asistida por IA: no es un diagnóstico ni una con
 analysis.error.capture|No se pudieron capturar los datos de la sesión.|Não foi possível capturar os dados da sessão.|Impossible de recueillir les données de la séance.|Sitzungsdaten konnten nicht erfasst werden.|セッションデータを取得できませんでした。
 analysis.error.manager|No se encontró AIAnalysisManager en la escena.|AIAnalysisManager não encontrado na cena.|AIAnalysisManager introuvable dans la scène.|AIAnalysisManager wurde in der Szene nicht gefunden.|シーンにAIAnalysisManagerが見つかりません。
 analysis.error|Error: {0}|Erro: {0}|Erreur : {0}|Fehler: {0}|エラー：{0}
+analysis.usage|Análisis de IA usados este mes: {0} / {1}|Análises de IA usadas neste mês: {0} / {1}|Analyses IA utilisées ce mois-ci : {0} / {1}|Diesen Monat verwendete KI-Analysen: {0} / {1}|今月使用したAI分析：{0} / {1}
+analysis.become_vip|Hazte VIP|Torne-se VIP|Devenir VIP|VIP werden|VIPになる
 analysis.save|Guardar|Salvar|Enregistrer|Speichern|保存
 analysis.saved|Guardado|Salvo|Enregistré|Gespeichert|保存済み
 analysis.export_pdf|Exportar PDF|Exportar PDF|Exporter en PDF|PDF exportieren|PDFを出力

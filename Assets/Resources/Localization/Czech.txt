@@ -128,6 +128,8 @@ analysis.disclaimer|Reflexe s podporou AI není diagnóza ani klinický závěr.
 analysis.error.capture|Nepodařilo se zachytit data sezení.
 analysis.error.manager|Ve scéně nebyl nalezen AIAnalysisManager.
 analysis.error|Chyba: {0}
+analysis.usage|Využité AI analýzy tento měsíc: {0} / {1}
+analysis.become_vip|Přejít na VIP
 analysis.save|Uložit
 analysis.saved|Uloženo
 analysis.export_pdf|Exportovat PDF

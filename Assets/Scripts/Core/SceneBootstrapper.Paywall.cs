@@ -113,6 +113,9 @@ namespace Sandplay.Core
 
         }
 
+        /// <summary>Opens the canonical plan screen from feature-specific UI.</summary>
+        public void ShowSubscriptionPlans() => ShowPaywallPanel();
+
         private void ShowPaywallMobileOnlyMessage()
         {
             if (_paywallPackageContainer != null)

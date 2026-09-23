@@ -50,6 +50,7 @@ namespace Sandplay.UI
         private float _reflectionWidth;
         private GameObject _errorPanel;
         private AnalysisPayload _retryPayload;
+        private AccessCapability _lastAnalysisQuota;
         public System.Action<AnalysisReport, string, System.Func<bool>, System.Action> EditResult { private get; set; }
 
         public void RequestEditResult()
@@ -152,6 +153,7 @@ namespace Sandplay.UI
         {
             if (_errorPanel) _errorPanel.SetActive(false);
             _retryPayload = null;
+            _lastAnalysisQuota = null;
             _resultGeneration++;
             if (_askAIBtn) _askAIBtn.interactable = true;
             if (_askBtnContainer) _askBtnContainer.SetActive(true);
@@ -219,6 +221,7 @@ namespace Sandplay.UI
         private void StartAIAnalysis(AnalysisPayload payload)
         {
             _retryPayload = payload;
+            _lastAnalysisQuota = null;
             if (_askAIBtn) _askAIBtn.interactable = false;
             if (_loadingIndicator) _loadingIndicator.SetActive(true);
             if (_actionStatusText)
@@ -251,7 +254,9 @@ namespace Sandplay.UI
                 error => { if (current()) ShowError(error); },
                 quota =>
                 {
-                    if (!current() || _actionStatusText == null || quota == null) return;
+                    if (!current() || quota == null) return;
+                    _lastAnalysisQuota = quota;
+                    if (_actionStatusText == null) return;
                     string remaining = quota.unlimited
                         ? Localization.Get("access.unlimited")
                         : quota.remaining.ToString(Localization.Culture);
@@ -555,8 +560,14 @@ namespace Sandplay.UI
             message.fontSize = 16; message.color = _resultText.color; message.richText = false;
             message.alignment = TextAlignmentOptions.Center;
             message.text = (Localization.Current == Language.Chinese ? "暂时无法生成反思\n\n" : "Could not create the reflection\n\n") + error;
-            message.rectTransform.anchorMin = new Vector2(0, .4f); message.rectTransform.anchorMax = Vector2.one;
+            bool allowanceSpent = HasSpentAnalysisAllowance(_lastAnalysisQuota);
+            message.rectTransform.anchorMin = new Vector2(0, allowanceSpent ? .55f : .4f);
+            message.rectTransform.anchorMax = Vector2.one;
             message.rectTransform.offsetMin = message.rectTransform.offsetMax = Vector2.zero;
+
+            if (allowanceSpent)
+                AddUsageMeter(panel, _lastAnalysisQuota);
+
             var retry = Instantiate(_askAIBtn, panel); retry.name = "Retry";
             retry.onClick.RemoveAllListeners(); retry.onClick.AddListener(() =>
             {
@@ -567,9 +578,70 @@ namespace Sandplay.UI
                 // turn a retry into a second paid generation on the server.
                 StartAIAnalysis(_retryPayload);
             });
+            retry.interactable = true;
             retry.GetComponentInChildren<TextMeshProUGUI>().text = Localization.Current == Language.Chinese ? "重试" : "Retry";
-            var rt = retry.GetComponent<RectTransform>(); rt.anchorMin = rt.anchorMax = new Vector2(.5f, .2f);
+            var rt = retry.GetComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = new Vector2(allowanceSpent ? .39f : .5f, .2f);
             rt.anchoredPosition = Vector2.zero; rt.sizeDelta = new Vector2(180, 44);
+
+            if (allowanceSpent)
+            {
+                var vip = Instantiate(_askAIBtn, panel); vip.name = "BecomeVip";
+                vip.onClick.RemoveAllListeners();
+                vip.onClick.AddListener(() =>
+                {
+                    var bootstrapper = Object.FindAnyObjectByType<SceneBootstrapper>();
+                    bootstrapper?.ShowSubscriptionPlans();
+                });
+                vip.interactable = true;
+                var vipImage = vip.GetComponent<Image>();
+                if (vipImage) vipImage.color = new Color(.31f, .19f, .58f, 1f);
+                vip.GetComponentInChildren<TextMeshProUGUI>().text = Localization.Get("analysis.become_vip");
+                var vipRt = vip.GetComponent<RectTransform>();
+                vipRt.anchorMin = vipRt.anchorMax = new Vector2(.61f, .2f);
+                vipRt.anchoredPosition = Vector2.zero; vipRt.sizeDelta = new Vector2(180, 44);
+            }
+        }
+
+        public static bool HasSpentAnalysisAllowance(AccessCapability quota) =>
+            quota != null && quota.entitled && quota.usage_ready && !quota.unlimited && quota.remaining < 1;
+
+        private void AddUsageMeter(RectTransform parent, AccessCapability quota)
+        {
+            long used = System.Math.Max(0L, quota.used);
+            long limit = System.Math.Max(0L, quota.limit);
+            float fraction = limit > 0 ? Mathf.Clamp01((float)used / limit) : 1f;
+
+            var label = new GameObject("UsageLabel", typeof(RectTransform)).AddComponent<TextMeshProUGUI>();
+            label.transform.SetParent(parent, false);
+            label.font = _resultText.font;
+            label.fontSize = 14;
+            label.fontStyle = FontStyles.Bold;
+            label.color = _resultText.color;
+            label.alignment = TextAlignmentOptions.Center;
+            label.text = Localization.Get("analysis.usage", used, limit);
+            label.rectTransform.anchorMin = new Vector2(.18f, .42f);
+            label.rectTransform.anchorMax = new Vector2(.82f, .50f);
+            label.rectTransform.offsetMin = label.rectTransform.offsetMax = Vector2.zero;
+
+            var track = new GameObject("UsageTrack", typeof(RectTransform), typeof(Image));
+            track.transform.SetParent(parent, false);
+            var trackRt = track.GetComponent<RectTransform>();
+            trackRt.anchorMin = new Vector2(.20f, .365f);
+            trackRt.anchorMax = new Vector2(.80f, .395f);
+            trackRt.offsetMin = trackRt.offsetMax = Vector2.zero;
+            bool darkTheme = _resultText.color.grayscale > .6f;
+            track.GetComponent<Image>().color = darkTheme
+                ? new Color(.31f, .34f, .39f, 1f)
+                : new Color(.83f, .86f, .87f, 1f);
+
+            var fill = new GameObject("UsageFill", typeof(RectTransform), typeof(Image));
+            fill.transform.SetParent(track.transform, false);
+            var fillRt = fill.GetComponent<RectTransform>();
+            fillRt.anchorMin = Vector2.zero;
+            fillRt.anchorMax = new Vector2(fraction, 1f);
+            fillRt.offsetMin = fillRt.offsetMax = Vector2.zero;
+            fill.GetComponent<Image>().color = new Color(.05f, .55f, .51f, 1f);
         }
 
         private void OnAnalysisCompleted(AnalysisCompletedEvent evt)
