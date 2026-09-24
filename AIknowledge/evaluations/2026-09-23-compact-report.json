@@ -1,0 +1,143 @@
+{
+  "release": "783ef99a516beec0edc65424ccafb2f9aa4e6ef7",
+  "scope": "Synthetic two-section report contract checks, not factual or clinical certification",
+  "input": "English and Chinese: seven-object synthetic scene including explicit all-left zone fields and uneven terrain; vision: synthetic two-marker image",
+  "limitations": "Lexical checks do not establish semantic correctness. Review wording for remaining repetition, unsupported negative claims and inaccurate spatial/terrain details.",
+  "results": [
+    {
+      "case": "english",
+      "ok": true,
+      "seconds": 9.3,
+      "reflection": "OBSERVATIONS\n- Five mirrors, one person, and one chair are placed in the left part of the tray.\n- The five mirrors are grouped closely together in the left part of the tray.\n- The person and chair are placed near each other, separate from the mirror group but still within the left part of the tray.\nCONCLUSION\nThe scene is composed entirely within the left part of the tray, with a repeated object type—mirrors—forming a distinct cluster, while two different object types—the person and chair—are placed together apart from that cluster. This creates a composition defined by repetition in one grouping and singularity in another, both contained in the same lateral area without extending elsewhere.\n\nMETHOD AND SOURCES\n\nBased on the supplied scene record and image when available. These references inform the reporting method, not conclusions about the individual.\n\n[1] Texas SandTray Association — Best Practices\nhttps://www.txsandtray.org/best-practices\n\n[2] ISST — Guidelines for the final case study\nhttps://www.isst-society.com/wp-content/uploads/2022/09/Guidelines_final_case_study.pdf\n\n[3] APA — Ethical guidance for AI in professional practice\nhttps://www.apa.org/topics/artificial-intelligence-machine-learning/ethical-guidance-ai-professional-practice",
+      "sources": [
+        {
+          "id": "tsta-practice",
+          "title": "Texas SandTray Association — Best Practices",
+          "url": "https://www.txsandtray.org/best-practices",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Best Practices",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "tsta-practice-01"
+        },
+        {
+          "id": "isst-case",
+          "title": "ISST — Guidelines for the final case study",
+          "url": "https://www.isst-society.com/wp-content/uploads/2022/09/Guidelines_final_case_study.pdf",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Guidelines, pages 1–2",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "isst-case-01"
+        },
+        {
+          "id": "apa-ai",
+          "title": "APA — Ethical guidance for AI in professional practice",
+          "url": "https://www.apa.org/topics/artificial-intelligence-machine-learning/ethical-guidance-ai-professional-practice",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Professional practice guidance",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "apa-ai-01"
+        }
+      ],
+      "knowledge_version": "1e3679f2218299c3ab839edc67ed00f5524d41e38b87de0f1d2b63b2c581c32d",
+      "model": "qwen-plus",
+      "tokens_used": 5214,
+      "clinical_review": "not performed"
+    },
+    {
+      "case": "chinese",
+      "ok": true,
+      "seconds": 8.1,
+      "reflection": "观察\n7个物件：1个人、1把椅子、5面镜子，全部位于沙盘左区；5面镜子彼此靠近，横向排布在左区内；沙盘地形有明显起伏，但左区未见人工堆高或挖低形成的独立地形结构。\n总结\n左区由重复的镜子与单一人形、单把椅子共同构成一个紧凑的物件群，该群处于整体有起伏的沙盘中，而中区与右区完全空置，形成局部聚集与大面积留白之间的画面结构。\n\n方法与来源\n\n依据所提供的场景记录与图像整理。以下资料支持报告方法，不用于推断个人心理。\n\n[1] Texas SandTray Association — Best Practices\nhttps://www.txsandtray.org/best-practices\n\n[2] ISST — Guidelines for the final case study\nhttps://www.isst-society.com/wp-content/uploads/2022/09/Guidelines_final_case_study.pdf\n\n[3] APA — Ethical guidance for AI in professional practice\nhttps://www.apa.org/topics/artificial-intelligence-machine-learning/ethical-guidance-ai-professional-practice",
+      "sources": [
+        {
+          "id": "tsta-practice",
+          "title": "Texas SandTray Association — Best Practices",
+          "url": "https://www.txsandtray.org/best-practices",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Best Practices",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "tsta-practice-01"
+        },
+        {
+          "id": "isst-case",
+          "title": "ISST — Guidelines for the final case study",
+          "url": "https://www.isst-society.com/wp-content/uploads/2022/09/Guidelines_final_case_study.pdf",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Guidelines, pages 1–2",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "isst-case-01"
+        },
+        {
+          "id": "apa-ai",
+          "title": "APA — Ethical guidance for AI in professional practice",
+          "url": "https://www.apa.org/topics/artificial-intelligence-machine-learning/ethical-guidance-ai-professional-practice",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Professional practice guidance",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "apa-ai-01"
+        }
+      ],
+      "knowledge_version": "1e3679f2218299c3ab839edc67ed00f5524d41e38b87de0f1d2b63b2c581c32d",
+      "model": "qwen-plus",
+      "tokens_used": 5165,
+      "clinical_review": "not performed"
+    },
+    {
+      "case": "vision",
+      "ok": true,
+      "seconds": 5.5,
+      "reflection": "OBSERVATIONS\n• Two circular markers—red and green—are placed on flat sand; no other objects are present.\n• The markers sit horizontally aligned near the tray’s center, separated by a clear gap of open sand.\n• The sand surface shows no relief; the brown tray boundary encloses the scene uniformly.\n\nCONCLUSION\nThe composition centers on two distinct, evenly spaced markers within an unadorned field, where repetition of form is offset by color contrast and balanced spacing, creating a minimal arrangement defined by separation and symmetry rather than grouping or hierarchy.\n\nMETHOD AND SOURCES\n\nBased on the supplied scene record and image when available. These references inform the reporting method, not conclusions about the individual.\n\n[1] Texas SandTray Association — Best Practices\nhttps://www.txsandtray.org/best-practices\n\n[2] ISST — Guidelines for the final case study\nhttps://www.isst-society.com/wp-content/uploads/2022/09/Guidelines_final_case_study.pdf\n\n[3] APA — Ethical guidance for AI in professional practice\nhttps://www.apa.org/topics/artificial-intelligence-machine-learning/ethical-guidance-ai-professional-practice",
+      "sources": [
+        {
+          "id": "tsta-practice",
+          "title": "Texas SandTray Association — Best Practices",
+          "url": "https://www.txsandtray.org/best-practices",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Best Practices",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "tsta-practice-01"
+        },
+        {
+          "id": "isst-case",
+          "title": "ISST — Guidelines for the final case study",
+          "url": "https://www.isst-society.com/wp-content/uploads/2022/09/Guidelines_final_case_study.pdf",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Guidelines, pages 1–2",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "isst-case-01"
+        },
+        {
+          "id": "apa-ai",
+          "title": "APA — Ethical guidance for AI in professional practice",
+          "url": "https://www.apa.org/topics/artificial-intelligence-machine-learning/ethical-guidance-ai-professional-practice",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Professional practice guidance",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "apa-ai-01"
+        }
+      ],
+      "knowledge_version": "1e3679f2218299c3ab839edc67ed00f5524d41e38b87de0f1d2b63b2c581c32d",
+      "model": "qwen3-vl-plus",
+      "tokens_used": 2381,
+      "clinical_review": "not performed"
+    }
+  ]
+}

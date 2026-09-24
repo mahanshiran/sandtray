@@ -18,6 +18,73 @@ namespace Sandplay.Core
         GameObject _notificationHeadsUp;
         Coroutine _notificationHeadsUpRoutine;
 
+        [Serializable] class ReceivedReportPage
+        {
+            public ReportNoticeInfo[] items;
+            public bool more;
+        }
+
+        void WireReportsBadge(Transform nav)
+        {
+            var service=ReportDeliveryClient.Instance;
+            service.EnsureAccount();
+            var badge=CreateRequestBadge(nav);
+            void Render()
+            {
+                if(badge==null)return;
+                int count=service.Inbox?.reports_unread??0;
+                badge.transform.parent.gameObject.SetActive(count>0);
+                badge.text=count>99?"99+":count.ToString();
+            }
+            service.Changed+=Render;
+            nav.gameObject.AddComponent<FriendViewLifetime>().Released=()=>service.Changed-=Render;
+            Render();
+        }
+
+        void OpenReceivedReports()
+        {
+            if(!BackendClient.Instance.IsLoggedIn){OpenLoginScreen(OpenReceivedReports);return;}
+            var service=ReportDeliveryClient.Instance;service.EnsureAccount();
+            var box=ClientDialog(F("Reports","报告"),960,760);StyleFriendDialog(box);
+            var dialog=_clientDialog;int user=BackendClient.Instance.UserId;
+            var status=ClientText(box,F("Reports shared with you by your therapist","治疗师与您共享的报告"),14,.04f,.78f,.92f,.065f,HomeMuted);
+            status.richText=false;
+            var list=ClientScroll(box,"ReceivedReports",.03f,.15f,.94f,.62f);
+            int offset=0;bool loading=false;
+            Button previous=null,next=null;
+            bool Current()=>box!=null && _clientDialog==dialog && BackendClient.Instance.IsLoggedIn && BackendClient.Instance.UserId==user;
+            void Load()
+            {
+                if(loading || !Current())return;
+                loading=true;previous.interactable=next.interactable=false;
+                status.text=F("Loading reports…","正在加载报告…");
+                FriendsClient.Instance.Request<ReceivedReportPage>("reports/received/?offset="+offset,null,page=>
+                {
+                    if(!Current())return;
+                    loading=false;ClearClientChildren(list);
+                    previous.interactable=offset>0;next.interactable=page.more;
+                    status.text=F("Reports shared with you by your therapist","治疗师与您共享的报告");
+                    var items=page.items??Array.Empty<ReportNoticeInfo>();
+                    if(items.Length==0)ClientText(ClientRow(list,"Empty",90),F("No reports yet. Reports your therapist shares will appear here.","暂无报告。治疗师共享的报告将显示在此处。"),16,.04f,0,.92f,1,HomeMuted);
+                    foreach(var item in items)
+                    {
+                        var row=ClientRow(list,"SharedReport",100);
+                        string date=DateTimeOffset.TryParse(item.created,out var created)?created.ToLocalTime().ToString("g"):item.created;
+                        var button=ClientButton(row,(item.read?"":"● ")+item.table_name+"\n"+item.author_name+" · "+date,.02f,.04f,.96f,.92f,
+                            ()=>OpenSharedReport("reports/received/"+item.report_id+"/",true));
+                        var text=button.GetComponentInChildren<TMP_Text>();
+                        text.richText=false;text.alignment=TextAlignmentOptions.Left;text.margin=new Vector4(14,0,8,0);
+                    }
+                },error=>{if(!Current())return;loading=false;status.text=error;previous.interactable=offset>0;});
+            }
+            previous=ClientButton(box,F("Previous","上一页"),.04f,.04f,.26f,.075f,()=>{offset=Math.Max(0,offset-50);Load();});
+            ClientButton(box,F("Refresh","刷新"),.37f,.04f,.26f,.075f,()=>{if(loading)return;offset=0;Load();service.Refresh();});
+            next=ClientButton(box,F("Next","下一页"),.70f,.04f,.26f,.075f,()=>{offset+=50;Load();});
+            service.Changed+=Load;
+            box.gameObject.AddComponent<FriendViewLifetime>().Released=()=>service.Changed-=Load;
+            GuardNotificationAccount(box,dialog);Load();service.Refresh();
+        }
+
         void WireNotificationCenter(Transform bell)
         {
             var service=ReportDeliveryClient.Instance;service.EnsureAccount();
@@ -81,6 +148,7 @@ namespace Sandplay.Core
         public bool ReceiveForegroundPush(PushDestination target)
         {
             if(_safeArea==null)return false;
+            if(target?.kind=="reports"){ReportDeliveryClient.Instance.Refresh();return true;}
             if(target==null||(target.kind!="invitations"&&target.kind!="session_invitations"))return true;
             EnsureNotificationHeadsUp();
             OnNotificationInboxChanged();
@@ -360,23 +428,129 @@ namespace Sandplay.Core
                     ShowScheduleDetail(notice.schedule_id);
                 });
         }
-        void OpenReportNotice(long id)
+        void OpenReportNotice(long id) => OpenSharedReport("notifications/"+id+"/", false);
+        void OpenSharedReport(string path, bool fromReports)
         {
-            var box=ClientDialog(F("Shared report","共享报告"),850,760);StyleFriendDialog(box);
-            var dialog=_clientDialog;int user=BackendClient.Instance.UserId;
-            var status=ClientText(box,F("Loading…","加载中…"),14,.04f,.77f,.92f,.06f,HomeMuted);status.richText=false;
-            var content=ClientScroll(box,"Report",.03f,.11f,.94f,.64f);
-            FriendsClient.Instance.Request<SharedReportInfo>("notifications/"+id+"/",null,report=>{
-                if(box==null || _clientDialog!=dialog || BackendClient.Instance.UserId!=user)return;
-                status.text=report.table_name+" · "+report.author_name+" · "+report.source;
-                var row=ClientRow(content,"Report text",100);
-                var text=ClientText(row,report.text,16,.02f,0,.96f,1,HomeText);text.richText=false;text.enableWordWrapping=true;text.alignment=TextAlignmentOptions.TopLeft;
-                Canvas.ForceUpdateCanvases();row.GetComponent<UnityEngine.UI.LayoutElement>().preferredHeight=Mathf.Max(100,text.GetPreferredValues(report.text,Mathf.Max(100,((RectTransform)content).rect.width-36),0).y+24);
-                FriendsClient.Instance.Request<FriendResult>("notifications/"+id+"/",new FriendResult(),_=>ReportDeliveryClient.Instance.Refresh(),error=>{if(status!=null)status.text=error;});
-            },error=>{if(status!=null)status.text=error;});
-            ClientButton(box,F("Back to notifications","返回通知中心"),.04f,.025f,.92f,.07f,OpenNotificationCenter);
-            StartCoroutine(Guard());IEnumerator Guard(){while(box!=null){if(!BackendClient.Instance.IsLoggedIn || BackendClient.Instance.UserId!=user){Destroy(dialog);yield break;}yield return new WaitForSeconds(.5f);}}
+            var box=ClientDialog(F("Session report","会话报告"),1000,800);
+            var card=(RectTransform)box;
+            card.anchorMin=new Vector2(.07f,.04f);card.anchorMax=new Vector2(.94f,.95f);
+            card.offsetMin=card.offsetMax=Vector2.zero;
+            StyleFriendDialog(box);
+            var dialog=_clientDialog;int user=BackendClient.Instance.UserId,epoch=LocalAccountStorage.Epoch;
+            bool Current()=>box!=null && _clientDialog==dialog && BackendClient.Instance.IsLoggedIn &&
+                BackendClient.Instance.UserId==user && LocalAccountStorage.Epoch==epoch;
+            var status=ClientText(box,F("Loading…","加载中…"),12,.04f,.10f,.92f,.045f,HomeMuted);status.richText=false;
+            var content=ClientScroll(box,"ReceivedReportDocument",.04f,.16f,.92f,.66f);
+            content.parent.GetComponent<Image>().color=new Color(.98f,.985f,.98f);
+            var layout=content.GetComponent<VerticalLayoutGroup>();
+            layout.padding=new RectOffset(24,24,20,24);layout.spacing=12;
+            var ink=new Color(.09f,.16f,.19f);var teal=new Color(.03f,.43f,.40f);
+            void DocumentText(string value,int size,Color color,bool heading=false)
+            {
+                var row=ClientRow(content,heading?"SectionHeading":"Paragraph",40);
+                row.GetComponent<Image>().color=heading?new Color(.89f,.95f,.93f):new Color(.98f,.985f,.98f);
+                var text=ClientText(row,value??"",size,.02f,0,.96f,1,color);
+                text.richText=false;text.enableWordWrapping=true;text.alignment=TextAlignmentOptions.MidlineLeft;
+                if(heading)text.fontStyle=FontStyles.Bold;
+                Canvas.ForceUpdateCanvases();
+                float width=Mathf.Max(100,((RectTransform)content).rect.width-60);
+                row.GetComponent<LayoutElement>().preferredHeight=Mathf.Max(40,text.GetPreferredValues(text.text,width,0).y+20);
+            }
+            SharedReportInfo loaded=null;
+            Button export=null;
+            export=ClientButton(box,F("Export PDF","导出 PDF"),.515f,.025f,.445f,.065f,()=>
+            {
+                if(!Current() || loaded==null)return;
+                export.interactable=false;status.text=Localization.Get("reports.pdf_downloading");
+                string id=loaded.id;
+                BackendClient.Instance.DownloadReceivedReportPdf(id,bytes=>
+                {
+                    if(!Current())return;
+                    try
+                    {
+                        if(bytes==null || bytes.Length==0)throw new InvalidOperationException("Empty PDF");
+                        string filename="report_"+id+".pdf";
+                        string dir=System.IO.Path.Combine(LocalAccountStorage.Root,"Reports");
+                        System.IO.Directory.CreateDirectory(dir);
+                        NativeShare.SavePdf(filename,bytes,System.IO.Path.Combine(dir,filename));
+                        status.text=Localization.Get("reports.pdf_saved");
+                    }
+                    catch(Exception){status.text=F("Could not save the PDF. Please try again.","无法保存 PDF，请重试。");}
+                    export.interactable=true;
+                },error=>{if(Current()){status.text=error;export.interactable=true;}});
+            },true);
+            export.interactable=false;
+            FriendsClient.Instance.Request<SharedReportInfo>(path,null,report=>{
+                if(!Current())return;
+                loaded=report;
+                DocumentText(F("SESSION REPORT","会话报告"),25,ink);
+                DocumentText(report.table_name,20,teal);
+                string issued=DateTimeOffset.TryParse(report.created,out var date)?date.ToLocalTime().ToString("f",Localization.Culture):report.created;
+                DocumentText(F("Client: ","来访者：")+(report.client_name??"")+"\n"+
+                    F("Therapist: ","治疗师：")+report.author_name+"\n"+F("Issued: ","签发日期：")+issued+"\n"+
+                    F("Revision: ","版本：")+report.revision,14,ink);
+                if(report.source=="ai")DocumentText(F("AI-assisted reflection","AI 辅助反思"),14,teal);
+                if(report.sections!=null && report.sections.Length>0)
+                    foreach(var section in report.sections)
+                    {
+                        if(!string.IsNullOrWhiteSpace(section.heading))DocumentText(section.heading,18,teal,true);
+                        if(!string.IsNullOrWhiteSpace(section.body))DocumentText(section.body,16,ink);
+                    }
+                else DocumentText(report.text,16,ink);
+                DocumentText(F("Report ID: ","报告编号：")+report.id,11,new Color(.38f,.45f,.48f));
+                status.text="";export.interactable=true;
+                Canvas.ForceUpdateCanvases();content.parent.GetComponent<ScrollRect>().verticalNormalizedPosition=1;
+                FriendsClient.Instance.Request<FriendResult>(path,new FriendResult(),_=>ReportDeliveryClient.Instance.Refresh(),error=>{if(Current())status.text=error;});
+            },error=>{if(Current())status.text=error;});
+            ClientButton(box,fromReports?F("Back to reports","返回报告"):F("Back to notifications","返回通知中心"),.04f,.025f,.445f,.065f,()=>{if(fromReports)OpenReceivedReports();else OpenNotificationCenter();});
+            StartCoroutine(Guard());IEnumerator Guard(){while(box!=null){if(!Current()){Destroy(dialog);yield break;}yield return new WaitForSeconds(.5f);}}
         }
+        [Serializable] private sealed class ClientReportPublication
+        {
+            public string local_id, table_name, source, text, organization_id, organization_client_id;
+            public int revision, client_user_id;
+            public bool send_to_client = true;
+        }
+
+        private void SendSavedReportToClient(string board, AnalysisReport report, Button button, TMP_Text status)
+        {
+            if (report == null || !SessionManager.CanEditReport(report)) return;
+            var manager = SessionManager.Instance;
+            var session = manager.LoadSessionData(board);
+            if (session == null) return;
+            bool organization = !string.IsNullOrEmpty(session.OrganizationId) && !string.IsNullOrEmpty(session.OrganizationClientId);
+            var client = organization ? null : ClientStore.GetAll().Find(item => item.Id == session.ClientId);
+            if (!organization && (client?.Account == null || client.Account.UserId <= 0 || client.Account.Backend != BackendClient.BaseUrl))
+            {
+                status.text = F("Link this client to their account before sending a report.", "请先将此来访者关联到其账户，再发送报告。");
+                return;
+            }
+            if (!ReportSharingText.TryPublication(report, out var text, out var error))
+            { status.text = Localization.Get(error); return; }
+            int account = BackendClient.Instance.UserId, epoch = LocalAccountStorage.Epoch;
+            string revisionKey = "shared_reports_" + account + "_revision_" + report.ReportId;
+            bool Current() => this != null && button != null && status != null &&
+                BackendClient.Instance.UserId == account && LocalAccountStorage.Epoch == epoch;
+            button.interactable = false;
+            status.text = F("Sending report…", "正在发送报告…");
+            FriendsClient.Instance.Request<SharedReportInfo>("reports/publish/", new ClientReportPublication {
+                local_id = report.ReportId, table_name = board, source = report.Source, text = text,
+                revision = PlayerPrefs.GetInt(revisionKey, 0), client_user_id = client?.Account?.UserId ?? 0,
+                organization_id = session.OrganizationId, organization_client_id = session.OrganizationClientId
+            }, sent => {
+                if (BackendClient.Instance.UserId != account || LocalAccountStorage.Epoch != epoch) return;
+                PlayerPrefs.SetInt(revisionKey, sent.revision); PlayerPrefs.Save();
+                if (!Current()) return;
+                button.interactable = true;
+                status.text = F("Sent to client. The report is available in their Reports tab and a notification has been created.",
+                    "已发送给来访者。报告已显示在其报告页面，并已生成通知。");
+            }, failure => {
+                if (!Current()) return;
+                button.interactable = true;
+                status.text = F("Report was not sent: ", "报告未发送：") + failure;
+            });
+        }
+
         void OpenReportSharing(string board,AnalysisReport report)
         {
             if(report==null || !SessionManager.CanEditReport(report) || !BackendClient.Instance.IsTherapistAccount)return;

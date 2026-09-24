@@ -24,7 +24,7 @@ namespace Sandplay.Core
         private void CreateAnalysisPanel()
         {
             var analysisPanel = CreatePanel(_sandboxUI.transform, "AnalysisPanel",
-                new Vector2(0.20f, 0.16f), new Vector2(0.80f, 0.84f), Vector2.zero, Vector2.zero);
+                new Vector2(0.10f, 0.05f), new Vector2(0.935f, 0.91f), Vector2.zero, Vector2.zero);
             analysisPanel.GetComponent<Image>().color = HomeCard;
             ApplyHomeRoundedCorners(analysisPanel.GetComponent<Image>(), 16f);
             var analysisOutline = analysisPanel.AddComponent<Outline>();
@@ -96,8 +96,8 @@ namespace Sandplay.Core
             welcome.alignment = TextAlignmentOptions.Center;
             welcome.fontStyle = FontStyles.Bold;
             var intro = ClientText(askContainer.transform,
-                reflectionZh ? "从沙盘中的物体、空间与布局出发，探索观察和开放式问题。"
-                    : "Explore the objects, spaces, and arrangements in your table through observations and open questions.",
+                reflectionZh ? "获得一份关于沙盘物件、空间与布局的完整报告。"
+                    : "Get a complete report on the objects, spaces, and arrangement in your tray.",
                 16, .12f, .51f, .76f, .14f, HomeMuted);
             intro.alignment = TextAlignmentOptions.Center;
             string[] previews = reflectionZh ? new[] { "观察", "探索可能", "反思与总结" }
@@ -756,7 +756,7 @@ namespace Sandplay.Core
             }, true).name = "SaveReportEdit";
         }
 
-        private void ShowReportDetail(Sandplay.Data.AnalysisReport report, string sessionName = null)
+        private void ShowReportDetail(Sandplay.Data.AnalysisReport report, string sessionName = null, bool readOnly = false)
         {
             // Full-screen dim modal
             var modal = new GameObject("ReportDetailModal");
@@ -881,7 +881,7 @@ namespace Sandplay.Core
             detailScrollRect.horizontal = false;
             detailScrollRect.vertical = true;
             detailScrollRect.movementType = ScrollRect.MovementType.Elastic;
-            if (!string.IsNullOrEmpty(sessionName) && SessionManager.CanEditReport(report))
+            if (!readOnly && !string.IsNullOrEmpty(sessionName) && SessionManager.CanEditReport(report))
                 ClientButton(box.transform, "reports.edit", .05f, .02f, .43f, .065f, () =>
                     ShowReportEditor(report, sessionName, () =>
                     {

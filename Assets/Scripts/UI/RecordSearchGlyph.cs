@@ -6,7 +6,7 @@ namespace Sandplay.UI
     [RequireComponent(typeof(CanvasRenderer))]
     public sealed class RecordSearchGlyph : MaskableGraphic
     {
-        public enum Kind { DocumentSearch, Document, Search, Filters, Back, Info, Close, Grid, Person, History, More, Archive, ChevronLeft, Check }
+        public enum Kind { DocumentSearch, Document, Search, Filters, Back, Info, Close, Grid, Person, History, More, Archive, ChevronLeft, Check, Refresh }
         public Kind Icon;
         public static void StyleBackButton(Button button, Color tint)
         {
@@ -38,6 +38,15 @@ namespace Sandplay.UI
             {
                 for(int i=0;i<32;i++) { float a=i*Mathf.PI/16,b=(i+1)*Mathf.PI/16;
                     Line(x+Mathf.Cos(a)*radius,y+Mathf.Sin(a)*radius,x+Mathf.Cos(b)*radius,y+Mathf.Sin(b)*radius); }
+            }
+            if(Icon==Kind.Refresh)
+            {
+                for(int i=0;i<28;i++)
+                {
+                    float a=(45+i*10)*Mathf.Deg2Rad,b=(55+i*10)*Mathf.Deg2Rad;
+                    Line(Mathf.Cos(a)*.32f,Mathf.Sin(a)*.32f,Mathf.Cos(b)*.32f,Mathf.Sin(b)*.32f);
+                }
+                Line(.226f,.226f,.226f,.43f);Line(.226f,.226f,.02f,.226f);return;
             }
             if(Icon==Kind.More){Ring(-.27f,0,.035f);Ring(0,0,.035f);Ring(.27f,0,.035f);return;}
             if(Icon==Kind.Grid){for(int x=0;x<2;x++)for(int y=0;y<2;y++){float a=-.34f+x*.39f,b=-.34f+y*.39f;Line(a,b,a+.28f,b);Line(a+.28f,b,a+.28f,b+.28f);Line(a+.28f,b+.28f,a,b+.28f);Line(a,b+.28f,a,b);}return;}

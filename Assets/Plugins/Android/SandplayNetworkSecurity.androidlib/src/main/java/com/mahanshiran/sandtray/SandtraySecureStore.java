@@ -6,8 +6,6 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
 
-import com.unity3d.player.UnityPlayer;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
@@ -26,9 +24,8 @@ public final class SandtraySecureStore {
 
     private SandtraySecureStore() {}
 
-    private static SharedPreferences preferences() {
-        Context context = UnityPlayer.currentActivity.getApplicationContext();
-        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+    private static SharedPreferences preferences(Context context) {
+        return context.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
     private static synchronized SecretKey secretKey() throws Exception {
@@ -46,8 +43,8 @@ public final class SandtraySecureStore {
         return generator.generateKey();
     }
 
-    public static String get(String name) throws Exception {
-        String encoded = preferences().getString(name, null);
+    public static String get(Context context, String name) throws Exception {
+        String encoded = preferences(context).getString(name, null);
         if (encoded == null || encoded.isEmpty()) return null;
 
         byte[] payload = Base64.decode(encoded, Base64.NO_WRAP);
@@ -64,8 +61,8 @@ public final class SandtraySecureStore {
         return new String(cipher.doFinal(ciphertext), StandardCharsets.UTF_8);
     }
 
-    public static boolean set(String name, String value) throws Exception {
-        if (value == null || value.isEmpty()) return delete(name);
+    public static boolean set(Context context, String name, String value) throws Exception {
+        if (value == null || value.isEmpty()) return delete(context, name);
 
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         cipher.init(Cipher.ENCRYPT_MODE, secretKey());
@@ -73,10 +70,10 @@ public final class SandtraySecureStore {
         byte[] ciphertext = cipher.doFinal(value.getBytes(StandardCharsets.UTF_8));
         byte[] payload = ByteBuffer.allocate(1 + iv.length + ciphertext.length)
                 .put(VERSION).put(iv).put(ciphertext).array();
-        return preferences().edit().putString(name, Base64.encodeToString(payload, Base64.NO_WRAP)).commit();
+        return preferences(context).edit().putString(name, Base64.encodeToString(payload, Base64.NO_WRAP)).commit();
     }
 
-    public static boolean delete(String name) {
-        return preferences().edit().remove(name).commit();
+    public static boolean delete(Context context, String name) {
+        return preferences(context).edit().remove(name).commit();
     }
 }

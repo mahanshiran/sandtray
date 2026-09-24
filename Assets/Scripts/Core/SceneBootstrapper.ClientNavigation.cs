@@ -17,10 +17,11 @@ namespace Sandplay.Core
             bool visible = CanShowClientNavigation;
             float top = .855f;
             const float height = .052f;
-            foreach (var key in new[] { "home", "boards", "clients", "organization", "schedules", "multiplayer" })
+            foreach (var key in new[] { "home", "boards", "clients", "organization", "schedules", "reports", "multiplayer" })
             {
                 if (!_homeNavItems.TryGetValue(key, out var item) || item == null) continue;
                 bool show = key == "clients" ? visible :
+                    key == "reports" ? BackendClient.Instance.IsLoggedIn && BackendClient.Instance.UserType == "normal" :
                     key == "schedules" && BackendClient.Instance.IsOrganizationTherapist
                         ? BackendClient.Instance.ManagedCanCreateSchedules :
                     key != "organization" || CanShowOrganizationNavigation;

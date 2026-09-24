@@ -841,10 +841,10 @@ namespace Sandplay.UI
             _renderedReflection = text;
             _resultText.enabled = false;
             bool zh = Localization.Current == Language.Chinese;
-            var headings = new[] { "SUMMARY", "OBSERVATIONS", "OPTIONAL HYPOTHESES", "QUESTIONS FOR REFLECTION", "CONCLUSION",
-                "摘要", "观察", "可选假设", "反思问题", "总结" };
-            var labels = zh ? new[] { "摘要", "观察", "探索不同可能", "反思问题", "总结" }
-                : new[] { "At a glance", "What is on the table", "Possibilities to explore", "Questions for you", "Conclusion" };
+            var headings = new[] { "SUMMARY", "OBSERVATIONS", "OPTIONAL HYPOTHESES", "QUESTIONS FOR REFLECTION", "CONCLUSION", "PRACTICE CONTEXT", "SOURCES",
+                "摘要", "观察", "可选假设", "反思问题", "总结", "实践参考", "资料来源", "SCENE COMPOSITION", "画面结构", "METHOD AND SOURCES", "方法与来源" };
+            var labels = zh ? new[] { "摘要", "观察", "探索不同可能", "反思问题", "总结", "实践参考", "资料来源" }
+                : new[] { "At a glance", "Key observations", "Possibilities to explore", "Questions for you", "Overall reading", "Practice context", "Sources" };
             string title = zh ? "关于本次反思" : "About this reflection";
             string heading = null;
             int section = -1;
@@ -870,7 +870,9 @@ namespace Sandplay.UI
                 if (index >= 0)
                 {
                     Flush();
-                    body.Clear(); section = index % 5; title = labels[section]; heading = candidate;
+                    body.Clear(); section = index >= 16 ? 6 : index >= 14 ? 2 : index % 7;
+                    title = index >= 16 ? (zh ? "方法与来源" : "Method and sources")
+                        : index >= 14 ? (zh ? "画面结构" : "Scene composition") : labels[section]; heading = candidate;
                 }
                 else body.AppendLine(line);
             }
@@ -899,7 +901,7 @@ namespace Sandplay.UI
             var header = Label("Heading", part.Title, 17); header.fontStyle = FontStyles.Bold;
             header.rectTransform.anchorMin = new Vector2(0, 1); header.rectTransform.anchorMax = Vector2.one;
             header.rectTransform.offsetMin = new Vector2(62, -52); header.rectTransform.offsetMax = new Vector2(-20, -16);
-            if (_editingReflection && part.Section >= 0)
+            if (_editingReflection && part.Section >= 0 && part.Section < 5)
                 part.Editor = AddReflectionEditor(card.transform, part.Body);
             else
             {

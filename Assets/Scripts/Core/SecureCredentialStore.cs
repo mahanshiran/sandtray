@@ -40,9 +40,11 @@ namespace Sandplay.Core
                     SandtraySecureFree(pointer);
                 }
 #elif UNITY_ANDROID && !UNITY_EDITOR
+                using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using (var activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
                 using (var store = new AndroidJavaClass("com.mahanshiran.sandtray.SandtraySecureStore"))
                 {
-                    value = store.CallStatic<string>("get", key) ?? "";
+                    value = store.CallStatic<string>("get", activity, key) ?? "";
                     return true;
                 }
 #elif (UNITY_STANDALONE_OSX && !UNITY_EDITOR) || UNITY_EDITOR_OSX
@@ -76,8 +78,10 @@ namespace Sandplay.Core
 #if UNITY_IOS && !UNITY_EDITOR
                 return SandtraySecureSet(key, value) != 0;
 #elif UNITY_ANDROID && !UNITY_EDITOR
+                using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using (var activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
                 using (var store = new AndroidJavaClass("com.mahanshiran.sandtray.SandtraySecureStore"))
-                    return store.CallStatic<bool>("set", key, value);
+                    return store.CallStatic<bool>("set", activity, key, value);
 #elif (UNITY_STANDALONE_OSX && !UNITY_EDITOR) || UNITY_EDITOR_OSX
                 return MacKeychain.TryWrite(key, value);
 #elif (UNITY_STANDALONE_WIN && !UNITY_EDITOR) || UNITY_EDITOR_WIN
@@ -106,8 +110,10 @@ namespace Sandplay.Core
 #if UNITY_IOS && !UNITY_EDITOR
                 return SandtraySecureDelete(key) != 0;
 #elif UNITY_ANDROID && !UNITY_EDITOR
+                using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using (var activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
                 using (var store = new AndroidJavaClass("com.mahanshiran.sandtray.SandtraySecureStore"))
-                    return store.CallStatic<bool>("delete", key);
+                    return store.CallStatic<bool>("delete", activity, key);
 #elif (UNITY_STANDALONE_OSX && !UNITY_EDITOR) || UNITY_EDITOR_OSX
                 return MacKeychain.TryDelete(key);
 #elif (UNITY_STANDALONE_WIN && !UNITY_EDITOR) || UNITY_EDITOR_WIN

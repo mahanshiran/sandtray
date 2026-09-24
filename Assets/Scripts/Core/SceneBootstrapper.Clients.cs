@@ -22,6 +22,7 @@ namespace Sandplay.Core
         private string _clientSearch = "";
         private bool _includeArchivedClients;
         private bool _clientReportsTab;
+        private bool _clientReplaysTab;
         private GameObject _clientDialog;
         private ClientRecordStore ClientStore => _clientStore ??= CreateClientStore();
         private ClientRecordStore CreateClientStore()
@@ -71,6 +72,7 @@ namespace Sandplay.Core
             var detailOutline = _clientDetail.gameObject.AddComponent<Outline>();
             detailOutline.effectColor = HomeCardBorder;
             detailOutline.effectDistance = new Vector2(1,-1);
+            BuildPersonalClientSyncControls();
             BuildOrganizationTherapistClientsPanel();
             _homePages["clients"] = _clientsPage;
             _clientsPage.SetActive(false);
@@ -151,9 +153,10 @@ namespace Sandplay.Core
             var guard = LocalAccountStorage.CaptureGuard();
             var store = ClientStore;
             var box = ClientDialog(F("Delete client?", "删除来访者？"), 540, 320);
+            box.gameObject.AddComponent<FriendViewLifetime>().Released=PersonalClientSyncClient.Instance.PauseForClientEdit();
             var message = ClientText(box, client.Name + "\n\n" + F(
-                "Delete this client profile from this device? Tables and reports will be kept under Unassigned tables. This cannot be undone here.",
-                "从此设备删除该来访者资料？沙盘与报告将保留在未分配的沙盘中。此操作无法在此撤销。"), 16, .07f,.30f,.86f,.48f,HomeText);
+                "Delete this client profile? When sync is enabled, this deletion also applies to your other devices. Tables and reports are kept. This cannot be undone here.",
+                "删除该来访者资料？启用同步后，此删除也会同步到其他设备。沙盘与报告将保留。此操作无法在此撤销。"), 16, .07f,.30f,.86f,.48f,HomeText);
             message.richText = false;
             var cancel = ClientButton(box,F("Cancel","取消"),.07f,.07f,.40f,.15f,()=>{if(_clientDialog!=null)Destroy(_clientDialog);_clientDialog=null;});
             Button confirm = null;
@@ -218,7 +221,7 @@ namespace Sandplay.Core
             button.onClick.AddListener(() =>
             {
                 _selectedClientId = id;
-                _clientReportsTab = false;
+                _clientReportsTab = false; _clientReplaysTab = false;
                 RefreshClientsPage();
             });
             ClientRecordAvatar(row, client, .025f, .20f, .18f, .60f);
@@ -282,11 +285,14 @@ namespace Sandplay.Core
                         catch (Exception) { _clientStatus.text = Localization.Get("clients.storage_error"); }
                     });
             }
-            var tablesTab = ClientButton(_clientDetail, "clients.tables", .035f, tabsY, .465f, .06f,
-                () => { _clientReportsTab = false; RefreshClientDetail(); });
-            var reportsTab = ClientButton(_clientDetail, "clients.reports", .50f, tabsY, .465f, .06f,
-                () => { _clientReportsTab = true; RefreshClientDetail(); });
-            StyleContentTab(tablesTab, !_clientReportsTab);
+            var tablesTab = ClientButton(_clientDetail, "clients.tables", .035f, tabsY, .31f, .06f,
+                () => { _clientReportsTab = false; _clientReplaysTab = false; RefreshClientDetail(); });
+            var reportsTab = ClientButton(_clientDetail, "clients.reports", .345f, tabsY, .31f, .06f,
+                () => { _clientReportsTab = true; _clientReplaysTab = false; RefreshClientDetail(); });
+            var replaysTab = ClientButton(_clientDetail, F("Replays", "回放"), .655f, tabsY, .31f, .06f,
+                () => { _clientReportsTab = false; _clientReplaysTab = true; RefreshClientDetail(); });
+            StyleContentTab(replaysTab, _clientReplaysTab);
+            StyleContentTab(tablesTab, !_clientReportsTab && !_clientReplaysTab);
             StyleContentTab(reportsTab, _clientReportsTab);
             float nextRowY = tabsY - .075f;
             if (client != null && !client.Archived)
@@ -305,9 +311,7 @@ namespace Sandplay.Core
                 nextRowY -= .07f;
             }
             float searchY = nextRowY;
-            var historySearch = ClientInput(_clientDetail, "", Localization.Get(_clientReportsTab ? "clients.search_reports" : "clients.search_tables"),
-                .035f, searchY, .93f, .055f, 100);
-            var content = ClientScroll(_clientDetail, "TablesAndReports", .035f, .025f, .93f, searchY - .04f);
+            var content = ClientScroll(_clientDetail, "TablesAndReports", .035f, .025f, .93f, searchY + .03f);
             ApplyHomeRoundedCorners(content.parent.GetComponent<Image>(), 12f);
             // This cache belongs to the open detail view, never another client/tab.
             var reportCache = new Dictionary<string, SessionData>();
@@ -323,6 +327,11 @@ namespace Sandplay.Core
             void RenderHistory(string query)
             {
                 ClearClientChildren(content);
+                if (_clientReplaysTab)
+                {
+                    RenderClientReplays(content, FilterClientHistory(tables, _selectedClientId, ""), query);
+                    return;
+                }
                 if (_clientReportsTab)
                 {
                     foreach (var entry in ClientReportHistory(tables, _selectedClientId, query,
@@ -345,7 +354,6 @@ namespace Sandplay.Core
                         ? "clients.history_no_matches" : _clientReportsTab ? "clients.no_reports" : "clients.no_tables"),
                         14, .05f, .05f, .90f, .90f, HomeMuted);
             }
-            historySearch.onValueChanged.AddListener(RenderHistory);
             RenderHistory("");
         }
 
@@ -400,7 +408,7 @@ namespace Sandplay.Core
             var list = ClientScroll(box,"Report table",.05f,.08f,.90f,.56f);
             foreach(var board in boards)
             {
-                var row=ClientRow(list,"Report table",64);
+                var row=ClientRow(list,"Report table",92);
                 var button=ClientButton(row,board.SessionName,.025f,.08f,.95f,.84f,()=>
                 {
                     try { account(); } catch (Exception) { return; }
@@ -409,7 +417,37 @@ namespace Sandplay.Core
                     {caption.text=F("The table assignment changed. Reopen the client's reports.","沙盘归属已更改，请重新打开来访者报告。");return;}
                     OpenReportWorkspace(board.SessionName);
                 });
-                button.GetComponentInChildren<TMP_Text>().richText=false;
+                AddBoardChooserThumbnail(button,board.SessionName);
+            }
+        }
+
+        private void AddBoardChooserThumbnail(Button button, string boardName)
+        {
+            var label=button.GetComponentInChildren<TMP_Text>();
+            label.richText=false;
+            label.alignment=TextAlignmentOptions.MidlineLeft;
+            label.enableWordWrapping=false;
+            label.overflowMode=TextOverflowModes.Ellipsis;
+            label.rectTransform.anchorMin=new Vector2(.23f,0);
+            label.rectTransform.anchorMax=new Vector2(.97f,1);
+            label.rectTransform.offsetMin=label.rectTransform.offsetMax=Vector2.zero;
+            var preview=ClientRect(button.transform,"BoardThumbnail",.02f,.08f,.18f,.84f);
+            var image=preview.gameObject.AddComponent<Image>();
+            image.sprite=ScreenshotManager.LoadThumbnail(boardName);
+            image.preserveAspect=true;
+            image.raycastTarget=false;
+            if(image.sprite!=null)
+            {
+                var owned=image.sprite;
+                preview.gameObject.AddComponent<FriendViewLifetime>().Released=()=>
+                {if(owned!=null){Destroy(owned.texture);Destroy(owned);}};
+            }
+            else
+            {
+                image.color=HomeCard;
+                var fallback=ClientText(preview,F("No preview","暂无预览"),11,0,0,1,1,HomeMuted);
+                fallback.alignment=TextAlignmentOptions.Center;
+                fallback.raycastTarget=false;
             }
         }
 
@@ -565,6 +603,7 @@ namespace Sandplay.Core
         private void ShowAuthorizedClientEditor(ClientRecord original)
         {
             var box = ClientDialog(Localization.Get(original == null ? "clients.new" : "clients.edit"), 780, 740);
+            box.gameObject.AddComponent<FriendViewLifetime>().Released=PersonalClientSyncClient.Instance.PauseForClientEdit();
             var content = ClientScroll(box, "ProfileForm", .05f, .14f, .90f, .72f);
             var safeSize = ((RectTransform)_safeArea.transform).rect.size;
             bool narrow = ((RectTransform)box).rect.width < 560 || safeSize.y > safeSize.x;

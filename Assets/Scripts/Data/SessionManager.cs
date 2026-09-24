@@ -23,7 +23,7 @@ namespace Sandplay.Data
             if (_requireWorkspace == null) throw new UnauthorizedAccessException("Record workspace is not initialized.");
             _requireWorkspace();
         }
-        private bool WorkspaceIsCurrent
+        public bool WorkspaceIsCurrent
         {
             get
             {

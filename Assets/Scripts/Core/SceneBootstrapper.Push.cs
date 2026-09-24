@@ -10,7 +10,7 @@ namespace Sandplay.Core
         {
             if(_safeArea==null)return false;
             if(target.kind=="schedules"){if(Guid.TryParse(target.schedule_id,out _))ShowScheduleDetail(target.schedule_id);else ShowSchedules();return true;}
-            if(target.kind=="reports"){if(target.notice_id>0)OpenReportNotice(target.notice_id);else OpenNotificationCenter();return true;}
+            if(target.kind=="reports"){ReportDeliveryClient.Instance.Refresh();if(target.notice_id>0)OpenSharedReport("notifications/"+target.notice_id+"/",true);else OpenReceivedReports();return true;}
             if(target.kind=="session_invitations"){OpenNotificationCenter();return true;}
             if(target.kind=="requests"){if(BackendClient.Instance.ExternalContactsAllowed)OpenFriendsTab("requests");return true;}
             if((target.kind!="messages" && target.kind!="invitations") || !Guid.TryParse(target.peer,out _))return true;

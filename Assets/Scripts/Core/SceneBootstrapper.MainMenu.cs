@@ -146,6 +146,11 @@ namespace Sandplay.Core
             navY -= navH + navGap;
             RegisterHomeNav(CreateHomeNavItem(sidebar.transform, "Nav_Schedules", "boards", F("Schedules", "预约日程"),
                 navY, navH, false, false, () => ShowSchedules()), "schedules");
+            navY -= navH + navGap;
+            var reportsNav = CreateHomeNavItem(sidebar.transform, "Nav_Reports", "boards", F("Reports", "报告"),
+                navY, navH, false, false, OpenReceivedReports);
+            RegisterHomeNav(reportsNav, "reports");
+            WireReportsBadge(reportsNav.transform);
             BuildFriendsSidebar(sidebar.transform);
 
             // Account card is moved into the dashboard header once its container exists.
@@ -398,7 +403,7 @@ namespace Sandplay.Core
             CreateHomeFeatureTile(content.transform, "Tile_AI", "ai",
                 Localization.Get("menu.tile_ai"), Localization.Get("menu.tile_ai_desc"),
                 new Vector2(0.675f, 0.03f), new Vector2(0.995f, 0.19f),
-                HomeCard, true, () => ShowHomeSection("ai"));
+                HomeCard, false, () => ShowHomeSection("ai"));
 
             _homePages.Clear();
             _homePages["home"] = _homeDashboardContent;
@@ -762,22 +767,126 @@ namespace Sandplay.Core
             _homePages["replays"]=_replaysPage;
         }
 
+        private Transform _homeAiReportList;
+        private TMP_InputField _homeAiReportSearch;
+        private TMP_Text _homeAiReportStatus;
+        private Button _homeAiArchiveFilter;
+        private bool _homeAiShowArchived;
+
         private void BuildHomeAiPage()
         {
             _aiPage = CreateHomeSidePage("AiPage");
             AddHomePageSubtitle(_aiPage.transform, Localization.Get("menu.tile_ai_desc"),
-                new Vector2(0.01f, 0.88f), new Vector2(0.95f, 0.97f));
-
-            CreateHomeCtaCard(_aiPage.transform, "Btn_AiOpen", "ai",
-                Localization.Get("menu.tile_ai"), Localization.Get("board.reports"),
-                new Vector2(0.01f, 0.62f), new Vector2(0.48f, 0.84f),
-                new Color(0.12f, 0.30f, 0.32f, 0.82f), OpenHomeAiEntry);
-            CreateHomeCtaCard(_aiPage.transform, "Btn_AiPro", "pro",
-                Localization.Get("sub.pro_badge") + "+", Localization.Get("menu.tile_ai_desc"),
-                new Vector2(0.52f, 0.62f), new Vector2(0.99f, 0.84f),
-                HomeProPurple, () => ShowPaywallPanel());
-
+                new Vector2(.01f,.89f),new Vector2(.99f,.97f));
+            _homeAiReportSearch=ClientInput(_aiPage.transform,"",F("Search by board, author, or report text","搜索沙盘、作者或报告内容"),.01f,.80f,.55f,.065f,0);
+            StyleReportInput(_homeAiReportSearch);
+            _homeAiReportSearch.onValueChanged.AddListener(_=>RefreshHomeAiReports());
+            _homeAiArchiveFilter=ClientButton(_aiPage.transform,F("Current reports","当前报告"),.58f,.80f,.22f,.065f,()=>
+            {
+                _homeAiShowArchived=!_homeAiShowArchived;
+                _homeAiArchiveFilter.GetComponentInChildren<TMP_Text>().text=_homeAiShowArchived?F("Archived reports","已归档报告"):F("Current reports","当前报告");
+                RefreshHomeAiReports();
+            });
+            ClientButton(_aiPage.transform,F("Refresh","刷新"),.82f,.80f,.17f,.065f,RefreshHomeAiReports);
+            _homeAiReportStatus=ClientText(_aiPage.transform,"",13,.01f,.73f,.98f,.05f,HomeMuted);
+            _homeAiReportStatus.richText=false;
+            _homeAiReportList=ClientScroll(_aiPage.transform,"AIReports",.01f,.035f,.98f,.68f);
             _homePages["ai"] = _aiPage;
+        }
+
+        private void RefreshHomeAiReports()
+        {
+            if(_homeAiReportList==null)return;
+            ClearClientChildren(_homeAiReportList);
+            var manager=SessionManager.Instance;
+            var backend=BackendClient.Instance;
+            if(manager==null || !backend.IsLoggedIn)
+            {
+                _homeAiReportStatus.text=F("Sign in to manage your AI reports.","登录后管理您的 AI 报告。");
+                ClientButton(ClientRow(_homeAiReportList,"SignIn",64),F("Sign in","登录"),.03f,.15f,.30f,.70f,()=>OpenLoginScreen(RefreshHomeAiReports));
+                return;
+            }
+            int epoch=LocalAccountStorage.Epoch;
+            bool Current()=>this!=null && epoch==LocalAccountStorage.Epoch && backend.IsLoggedIn;
+            string query=(_homeAiReportSearch?.text??"").Trim();
+            var reports=new List<(string board,AnalysisReport report)>();
+            int unreadable=0;
+            foreach(var board in manager.GetSavedSessions(includeArchived:true))
+            {
+                SessionData data;
+                try { data=manager.LoadSessionData(board.SessionName); }
+                catch { unreadable++;continue; }
+                if(data==null){unreadable++;continue;}
+                foreach(var report in data.Reports??new List<AnalysisReport>())
+                {
+                    if(report==null || report.Source!="ai" || report.AuthorUserId!=backend.UserId || report.Archived!=_homeAiShowArchived)continue;
+                    string searchable=board.SessionName+"\n"+report.AuthorName+"\n"+report.ResultText;
+                    if(query.Length>0 && searchable.IndexOf(query,StringComparison.OrdinalIgnoreCase)<0)continue;
+                    reports.Add((board.SessionName,report));
+                }
+            }
+            reports=reports.OrderByDescending(item=>DateTimeOffset.TryParse(item.report.CreatedAt,out var date)?date:DateTimeOffset.MinValue).ToList();
+            _homeAiReportStatus.text=reports.Count+F(" reports · newest first"," 份报告 · 最新优先")+
+                (unreadable>0?F(" · Some boards could not be loaded."," · 部分沙盘无法加载。") : "");
+            if(reports.Count==0)
+            {
+                var empty=ClientRow(_homeAiReportList,"Empty",130);
+                ClientText(empty,query.Length>0?F("No matching AI reports.","没有匹配的 AI 报告。"):
+                    _homeAiShowArchived?F("No archived AI reports.","暂无已归档的 AI 报告。"):
+                    F("Your saved AI reports will appear here. Open a board and use AI Reflection to create one.","保存的 AI 报告将显示在此处。打开沙盘并使用 AI 辅助反思生成报告。"),16,.03f,.28f,.94f,.65f,HomeMuted);
+                ClientButton(empty,F("My boards","我的沙盘"),.03f,.04f,.30f,.28f,()=>ShowHomeSection("boards"));
+            }
+            foreach(var item in reports)
+            {
+                var report=item.report;string board=item.board;
+                var row=ClientRow(_homeAiReportList,"AIReport",180);
+                var thumbnail=ClientRect(row,"BoardThumbnail",.025f,.36f,.19f,.59f);
+                var background=thumbnail.gameObject.AddComponent<Image>();
+                background.color=HomeChromeButton;
+                background.raycastTarget=false;
+                var capture=ScreenshotManager.LoadAnalysisPreview(report.ReportId);
+                if(capture==null)capture=ScreenshotManager.LoadThumbnail(board);
+                if(capture!=null)
+                {
+                    var imageRect=ClientRect(thumbnail,"Image",0,0,1,1);
+                    var image=imageRect.gameObject.AddComponent<Image>();
+                    image.sprite=capture;image.preserveAspect=true;image.raycastTarget=false;
+                    // Each load owns a new sprite and texture; release both when the list refreshes.
+                    var ownedCapture=capture;
+                    thumbnail.gameObject.AddComponent<FriendViewLifetime>().Released=()=>
+                    {
+                        if(ownedCapture!=null){Destroy(ownedCapture.texture);Destroy(ownedCapture);}
+                    };
+                    var open=thumbnail.gameObject.AddComponent<Button>();
+                    open.targetGraphic=background;
+                    background.raycastTarget=true;
+                    open.onClick.AddListener(()=>{if(Current())ShowReportDetail(report,board);});
+                }
+                else
+                {
+                    var placeholder=ClientText(thumbnail,F("No preview","暂无预览"),12,0,0,1,1,HomeMuted);
+                    placeholder.alignment=TextAlignmentOptions.Center;placeholder.raycastTarget=false;
+                }
+                var name=ClientText(row,board,19,.235f,.73f,.74f,.22f,HomeText);
+                name.richText=false;name.fontStyle=FontStyles.Bold;
+                string date=DateTimeOffset.TryParse(report.CreatedAt,out var created)?created.ToLocalTime().ToString("g"):report.CreatedAt;
+                var meta=ClientText(row,date+" · "+report.AuthorName+(string.IsNullOrEmpty(report.EditedAt)?"":F(" · Edited"," · 已编辑")),12,.235f,.56f,.74f,.17f,HomeMuted);meta.richText=false;
+                string preview=(report.ResultText??"").Replace('\n',' ');
+                if(preview.Length>180)preview=preview.Substring(0,180)+"…";
+                var summary=ClientText(row,preview,13,.235f,.34f,.74f,.22f,HomeMuted);summary.richText=false;summary.overflowMode=TextOverflowModes.Ellipsis;
+                ClientButton(row,F("Open","打开"),.025f,.07f,.15f,.23f,()=>{if(Current())ShowReportDetail(report,board);},true);
+                ClientButton(row,F("Edit","编辑"),.185f,.07f,.15f,.23f,()=>{if(Current())ShowReportEditor(report,board,RefreshHomeAiReports);});
+                Button pdf=null;
+                pdf=ClientButton(row,F("Export PDF","导出 PDF"),.345f,.07f,.19f,.23f,()=>{if(Current())ExportReportPdf(report,board,pdf,(TextMeshProUGUI)_homeAiReportStatus);});
+                if(backend.IsTherapistAccount)
+                    ClientButton(row,F("Share","共享"),.545f,.07f,.17f,.23f,()=>{if(Current())OpenReportSharing(board,report);});
+                ClientButton(row,report.Archived?F("Restore","恢复"):F("Archive","归档"),.735f,.07f,.24f,.23f,()=>
+                {
+                    if(!Current())return;
+                    try { manager.SetReportArchived(board,report.ReportId,!report.Archived);RefreshHomeAiReports(); }
+                    catch(Exception) { _homeAiReportStatus.text=Localization.Get("clients.storage_error"); }
+                });
+            }
         }
 
         private void BuildHomeObjectsPage()
@@ -867,6 +976,8 @@ namespace Sandplay.Core
                 RefreshHomeReplaysPage();
             else if (key == "schedules")
                 RefreshSchedulesPage();
+            else if (key == "ai")
+                RefreshHomeAiReports();
             else if (key == "settings")
                 RefreshAccountTypeSettings();
             if (_secondaryHomeHeader != null) _secondaryHomeHeader.transform.SetAsLastSibling();
@@ -898,6 +1009,15 @@ namespace Sandplay.Core
         private void OnHomeSubscriptionStatusChanged(bool subscribed)
         {
             UpdateHomeUserChrome();
+            RefreshSettingsValues();
+        }
+
+        private void OnAccountStatusChanged()
+        {
+            UpdateHomeUserChrome();
+            RefreshSettingsValues();
+            if (_accountPopover != null && _accountPopover.activeInHierarchy)
+                ShowAccountPopover();
         }
 
         private Sprite GetNavActiveGradientSprite()
@@ -1352,31 +1472,6 @@ namespace Sandplay.Core
             if (sheet == null) return;
             sheet.SetActive(false);
             if (Application.isPlaying) Destroy(sheet); else DestroyImmediate(sheet);
-        }
-
-        private void OpenHomeAiEntry()
-        {
-            var client = BackendClient.Instance;
-            if (client == null || !client.IsLoggedIn)
-            {
-                OpenLoginScreen(OpenHomeAiEntry);
-                return;
-            }
-            WithAccess("ai.analyze", OpenHomeAiWorkspace);
-        }
-
-        private void OpenHomeAiWorkspace()
-        {
-            var sessions = SessionManager.Instance?.GetSavedSessions();
-            if (sessions != null && sessions.Count > 0)
-            {
-                sessions.Sort((a, b) => string.Compare(b.ModifiedAt, a.ModifiedAt, StringComparison.Ordinal));
-                ShowReportsPanel(sessions[0].SessionName);
-            }
-            else
-            {
-                ShowLockedFeatureDialog(Localization.Get("menu.empty"));
-            }
         }
 
         private void UpdateHomeUserChrome()

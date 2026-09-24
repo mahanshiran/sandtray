@@ -8,7 +8,8 @@ namespace Sandplay.Core
 {
     [Serializable] public class ReportRecipients { public string owner_code,client_code; }
     [Serializable] public class ReportPublication { public string local_id,table_name,owner_code,client_code,source,text,organization_id,organization_client_id; public int revision; }
-    [Serializable] public class SharedReportInfo { public string id,table_name,author_name,source,text,created,updated; public int revision; }
+    [Serializable] public class SharedReportSection { public string heading,body; }
+    [Serializable] public class SharedReportInfo { public string id,table_name,author_name,client_name,source,text,created,updated; public int revision; public SharedReportSection[] sections; }
     [Serializable] public class ReportNoticeInfo { public long id;public string report_id,table_name,author_name,source,created; public bool read; }
     [Serializable] public class OrganizationNoticeInfo { public string id,organization_id,organization_name,invited_by_name,expires_at,created_at; }
     [Serializable] public class SessionInvitationNoticeInfo { public long id;public string sender_name,created_at,expires_at; }
@@ -19,7 +20,7 @@ namespace Sandplay.Core
         public OrganizationNoticeInfo[] organization_invitations=new OrganizationNoticeInfo[0];
         public SessionInvitationNoticeInfo[] session_invitations=new SessionInvitationNoticeInfo[0];
         public ScheduleNoticeInfo[] schedule_notifications=new ScheduleNoticeInfo[0];
-        public int unread;
+        public int unread, reports_unread;
         public long before;
     }
     [Serializable] class PendingReport { public string board,id; }
@@ -58,7 +59,9 @@ namespace Sandplay.Core
         public void Refresh()
         {
             EnsureAccount();if(user==0 || polling)return;polling=true;nextPoll=Time.unscaledTime+20;
-            FriendsClient.Instance.Request<ReportInbox>("notifications/",null,result=>{Inbox=result;polling=false;Changed?.Invoke();},error=>{Error=error;polling=false;nextPoll=Time.unscaledTime+40;Changed?.Invoke();});
+            int requestUser=user;string requestToken=token;
+            bool Current()=>BackendClient.Instance.IsLoggedIn && BackendClient.Instance.UserId==requestUser && BackendClient.Instance.AccessToken==requestToken;
+            FriendsClient.Instance.Request<ReportInbox>("notifications/",null,result=>{if(!Current())return;Inbox=result;Error=null;polling=false;Changed?.Invoke();},error=>{if(!Current())return;Error=error;polling=false;nextPoll=Time.unscaledTime+40;Changed?.Invoke();});
         }
         void SendNext()
         {

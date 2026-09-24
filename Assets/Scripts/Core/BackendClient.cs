@@ -121,6 +121,7 @@ namespace Sandplay.Core
         private int _userTypeRevision;
         public DateTime? SubscriptionExpiresAt { get; private set; }
         public string AccessSource { get; private set; }
+        public event Action OnAccountStatusChanged;
         private string RevenueCatUserId { get; set; }
         public string RevenueCatAppUserId =>
             !string.IsNullOrEmpty(RevenueCatUserId)
@@ -135,6 +136,7 @@ namespace Sandplay.Core
         {
             get
             {
+                if (!IsLoggedIn) return false;
                 // An active admin grant or an active store entitlement provides VIP.
                 if (SubscriptionExpiresAt.HasValue &&
                     DateTime.UtcNow < SubscriptionExpiresAt.Value)
@@ -153,10 +155,11 @@ namespace Sandplay.Core
 
         private void Start()
         {
-            // On app launch, if already logged in, refresh subscription status
+            // Resolve account access as soon as a saved session is restored.
             if (IsLoggedIn)
             {
-                FetchMe(null, err => Debug.LogWarning($"[BackendClient] Failed to refresh subscription on launch: {err}"));
+                FetchMe(_ => InitializeAccountAccess(),
+                    err => Debug.LogWarning($"[BackendClient] Failed to refresh subscription on launch: {err}"));
             }
         }
 
@@ -284,6 +287,7 @@ namespace Sandplay.Core
             ManagedCanCreateClients = ManagedCanCreateSchedules = ManagedCanHostSessions =
                 ManagedCanCreateReports = ManagedCanInviteClients = ManagedAllowExternalContacts = false;
             SaveToPrefs();
+            OnAccountStatusChanged?.Invoke();
         }
 
         /// <summary>Clear the local identity after the server has permanently erased it.</summary>
@@ -307,6 +311,7 @@ namespace Sandplay.Core
             ManagedCanCreateClients = ManagedCanCreateSchedules = ManagedCanHostSessions =
                 ManagedCanCreateReports = ManagedCanInviteClients = ManagedAllowExternalContacts = false;
             SaveToPrefs();
+            OnAccountStatusChanged?.Invoke();
         }
 
         // ── Public API calls ──────────────────────────────────────────────────
@@ -335,7 +340,11 @@ namespace Sandplay.Core
                 AccessToken = resp.access;
                 Sandplay.Data.LocalAccountStorage.ObserveIdentity();
                 RefreshToken = resp.refresh ?? "";
-                FetchMe(onSuccess, error =>
+                FetchMe(name =>
+                {
+                    InitializeAccountAccess();
+                    onSuccess?.Invoke(name);
+                }, error =>
                 {
                     // Leave the transition shield only after an identity is resolved or the failed login is cleared.
                     if (attempt != _loginAttempt) return;
@@ -540,6 +549,7 @@ namespace Sandplay.Core
 
                 SaveToPrefs();
                 RevenueCatManager.Instance?.IdentifyUser(RevenueCatAppUserId);
+                OnAccountStatusChanged?.Invoke();
                 onSuccess?.Invoke(UserName);
             }, error =>
             {
@@ -678,6 +688,12 @@ namespace Sandplay.Core
         /// <summary>
         /// Download the PDF report for an analysis record. Returns raw PDF bytes via onSuccess.
         /// </summary>
+        public void DownloadReceivedReportPdf(string reportId, Action<byte[]> onSuccess, Action<string> onError)
+        {
+            if (!Guid.TryParse(reportId, out _)) { onError?.Invoke("Invalid report ID"); return; }
+            StartCoroutine(GetBytes($"{BaseUrl}/community/reports/received/{reportId}/pdf/", AccessToken, onSuccess, onError));
+        }
+
         public void DownloadAnalysisPdf(string analysisId,
             Action<byte[]> onSuccess, Action<string> onError)
         {
@@ -992,36 +1008,53 @@ namespace Sandplay.Core
 
         private static string ExtractError(string body, long code)
         {
-            // Try to pull "detail" or "non_field_errors" from DRF JSON error
             if (!string.IsNullOrEmpty(body))
             {
-                var detail = ParseField(body, "detail");
-                if (!string.IsNullOrEmpty(detail)) return detail;
-                var nfe = ParseField(body, "non_field_errors");
-                if (!string.IsNullOrEmpty(nfe)) return nfe;
-                // DRF field validation errors have neither detail nor non_field_errors.
-                // Surface known capacity field messages without echoing the request/receipt.
                 try
                 {
                     var token = Newtonsoft.Json.Linq.JToken.Parse(body);
-                    if (token is Newtonsoft.Json.Linq.JArray rootErrors && rootErrors.Count > 0 &&
-                        rootErrors[0].Type == Newtonsoft.Json.Linq.JTokenType.String)
-                        return (string)rootErrors[0];
+                    var rootMessage = ApiErrorText(token);
+                    if (!string.IsNullOrEmpty(rootMessage)) return rootMessage;
                     if (!(token is Newtonsoft.Json.Linq.JObject fields)) return $"HTTP {code}";
-                    foreach (string field in new[] { "action", "device_id", "operation_id", "capability", "lease_id", "receipt", "therapist_code",
-                        "id", "client_code", "organization_id", "organization_client_id", "starts_at", "utc_offset_minutes", "nonce", "room" })
+                    foreach (string field in new[] { "detail", "non_field_errors" })
                     {
-                        var value = fields[field];
-                        if (value is Newtonsoft.Json.Linq.JArray errors && errors.Count > 0 &&
-                            errors[0].Type == Newtonsoft.Json.Linq.JTokenType.String)
-                            return field == "therapist_code" ? (string)errors[0] : field + ": " + (string)errors[0];
-                        if (value != null && value.Type == Newtonsoft.Json.Linq.JTokenType.String)
-                            return field == "therapist_code" ? (string)value : field + ": " + (string)value;
+                        var message = ApiErrorText(fields[field]);
+                        if (!string.IsNullOrEmpty(message)) return message;
+                    }
+                    // Only surface known validation fields. Unknown server fields may contain
+                    // request data or tokens that should not be displayed in the UI.
+                    foreach (string field in new[] { "email", "password", "name", "user_type", "language",
+                        "marketing_email_consent", "new_password", "current_password", "action", "device_id",
+                        "operation_id", "capability", "lease_id", "receipt", "therapist_code", "id",
+                        "client_code", "organization_id", "organization_client_id", "starts_at",
+                        "utc_offset_minutes", "nonce", "room" })
+                    {
+                        var message = ApiErrorText(fields[field]);
+                        if (string.IsNullOrEmpty(message)) continue;
+                        if (field == "therapist_code") return message;
+                        string label = field == "user_type" ? "Account type" : field.Replace('_', ' ');
+                        return char.ToUpperInvariant(label[0]) + label.Substring(1) + ": " + message;
                     }
                 }
                 catch (Newtonsoft.Json.JsonException) { }
             }
             return $"HTTP {code}";
+        }
+
+        private static string ApiErrorText(Newtonsoft.Json.Linq.JToken value)
+        {
+            if (value == null) return null;
+            if (value.Type == Newtonsoft.Json.Linq.JTokenType.String)
+                return ((string)value)?.Trim();
+            if (value is Newtonsoft.Json.Linq.JArray errors)
+            {
+                foreach (var error in errors)
+                {
+                    var message = ApiErrorText(error);
+                    if (!string.IsNullOrEmpty(message)) return message;
+                }
+            }
+            return null;
         }
 
         private static bool IsAuthenticationError(string error)

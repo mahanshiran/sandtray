@@ -26,6 +26,7 @@ namespace Sandplay.Core
             public bool can_create_clients;
             public bool can_create_schedules;
             public bool can_host_sessions;
+            public bool can_create_reports;
             public int? client_limit;
         }
 

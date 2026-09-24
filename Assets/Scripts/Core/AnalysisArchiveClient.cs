@@ -32,6 +32,8 @@ namespace Sandplay.Core
 
         private AnalysisArchiveQueue _queue = new();
         private int _user;
+        private int _epoch = -1;
+        private bool _recoveryPending;
         private string _token = "";
         private bool _sending;
         private float _nextSend;
@@ -42,21 +44,32 @@ namespace Sandplay.Core
         {
             var backend = BackendClient.Instance;
             int user = backend.IsLoggedIn ? backend.UserId : 0;
-            if (_user == user && _token == backend.AccessToken) return;
-            _user = user;
-            _token = backend.AccessToken;
-            _sending = false;
-            _nextSend = 0;
-            try { _queue = JsonUtility.FromJson<AnalysisArchiveQueue>(PlayerPrefs.GetString(QueueKey(user), "{}")) ?? new AnalysisArchiveQueue(); }
-            catch { _queue = new AnalysisArchiveQueue(); }
-            _queue.items ??= new List<PendingAnalysisArchive>();
+            if (_user != user || _token != backend.AccessToken || _epoch != LocalAccountStorage.Epoch)
+            {
+                _user = user;
+                _token = backend.AccessToken;
+                _epoch = LocalAccountStorage.Epoch;
+                _sending = false;
+                _nextSend = 0;
+                _recoveryPending = true;
+                try { _queue = JsonUtility.FromJson<AnalysisArchiveQueue>(PlayerPrefs.GetString(QueueKey(user), "{}")) ?? new AnalysisArchiveQueue(); }
+                catch { _queue = new AnalysisArchiveQueue(); }
+                _queue.items ??= new List<PendingAnalysisArchive>();
+            }
+            // /me can resolve before the old scene has been replaced. Keep recovery
+            // pending until SessionManager belongs to the newly initialized workspace.
+            if (!_recoveryPending || !WorkspaceReady) return;
             RecoverUnbackedReports();
+            _recoveryPending = false;
             SaveQueue();
         }
 
+        private bool WorkspaceReady => _user > 0 && !LocalAccountStorage.RequiresRestart &&
+            SessionManager.Instance != null && SessionManager.Instance.WorkspaceIsCurrent;
+
         private void RecoverUnbackedReports()
         {
-            if (_user <= 0 || SessionManager.Instance == null) return;
+            if (!WorkspaceReady) return;
             foreach (var board in SessionManager.Instance.GetSavedSessions(includeArchived: true))
             {
                 SessionData data;
@@ -75,7 +88,7 @@ namespace Sandplay.Core
         public void Queue(string board, AnalysisReport report)
         {
             EnsureAccount();
-            if (_user <= 0 || string.IsNullOrWhiteSpace(board) || report == null ||
+            if (!WorkspaceReady || string.IsNullOrWhiteSpace(board) || report == null ||
                 report.Source != "ai" || string.IsNullOrWhiteSpace(report.ReportId) ||
                 !string.IsNullOrWhiteSpace(report.CloudId)) return;
             if (!_queue.items.Any(item => item.board == board && item.reportId == report.ReportId))
@@ -100,7 +113,7 @@ namespace Sandplay.Core
         private void Update()
         {
             EnsureAccount();
-            if (_user > 0 && !_sending && Time.unscaledTime >= _nextSend) SendNext();
+            if (WorkspaceReady && !_sending && Time.unscaledTime >= _nextSend) SendNext();
         }
 
         private void SendNext()
@@ -126,10 +139,12 @@ namespace Sandplay.Core
             }
 
             int requestUser = _user;
+            int requestEpoch = _epoch;
             string requestToken = _token;
             string expectedText = report.ResultText;
             string screenshot = ScreenshotManager.LoadAnalysisImageBase64(report.ReportId);
-            bool CurrentAccount() => this != null && _user == requestUser && _token == requestToken &&
+            bool CurrentAccount() => this != null && requestEpoch == LocalAccountStorage.Epoch && WorkspaceReady &&
+                _user == requestUser && _token == requestToken &&
                 BackendClient.Instance.UserId == requestUser && BackendClient.Instance.AccessToken == requestToken;
 
             _sending = true;

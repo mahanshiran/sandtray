@@ -78,11 +78,14 @@ namespace Sandplay.Core
             if(manager==null || string.IsNullOrEmpty(board)) { ShowClientMessage("report.no_board");return; }
             if(backend==null || !backend.IsLoggedIn) { ShowClientMessage("report.sign_in");return; }
             int author=backend.UserId; string access=backend.AccessToken;
-            // Reports are an in-board workspace, so keep the board visible around the
-            // dialog. The editor body scrolls and does not need to consume the safe area.
+            // Give the report workspace most of the safe area on every screen size.
             var box=ClientDialog(Localization.Get("report.workspace"),920,590);
             box.GetComponent<Image>().color=HomeCard;
             var card=(RectTransform)box;
+            card.anchorMin=new Vector2(.07f,.025f);
+            card.anchorMax=new Vector2(.94f,.935f);
+            card.offsetMin=card.offsetMax=Vector2.zero;
+            Canvas.ForceUpdateCanvases();
             var dialog=_clientDialog;
             bool Current()=>dialog!=null && _clientDialog==dialog && manager==SessionManager.Instance && backend==BackendClient.Instance && backend.UserId==author && backend.AccessToken==access;
             bool dirty=false; Action pending=null; GameObject confirmation=null;
@@ -215,6 +218,7 @@ namespace Sandplay.Core
                 if(active<0 && activeTemplate!=null){templateOptions.Add(activeTemplate);active=templateOptions.Count-1;}
                 templateDropdown.ClearOptions();
                 templateDropdown.AddOptions(templateOptions.Select(t=>t?.Name??Localization.Get("templates.default")).ToList());
+                templateDropdown.template.sizeDelta = new Vector2(0, Mathf.Min(260, templateOptions.Count * 44 + 12));
                 templateDropdown.SetValueWithoutNotify(Mathf.Max(0,active));
                 if(templateError!=null)status.text=templateError;
             }
@@ -223,7 +227,6 @@ namespace Sandplay.Core
                 selected=report;original=report?.ResultText??"";dirty=false;readers.Clear();legacyInput=null;
                 activeTemplate=report==null?template:null;
                 ClearClientChildren(editor);bool editable=report==null || SessionManager.CanEditReport(report);
-                TextRow(board,report==null?Localization.Get("report.new_manual"):string.Join(" · ",new[]{report.Source=="ai"?Localization.Get("report.ai_source"):report.Source=="manual"?Localization.Get("report.manual_source"):Localization.Get("report.legacy"),report.CreatedAt,report.AuthorName}));
                 RefreshTemplates();
                 if(!editable)TextRow(Localization.Get("report.read_only"),Localization.Get("report.author_only"));
                 if(report?.Source=="ai")TextRow(Localization.Get("report.ai_source"),Localization.Get("report.ai_notice"));
@@ -251,7 +254,6 @@ namespace Sandplay.Core
                     TemplateField("report.client_voice",draft.ClientPerspective,v=>draft.ClientPerspective=v);
                     TemplateField("report.practitioner_notes",draft.PractitionerNotes,v=>draft.PractitionerNotes=v);
                     TemplateField("report.next_steps",draft.NextSteps,v=>draft.NextSteps=v);
-                    TemplateField("report.ai_reflection",draft.AIReflection,v=>draft.AIReflection=v);
                 }
                 save.interactable=editable;export.interactable=report!=null;if(share!=null)share.interactable=report!=null && editable;
                 status.text=templateError ?? Localization.Get("report.local_notice");showHistory=false;Layout();
@@ -311,7 +313,7 @@ namespace Sandplay.Core
                 int active=activeTemplate==null?0:templateOptions.FindIndex(t=>t?.Id==activeTemplate.Id && t?.Revision==activeTemplate.Revision);
                 templateDropdown.SetValueWithoutNotify(Mathf.Max(0,active));
                 GuardChange(()=>Render(null,next));
-            });
+            }, useHomeTheme: true);
             string pendingReportId=Guid.NewGuid().ToString("N");
             save=ClientButton(box,"manual.save",.02f,.015f,.29f,.065f,()=>
             {
@@ -339,7 +341,7 @@ namespace Sandplay.Core
                 catch(Exception){status.text=Localization.Get("clients.storage_error");}
             },true);
             export=ClientButton(box,"report.export",.68f,.015f,.30f,.065f,()=>GuardChange(()=>ExportReportPdf(selected,board,export,(TextMeshProUGUI)status)));
-            share=ClientButton(box,F("Share & notify","共享并通知"),0,0,1,1,()=>GuardChange(()=>OpenReportSharing(board,selected)));
+            share=ClientButton(box,F("Send to client","发送给来访者"),0,0,1,1,()=>GuardChange(()=>SendSavedReportToClient(board,selected,share,status)));
             Layout();RefreshHistory();
             var initialReports = newReport ? null : manager.LoadSessionData(board)?.Reports;
             var requestedReport = newReport || reportId == null ? null : initialReports?

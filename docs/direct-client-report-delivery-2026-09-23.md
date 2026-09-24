@@ -1,0 +1,9 @@
+# Direct client report delivery — 2026-09-23
+
+Manual report workspace now has **Send to client**. It uses the saved report and its board's linked client, and reports success only after the publication endpoint acknowledges delivery. Unsaved edits still use the existing save/discard handling. Missing account links and server errors are shown inline. Private practitioner notes remain excluded by ReportSharingText.
+
+The backend's additive `send_to_client` mode resolves organization recipients from the assigned organization client after checking active membership and report permissions. Personal recipients use the linked account ID and retain the accepted-connection authorization check. Existing code-based sharing remains compatible. New deliveries create the persistent received-report entry, unread notice, and eligible push jobs; existing report-email processing handles the notice. Duplicate retries do not duplicate alerts. Updates retain the existing revision/recipient checks and do not create repeated alerts.
+
+Verification: Unity runtime assembly compiled; 25 backend tests ran locally and in the candidate image (20 passed, 5 PostgreSQL-specific skips). Tests cover direct inbox retrieval, notification/push creation, retry deduplication, unrelated personal account denial, and organization assignment/permission checks without requiring friendship. No real report was sent for testing.
+
+Production release: `0423e3d74881e5d309d1b206cd4272f47f4addaf`, green slot. Based on `660b74050b4dbebb1d7cd488b2ed11289a27ff85` with only community/report_views.py and its report-notice tests overlaid. No migrations required. Deployment readiness passed; public /ready/ returned ready. Rollback image remains the previous release. Unity client must be restarted in Play mode or rebuilt to use the new button.

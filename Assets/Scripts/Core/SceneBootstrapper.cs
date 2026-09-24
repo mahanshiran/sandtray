@@ -127,6 +127,8 @@ namespace Sandplay.Core
         {
             ClearJoinedSessionLoadingHandlers();
             Localization.OnLanguageChanged -= RefreshAllLocalizedTexts;
+            if (BackendClient.Instance != null)
+                BackendClient.Instance.OnAccountStatusChanged -= OnAccountStatusChanged;
             UnwireNotificationHeadsUp();
             if (AgoraManager.Instance != null)
             {
@@ -207,6 +209,7 @@ namespace Sandplay.Core
             CreateAIManager();
             CreateUndoManager();
             CreateRevenueCatManager();
+            BackendClient.Instance.OnAccountStatusChanged += OnAccountStatusChanged;
             CreateAgoraManager();
 
             try { CreateEnvironment(); }

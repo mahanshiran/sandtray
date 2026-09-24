@@ -51,8 +51,8 @@ namespace Sandplay.Core
             var guard = LocalAccountStorage.CaptureGuard();
             var box = ClientDialog(F("Set up your account library", "设置账号资料库"), 780, 640);
             var dialog = _clientDialog;
-            var message = ClientText(box,F("Boards save on this device and check quota in the background. Start a private library, or copy existing records after confirming ownership. Existing records remain available; cloud backup is a separate action.",
-                "沙盘保存在此设备，额度在后台检查。可新建私有资料库，或确认归属后复制现有记录。现有记录仍可使用；云端备份需单独操作。"),17,.06f,.64f,.88f,.18f,HomeMuted);
+            var message = ClientText(box,F("Boards save on this device and check quota in the background. Start a private library, or copy existing records after confirming ownership. Existing records remain available. Personal therapist client profiles sync automatically after setup; board backup is a separate action.",
+                "沙盘保存在此设备，额度在后台检查。可新建私有资料库，或确认归属后复制现有记录。现有记录仍可使用。设置后，个人治疗师的来访者资料会自动同步；沙盘备份需单独操作。"),17,.06f,.64f,.88f,.18f,HomeMuted);
             message.richText=false;
             bool Current() => this != null && dialog != null && dialog == _clientDialog;
             void Run(Action action)

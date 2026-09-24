@@ -48,6 +48,7 @@ namespace Sandplay.Data
         private AggregateCapacityStore ResolveCapacity() => capacityProvider != null ? capacityProvider() : fixedCapacity;
         private readonly Action requireCreation;
         private bool saving;
+        public static event Action LocalChanged;
         public bool RecoveredFromBackup { get; private set; }
         public ClientRecordStore(string directory, Action guard = null, AggregateCapacityStore capacity = null, Action requireCreation = null, Func<AggregateCapacityStore> capacityProvider = null) { _path = Path.Combine(directory, "clients.json"); requireCurrent = guard; this.fixedCapacity=capacity; this.capacityProvider=capacityProvider; this.requireCreation=requireCreation; }
 
@@ -141,12 +142,43 @@ namespace Sandplay.Data
                     if (File.ReadAllText(_path) != expected) throw new InvalidOperationException("Client records changed. Please retry.");
                     beforeDelete?.Invoke();
                     LocalRecordFile.Write(_path, JsonUtility.ToJson(new Records { Clients = records }, true));
+                    LocalChanged?.Invoke();
                 }
                 void Done() { saving = false; deleted?.Invoke(); }
                 if (capacity != null) capacity.Write("Clients/clients.json", "clients.capacity", before, records.Select(c => c.Id), Persist, Done, Error);
                 else { Persist(); Done(); }
             }
             catch (Exception e) { Error(e.Message); }
+        }
+
+        // Restore an already-owned cloud record, not a new logical client/capacity slot.
+        // The expected snapshot prevents an in-flight sync from overwriting a local edit.
+        public void ApplySynced(PersonalClientSyncItem incoming, PersonalClientSyncItem expected)
+        {
+            requireCurrent?.Invoke();
+            if (saving) throw new InvalidOperationException("A client save is still in progress.");
+            var records = GetAll();
+            var current = records.Find(c => c.Id == incoming.id);
+            if (!PersonalClientSync.Same(PersonalClientSync.Snapshot(this, current), expected))
+                throw new InvalidOperationException("Client changed locally; syncing again.");
+            if (!incoming.deleted)
+            {
+                var record = JsonUtility.FromJson<ClientRecord>(incoming.record_json);
+                if (record == null || record.Id != incoming.id || string.IsNullOrWhiteSpace(record.Name))
+                    throw new InvalidDataException("Invalid synced client.");
+                if (record.Account != null && record.Account.UserId == 0) record.Account = null;
+                if (!string.IsNullOrEmpty(record.PhotoFile))
+                {
+                    string photoPath = PhotoPath(record.PhotoFile);
+                    byte[] photo = Convert.FromBase64String(incoming.photo_base64);
+                    Directory.CreateDirectory(Path.GetDirectoryName(photoPath));
+                    File.WriteAllBytes(photoPath, photo);
+                }
+                records.RemoveAll(c => c.Id == incoming.id);
+                records.Add(record);
+            }
+            else records.RemoveAll(c => c.Id == incoming.id);
+            LocalRecordFile.Write(_path, JsonUtility.ToJson(new Records { Clients = records }, true));
         }
 
         public ClientRecord Save(ClientRecord record, byte[] photoPng = null, bool replacePhoto = false)
@@ -237,6 +269,7 @@ namespace Sandplay.Data
                     File.WriteAllBytes(newPhotoPath, photoPng);
                 }
                 LocalRecordFile.Write(_path, content);
+                LocalChanged?.Invoke();
             }
             catch
             {

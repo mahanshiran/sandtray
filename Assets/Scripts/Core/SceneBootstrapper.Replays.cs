@@ -65,6 +65,23 @@ namespace Sandplay.Core
         private Action _replayReviewGuard;
         private RectTransform _replayMarkerLayer;
         private GameObject _replayReportPanel;
+        private readonly List<(ReplayTimelineNote note, Image background, Color normal)> _replayNoteRows =
+            new List<(ReplayTimelineNote, Image, Color)>();
+
+        private void UpdateReplayNoteRowHighlights(uint currentMs)
+        {
+            if (_replayReportPanel == null) return;
+            foreach (var row in _replayNoteRows)
+            {
+                if (row.background == null) continue;
+                bool active = _activePlayer != null && currentMs < _activePlayer.DurationMs &&
+                    currentMs >= row.note.OffsetMs &&
+                    currentMs - row.note.OffsetMs < NormalizeReplayNoteDuration(row.note.DurationMs);
+                row.background.color = active
+                    ? Color.Lerp(row.normal, HomePrimary, HomeIsLight ? .25f : .55f)
+                    : row.normal;
+            }
+        }
         private GameObject _replayNoteDialog;
         private GameObject _replayNoteCaption;
         private TMP_Text _replayNoteCaptionBody;
@@ -199,6 +216,33 @@ namespace Sandplay.Core
                 for (int i = 0; i < files.Count; i++)
                     AddReplayRow(contentGo.transform, files[i], isVip, isLatest: i == 0);
             }
+        }
+
+        // Resolve recordings only against boards already scoped to the selected client.
+        private void RenderClientReplays(Transform content, IEnumerable<SessionListEntry> boards, string query)
+        {
+            var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var board in boards)
+                if (board != null && !string.IsNullOrEmpty(board.SessionName)) names.Add(board.SessionName);
+            foreach (var path in ListSessionFiles())
+            {
+                if (!SessionPlayer.TryPeek(path, out var meta) || string.IsNullOrEmpty(meta.BoardName) ||
+                    !names.Contains(meta.BoardName) || meta.BoardName.IndexOf(query ?? "", StringComparison.OrdinalIgnoreCase) < 0) continue;
+                var row = ClientRow(content, "ClientReplay", 86);
+                var preview = ScreenshotManager.LoadReplayPreview(path, meta.BoardName);
+                var image = ClientRect(row, "Preview", .02f, .12f, .15f, .76f).gameObject.AddComponent<Image>();
+                image.sprite = preview; image.preserveAspect = true; image.raycastTarget = false;
+                ClientText(row, meta.BoardName, 15, .20f, .47f, .50f, .46f, HomeText).richText = false;
+                string date = File.GetLastWriteTime(path).ToString("g", Localization.Culture);
+                ClientText(row, date + " · " + TimeSpan.FromMilliseconds(meta.DurationMs).ToString(@"hh\:mm\:ss"),
+                    12, .20f, .08f, .50f, .35f, HomeMuted);
+                ClientButton(row, HasCapability("replays.play") ? "replays.play" : "replays.upgrade",
+                    .73f, .20f, .24f, .60f, () => StartReplay(path));
+            }
+            if (content.childCount == 0)
+                ClientText(ClientRow(content, "Empty", 90), string.IsNullOrWhiteSpace(query)
+                    ? F("No saved replays for this client on this device yet.", "此设备上暂无此来访者的已保存回放。")
+                    : F("No matching replays.", "没有匹配的回放。"), 14, .04f, .1f, .92f, .8f, HomeMuted);
         }
 
         private static List<string> ListSessionFiles()
@@ -381,12 +425,12 @@ namespace Sandplay.Core
             Place(title.rectTransform,.05f,.22f,.73f,.10f);
             var sub=card.Find("Sub").GetComponent<TextMeshProUGUI>();sub.color=HomeMuted;sub.fontSize=10;
             try{var file=new FileInfo(path);sub.text=file.LastWriteTime.ToString("g",Localization.Culture)+"\n"+F($"{meta.EventCount} events",$"{meta.EventCount} 个事件")+$" · {file.Length/1024} KB";}catch{sub.text="";}
-            Place(sub.rectTransform,.05f,.035f,.90f,.17f);
+            Place(sub.rectTransform,.05f,.115f,.90f,.09f);
             // Replay headers store the saved board name; resolve its current client assignment.
             // Do not infer clients from display names or partial filename matches.
             var linkedBoard = boards?.Find(entry => string.Equals(entry.SessionName, meta.BoardName, StringComparison.Ordinal));
-            if (linkedBoard != null) AddBoardClientLabel(thumb, linkedBoard, clientNames, true);
-            var duration=ClientRect(thumb,"Duration",.69f,linkedBoard != null && !string.IsNullOrWhiteSpace(linkedBoard.ClientId) ? .18f : .035f,.28f,.12f);duration.gameObject.AddComponent<Image>().color=new Color(0,0,0,.65f);
+            if (linkedBoard != null) AddReplayClientBadge(card, linkedBoard);
+            var duration=ClientRect(thumb,"Duration",.69f,.035f,.28f,.12f);duration.gameObject.AddComponent<Image>().color=new Color(0,0,0,.65f);
             long seconds=meta.DurationMs/1000;
             ClientText(duration,$"{seconds/60}:{seconds%60:00}",11,0,0,1,1,Color.white).alignment=TextAlignmentOptions.Center;
             if(latest){var badge=ClientRect(thumb,"Latest",.035f,.81f,.32f,.15f);badge.gameObject.AddComponent<Image>().color=HomeTeal;ClientText(badge,Localization.Get("replays.latest_badge"),11,0,0,1,1,HomePrimary).alignment=TextAlignmentOptions.Center;}
@@ -417,6 +461,55 @@ namespace Sandplay.Core
                 var arrow=ClientText(ex.transform,"↓",20,.05f,0,.16f,1,HomeText);arrow.alignment=TextAlignmentOptions.Center;
                 ClientRect(menu,"Divider",.08f,.49f,.84f,.01f).gameObject.AddComponent<Image>().color=HomeCardBorder;
             });
+        }
+
+        private void AddReplayClientBadge(Transform card, SessionListEntry board)
+        {
+            bool organization = !string.IsNullOrEmpty(board.OrganizationId) && !string.IsNullOrEmpty(board.OrganizationClientId);
+            if (!organization && string.IsNullOrEmpty(board.ClientId)) return;
+            var badge = ClientRect(card, "ReplayClient", .05f, .025f, .90f, .075f);
+            var name = ClientText(badge, Localization.Get("board.client_linked"), 12, .17f, 0, .83f, 1, HomeText);
+            name.richText = false; name.enableWordWrapping = false; name.overflowMode = TextOverflowModes.Ellipsis;
+            if (!organization)
+            {
+                var client = ClientStore.GetAll().Find(item => item.Id == board.ClientId);
+                if (client != null)
+                {
+                    name.text = client.Name;
+                    ClientRecordAvatar(badge, client, 0, .05f, .14f, .90f);
+                }
+                return;
+            }
+            int account = BackendClient.Instance.UserId, epoch = LocalAccountStorage.Epoch;
+            void Show(BackendClient.OrganizationClient client)
+            {
+                if (badge == null || client == null || BackendClient.Instance.UserId != account || LocalAccountStorage.Epoch != epoch) return;
+                name.text = client.name;
+                var avatar = ClientRect(badge, "Avatar", 0, .05f, .14f, .90f);
+
+                var circle = avatar.gameObject.AddComponent<Image>();
+                circle.sprite = Sandplay.UI.SessionAvatars.Circle(); circle.color = HomeTeal; circle.raycastTarget = false;
+                var initial = ClientText(avatar, string.IsNullOrWhiteSpace(client.name) ? "?" : client.name.Substring(0,1), 14, 0,0,1,1,HomeText);
+                initial.alignment = TextAlignmentOptions.Center;
+                avatar.gameObject.AddComponent<Sandplay.UI.AccountAvatar>().SetPerson(client.linked_user_id, client.avatar_url, initial);
+            }
+            foreach (bool archived in new[] { false, true })
+            {
+                if (TryLoadOrganizationTherapistClientCache(board.OrganizationId, archived, out var cached))
+                {
+                    var client = Array.Find(cached, item => item != null && item.id == board.OrganizationClientId);
+                    if (client != null) { Show(client); return; }
+                }
+            }
+            // A replay can be opened before the Clients page has ever loaded.
+            BackendClient.Instance.FetchOrganizationClients(board.OrganizationId, "", false, clients =>
+            {
+                if (badge == null || BackendClient.Instance.UserId != account || LocalAccountStorage.Epoch != epoch) return;
+                var client = Array.Find(clients ?? Array.Empty<BackendClient.OrganizationClient>(), item => item != null && item.id == board.OrganizationClientId);
+                if (client != null) Show(client);
+                else BackendClient.Instance.FetchOrganizationClients(board.OrganizationId, "", true,
+                    archived => Show(Array.Find(archived ?? Array.Empty<BackendClient.OrganizationClient>(), item => item != null && item.id == board.OrganizationClientId)), _ => { });
+            }, _ => { });
         }
 
         private static void ShrinkReplayRowButtonLabel(Button btn)
@@ -1571,6 +1664,7 @@ namespace Sandplay.Core
                 empty.alignment = TextAlignmentOptions.Center;
             }
             foreach (var note in notes) AddReplayReportNoteRow(content, note);
+            UpdateReplayNoteRowHighlights(_activePlayer.CurrentTimeMs);
             var exportReport = ClientButton(_replayReportPanel.transform, F("Export report video", "导出报告视频"),
                 .05f, .025f, .90f, .06f, StartReplayReportVideoExport);
             exportReport.GetComponentInChildren<TMP_Text>().fontSize = 11;
@@ -1599,6 +1693,8 @@ namespace Sandplay.Core
             ApplyHomeRoundedCorners(rowImage, 8f);
             var rowButton = row.AddComponent<Button>();
             rowButton.targetGraphic = rowImage;
+            rowButton.transition = Selectable.Transition.None;
+            _replayNoteRows.Add((note, rowImage, rowImage.color));
             rowButton.onClick.AddListener(() => ShowReplayNoteFromList(note));
             var layout = row.AddComponent<LayoutElement>();
             layout.minHeight = 74;
@@ -1628,6 +1724,7 @@ namespace Sandplay.Core
 
         private void CloseReplayReportPanel()
         {
+            _replayNoteRows.Clear();
             if (_replayReportPanel != null) Destroy(_replayReportPanel);
             _replayReportPanel = null;
         }
@@ -1958,6 +2055,7 @@ namespace Sandplay.Core
             }
 
             RefreshReplayPlayPauseLabel();
+            UpdateReplayNoteRowHighlights(_activePlayer.CurrentTimeMs);
             UpdateReplayReportCaption(_activePlayer.CurrentTimeMs);
             UpdateReplayExportCaption(_activePlayer.CurrentTimeMs);
             MaintainReplayObjectHighlight();

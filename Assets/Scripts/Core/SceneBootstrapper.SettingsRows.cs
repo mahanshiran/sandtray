@@ -61,7 +61,7 @@ namespace Sandplay.Core
             return button;
         }
 
-        private TMP_Dropdown SettingsDropdown(Transform row, string name, string[] choices, int selected, Action<int> changed)
+        private TMP_Dropdown SettingsDropdown(Transform row, string name, string[] choices, int selected, Action<int> changed, bool useHomeTheme = false)
         {
             // Unity's complete template provides keyboard navigation, scrolling and an
             // outside-click blocker; style it to match the shortcut settings controls.
@@ -72,26 +72,26 @@ namespace Sandplay.Core
             rect.anchorMin = new Vector2(.55f,.20f); rect.anchorMax = new Vector2(.975f,.80f);
             rect.offsetMin = rect.offsetMax = Vector2.zero;
             var dropdown = go.GetComponent<TMP_Dropdown>();
-            bool lightSurface = IsHomeSettingsTransform(row) || IsSandboxSettingsTransform(row);
+            bool lightSurface = useHomeTheme || IsHomeSettingsTransform(row) || IsSandboxSettingsTransform(row);
             var dropdownImage = go.GetComponent<Image>();
-            dropdownImage.color = lightSurface ? (HomeIsLight ? new Color(.94f,.96f,.96f) : new Color(.12f,.20f,.23f)) : new Color(.20f,.25f,.32f);
+            dropdownImage.color = useHomeTheme ? HomeChromeButton : lightSurface ? (HomeIsLight ? new Color(.94f,.96f,.96f) : new Color(.12f,.20f,.23f)) : new Color(.20f,.25f,.32f);
             ApplyHomeRoundedCorners(dropdownImage, 10f);
             dropdown.template.GetComponent<Image>().color = lightSurface ? HomeCard : new Color(.12f,.16f,.23f);
             dropdown.template.sizeDelta = new Vector2(0, Mathf.Min(260, choices.Length*44+12));
             var scrollbar = dropdown.template.GetComponentInChildren<Scrollbar>(true);
             scrollbar.GetComponent<RectTransform>().sizeDelta = new Vector2(6,0);
-            scrollbar.GetComponent<Image>().color = new Color(.10f,.14f,.19f);
-            scrollbar.targetGraphic.color = new Color(.42f,.52f,.65f);
+            scrollbar.GetComponent<Image>().color = useHomeTheme ? HomeCard : new Color(.10f,.14f,.19f);
+            scrollbar.targetGraphic.color = useHomeTheme ? HomeMuted : new Color(.42f,.52f,.65f);
             dropdown.template.Find("Viewport").GetComponent<RectTransform>().sizeDelta = new Vector2(-8,0);
             var item = dropdown.itemText.GetComponentInParent<Toggle>(true);
             item.GetComponent<RectTransform>().sizeDelta = new Vector2(0,44);
             ((RectTransform)item.transform.parent).sizeDelta = new Vector2(0,52);
             item.targetGraphic.color = lightSurface ? HomeCard : new Color(.20f,.25f,.32f);
             var colors = item.colors;
-            colors.highlightedColor = new Color(.65f,.80f,1f);
+            colors.highlightedColor = useHomeTheme ? Color.Lerp(Color.white, HomePrimary, .3f) : new Color(.65f,.80f,1f);
             colors.selectedColor = colors.highlightedColor;
             item.colors = colors;
-            item.graphic.color = new Color(.55f,.78f,1f);
+            item.graphic.color = useHomeTheme ? HomePrimary : new Color(.55f,.78f,1f);
             item.graphic.rectTransform.sizeDelta = new Vector2(4,20);
             foreach (var text in go.GetComponentsInChildren<TMP_Text>(true))
             {

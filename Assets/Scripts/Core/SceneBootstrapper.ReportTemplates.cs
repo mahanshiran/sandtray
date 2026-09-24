@@ -94,7 +94,7 @@ namespace Sandplay.Core
                 var name = ClientInput(nameRow, initialName, Localization.Get("templates.name"), .02f, .08f, .96f, .54f, 80);
                 var chosen = new HashSet<string>(source?.SectionKeys ?? ReportTemplateStore.StandardSections.Take(4));
                 name.onValueChanged.AddListener(_ => dirty = true);
-                foreach (var key in ReportTemplateStore.StandardSections)
+                foreach (var key in ReportTemplateStore.StandardSections.Where(key => key != "report.ai_reflection"))
                 {
                     var row = ClientRow(list, key, 94);
                     ClientText(row, Localization.Get(key), 15, .025f, .08f, .66f, .84f, HomeText);
@@ -115,7 +115,7 @@ namespace Sandplay.Core
                     {
                         store.Save(new ReportTemplate {
                             Id = duplicate ? null : source?.Id, Revision = duplicate ? 0 : source?.Revision ?? 0,
-                            Name = name.text.Trim(), SectionKeys = ReportTemplateStore.StandardSections.Where(chosen.Contains).ToArray()
+                            Name = name.text.Trim(), SectionKeys = ReportTemplateStore.StandardSections.Where(key => key != "report.ai_reflection" && chosen.Contains(key)).ToArray()
                         });
                         dirty = false; RenderList();
                         status.text = Localization.Get("templates.saved");

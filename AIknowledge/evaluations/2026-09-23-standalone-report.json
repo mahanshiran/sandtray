@@ -1,0 +1,141 @@
+{
+  "release": "eacabdbc8ecfa983abb4411509817868fde4f15e",
+  "scope": "Synthetic provider smoke checks: four-section final report, no questions, validated source IDs; not clinical validation",
+  "results": [
+    {
+      "case": "english",
+      "ok": true,
+      "seconds": 7.4,
+      "reflection": "SUMMARY\nTwo distinct colored markers—red and green—are the only placed objects in this scene, positioned symmetrically along a central horizontal axis on otherwise empty sand. The tray has no terrain variation, and no additional features or figures are present.\n\nOBSERVATIONS\nThe red marker sits to the left of center, and the green marker sits to the right of center, both at the same depth level on flat sand. Neither marker is embedded in sand, tilted, or adjacent to any other object. The tray boundary is described as brown, with no water, structures, or natural elements present. The scene contains no figures, animals, vehicles, buildings, or symbolic items beyond the two markers. The sand surface is uniformly flat with no mounds, depressions, or texture variation.\n\nSCENE COMPOSITION\nThe layout is defined by simple symmetry and clear separation: the two markers face each other across open space, forming a balanced pair without enclosure, connection, or grouping. Their equal distance from center and identical category (Markers) emphasize repetition and contrast through color alone. No object interrupts the visual field between them, and the absence of terrain relief or other elements leaves the composition minimal and uncluttered.\n\nCONCLUSION\nThis is a deliberately sparse, two-element arrangement centered on chromatic distinction and spatial balance within an unmodified sand tray.\n\nPRACTICE CONTEXT\n\nThese notes support the reflection method; they are not evidence about the individual.\n\n[1] The builder determines personal meaning. Follow their language and pace; use open invitations instead of supplying a symbol interpretation. Avoid entering or changing the tray without invitation. Training and consultation support competent practice.\n\n[2] Document the construction sequence, sand use, placements and the creator’s words, alongside relevant context and changes across sessions. Keep recorded events distinct from the therapist’s reflections. A finished-tray image cannot supply missing process or history.\n\n[3] Professional AI use requires attention to transparency, privacy, bias, evidence and human oversight. A model-generated reflection needs professional review; an apparently fluent answer does not establish clinical validity.\n\nSOURCES\n\n[1] Texas SandTray Association — Best Practices\nhttps://www.txsandtray.org/best-practices\n\n[2] ISST — Guidelines for the final case study\nhttps://www.isst-society.com/wp-content/uploads/2022/09/Guidelines_final_case_study.pdf\n\n[3] APA — Ethical guidance for AI in professional practice\nhttps://www.apa.org/topics/artificial-intelligence-machine-learning/ethical-guidance-ai-professional-practice",
+      "sources": [
+        {
+          "id": "tsta-practice",
+          "title": "Texas SandTray Association — Best Practices",
+          "url": "https://www.txsandtray.org/best-practices",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Best Practices",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "tsta-practice-01"
+        },
+        {
+          "id": "isst-case",
+          "title": "ISST — Guidelines for the final case study",
+          "url": "https://www.isst-society.com/wp-content/uploads/2022/09/Guidelines_final_case_study.pdf",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Guidelines, pages 1–2",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "isst-case-01"
+        },
+        {
+          "id": "apa-ai",
+          "title": "APA — Ethical guidance for AI in professional practice",
+          "url": "https://www.apa.org/topics/artificial-intelligence-machine-learning/ethical-guidance-ai-professional-practice",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Professional practice guidance",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "apa-ai-01"
+        }
+      ],
+      "knowledge_version": "1e3679f2218299c3ab839edc67ed00f5524d41e38b87de0f1d2b63b2c581c32d",
+      "model": "qwen-plus",
+      "tokens_used": 2157,
+      "clinical_review": "not performed"
+    },
+    {
+      "case": "chinese",
+      "ok": true,
+      "seconds": 7.2,
+      "reflection": "摘要\n画面最显著的特征是沙盘中仅放置两个颜色鲜明、类别相同的圆形标记，一红一绿，呈水平对称分布于沙面中央区域。\n\n观察\n1. 沙盘内仅有两个可见物件：一枚红色标记与一枚绿色标记；\n2. 两枚标记均位于沙面，无其他物件、人物、建筑或自然元素；\n3. 沙面地形平坦，无明显起伏、沟壑或堆塑痕迹；\n4. 沙盘边界为棕色，未见水体、围栏、路径或其他背景结构；\n5. 标记之间水平间距清晰，左右分置，中心区域留空。\n\n画面结构\n画面由两个同质物件构成极简布局：二者大小相当、类别一致、色彩对比强烈，在水平方向上彼此分离，中间保留开阔的空白沙面；整体无围合、无连接、无层级，亦无重复或聚集现象，形成一种平衡而疏离的二元结构。\n\n总结\n本画面呈现为一个高度简化、对称分离的双点结构，依靠色彩差异与空间间距建立基本视觉关系，其余区域保持未使用状态，结构特征明确且无复杂组织。\n\n实践参考\n\n以下资料支持反思方法，不证明对个人的判断。\n\n[1] 沙盘创作者决定其个人意义。跟随其语言与节奏，以开放邀请代替替对方解释象征。未经邀请不进入或改变沙盘。专业训练与督导支持胜任实践。\n\n[2] 记录制作顺序、用沙方式、摆放、创作者原话，以及相关背景和跨次变化。把实际事件与治疗师的思考分开。完成后的沙盘照片不能补足缺失的过程或历史。\n\n[3] 专业使用AI应注意透明度、隐私、偏差、证据与人工监督。模型生成的反思需要专业审阅，语言流畅并不能证明临床有效性。\n\n资料来源\n\n[1] Texas SandTray Association — Best Practices\nhttps://www.txsandtray.org/best-practices\n\n[2] ISST — Guidelines for the final case study\nhttps://www.isst-society.com/wp-content/uploads/2022/09/Guidelines_final_case_study.pdf\n\n[3] APA — Ethical guidance for AI in professional practice\nhttps://www.apa.org/topics/artificial-intelligence-machine-learning/ethical-guidance-ai-professional-practice",
+      "sources": [
+        {
+          "id": "tsta-practice",
+          "title": "Texas SandTray Association — Best Practices",
+          "url": "https://www.txsandtray.org/best-practices",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Best Practices",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "tsta-practice-01"
+        },
+        {
+          "id": "isst-case",
+          "title": "ISST — Guidelines for the final case study",
+          "url": "https://www.isst-society.com/wp-content/uploads/2022/09/Guidelines_final_case_study.pdf",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Guidelines, pages 1–2",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "isst-case-01"
+        },
+        {
+          "id": "apa-ai",
+          "title": "APA — Ethical guidance for AI in professional practice",
+          "url": "https://www.apa.org/topics/artificial-intelligence-machine-learning/ethical-guidance-ai-professional-practice",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Professional practice guidance",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "apa-ai-01"
+        }
+      ],
+      "knowledge_version": "1e3679f2218299c3ab839edc67ed00f5524d41e38b87de0f1d2b63b2c581c32d",
+      "model": "qwen-plus",
+      "tokens_used": 2151,
+      "clinical_review": "not performed"
+    },
+    {
+      "case": "vision",
+      "ok": true,
+      "seconds": 6.6,
+      "reflection": "SUMMARY\nTwo circular markers—one red, one green—are placed on a flat, light-colored sand surface within a brown tray boundary. The scene contains no raised or depressed terrain, and no additional objects or features are present.\n\nOBSERVATIONS\nThe red marker sits on the left side of the tray and the green marker on the right, with noticeable empty space between them. Both markers are identical in shape and size, differing only in color. The sand surface is uniformly level, with no ridges, mounds, or indentations. The tray’s perimeter is a solid brown border enclosing the entire scene.\n\nSCENE COMPOSITION\nThe layout is symmetrical along the horizontal axis, with the two markers positioned at equal distances from the center but separated by open space. There is no grouping, enclosure, or connection between the markers; each stands independently. The absence of terrain variation or additional elements emphasizes the simplicity and spatial separation of the two objects.\n\nCONCLUSION\nThis scene consists solely of two colored markers placed apart on a flat sand field within a defined tray, with no further structure, interaction, or relief.\n\nPRACTICE CONTEXT\n\nThese notes support the reflection method; they are not evidence about the individual.\n\n[1] The builder determines personal meaning. Follow their language and pace; use open invitations instead of supplying a symbol interpretation. Avoid entering or changing the tray without invitation. Training and consultation support competent practice.\n\n[2] Document the construction sequence, sand use, placements and the creator’s words, alongside relevant context and changes across sessions. Keep recorded events distinct from the therapist’s reflections. A finished-tray image cannot supply missing process or history.\n\n[3] Professional AI use requires attention to transparency, privacy, bias, evidence and human oversight. A model-generated reflection needs professional review; an apparently fluent answer does not establish clinical validity.\n\nSOURCES\n\n[1] Texas SandTray Association — Best Practices\nhttps://www.txsandtray.org/best-practices\n\n[2] ISST — Guidelines for the final case study\nhttps://www.isst-society.com/wp-content/uploads/2022/09/Guidelines_final_case_study.pdf\n\n[3] APA — Ethical guidance for AI in professional practice\nhttps://www.apa.org/topics/artificial-intelligence-machine-learning/ethical-guidance-ai-professional-practice",
+      "sources": [
+        {
+          "id": "tsta-practice",
+          "title": "Texas SandTray Association — Best Practices",
+          "url": "https://www.txsandtray.org/best-practices",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Best Practices",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "tsta-practice-01"
+        },
+        {
+          "id": "isst-case",
+          "title": "ISST — Guidelines for the final case study",
+          "url": "https://www.isst-society.com/wp-content/uploads/2022/09/Guidelines_final_case_study.pdf",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Guidelines, pages 1–2",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "isst-case-01"
+        },
+        {
+          "id": "apa-ai",
+          "title": "APA — Ethical guidance for AI in professional practice",
+          "url": "https://www.apa.org/topics/artificial-intelligence-machine-learning/ethical-guidance-ai-professional-practice",
+          "license": "Not established; linked reference only",
+          "review_status": "source-checked; not clinician-reviewed",
+          "locator": "Professional practice guidance",
+          "authors": "",
+          "license_urls": [],
+          "passage_id": "apa-ai-01"
+        }
+      ],
+      "knowledge_version": "1e3679f2218299c3ab839edc67ed00f5524d41e38b87de0f1d2b63b2c581c32d",
+      "model": "qwen3-vl-plus",
+      "tokens_used": 2360,
+      "clinical_review": "not performed"
+    }
+  ]
+}

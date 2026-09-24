@@ -81,9 +81,12 @@ namespace Sandplay.Core
                 UserAvatarUrl = me.profile?.avatar_url ?? "";
                 RevenueCatUserId = me.revenuecatAppUserId;
                 StoreSubscriptionState = me.subscriptionState;
+                AccessSource = me.access_source ?? "";
                 SubscriptionExpiresAt = DateTime.TryParse(me.subscriptionExpireDate, out var expires) ? expires : (DateTime?)null;
                 SaveToPrefs();
                 RevenueCatManager.Instance?.IdentifyUser(RevenueCatAppUserId);
+                OnAccountStatusChanged?.Invoke();
+                InitializeAccountAccess();
                 success?.Invoke(UserName);
                 yield break;
             }
