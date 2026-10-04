@@ -39,11 +39,12 @@ namespace Sandplay.UI
         {
             if (content == null) return;
             var parent = transform.parent as RectTransform;
-            float available = Mathf.Max(48, (parent != null ? parent.rect.height : Screen.height) - 140);
+            // Keep the upper tools near the top and reserve space for the view cube below.
+            float available = Mathf.Max(48, (parent != null ? parent.rect.height : Screen.height) - 124);
             float fittedHeight = Mathf.Min(height, available);
-            viewport.anchorMin = viewport.anchorMax = new Vector2(0, .5f);
-            viewport.pivot = new Vector2(0, .5f);
-            viewport.anchoredPosition = new Vector2(4, 12);
+            viewport.anchorMin = viewport.anchorMax = new Vector2(0, 1);
+            viewport.pivot = new Vector2(0, 1);
+            viewport.anchoredPosition = new Vector2(4, -8);
             viewport.sizeDelta = new Vector2(width, fittedHeight);
             var position = content.anchoredPosition;
             position.y = Mathf.Clamp(position.y, 0, height - fittedHeight);

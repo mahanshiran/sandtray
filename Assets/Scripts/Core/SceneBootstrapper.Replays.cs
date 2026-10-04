@@ -160,7 +160,7 @@ namespace Sandplay.Core
             noteTxt.enableWordWrapping = true;
             noteTxt.text = isVip
                 ? Localization.Get("replays.storage_note")
-                : F("Replay access depends on your current plan and grants.", "回放权限由当前方案及授权决定。");
+                : F("Replays are saved on this device. Playback depends on your plan and grants.", "回放保存在此设备上，播放权限取决于您的方案及授权。");
             var noteRT = noteGo.GetComponent<RectTransform>();
             noteRT.anchorMin = new Vector2(0.10f, 0.865f);
             noteRT.anchorMax = new Vector2(0.90f, 0.915f);

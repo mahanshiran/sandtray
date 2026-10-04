@@ -114,7 +114,7 @@ namespace Sandplay.UI
 
             // Show brush settings only for sand tools
             bool isSandTool = evt.NewMode == ToolMode.SandRaise || evt.NewMode == ToolMode.SandDig ||
-                              evt.NewMode == ToolMode.SandSmooth || evt.NewMode == ToolMode.SandFlatten;
+                              evt.NewMode == ToolMode.SandSmooth || evt.NewMode == ToolMode.SandFlatten || evt.NewMode == ToolMode.SandDraw;
             if (_brushSettingsPanel) _brushSettingsPanel.SetActive(isSandTool);
 
             // Show delete button only in select mode
@@ -140,6 +140,7 @@ namespace Sandplay.UI
                 ToolMode.SandRaise => Localization.Get("hud.raise_sand"),
                 ToolMode.SandDig => Localization.Get("hud.dig_sand"),
                 ToolMode.SandSmooth => Localization.Get("hud.smooth_sand"),
+                ToolMode.SandDraw => Localization.Get("tool.draw"),
                 ToolMode.SandFlatten => Localization.Get("hud.flatten_sand"),
                 ToolMode.ObjectPlace => Localization.Get("hud.place_object"),
                 ToolMode.ObjectMove => Localization.Get("hud.move_object"),

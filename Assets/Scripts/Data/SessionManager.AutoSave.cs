@@ -130,7 +130,7 @@ namespace Sandplay.Data
             return Hash128.Compute(JsonUtility.ToJson(new SessionData
             {
                 SessionName = data.SessionName, SandboxWidth = data.SandboxWidth,
-                SandboxDepth = data.SandboxDepth, HeightmapResolution = data.HeightmapResolution,
+                SandboxDepth = data.SandboxDepth, CircularTray = data.CircularTray, HeightmapResolution = data.HeightmapResolution,
                 HeightmapBase64 = data.HeightmapBase64, SplatmapBase64 = data.SplatmapBase64,
                 PlacedObjects = data.PlacedObjects
             })).ToString();

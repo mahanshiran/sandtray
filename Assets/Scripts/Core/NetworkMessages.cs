@@ -128,7 +128,7 @@ namespace Sandplay.Core
         }
 
         public static byte[] WriteFullState(float boardW, float boardD, int resolution, byte[] heightmap,
-            SpawnObjectData[] objects, ColorSyncData[] colors)
+            SpawnObjectData[] objects, ColorSyncData[] colors, bool circularTray = false)
         {
             using var ms = new MemoryStream();
             using var w = new BinaryWriter(ms);
@@ -163,6 +163,7 @@ namespace Sandplay.Core
                 }
             }
 
+            w.Write(circularTray);
             return ms.ToArray();
         }
 
@@ -284,6 +285,12 @@ namespace Sandplay.Core
         public static void ReadFullState(byte[] data, out float boardW, out float boardD,
             out int resolution, out byte[] heightmap, out SpawnObjectData[] objects, out ColorSyncData[] colors)
         {
+            ReadFullState(data, out boardW, out boardD, out resolution, out heightmap, out objects, out colors, out _);
+        }
+
+        public static void ReadFullState(byte[] data, out float boardW, out float boardD,
+            out int resolution, out byte[] heightmap, out SpawnObjectData[] objects, out ColorSyncData[] colors, out bool circularTray)
+        {
             RequireBytes(data, 16, nameof(ReadFullState));
             using var ms = new MemoryStream(data);
             using var r = new BinaryReader(ms);
@@ -318,6 +325,7 @@ namespace Sandplay.Core
                     Color = ReadColor(r)
                 };
             }
+            circularTray = ms.Position < ms.Length && r.ReadBoolean();
         }
 
         public static void ReadHeightmapRegion(byte[] data, out int startX, out int startZ,

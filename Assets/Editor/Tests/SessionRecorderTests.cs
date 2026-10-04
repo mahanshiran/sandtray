@@ -327,6 +327,7 @@ namespace Sandplay.Tests
         public void Recorder_WritesParsableFile_EndToEnd()
         {
             var rec = SessionRecorder.GetOrCreate();
+            bool includesManifest = Sandplay.Objects.NetworkCatalogRegistry.IsLoaded;
             string filePath = rec.StartRecording("EndToEndBoard");
             Assert.IsNotNull(filePath, "StartRecording should return a path.");
             Assert.IsTrue(rec.IsRecording);
@@ -348,9 +349,13 @@ namespace Sandplay.Tests
             {
                 Assert.IsTrue(player.Load(filePath));
                 Assert.AreEqual("EndToEndBoard", player.BoardName);
-                Assert.AreEqual(3, player.Events.Count);
-                Assert.AreEqual(NetMsgType.MoveObject, player.Events[2].Type);
-                Assert.AreEqual(4, player.Events[2].Payload.Length);
+                int firstAction = includesManifest ? 1 : 0;
+                Assert.AreEqual(firstAction + 3, player.Events.Count);
+                if (includesManifest) Assert.AreEqual(NetMsgType.CatalogManifest, player.Events[0].Type);
+                Assert.AreEqual(NetMsgType.RoleRequest, player.Events[firstAction].Type);
+                Assert.AreEqual(NetMsgType.RoleAssignment, player.Events[firstAction + 1].Type);
+                Assert.AreEqual(NetMsgType.MoveObject, player.Events[firstAction + 2].Type);
+                Assert.AreEqual(4, player.Events[firstAction + 2].Payload.Length);
             }
             finally
             {

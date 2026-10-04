@@ -78,6 +78,7 @@ namespace Sandplay.Data
         public List<ClientAssignmentChange> ClientAssignmentHistory = new();
         public float SandboxWidth;
         public float SandboxDepth;
+        public bool CircularTray; // Absent in older boards: rectangle.
         public int HeightmapResolution;
         public string HeightmapBase64; // float[] encoded as Base64
         public string SplatmapBase64;  // Base64: legacy RGBA (4 B/px) or primary+extra RGBA (8 B/px)

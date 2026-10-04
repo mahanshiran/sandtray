@@ -208,6 +208,7 @@ namespace Sandplay.Objects
             foreach (var pose in _groupStart) pose.Restore();
             delta = ClampGroupDelta(_groupStart.Select(p => p.obj), delta);
             foreach (var pose in _groupStart) if (pose.obj != null) pose.obj.transform.position = pose.position + delta;
+            if (GameManager.Instance?.Config != null && GameManager.Instance.Config.CircularTray) KeepGroupInsideTray();
         }
         public void RaiseGroup(float amount)
         {
@@ -223,10 +224,12 @@ namespace Sandplay.Objects
             }
             if (min <= max) TranslateGroup(Vector3.up * Mathf.Clamp(amount, min, max));
         }
-        public void RotateGroup(float degrees)
+        public void RotateGroup(float degrees) => RotateGroup(degrees, Vector3.up);
+
+        public void RotateGroup(float degrees, Vector3 axis)
         {
             if (_groupStart == null) return;
-            var rotation = Quaternion.Euler(0, degrees, 0);
+            var rotation = Quaternion.AngleAxis(degrees, axis.normalized);
             foreach (var pose in _groupStart) if (pose.obj != null)
             {
                 pose.obj.transform.position = _groupPivot + rotation * (pose.position - _groupPivot);
@@ -260,6 +263,15 @@ namespace Sandplay.Objects
             var bounds = SelectionBounds();
             if (bounds.size.x > config.SandboxWidth || bounds.size.z > config.SandboxDepth)
             { foreach (var pose in _groupStart) pose.Restore(); return; }
+            if (config.CircularTray)
+            {
+                float available = Mathf.Min(config.SandboxWidth, config.SandboxDepth) * .5f - new Vector2(bounds.extents.x, bounds.extents.z).magnitude;
+                if (available < 0) { foreach (var pose in _groupStart) pose.Restore(); return; }
+                var center = Vector2.ClampMagnitude(new Vector2(bounds.center.x, bounds.center.z), available);
+                var shift = new Vector3(center.x - bounds.center.x, 0, center.y - bounds.center.z);
+                foreach (var pose in _groupStart) if (pose.obj != null) pose.obj.transform.position += shift;
+                return;
+            }
             float x = Mathf.Clamp(bounds.center.x, -config.SandboxWidth/2 + bounds.extents.x, config.SandboxWidth/2 - bounds.extents.x) - bounds.center.x;
             float z = Mathf.Clamp(bounds.center.z, -config.SandboxDepth/2 + bounds.extents.z, config.SandboxDepth/2 - bounds.extents.z) - bounds.center.z;
             foreach (var pose in _groupStart) if (pose.obj != null) pose.obj.transform.position += new Vector3(x,0,z);
@@ -290,6 +302,14 @@ namespace Sandplay.Objects
                 if (!float.IsInfinity(lift)) foreach (var pose in _groupStart) if (pose.obj != null) pose.obj.transform.position += Vector3.up * lift;
             }
             var commands = new List<ICommand>();
+            if (changed)
+                foreach (var pose in _groupStart) if (pose.obj != null &&
+                    Vector2.Distance(new Vector2(pose.position.x, pose.position.z),
+                        new Vector2(pose.obj.transform.position.x, pose.obj.transform.position.z)) > .02f)
+                {
+                    var impression = Sandplay.Sand.ObjectImpressions.Apply(pose.obj);
+                    if (impression != null) commands.Add(impression);
+                }
             foreach (var pose in _groupStart) if (pose.obj != null)
             {
                 var tr = pose.obj.transform;

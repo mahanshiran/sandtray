@@ -50,7 +50,7 @@ namespace Sandplay.Objects
                 var mat = _renderers[i].material;
                 if (mat == null) continue;
                 if (selected)
-                    SetMainColor(mat, _originalColors[i] * 1.3f + new Color(0.1f, 0.2f, 0.4f, 0f));
+                    SetMainColor(mat, Color.Lerp(_originalColors[i], new Color(.2f, .85f, .9f, _originalColors[i].a), .12f));
                 else
                     SetMainColor(mat, _originalColors[i]);
             }

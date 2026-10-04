@@ -362,11 +362,8 @@ namespace Sandplay.Core
             StyleContentTab(tablesTab,!_organizationClientReportsTab&&!_organizationClientReplaysTab);
             StyleContentTab(reportsTab,_organizationClientReportsTab);StyleContentTab(replaysTab,_organizationClientReplaysTab);
             var host=ClientButton(_organizationTherapistClientDetail,"host.title",.035f,.665f,.45f,.06f,()=>
-                ShowNameDialog(Localization.Get("dialog.new_board"),"",name=>
-                {
-                    if(!string.IsNullOrWhiteSpace(name))ShowSizeDialog(name,null,true,workspace.id,client.id,
-                        InviteTargetForOrganizationClient(workspace,client));
-                }),true);host.interactable=canHost;
+                ShowNewBoardDialog("",null,true,workspace.id,client.id,
+                        InviteTargetForOrganizationClient(workspace,client)),true);host.interactable=canHost;
             var schedule=ClientButton(_organizationTherapistClientDetail,F("Schedule session","预约会话"),.515f,.665f,.45f,.06f,
                 ()=>ShowOrganizationScheduleProposal(workspace,client));schedule.interactable=canSchedule;
             var boards=(SessionManager.Instance?.GetSavedSessions(includeArchived:true)??new System.Collections.Generic.List<SessionListEntry>())

@@ -17,11 +17,13 @@ namespace Sandplay.Sand
 
         public static readonly string[] PresetNames = { "Sand", "Rock", "Grass", "Snow", "Mud", "Water", "Clay" };
 
+        public static readonly Color DefaultSandColor = new Color(209f / 255f, 178f / 255f, 140f / 255f); // #D1B28C
+
         // -1 = Sand; 0-3 = primary RGBA; 4-5 = extra RG.
         private static readonly int[] SplatChannel = { -1, 0, 1, 2, 3, 4, 5 };
 
         public static readonly Color[] PresetColors = {
-            new Color(0.70f, 0.60f, 0.45f),  // 0 Sand
+            DefaultSandColor,                  // 0 Sand
             new Color(0.40f, 0.38f, 0.36f),  // 1 Rock
             new Color(0.24f, 0.46f, 0.22f),  // 2 Grass
             new Color(0.88f, 0.92f, 0.96f),  // 3 Snow

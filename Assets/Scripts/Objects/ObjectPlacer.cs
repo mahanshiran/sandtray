@@ -35,6 +35,7 @@ namespace Sandplay.Objects
         public ObjectCatalog Catalog => _catalog;
 
         private bool _isDraggingObject;
+        public bool IsDraggingSelection => (_isDraggingObject && _dragStarted) || (_movingGroup && _gestureMoved);
         private bool _dragStarted; // true once pointer exceeds drag threshold
         private Vector2 _pointerDownPos;
         private const float DragThreshold = 10f; // pixels
@@ -94,6 +95,8 @@ namespace Sandplay.Objects
         {
             if (_cam == null || _sandMesh == null) return;
             if (InputHelper.IsInputBlocked || InputHelper.IsTextInputFocused) { CancelSelectionGesture(); return; }
+            if (Sandplay.UI.ObjectTransformGizmo.BlocksWorldInput) return;
+            if (HandleObjectDoubleTap()) return;
             if (HandleActiveSelectionGesture()) return;
 
             // Handle keyboard shortcuts first (works globally when keyboard is available)
@@ -851,6 +854,8 @@ namespace Sandplay.Objects
         /// <summary>
         /// Clamps a position so the object's renderer bounds stay inside the sandbox walls.
         /// </summary>
+        public Vector3 ClampPlacementToBounds(Vector3 pos, GameObject obj) => ClampToBounds(pos, obj);
+
         private Vector3 ClampToBounds(Vector3 pos, GameObject obj)
         {
             var config = GameManager.Instance?.Config;
@@ -870,6 +875,17 @@ namespace Sandplay.Objects
                 extentZ = b.extents.z;
             }
 
+            if (config.CircularTray)
+            {
+                // Keep the renderer's full footprint inside the round rim, including off-center pivots.
+                var bounds = renderers.Length > 0 ? renderers[0].bounds : new Bounds(obj.transform.position, Vector3.zero);
+                foreach (var renderer in renderers) bounds.Encapsulate(renderer.bounds);
+                Vector3 offset = bounds.center - obj.transform.position;
+                float available = Mathf.Max(0, Mathf.Min(halfW, halfD) - new Vector2(extentX, extentZ).magnitude);
+                Vector2 center = Vector2.ClampMagnitude(new Vector2(pos.x + offset.x, pos.z + offset.z), available);
+                pos.x = center.x - offset.x; pos.z = center.y - offset.z;
+                return pos;
+            }
             pos.x = Mathf.Clamp(pos.x, -halfW + extentX, halfW - extentX);
             pos.z = Mathf.Clamp(pos.z, -halfD + extentZ, halfD - extentZ);
             return pos;

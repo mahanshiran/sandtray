@@ -126,12 +126,9 @@ namespace Sandplay.Core
                 CloseClientDialog();
                 _hostTherapistMode=true;
                 string suggested=F("Session ","会话 ")+DateTime.Now.ToString("yyyy-MM-dd HHmm");
-                ShowNameDialog(Localization.Get("dialog.new_board"),suggested,name=>
-                {
-                    if(!string.IsNullOrWhiteSpace(name))ShowSizeDialog(name,localClientId,true,
+                ShowNewBoardDialog(suggested,localClientId,true,
                         item.organization_id,item.organization_client_id,null,
                         ()=>_pendingScheduleStartId=item.id);
-                });
             },true);
             newBoard.name="ScheduledNewBoard";
             ClientText(box,F("Or continue an existing board for this client", "或继续该来访者已有的沙盘"),

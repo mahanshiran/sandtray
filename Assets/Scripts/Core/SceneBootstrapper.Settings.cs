@@ -272,6 +272,10 @@ namespace Sandplay.Core
             _allowAirDropdown = SettingsDropdown(air, "AllowAirDropdown",
                 new[] { Localization.Get("settings.off"), Localization.Get("settings.on") },
                 ObjectPlacer.AllowObjectsInAir ? 1 : 0, value => ObjectPlacer.AllowObjectsInAir = value == 1);
+            var impressions = SettingsRow(_settingsRowsContent, "settings.object_impressions");
+            _objectImpressionsDropdown = SettingsDropdown(impressions, "ObjectImpressionsDropdown",
+                new[] { Localization.Get("settings.off"), Localization.Get("settings.on") },
+                Sandplay.Sand.ObjectImpressions.Enabled ? 1 : 0, value => Sandplay.Sand.ObjectImpressions.Enabled = value == 1);
             SettingsAction(_settingsRowsContent, "settings.restore", "Btn_RestoreDefaults", "settings.reset", RestoreDefaultColors);
             SettingsAction(_settingsRowsContent, "shortcuts.title", "Btn_KeyboardShortcuts", "settings.configure", ShowKeyboardShortcutSettings);
             BuildSupportSettingsRows(_settingsRowsContent);
@@ -808,8 +812,9 @@ namespace Sandplay.Core
             const float headerHeight = 24f;
             const float spacing = 5f;
             const float columnGap = 5f;
-            float contentWidth = Mathf.Max(260f, _catalogPanel.GetComponent<RectTransform>().rect.width - 14f);
-            float cardWidth = (contentWidth - columnGap * 2f) / 3f;
+            float contentWidth = Mathf.Max(0f, _catalogPanel.GetComponent<RectTransform>().rect.width - 14f);
+            int columns = contentWidth < 320f ? 2 : 3;
+            float cardWidth = (contentWidth - columnGap * (columns - 1)) / columns;
             float itemY = 0f;
 
             foreach (var kvp in groups)
@@ -853,8 +858,8 @@ namespace Sandplay.Core
                     rowRT.anchorMin = new Vector2(0, 1);
                     rowRT.anchorMax = new Vector2(0, 1);
                     rowRT.pivot = new Vector2(0, 1);
-                    int column = itemIndex % 3;
-                    int rowNumber = itemIndex / 3;
+                    int column = itemIndex % columns;
+                    int rowNumber = itemIndex / columns;
                     rowRT.anchoredPosition = new Vector2(column * (cardWidth + columnGap), itemY - rowNumber * (itemHeight + spacing));
                     rowRT.sizeDelta = new Vector2(cardWidth, itemHeight);
 
@@ -872,8 +877,8 @@ namespace Sandplay.Core
                     thumbRT.anchorMin = new Vector2(0, 1);
                     thumbRT.anchorMax = new Vector2(0, 1);
                     thumbRT.pivot = new Vector2(0, 1);
-                    thumbRT.anchoredPosition = new Vector2(6, 0);
-                    thumbRT.sizeDelta = new Vector2(56, 56);
+                    thumbRT.anchoredPosition = new Vector2(5, -5);
+                    thumbRT.sizeDelta = new Vector2(45, 45);
 
                     // === Download button (compact status action) ===
                     const float dlBtnW = 22f;
@@ -905,7 +910,6 @@ namespace Sandplay.Core
 
                     Sprite downloadIcon = LoadIconRaw("download");
                     Sprite loadingIcon = LoadIconRaw("loading");
-                    Sprite downloadedIcon = LoadIconRaw("downloaded");
 
                     var dlIconGo = new GameObject("Icon_Download");
                     dlIconGo.transform.SetParent(dlBtnGo.transform, false);
@@ -951,20 +955,6 @@ namespace Sandplay.Core
                     loadingFallbackGo.SetActive(loadingIcon == null);
                     loadingGo.SetActive(false);
 
-                    var downloadedIconGo = new GameObject("Icon_Downloaded");
-                    downloadedIconGo.transform.SetParent(dlBtnGo.transform, false);
-                    var downloadedIconImg = downloadedIconGo.AddComponent<Image>();
-                    downloadedIconImg.sprite = downloadedIcon;
-                    downloadedIconImg.enabled = downloadedIcon != null;
-                    downloadedIconImg.preserveAspect = true;
-                    downloadedIconImg.raycastTarget = false;
-                    var downloadedIconRT = downloadedIconGo.GetComponent<RectTransform>();
-                    downloadedIconRT.anchorMin = Vector2.zero;
-                    downloadedIconRT.anchorMax = Vector2.one;
-                    downloadedIconRT.offsetMin = Vector2.zero;
-                    downloadedIconRT.offsetMax = Vector2.zero;
-                    downloadedIconGo.SetActive(false);
-
                     // Name label (between thumbnail and download button)
                     var lblGo = new GameObject("Label");
                     lblGo.transform.SetParent(row.transform, false);
@@ -978,38 +968,28 @@ namespace Sandplay.Core
                     var lblRT = lblGo.GetComponent<RectTransform>();
                     lblRT.anchorMin = new Vector2(0, 1);
                     lblRT.anchorMax = new Vector2(1, 1);
-                    lblRT.offsetMin = new Vector2(66, -52);
+                    lblRT.offsetMin = new Vector2(55, -52);
                     lblRT.offsetMax = new Vector2(-6, -6);
                     lbl.enableWordWrapping = true;
                     lbl.overflowMode = TextOverflowModes.Ellipsis;
                     lbl.maxVisibleLines = 2;
 
-                    // Helper: mark row as downloaded (downloaded icon, button disabled)
+                    // Downloaded objects need no status badge or extra click target.
                     void MarkDownloaded()
                     {
-                        if (dlBtnImg != null)
-                            dlBtnImg.color = downloadedIcon != null
-                                ? new Color(1f, 1f, 1f, 0.001f)
-                                : new Color(0.22f, 0.50f, 0.30f, 1f);
-                        if (dlIconGo != null) dlIconGo.SetActive(false);
-                        if (loadingGo != null) loadingGo.SetActive(false);
-                        if (downloadedIconGo != null) downloadedIconGo.SetActive(downloadedIcon != null);
-                        if (dlLbl != null) dlLbl.text = "\u2713";
-                        if (dlLbl != null) dlLbl.gameObject.SetActive(downloadedIcon == null);
-                        if (dlLbl != null) dlLbl.color = Color.white;
-                        if (dlBtn != null) dlBtn.interactable = false;
+                        if (dlBtnGo != null) dlBtnGo.SetActive(false);
                     }
 
                     // Helper: mark row as "not yet downloaded" (download icon)
                     void MarkNotDownloaded()
                     {
+                        if (dlBtnGo != null) dlBtnGo.SetActive(true);
                         if (dlBtnImg != null)
                             dlBtnImg.color = downloadIcon != null
                                 ? new Color(1f, 1f, 1f, 0.001f)
                                 : new Color(0.22f, 0.38f, 0.56f, 1f);
                         if (dlIconGo != null) dlIconGo.SetActive(downloadIcon != null);
                         if (loadingGo != null) loadingGo.SetActive(false);
-                        if (downloadedIconGo != null) downloadedIconGo.SetActive(false);
                         if (dlLbl != null) dlLbl.gameObject.SetActive(downloadIcon == null);
                         if (dlLbl != null) dlLbl.text = "\u2B07";
                         if (dlLbl != null) dlLbl.color = Color.white;
@@ -1018,12 +998,12 @@ namespace Sandplay.Core
 
                     void MarkDownloading()
                     {
+                        if (dlBtnGo != null) dlBtnGo.SetActive(true);
                         if (dlBtnImg != null)
                             dlBtnImg.color = loadingIcon != null
                                 ? new Color(1f, 1f, 1f, 0.001f)
                                 : new Color(0.22f, 0.38f, 0.56f, 1f);
                         if (dlIconGo != null) dlIconGo.SetActive(false);
-                        if (downloadedIconGo != null) downloadedIconGo.SetActive(false);
                         if (dlLbl != null) dlLbl.gameObject.SetActive(false);
                         if (loadingGo != null)
                         {
@@ -1091,7 +1071,7 @@ namespace Sandplay.Core
                     itemIndex++;
                     yield return null; // Thumbnail decoding and row creation are spread across frames.
                 }
-                int categoryRows = (kvp.Value.Count + 2) / 3;
+                int categoryRows = (kvp.Value.Count + columns - 1) / columns;
                 itemY -= categoryRows * (itemHeight + spacing) + 6f; // gap between categories
             }
 
@@ -1227,6 +1207,9 @@ namespace Sandplay.Core
             if (material == null)
                 return;
 
+            if (material == _floorMaterial && _sandMaterial != null && _sandMaterial.HasProperty("_DigWaterColor"))
+                _sandMaterial.SetColor("_DigWaterColor", color);
+
             foreach (var propertyName in propertyNames)
             {
                 if (material.HasProperty(propertyName))
@@ -1271,10 +1254,14 @@ namespace Sandplay.Core
                 row.callback(_defaultFloorColor);
             }
 
+            Sandplay.Sand.ObjectImpressions.Enabled = false;
+            if (_objectImpressionsDropdown != null) _objectImpressionsDropdown.SetValueWithoutNotify(0);
             ObjectPlacer.AllowObjectsInAir = false;
             if (_allowAirDropdown != null)
                 _allowAirDropdown.SetValueWithoutNotify(0);
         }
+
+        private TMP_Dropdown _objectImpressionsDropdown;
 
         private void ShowColorPicker(Color initialColor, System.Action<Color> onColorChanged)
         {

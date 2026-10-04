@@ -9,14 +9,12 @@ namespace Sandplay.Core
         private double _nextPolicyRefresh;
         private bool _policyRefreshing;
         private int _accessActionRequest;
-        private double _recordingPolicyDeadline;
         private bool HasCapability(string key) => AccessPolicy.Evaluate(BackendClient.Instance.CurrentAccess,
             key, checkUsage: false) == AccessDecision.Allowed;
 
         private void UpdateAccessPolicy()
         {
             var client = BackendClient.Instance;
-            if (Time.realtimeSinceStartupAsDouble >= _recordingPolicyDeadline) SessionRecorder.Instance?.StopRecording();
             if (!client.IsLoggedIn || client.UserId <= 0 || _policyRefreshing ||
                 Time.realtimeSinceStartupAsDouble < _nextPolicyRefresh) return;
             _policyRefreshing = true;
@@ -29,8 +27,6 @@ namespace Sandplay.Core
                 if (snapshot.local_capacity_enforced && _config != null)
                     _config.LocalTableCapacityEnforcement = true;
                 if (_activeHomeNav == "replays" && IsHomeMenuActive) RefreshHomeReplaysPage();
-                if (!HasCapability("replays.record")) SessionRecorder.Instance?.StopRecording();
-                else _recordingPolicyDeadline = client.AccessCacheDeadline;
             }, error => { if (this != null) { _policyRefreshing = false; _nextPolicyRefresh = Time.realtimeSinceStartupAsDouble + 10; } }, true);
         }
 

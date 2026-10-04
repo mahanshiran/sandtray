@@ -506,7 +506,7 @@ namespace Sandplay.UI
             SetStatus(Localization.Get("analysis.pdf_generating"));
             if (_exportPdfBtn) _exportPdfBtn.interactable = false;
             if (_editReportBtn) _editReportBtn.interactable = false;
-            client.ExportReflectionPdf(PdfOperationId(), _lastResultText, _lastScreenshotB64,
+            client.ExportReflectionPdf(PdfOperationId(), Sandplay.AI.ReflectionPresentation.WithoutReferences(_lastResultText), _lastScreenshotB64,
                 _localReportBoard ?? SessionManager.Instance?.CurrentBoardName ?? "",
                 _localReport?.ModelUsed ?? AIAnalysisManager.Instance?.LastModelUsed ?? "",
                 pdfBytes =>
@@ -863,7 +863,7 @@ namespace Sandplay.UI
                 _reflectionParts.Add(part);
                 AddReflectionCard(part);
             }
-            foreach (string line in text.Replace("\r", "").Split('\n'))
+            foreach (string line in Sandplay.AI.ReflectionPresentation.WithoutReferences(text).Replace("\r", "").Split('\n'))
             {
                 string candidate = line.Trim().Trim('#', '*', ':', '：').Trim();
                 int index = System.Array.FindIndex(headings, h => string.Equals(h, candidate, System.StringComparison.OrdinalIgnoreCase));

@@ -33,10 +33,11 @@ namespace Sandplay.UI
                 rect.offsetMax = new Vector2(-1, 0);
                 var text = hint.AddComponent<TextMeshProUGUI>();
                 text.font = font;
-                text.fontSize = 9;
+                text.fontSize = 11;
                 text.enableAutoSizing = true;
-                text.fontSizeMin = 6;
-                text.fontSizeMax = 9;
+                text.enableWordWrapping = false;
+                text.fontSizeMin = 9;
+                text.fontSizeMax = 11;
                 text.alignment = TextAlignmentOptions.Center;
                 text.color = new Color(1, 1, 1, .85f);
                 text.raycastTarget = false;
@@ -99,17 +100,18 @@ namespace Sandplay.UI
                 _groupPlacer.EndGroupTransform(action == 0);
                 return;
             }
+            // Keyboard steps commit immediately; they are not pending pointer taps.
             if (action == 0)
             {
                 var placer = FindAnyObjectByType<ObjectPlacer>();
                 if (placer == null) return;
-                OnVerticalPointerDown();
+                BeginVerticalDrag();
                 placer.MoveObjectVertically(_target, direction * (fine ? .01f : .05f));
                 OnVerticalPointerUp();
             }
             else if (action == 1)
             {
-                OnRotatePointerDown();
+                BeginRotateDrag();
                 _target.transform.Rotate(Vector3.up, direction * (fine ? 1f : 15f), Space.World);
                 OnRotatePointerUp();
             }
@@ -120,7 +122,7 @@ namespace Sandplay.UI
                 float factor = fine ? 1.02f : 1.1f;
                 float next = Mathf.Clamp(current * (direction > 0 ? factor : 1f / factor), .1f, 5f);
                 if (current <= 0 || Mathf.Approximately(current, next)) return;
-                OnResizePointerDown();
+                BeginResizeDrag();
                 _target.transform.localScale *= next / current;
                 OnResizePointerUp();
             }

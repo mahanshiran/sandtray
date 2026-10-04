@@ -597,7 +597,7 @@ namespace Sandplay.Core
             int res = sandMesh != null ? sandMesh.Resolution : (config != null ? config.HeightmapResolution : 128);
 
             return NetSerializer.WriteFullState(bw, bd, res, heightmapBytes,
-                placedObjects.ToArray(), colors.ToArray());
+                placedObjects.ToArray(), colors.ToArray(), config != null && config.CircularTray);
         }
 
         private void SendFullStateViaRelay(string recipientToken)
@@ -1079,7 +1079,7 @@ namespace Sandplay.Core
                     {
                         _snapshotApplied = false;
                         NetSerializer.ReadFullState(payload, out float bw, out float bd,
-                            out int res, out byte[] hm, out SpawnObjectData[] objs, out ColorSyncData[] cols);
+                            out int res, out byte[] hm, out SpawnObjectData[] objs, out ColorSyncData[] cols, out bool circularTray);
                         if (!IsValidNetworkBoard(bw, bd, res))
                         {
                             Debug.LogWarning($"[Network] Ignoring invalid FullState board: {bw}x{bd} res={res}");
@@ -1106,7 +1106,8 @@ namespace Sandplay.Core
                         // Resize board to match host
                         if (SandMesh.Instance != null && res > 0)
                         {
-                            bool needsResize = SandMesh.Instance.Resolution != res
+                            bool needsResize = SandMesh.Instance.IsCircular != circularTray
+                                || SandMesh.Instance.Resolution != res
                                 || Mathf.Abs(SandMesh.Instance.Width - bw) > 0.01f
                                 || Mathf.Abs(SandMesh.Instance.Depth - bd) > 0.01f;
 
@@ -1116,6 +1117,7 @@ namespace Sandplay.Core
                             {
                                 cfg.SandboxWidth = bw;
                                 cfg.SandboxDepth = bd;
+                                cfg.CircularTray = circularTray;
                             }
 
                             if (needsResize)
@@ -1686,7 +1688,7 @@ namespace Sandplay.Core
             int res = sandMesh != null ? sandMesh.Resolution : (config != null ? config.HeightmapResolution : 128);
 
             var payload = NetSerializer.WriteFullState(bw, bd, res, heightmapBytes,
-                placedObjects.ToArray(), colors.ToArray());
+                placedObjects.ToArray(), colors.ToArray(), config != null && config.CircularTray);
             SendToClient(client, NetSerializer.Pack(NetMsgType.FullState, payload));
 
             // Send the current splatmap so the joining client sees any painted areas

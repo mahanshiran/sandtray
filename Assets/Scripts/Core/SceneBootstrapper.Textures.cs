@@ -9,112 +9,73 @@ namespace Sandplay.Core
     /// </summary>
     public partial class SceneBootstrapper : MonoBehaviour
     {
+        // Blend opposite edges so repeating tiles do not leave visible seams.
+        private static float SandTileNoise(int x, int y, int w, int h, float frequency, float seed)
+        {
+            float u = x / (float)w, v = y / (float)h;
+            float a = Mathf.PerlinNoise(x * frequency + seed, y * frequency + seed);
+            float b = Mathf.PerlinNoise((x - w) * frequency + seed, y * frequency + seed);
+            float c = Mathf.PerlinNoise(x * frequency + seed, (y - h) * frequency + seed);
+            float d = Mathf.PerlinNoise((x - w) * frequency + seed, (y - h) * frequency + seed);
+            return Mathf.Lerp(Mathf.Lerp(a, b, u), Mathf.Lerp(c, d, u), v);
+        }
+
+        private static Texture2D FinishSandTexture(Texture2D texture, Color[] pixels)
+        {
+            texture.SetPixels(pixels); texture.Apply(true);
+            texture.wrapMode = TextureWrapMode.Repeat;
+            texture.filterMode = FilterMode.Trilinear;
+            texture.anisoLevel = 4;
+            return texture;
+        }
+
         private Texture2D GenerateSandGrainTexture(int w, int h)
         {
-            var tex = new Texture2D(w, h, TextureFormat.RGB24, true);
             var pixels = new Color[w * h];
-            // Sand grain palette: neutral tan/beige
-            Color sandLight = new Color(0.78f, 0.68f, 0.52f);
-            Color sandMid = new Color(0.70f, 0.60f, 0.45f);
-            Color sandDark = new Color(0.55f, 0.46f, 0.33f);
-            Color sandWarm = new Color(0.72f, 0.58f, 0.40f);
-
-            for (int i = 0; i < pixels.Length; i++)
-            {
-                int x = i % w;
-                int y = i / w;
-                // Large dune-like variation
-                float dune = Mathf.PerlinNoise(x * 0.008f + 50f, y * 0.008f + 50f);
-                // Medium clumps
-                float clump = Mathf.PerlinNoise(x * 0.04f + 200f, y * 0.04f + 200f);
-                // Fine grain pattern
-                float grain = Mathf.PerlinNoise(x * 0.15f + 77f, y * 0.15f + 33f);
-                // Individual grain sparkle
-                float sparkle = Random.Range(0.85f, 1.05f);
-
-                float combined = dune * 0.25f + clump * 0.3f + grain * 0.3f + sparkle * 0.15f;
-                combined = Mathf.Clamp01(combined);
-
-                Color baseColor = Color.Lerp(sandDark, sandLight, combined);
-                // Occasional warm/golden grains
-                if (Random.value < 0.08f)
-                    baseColor = Color.Lerp(baseColor, sandWarm, Random.Range(0.2f, 0.5f));
-                // Occasional darker grains (like small pebbles)
-                if (Random.value < 0.03f)
-                    baseColor = Color.Lerp(baseColor, sandDark, Random.Range(0.3f, 0.6f));
-
-                pixels[i] = baseColor;
-            }
-            tex.SetPixels(pixels);
-            tex.Apply(true);
-            tex.wrapMode = TextureWrapMode.Repeat;
-            tex.filterMode = FilterMode.Bilinear;
-            return tex;
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                {
+                    float grain = SandTileNoise(x, y, w, h, .24f, 77f);
+                    float variation = SandTileNoise(x, y, w, h, .035f, 200f);
+                    float value = .96f + (grain - .5f) * .14f + (variation - .5f) * .025f;
+                    // Nearly neutral: the selected sand colour supplies the tint.
+                    pixels[y * w + x] = new Color(value, value * .995f, value * .98f);
+                }
+            return FinishSandTexture(new Texture2D(w, h, TextureFormat.RGB24, true), pixels);
         }
 
         private Texture2D GenerateSandDetailTexture(int w, int h)
         {
-            var tex = new Texture2D(w, h, TextureFormat.RGB24, true);
             var pixels = new Color[w * h];
-            for (int i = 0; i < pixels.Length; i++)
-            {
-                int x = i % w;
-                int y = i / w;
-                // Very fine individual grain dots
-                float g1 = Mathf.PerlinNoise(x * 0.5f + 11f, y * 0.5f + 22f);
-                float g2 = Mathf.PerlinNoise(x * 0.8f + 99f, y * 0.8f + 44f);
-                float dot = Random.Range(0.9f, 1.0f);
-                float v = g1 * 0.3f + g2 * 0.3f + dot * 0.4f;
-                v = Mathf.Lerp(0.7f, 1.0f, v);
-                pixels[i] = new Color(v, v, v);
-            }
-            tex.SetPixels(pixels);
-            tex.Apply(true);
-            tex.wrapMode = TextureWrapMode.Repeat;
-            tex.filterMode = FilterMode.Bilinear;
-            return tex;
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                {
+                    float grain = SandTileNoise(x, y, w, h, .55f, 22f);
+                    float value = .5f + (grain - .5f) * .10f;
+                    pixels[y * w + x] = new Color(value, value, value);
+                }
+            // Both Standard and SandSplat multiply detail by two. Linear 0.5 is
+            // neutral; a bright detail map washes out the terrain's lighting.
+            return FinishSandTexture(new Texture2D(w, h, TextureFormat.RGB24, true, true), pixels);
         }
 
         private Texture2D GenerateSandNormalMap(int w, int h)
         {
-            // Generate a multi-octave height field, then derive normals
-            float[] heights = new float[w * h];
-            for (int i = 0; i < heights.Length; i++)
-            {
-                int x = i % w;
-                int y = i / w;
-                // Large ripples (wind patterns)
-                float ripple = Mathf.PerlinNoise(x * 0.02f + 123.4f, y * 0.02f + 567.8f) * 0.15f;
-                // Medium grain clumps
-                float medium = Mathf.PerlinNoise(x * 0.08f + 91.2f, y * 0.08f + 34.5f) * 0.25f;
-                // Fine individual grains
-                float fine = Mathf.PerlinNoise(x * 0.25f + 44f, y * 0.25f + 88f) * 0.35f;
-                // Very fine micro detail
-                float micro = Mathf.PerlinNoise(x * 0.6f + 12f, y * 0.6f + 56f) * 0.25f;
-                heights[i] = ripple + medium + fine + micro;
-            }
-
-            var tex = new Texture2D(w, h, TextureFormat.RGBA32, true, true); // linear
-            var pixels = new Color[w * h];
-            float strength = 2.0f; // Stronger normals for visible grain
+            var heights = new float[w * h];
             for (int y = 0; y < h; y++)
-            {
+                for (int x = 0; x < w; x++)
+                    heights[y * w + x] = SandTileNoise(x, y, w, h, .24f, 44f) * .7f
+                        + SandTileNoise(x, y, w, h, .55f, 12f) * .3f;
+            var pixels = new Color[w * h];
+            for (int y = 0; y < h; y++)
                 for (int x = 0; x < w; x++)
                 {
-                    float l = heights[y * w + ((x - 1 + w) % w)];
-                    float r = heights[y * w + ((x + 1) % w)];
-                    float d = heights[((y - 1 + h) % h) * w + x];
-                    float u = heights[((y + 1) % h) * w + x];
-                    float nx = Mathf.Clamp01((l - r) * strength + 0.5f);
-                    float ny = Mathf.Clamp01((d - u) * strength + 0.5f);
-                    pixels[y * w + x] = new Color(nx, ny, 1f, 1f);
+                    float dx = heights[y * w + (x - 1 + w) % w] - heights[y * w + (x + 1) % w];
+                    float dy = heights[((y - 1 + h) % h) * w + x] - heights[((y + 1) % h) * w + x];
+                    var normal = new Vector3(dx * 1.5f, dy * 1.5f, 1f).normalized;
+                    pixels[y * w + x] = new Color(normal.x * .5f + .5f, normal.y * .5f + .5f, normal.z * .5f + .5f, 1f);
                 }
-            }
-            tex.SetPixels(pixels);
-            tex.Apply(true);
-            tex.wrapMode = TextureWrapMode.Repeat;
-            tex.filterMode = FilterMode.Bilinear;
-            return tex;
+            return FinishSandTexture(new Texture2D(w, h, TextureFormat.RGBA32, true, true), pixels);
         }
 
         private Texture2D GenerateWoodFloorTexture(int w, int h)

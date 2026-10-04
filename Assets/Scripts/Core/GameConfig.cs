@@ -8,6 +8,7 @@ namespace Sandplay.Core
         [Header("Sandbox")]
         public float SandboxWidth = 10f;
         public float SandboxDepth = 10f;
+        public bool CircularTray;
         public float SandMaxHeight = 2f;
         public float SandBaseHeight = 0.5f;
         public int HeightmapResolution = 128;

@@ -82,8 +82,14 @@ namespace Sandplay.UI
             bool Current()=>this!=null && overlay!=null && _emailFlow==overlay;
             void Close(){if(!Current())return;_emailFlow=null;overlay.SetActive(false);if(Application.isPlaying)Destroy(overlay);else DestroyImmediate(overlay);}
             overlay.AddComponent<KeyboardFocusScope>().Configure(true,Close);
-            MakeButton("Close",card.transform,"×",font,Field,new Vector2(.87f,.89f),new Vector2(.96f,.97f)).onClick.AddListener(Close);
-            var send=MakeButton("SendCode",card.transform,T("Send / resend code","发送／重发验证码"),font,Field,new Vector2(.07f,reset ? .015f:.11f),new Vector2(.47f,reset ? .09f:.22f));
+            var secondaryFill = IsLightTheme ? new Color(.83f,.91f,.90f,1f) : new Color(.15f,.30f,.32f,1f);
+            var secondaryText = IsLightTheme ? new Color(.02f,.24f,.25f,1f) : Ink;
+            var close=MakeButton("Close",card.transform,"×",font,secondaryFill,new Vector2(.87f,.89f),new Vector2(.96f,.97f));
+            close.GetComponentInChildren<TextMeshProUGUI>().color=secondaryText;
+            close.onClick.AddListener(Close);
+            var send=MakeButton("SendCode",card.transform,T("Send / resend code","发送／重发验证码"),font,secondaryFill,new Vector2(.07f,reset ? .015f:.11f),new Vector2(.47f,reset ? .09f:.22f));
+            send.GetComponentInChildren<TextMeshProUGUI>().color=secondaryText;
+            AddRoundedBorder(send.gameObject,IsLightTheme ? new Color(.38f,.61f,.60f,1f) : Border);
             var finish=MakeButton("Confirm",card.transform,reset ? T("Reset password","重置密码"):T("Verify","验证"),font,Primary,new Vector2(.53f,reset ? .015f:.11f),new Vector2(.93f,reset ? .09f:.22f));
             void Pending(bool value){busy=value;send.interactable=finish.interactable=!value;email.interactable=code.interactable=!value;if(reset)passwordField.interactable=confirmField.interactable=!value;}
             send.onClick.AddListener(()=>

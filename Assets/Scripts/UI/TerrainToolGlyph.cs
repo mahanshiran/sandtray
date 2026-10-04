@@ -9,6 +9,16 @@ namespace Sandplay.UI
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();
+            if (Mode == 6)
+            {
+                for (int i = 0; i < 32; i++)
+                {
+                    float x = .12f + i * .76f / 32, next = .12f + (i + 1) * .76f / 32;
+                    Line(vh, x, .5f + Mathf.Sin(i * Mathf.PI * 2 / 32) * .27f,
+                        next, .5f + Mathf.Sin((i + 1) * Mathf.PI * 2 / 32) * .27f);
+                }
+                return;
+            }
             if(Mode==3) { for(int i=0;i<3;i++){float y=.22f+i*.27f;Line(vh,.12f,y,.4f,y+.08f);Line(vh,.4f,y+.08f,.66f,y-.02f);Line(vh,.66f,y-.02f,.88f,y+.06f);}return; }
             if(Mode==4) { Circle(vh,.56f,.83f,.08f);Line(vh,.54f,.7f,.43f,.43f);Line(vh,.43f,.43f,.24f,.1f);Line(vh,.43f,.43f,.67f,.28f);Line(vh,.67f,.28f,.72f,.1f);Line(vh,.5f,.61f,.74f,.49f);Line(vh,.5f,.61f,.29f,.51f);return; }
             if(Mode==5) { Line(vh,.2f,.1f,.8f,.1f);Line(vh,.8f,.1f,.8f,.9f);Line(vh,.8f,.9f,.2f,.9f);Line(vh,.2f,.9f,.2f,.1f);for(int i=0;i<3;i++)Line(vh,.33f,.32f+i*.18f,.67f,.32f+i*.18f);return; }

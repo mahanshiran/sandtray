@@ -10,6 +10,30 @@ namespace Sandplay.Tests
     public class AnalysisExtractorTests
     {
         [Test]
+        public void DefaultUnevenSandIsNotDistinctSculpting()
+        {
+            var heights = new float[100];
+            for (int i = 0; i < heights.Length; i++) heights[i] = .3f + .5f * i / 100f;
+            Assert.IsFalse(AnalysisExtractor.HasDistinctTerrainFeatures(heights, .5f, 1f));
+            heights[0] = 0; // A single sample is not a substantial formation.
+            Assert.IsFalse(AnalysisExtractor.HasDistinctTerrainFeatures(heights, .5f, 1f));
+            for (int i = 0; i < 5; i++) heights[i] = 0;
+            Assert.IsTrue(AnalysisExtractor.HasDistinctTerrainFeatures(heights, .5f, 1f));
+        }
+
+        [Test]
+        public void LegacySourcesAreHiddenButLaterConclusionIsKept()
+        {
+            var text = "OBSERVATIONS\nA figure. [1]\nMETHOD AND SOURCES\n[1] Book\nhttps://example.test\nCONCLUSION\nLimited detail.";
+            var result = ReflectionPresentation.WithoutReferences(text);
+            StringAssert.DoesNotContain("Book", result);
+            StringAssert.DoesNotContain("[1]", result);
+            StringAssert.DoesNotContain("https:", result);
+            StringAssert.Contains("CONCLUSION\nLimited detail.", result);
+            Assert.AreEqual("观察\n一个物件。", ReflectionPresentation.WithoutReferences("观察\n一个物件。\n资料来源\n书籍"));
+        }
+
+        [Test]
         public void VisibleRootsAreCountedOnceWithCatalogSemantics()
         {
             var houseRoot = new GameObject("House root");

@@ -29,6 +29,7 @@ namespace Sandplay.Camera
         private Transform _camTransform;
         private float _savedNearClip;
         private CharacterController _body;
+        private Collider _roomFloor;
 
         // Joystick input set by UI (mobile only — movement)
         private Vector2 _moveInput;
@@ -183,59 +184,119 @@ namespace Sandplay.Camera
                 HandleTouchLook();
             }
 
-            // Move horizontally
+            SimulateMovement(move, Time.deltaTime);
+            ApplyCamera();
+        }
+
+        private void SimulateMovement(Vector2 move, float deltaTime)
+        {
+            // The tray rim remains a physical obstacle, but a walker who clears
+            // it can land on the floor. Only the room is a hard movement bound.
             if (move.sqrMagnitude > 0.01f)
             {
                 Vector3 forward = Quaternion.Euler(0, _yaw, 0) * Vector3.forward;
                 Vector3 right = Quaternion.Euler(0, _yaw, 0) * Vector3.right;
-                Vector3 delta = (forward * move.y + right * move.x) * MoveSpeed * Time.deltaTime;
+                move = Vector2.ClampMagnitude(move, 1f);
+                Vector3 delta = (forward * move.y + right * move.x) * MoveSpeed * deltaTime;
                 MoveWithCollision(delta);
-
-                // Clamp to sandbox bounds
-                float halfW = GetHalfWidth();
-                float halfD = GetHalfDepth();
-                _position.x = Mathf.Clamp(_position.x, -halfW + WallMargin, halfW - WallMargin);
-                _position.z = Mathf.Clamp(_position.z, -halfD + WallMargin, halfD - WallMargin);
             }
+            ClampToRoom();
 
-            // Terrain height — sample at camera pos and small offsets, use max to avoid clipping on slopes
-            if (SandMesh.Instance != null)
+            // Gravity also runs outside the tray (and when there is no sand).
+            _verticalVelocity -= Gravity * deltaTime;
+            var flags = MoveWithCollision(Vector3.up * (_verticalVelocity * deltaTime));
+            if ((flags & CollisionFlags.Above) != 0 && _verticalVelocity > 0) _verticalVelocity = 0;
+            _grounded = (flags & CollisionFlags.Below) != 0;
+            if (_grounded && _verticalVelocity < 0) _verticalVelocity = 0;
+
+            float groundY = SampleWalkGroundHeight() + EyeHeight;
+            if (_position.y <= groundY && _verticalVelocity <= 0)
             {
-                float terrainY = SandMesh.Instance.SampleWorldHeight(_position);
-                float offset = 0.15f;
-                terrainY = Mathf.Max(terrainY, SandMesh.Instance.SampleWorldHeight(_position + Vector3.forward * offset));
-                terrainY = Mathf.Max(terrainY, SandMesh.Instance.SampleWorldHeight(_position + Vector3.back * offset));
-                terrainY = Mathf.Max(terrainY, SandMesh.Instance.SampleWorldHeight(_position + Vector3.left * offset));
-                terrainY = Mathf.Max(terrainY, SandMesh.Instance.SampleWorldHeight(_position + Vector3.right * offset));
+                _position.y = groundY;
+                _verticalVelocity = 0f;
+                _grounded = true;
+            }
+            SyncBodyPosition();
+        }
 
-                float groundY = terrainY + EyeHeight;
+        private float SampleWalkGroundHeight()
+        {
+            float ground = _roomFloor != null ? _roomFloor.bounds.max.y : SandboxFrame.RoomFloorY;
+            var sand = SandMesh.Instance;
+            if (sand == null || !IsOverSand(sand, _position)) return ground;
 
-                // Apply gravity / jump
-                _verticalVelocity -= Gravity * Time.deltaTime;
-                var flags = MoveWithCollision(Vector3.up * (_verticalVelocity * Time.deltaTime));
-                if ((flags & CollisionFlags.Above) != 0 && _verticalVelocity > 0) _verticalVelocity = 0;
-                _grounded = (flags & CollisionFlags.Below) != 0;
-                if (_grounded && _verticalVelocity < 0) _verticalVelocity = 0;
+            // Walking underneath the table must not snap the player up through
+            // its base onto the sand above.
+            if (_position.y - EyeHeight < sand.transform.position.y - .05f) return ground;
 
-                // Land on terrain
-                if (_position.y <= groundY)
-                {
-                    _position.y = groundY;
-                    _verticalVelocity = 0f;
-                    _grounded = true;
-                }
+            ground = Mathf.Max(ground, sand.SampleWorldHeight(_position));
+            const float offset = .15f;
+            Sample(_position + Vector3.forward * offset);
+            Sample(_position + Vector3.back * offset);
+            Sample(_position + Vector3.left * offset);
+            Sample(_position + Vector3.right * offset);
+            return ground;
+
+            void Sample(Vector3 point)
+            {
+                if (IsOverSand(sand, point)) ground = Mathf.Max(ground, sand.SampleWorldHeight(point));
+            }
+        }
+
+        private static bool IsOverSand(SandMesh sand, Vector3 point)
+        {
+            var local = sand.transform.InverseTransformPoint(point);
+            if (sand.IsCircular)
+            {
+                float radius = Mathf.Min(sand.Width, sand.Depth) * .5f;
+                return local.x * local.x + local.z * local.z <= radius * radius;
+            }
+            return Mathf.Abs(local.x) <= sand.Width * .5f && Mathf.Abs(local.z) <= sand.Depth * .5f;
+        }
+
+        private void ClampToRoom()
+        {
+            if (_roomFloor == null)
+            {
+                var room = SandMesh.Instance != null ? SandMesh.Instance.transform.parent?.Find("TherapyRoom") : null;
+                if (room == null) room = GameObject.Find("TherapyRoom")?.transform;
+                _roomFloor = room?.Find("Floor")?.GetComponent<Collider>();
             }
 
-            ApplyCamera();
+            if (_roomFloor != null)
+            {
+                var bounds = _roomFloor.bounds;
+                _position.x = Mathf.Clamp(_position.x, bounds.min.x + WallMargin, bounds.max.x - WallMargin);
+                _position.z = Mathf.Clamp(_position.z, bounds.min.z + WallMargin, bounds.max.z - WallMargin);
+                return;
+            }
+            // Match the procedural room dimensions until its floor is ready.
+            var sand = SandMesh.Instance;
+            var config = GameManager.Instance?.Config;
+            float boardWidth = sand != null ? sand.Width : config != null ? config.SandboxWidth : 10f;
+            float boardDepth = sand != null ? sand.Depth : config != null ? config.SandboxDepth : 10f;
+            float halfRoom = Mathf.Max(40f, Mathf.Max(boardWidth, boardDepth) * 4f) - WallMargin;
+            _position.x = Mathf.Clamp(_position.x, -halfRoom, halfRoom);
+            _position.z = Mathf.Clamp(_position.z, -halfRoom, halfRoom);
         }
 
         private CollisionFlags MoveWithCollision(Vector3 delta)
         {
-            // Terrain sampling / tray clamping may have corrected the last position.
-            _body.transform.position = _position - Vector3.up * EyeHeight;
+            // Terrain sampling / room bounds may have corrected the last position.
+            SyncBodyPosition();
             var flags = _body.Move(delta);
             _position = _body.transform.position + Vector3.up * EyeHeight;
             return flags;
+        }
+
+        private void SyncBodyPosition()
+        {
+            var feet = _position - Vector3.up * EyeHeight;
+            if ((_body.transform.position - feet).sqrMagnitude < .00000001f) return;
+            _body.transform.position = feet;
+            // CharacterController.Move must see corrections before its next
+            // sweep, otherwise it can restore the old, out-of-bounds position.
+            Physics.SyncTransforms();
         }
 
         private void ApplyCamera()
@@ -287,20 +348,6 @@ namespace Sandplay.Camera
                     }
                 }
             }
-        }
-
-        private float GetHalfWidth()
-        {
-            if (GameManager.Instance?.Config != null)
-                return GameManager.Instance.Config.SandboxWidth * 0.5f;
-            return 5f;
-        }
-
-        private float GetHalfDepth()
-        {
-            if (GameManager.Instance?.Config != null)
-                return GameManager.Instance.Config.SandboxDepth * 0.5f;
-            return 5f;
         }
 
         private void OnDestroy()

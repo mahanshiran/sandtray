@@ -45,7 +45,7 @@ namespace Sandplay.Core
 
         public static bool IsPointerOverUI()
         {
-            if (IsInputBlocked) return true;
+            if (IsInputBlocked || Sandplay.UI.ObjectTransformGizmo.BlocksWorldInput) return true;
             var es = UnityEngine.EventSystems.EventSystem.current;
             if (es == null) return false;
             if (Input.touchCount > 0)
@@ -68,13 +68,16 @@ namespace Sandplay.Core
             return Input.GetMouseButtonDown(0);
         }
 
+        public static bool IsTouchHeld(TouchPhase phase) =>
+            phase == TouchPhase.Began || phase == TouchPhase.Moved || phase == TouchPhase.Stationary;
+
         public static bool GetPointerHeld()
         {
             if (IsInputBlocked) return false;
             if (Input.touchCount > 0)
             {
                 var phase = Input.GetTouch(0).phase;
-                return phase == TouchPhase.Moved || phase == TouchPhase.Stationary;
+                return IsTouchHeld(phase);
             }
             return Input.GetMouseButton(0);
         }

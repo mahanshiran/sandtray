@@ -56,3 +56,7 @@ New reports use Observations and Conclusion, displayed as Key observations and O
 ## Concise report revision
 
 The four narrative sections were consolidated into two to reduce repetition. A compact Method and sources appendix replaces the lengthy Practice context notes. Provider context still includes the selected knowledge notes; they are no longer copied into every user report. Validation checks common unsupported identity/size/grouping claims, raw measurements, text-only front/back claims, unsupported boundary claims and exact sentence repetition. Feedback reports all detected issues in a single rewrite request. These checks are limited lexical safeguards, not proof that every statement is correct.
+
+## September 25 report revision
+
+The current contract supersedes the citation and layout-only rules above. Source notes remain internal context. New requests require only a `reflection` JSON string; sources are no longer generated or appended. Reports use Observations and Conclusion, with grounded tentative scene themes for sufficiently detailed scenes and no personality profiling. Empty/single-object trays with ordinary terrain get a short insufficient-detail response without a model call. Default random terrain is explicitly separated from distinctive formations. Legacy source appendices are hidden in Unity and PDF rendering. See `docs/AI_REFLECTION_BOUNDARIES.md` for limitations and validation behavior.

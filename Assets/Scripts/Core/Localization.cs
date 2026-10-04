@@ -71,6 +71,8 @@ namespace Sandplay.Core
             ["records.local"] = "Local import & recovery",
             // Toolbar
             ["toolbar.sand"] = "Sand",
+            ["tool.draw"] = "Draw",
+            ["brush.depth"] = "Depth",
             ["tool.raise"] = "Raise",
             ["tool.dig"] = "Dig",
             ["tool.smooth"] = "Smooth",
@@ -220,7 +222,7 @@ namespace Sandplay.Core
             ["analysis.ask"] = "Create AI Reflection",
             ["analysis.loading"] = "Preparing reflection... Please wait...",
             ["analysis.login_required"] = "Create a free account or sign in to use AI-assisted reflection.",
-            ["analysis.disclaimer"] = "AI-assisted reflection — not a diagnosis or clinical conclusion. The report describes observations and scene composition; only the creator can confirm personal meaning.",
+            ["analysis.disclaimer"] = "AI-assisted reflection — not a diagnosis or clinical conclusion. Possible themes describe the scene, not established facts about your personality or emotional state.",
             ["analysis.error.capture"] = "Failed to capture session data.",
             ["analysis.error.manager"] = "AIAnalysisManager not found in scene.",
             ["analysis.error"] = "Error: {0}",
@@ -391,7 +393,8 @@ namespace Sandplay.Core
             ["exit.confirm"] = "Are you sure you want to leave this table and return to the main menu?",
 
             // Size dialog
-            ["size.title"] = "Choose Board Size",
+            ["size.title"] = "Choose Board Shape & Size",
+            ["size.circle"] = "Circle (10 diameter)",
             ["size.standard"] = "Standard (Square)",
             ["size.standard_desc"] = "10 × 10",
             ["size.medium"] = "Medium (Wide)",
@@ -561,6 +564,7 @@ namespace Sandplay.Core
             ["settings.box_inner"] = "Box Inner",
             ["settings.floor"] = "Floor",
             ["settings.allow_objects_in_air"] = "Allow objects in air",
+            ["settings.object_impressions"] = "Object impressions",
             ["settings.restore"] = "Restore Defaults",
             ["settings.pick"] = "Pick",
             ["shortcuts.title"] = "Keyboard Shortcuts",
@@ -690,6 +694,8 @@ namespace Sandplay.Core
             ["records.local"] = "本地导入与恢复",
             // Toolbar
             ["toolbar.sand"] = "沙子",
+            ["tool.draw"] = "画沙",
+            ["brush.depth"] = "深度",
             ["tool.raise"] = "堆高",
             ["tool.dig"] = "挖掘",
             ["tool.smooth"] = "平滑",
@@ -839,7 +845,7 @@ namespace Sandplay.Core
             ["analysis.ask"] = "生成 AI 反思",
             ["analysis.loading"] = "正在准备反思…请稍候…",
             ["analysis.login_required"] = "创建免费账户或登录后即可使用AI辅助反思。",
-            ["analysis.disclaimer"] = "AI辅助反思并非诊断或临床结论。报告呈现客观观察与画面结构；个人意义只能由创作者本人确认。",
+            ["analysis.disclaimer"] = "AI辅助反思并非诊断或临床结论。可能的主题是对画面的解读，不代表已确定的人格或情绪事实。",
             ["analysis.error.capture"] = "无法捕获会话数据。",
             ["analysis.error.manager"] = "场景中未找到 AIAnalysisManager。",
             ["analysis.error"] = "错误：{0}",
@@ -1010,7 +1016,8 @@ namespace Sandplay.Core
             ["exit.confirm"] = "确定要退出当前沙盘并返回主菜单吗？",
 
             // Size dialog
-            ["size.title"] = "选择沙盘大小",
+            ["size.title"] = "选择沙盘形状和大小",
+            ["size.circle"] = "圆形（直径 10）",
             ["size.standard"] = "标准（正方形）",
             ["size.standard_desc"] = "10 × 10",
             ["size.medium"] = "中等（宽型）",
@@ -1178,6 +1185,7 @@ namespace Sandplay.Core
             ["settings.box_inner"] = "盒子内层",
             ["settings.floor"] = "地板",
             ["settings.allow_objects_in_air"] = "允许物体悬空",
+            ["settings.object_impressions"] = "物体沙面压痕",
             ["settings.restore"] = "恢复默认",
             ["settings.pick"] = "选择",
             ["shortcuts.title"] = "键盘快捷键",

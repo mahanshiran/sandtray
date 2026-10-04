@@ -8,9 +8,12 @@ namespace Sandplay.Core
     /// </summary>
     public class SandboxFrame : MonoBehaviour
     {
+        public const float LegHeight = 1.2f;
+        public const float RoomFloorY = -0.1f - LegHeight;
         [SerializeField] private GameConfig _config;
         [SerializeField] private Material _frameMaterial;
 
+        private readonly System.Collections.Generic.List<Mesh> _roundMeshes = new();
         private Material _outerWallMaterial;
         private Material _innerPanelMaterial;
         private Material _floorMaterial;
@@ -31,6 +34,9 @@ namespace Sandplay.Core
             Color? innerColor = _innerPanelMaterial != null ? _innerPanelMaterial.color : (Color?)null;
             Color? floorColor = _floorMaterial != null ? _floorMaterial.color : (Color?)null;
 
+            foreach (var mesh in _roundMeshes) if (mesh != null) DestroyGenerated(mesh);
+            _roundMeshes.Clear();
+
             // Clear references
             _outerWallMaterial = null;
             _innerPanelMaterial = null;
@@ -38,9 +44,10 @@ namespace Sandplay.Core
 
             // Destroy all children (old walls/floor)
             for (int i = transform.childCount - 1; i >= 0; i--)
-                Destroy(transform.GetChild(i).gameObject);
+                DestroyGenerated(transform.GetChild(i).gameObject);
             BuildFrame();
             BuildFloor();
+            BuildLegs();
 
             // Restore colors
             if (outerColor.HasValue && _outerWallMaterial != null)
@@ -64,6 +71,28 @@ namespace Sandplay.Core
 
             BuildFrame();
             BuildFloor();
+            BuildLegs();
+        }
+
+        private void BuildLegs()
+        {
+            // Keep the sand and saved object coordinates unchanged; the room floor
+            // sits lower so these supports raise the tray visually into a low table.
+            float width = Mathf.Clamp(Mathf.Min(_config.SandboxWidth, _config.SandboxDepth) * .045f, .2f, .5f);
+            float x = _config.SandboxWidth * .5f - width;
+            float z = _config.SandboxDepth * .5f - width;
+            if (_config.CircularTray) x = z = Mathf.Min(_config.SandboxWidth, _config.SandboxDepth) * .30f;
+            for (int i = 0; i < 4; i++)
+            {
+                var leg = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                leg.name = "TableLeg_" + (i + 1);
+                leg.transform.SetParent(transform, false);
+                leg.transform.localPosition = new Vector3((i % 2 == 0 ? -1 : 1) * x,
+                    RoomFloorY + LegHeight * .5f, (i < 2 ? -1 : 1) * z);
+                leg.transform.localScale = new Vector3(width, LegHeight, width);
+                leg.GetComponent<Renderer>().sharedMaterial = _frameMaterial != null ? _frameMaterial : _outerWallMaterial;
+                leg.layer = LayerMask.NameToLayer("Ignore Raycast");
+            }
         }
 
         private void BuildFrame()
@@ -79,7 +108,7 @@ namespace Sandplay.Core
                 var tempPrimitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 _outerWallMaterial = new Material(tempPrimitive.GetComponent<Renderer>().sharedMaterial);
                 _outerWallMaterial.color = new Color(157f / 255f, 151f / 255f, 53f / 255f);
-                Destroy(tempPrimitive);
+                DestroyGenerated(tempPrimitive);
             }
 
             if (_innerPanelMaterial == null)
@@ -87,7 +116,13 @@ namespace Sandplay.Core
                 var tempPrimitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 _innerPanelMaterial = new Material(tempPrimitive.GetComponent<Renderer>().sharedMaterial);
                 _innerPanelMaterial.color = new Color(0.15f, 0.45f, 0.75f);
-                Destroy(tempPrimitive);
+                DestroyGenerated(tempPrimitive);
+            }
+
+            if (_config.CircularTray)
+            {
+                BuildRoundPart("RoundFrame", false, wallHeight);
+                return;
             }
 
             // Four walls (outer brown) - all share same material
@@ -147,7 +182,7 @@ namespace Sandplay.Core
             panel.GetComponent<Renderer>().sharedMaterial = _innerPanelMaterial;
 
             // Remove collider so it doesn't interfere with raycasting
-            Destroy(panel.GetComponent<Collider>());
+            DestroyGenerated(panel.GetComponent<Collider>());
             panel.layer = LayerMask.NameToLayer("Default");
         }
 
@@ -158,16 +193,89 @@ namespace Sandplay.Core
                 var tempPrimitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 _floorMaterial = new Material(tempPrimitive.GetComponent<Renderer>().sharedMaterial);
                 _floorMaterial.color = new Color(0.15f, 0.45f, 0.75f); // Blue water
-                Destroy(tempPrimitive);
+                _floorMaterial.SetFloat("_Glossiness", .65f);
+                DestroyGenerated(tempPrimitive);
             }
 
+            if (_config.CircularTray)
+            {
+                BuildRoundPart("SandboxFloor", true, 0);
+                return;
+            }
             var floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
             floor.name = "SandboxFloor";
+            // Keep submerged sand editable; the visible water base must not intercept tool rays.
+            floor.layer = LayerMask.NameToLayer("Ignore Raycast");
             floor.transform.SetParent(transform);
             floor.transform.localPosition = new Vector3(0, -0.05f, 0);
             floor.transform.localScale = new Vector3(_config.SandboxWidth, 0.1f, _config.SandboxDepth);
 
             floor.GetComponent<Renderer>().sharedMaterial = _floorMaterial;
+        }
+        private void BuildRoundPart(string name, bool floor, float height)
+        {
+            const int segments = 128;
+            float radius = Mathf.Min(_config.SandboxWidth, _config.SandboxDepth) * .5f;
+            float outer = floor ? radius : radius + .15f;
+            var vertices = new System.Collections.Generic.List<Vector3>();
+            var outerIndices = new System.Collections.Generic.List<int>();
+            var innerIndices = new System.Collections.Generic.List<int>();
+            void Quad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, bool inner = false)
+            {
+                int n = vertices.Count;
+                vertices.Add(a); vertices.Add(b); vertices.Add(c); vertices.Add(d);
+                var indices = inner ? innerIndices : outerIndices;
+                indices.AddRange(new[] { n, n + 1, n + 2, n, n + 2, n + 3 });
+            }
+            Vector3 Point(int i, float r, float y)
+            {
+                float a = i * Mathf.PI * 2 / segments;
+                return new Vector3(Mathf.Cos(a) * r, y, Mathf.Sin(a) * r);
+            }
+            for (int i = 0; i < segments; i++)
+            {
+                var a = Point(i, outer, height); var b = Point(i + 1, outer, height);
+                var c = Point(i, outer, -.1f); var d = Point(i + 1, outer, -.1f);
+                Quad(a, b, d, c); // outside
+                if (floor)
+                {
+                    Quad(Vector3.zero, b, a, Vector3.zero);
+                    Quad(new Vector3(0, -.1f, 0), c, d, new Vector3(0, -.1f, 0));
+                }
+                else
+                {
+                    var ia = Point(i, radius, height); var ib = Point(i + 1, radius, height);
+                    var ic = Point(i, radius, -.1f); var id = Point(i + 1, radius, -.1f);
+                    Quad(ia, ic, id, ib, true); // blue inside
+                    Quad(ia, ib, b, a); // top rim
+                    Quad(ic, c, d, id);
+                }
+            }
+            var mesh = new Mesh { name = name };
+            mesh.SetVertices(vertices);
+            mesh.subMeshCount = floor ? 1 : 2;
+            mesh.SetTriangles(outerIndices, 0);
+            if (!floor) mesh.SetTriangles(innerIndices, 1);
+            mesh.RecalculateNormals(); mesh.RecalculateBounds();
+            _roundMeshes.Add(mesh);
+            var part = new GameObject(name, typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
+            part.transform.SetParent(transform, false);
+            part.GetComponent<MeshFilter>().sharedMesh = mesh;
+            part.GetComponent<MeshRenderer>().sharedMaterials = floor ? new[] { _floorMaterial } :
+                new[] { _frameMaterial != null ? _frameMaterial : _outerWallMaterial, _innerPanelMaterial };
+            part.GetComponent<MeshCollider>().sharedMesh = mesh;
+            part.layer = LayerMask.NameToLayer(floor ? "Ignore Raycast" : "Default");
+        }
+
+        private static void DestroyGenerated(Object value)
+        {
+            if (Application.isPlaying) Destroy(value);
+            else DestroyImmediate(value);
+        }
+
+        private void OnDestroy()
+        {
+            foreach (var mesh in _roundMeshes) if (mesh != null) DestroyGenerated(mesh);
         }
     }
 }

@@ -64,11 +64,15 @@ namespace Sandplay.AI
         public float HeightVariance;
         public float LocallyFlatPercentage;
         public bool HasMeaningfulRelief;
+        public bool DefaultTerrainRandomized = true;
+        public bool HasDistinctFeatures;
+        public bool BaselineComparisonAvailable = false;
     }
 
     [Serializable]
     public class SceneContext
     {
+        public string TerrainOrigin = "The initial sand is randomly uneven, including hills. Ordinary unevenness is not evidence of sculpting. Only emphasize substantial distinctive formations; no original baseline or edit history is supplied.";
         public string CoordinateConvention = "Positions use tray-local X/Z coordinates; negative and positive Z are not psychological directions.";
         public string BluePerimeter = "The blue vertical perimeter is the tray wall, not water.";
         public string BlueLowAreas = "Blue areas visible within low parts of the sand may be exposed tray base; the app does not explicitly identify them as water.";
@@ -196,6 +200,16 @@ namespace Sandplay.AI
             return "center";
         }
 
+        public static bool HasDistinctTerrainFeatures(float[] heights, float baseHeight, float maxHeight)
+        {
+            if (heights == null || heights.Length == 0 || maxHeight < .05f) return false;
+            // Theoretical envelope of the three noise octaves in GenerateRandomTerrain.
+            float defaultMin = Mathf.Clamp(baseHeight - .28f * maxHeight, .05f, maxHeight);
+            float defaultMax = Mathf.Clamp(baseHeight + .40f * maxHeight, .05f, maxHeight);
+            int distinct = heights.Count(h => h < defaultMin - .05f || h > defaultMax + .05f);
+            return distinct >= Mathf.Max(4, Mathf.CeilToInt(heights.Length * .01f));
+        }
+
         private static void ExtractTerrain(SessionData session, TerrainAnalysis terrain)
         {
             float[] heights = session?.DecodeHeightmap();
@@ -212,7 +226,13 @@ namespace Sandplay.AI
             terrain.MaxHeight = max;
             terrain.MinHeight = min;
             terrain.HeightRange = max - min;
+            // Legacy field describes geometry only; it never establishes intent.
             terrain.HasMeaningfulRelief = terrain.HeightRange >= 0.1f;
+            var config = Sandplay.Core.GameManager.Instance?.Config;
+            if (config != null)
+            {
+                terrain.HasDistinctFeatures = HasDistinctTerrainFeatures(heights, config.SandBaseHeight, config.SandMaxHeight);
+            }
 
             float variance = 0f;
             foreach (float height in heights)

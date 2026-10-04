@@ -94,7 +94,7 @@ namespace Sandplay.Core
         private Material _roundedUIMaterial;
 
         // Default colors
-        private readonly Color _defaultSandColor = new Color(0.70f, 0.60f, 0.45f);
+        private readonly Color _defaultSandColor = SandMaterialController.DefaultSandColor;
         private readonly Color _defaultWallOuterColor = new Color(157f / 255f, 151f / 255f, 53f / 255f);
         private readonly Color _defaultWallInnerColor = new Color(0.15f, 0.45f, 0.75f);
         private readonly Color _defaultFloorColor = new Color(0.15f, 0.45f, 0.75f);
@@ -125,6 +125,7 @@ namespace Sandplay.Core
 
         private void OnDestroy()
         {
+            if (_windowSunlightCookie != null) Destroy(_windowSunlightCookie);
             ClearJoinedSessionLoadingHandlers();
             Localization.OnLanguageChanged -= RefreshAllLocalizedTexts;
             if (BackendClient.Instance != null)
@@ -289,7 +290,7 @@ namespace Sandplay.Core
             var tempPrimitive = GameObject.CreatePrimitive(PrimitiveType.Plane);
             var sandMat = new Material(tempPrimitive.GetComponent<Renderer>().sharedMaterial);
             Destroy(tempPrimitive);
-            sandMat.color = new Color(0.70f, 0.60f, 0.45f); // Brown sand
+            sandMat.color = _defaultSandColor;
             sandMat.SetFloat("_Metallic", 0f);
             sandMat.SetFloat("_Glossiness", 0.08f); // Matte sand
 
@@ -318,14 +319,14 @@ namespace Sandplay.Core
                 sandMat.SetTexture("_BumpMap", GenerateSandNormalMap(512, 512));
                 Debug.Log("[Sandplay] Using procedurally generated sand normal map");
             }
-            sandMat.SetFloat("_BumpScale", 0.8f);
+            sandMat.SetFloat("_BumpScale", 0.45f);
             sandMat.SetTextureScale("_BumpMap", new Vector2(10f, 10f));
 
             // Detail/occlusion map for extra grain depth
             sandMat.EnableKeyword("_DETAIL_MULX2");
             sandMat.SetTexture("_DetailAlbedoMap", GenerateSandDetailTexture(256, 256));
             sandMat.SetTextureScale("_DetailAlbedoMap", new Vector2(30f, 30f));
-            sandMat.SetFloat("_DetailNormalMapScale", 0.4f);
+            sandMat.SetFloat("_DetailNormalMapScale", 0.12f);
             sandMat.SetTexture("_DetailNormalMap", GenerateSandNormalMap(256, 256));
             sandMat.SetTextureScale("_DetailNormalMap", new Vector2(30f, 30f));
 
@@ -441,19 +442,29 @@ namespace Sandplay.Core
 
         private void ApplyEnvironmentLighting()
         {
-            // Warm trilight ambient for cozy room feel.
+            // Bright bounced daylight keeps vertical surfaces and tray sides
+            // readable, while a slightly warmer ground fill preserves depth.
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.75f, 0.70f, 0.62f);
-            RenderSettings.ambientEquatorColor = new Color(0.85f, 0.78f, 0.68f);
-            RenderSettings.ambientGroundColor = new Color(0.55f, 0.50f, 0.45f);
+            RenderSettings.ambientSkyColor = new Color(0.84f, 0.87f, 0.90f);
+            RenderSettings.ambientEquatorColor = new Color(0.76f, 0.78f, 0.77f);
+            RenderSettings.ambientGroundColor = new Color(0.60f, 0.56f, 0.49f);
+
+            // The room owns its lighting. SceneSetup and Unity's template scene
+            // may also contain these lights; don't stack them onto the room rig.
+            foreach (string lightName in new[] { "Directional Light", "Fill Light" })
+            {
+                var sceneLight = GameObject.Find(lightName)?.GetComponent<Light>();
+                if (sceneLight != null) sceneLight.enabled = false;
+            }
 
             // Disable skybox — we have a room now
             RenderSettings.skybox = null;
             var camera = UnityEngine.Camera.main ?? FindAnyObjectByType<UnityEngine.Camera>();
             if (camera != null)
             {
+                camera.allowMSAA = true;
                 camera.clearFlags = CameraClearFlags.SolidColor;
-                camera.backgroundColor = new Color(0.15f, 0.13f, 0.12f);
+                camera.backgroundColor = new Color(0.78f, 0.88f, 0.96f);
             }
             else Debug.LogWarning("[Sandplay] Environment camera is not ready; room lighting will still be created.");
 
@@ -487,12 +498,12 @@ namespace Sandplay.Core
             float roomDepth = Mathf.Max(80f, boardMax * 8f);   // Z
             float roomHeight = Mathf.Max(40f, boardMax * 4f);  // Y
             float wallThick = 0.15f;
-            float floorY = -0.1f;
+            float floorY = SandboxFrame.RoomFloorY;
 
-            Color wallColor = new Color(0.92f, 0.88f, 0.82f);      // warm cream/beige
-            Color floorColor = new Color(0.55f, 0.40f, 0.28f);     // warm wood brown
-            Color ceilingColor = new Color(0.95f, 0.93f, 0.88f);   // off-white
-            Color trimColor = new Color(0.45f, 0.32f, 0.22f);      // dark wood trim
+            Color wallColor = new Color(0.97f, 0.95f, 0.89f);     // sunny ivory
+            Color floorColor = new Color(0.78f, 0.60f, 0.42f);    // warm brown oak tint
+            Color ceilingColor = new Color(0.98f, 0.97f, 0.94f);  // soft white
+            Color trimColor = new Color(0.64f, 0.49f, 0.34f);     // natural oak trim
 
             _therapyRoom = new GameObject("TherapyRoom");
             _therapyRoom.transform.SetParent(_sandboxRoot.transform, false);
@@ -507,12 +518,12 @@ namespace Sandplay.Core
             var floorMat = floor.GetComponent<Renderer>().material;
             floorMat.color = floorColor;
             floorMat.SetFloat("_Metallic", 0f);
-            floorMat.SetFloat("_Glossiness", 0.6f);
+            floorMat.SetFloat("_Glossiness", 0.32f);
             floorMat.mainTexture = GenerateWoodFloorTexture(512, 512);
             floorMat.mainTextureScale = new Vector2(8f, 8f);
             floorMat.EnableKeyword("_NORMALMAP");
             floorMat.SetTexture("_BumpMap", GenerateWoodFloorNormalMap(512, 512));
-            floorMat.SetFloat("_BumpScale", 0.3f);
+            floorMat.SetFloat("_BumpScale", 0.18f);
             floorMat.SetTextureScale("_BumpMap", new Vector2(8f, 8f));
             floor.layer = LayerMask.NameToLayer("Ignore Raycast");
 
@@ -600,12 +611,13 @@ namespace Sandplay.Core
             lightGo.transform.rotation = Quaternion.Euler(90f, 0f, 0f); // straight down
             var roomLight = lightGo.AddComponent<Light>();
             roomLight.type = LightType.Spot;
-            roomLight.color = new Color(1f, 0.97f, 0.88f); // warm white
-            roomLight.intensity = 3f;
+            roomLight.color = new Color(1f, 0.98f, 0.93f); // gentle warm white
+            roomLight.intensity = 2.2f;
             roomLight.range = roomHeight * 2.5f;
-            roomLight.spotAngle = 90f;
+            roomLight.spotAngle = 110f;
+            roomLight.renderMode = LightRenderMode.ForcePixel;
             roomLight.shadows = LightShadows.Soft;
-            roomLight.shadowStrength = 0.75f;
+            roomLight.shadowStrength = 0.35f;
             roomLight.shadowResolution = UnityEngine.Rendering.LightShadowResolution.High;
             roomLight.shadowBias = 0.05f;
             roomLight.shadowNormalBias = 0.4f;
@@ -617,15 +629,16 @@ namespace Sandplay.Core
             QualitySettings.shadowCascades = 2;
             QualitySettings.shadowProjection = ShadowProjection.StableFit;
 
-            // Ambient fill — low intensity point light so unlit areas aren't pitch black
+            // Broad daylight from the window side. Directional fill doesn't
+            // fade across this large room or change brightness when resizing.
             var fillGo = new GameObject("FillLight");
             fillGo.transform.SetParent(roomParent.transform, false);
-            fillGo.transform.position = new Vector3(0, floorY + roomHeight * 0.5f, 0);
+            fillGo.transform.rotation = Quaternion.Euler(50f, -90f, 0f);
             var fillLight = fillGo.AddComponent<Light>();
-            fillLight.type = LightType.Point;
-            fillLight.color = new Color(0.9f, 0.92f, 1f);
-            fillLight.intensity = 0.35f;
-            fillLight.range = roomWidth;
+            fillLight.type = LightType.Directional;
+            fillLight.color = new Color(1f, 0.96f, 0.87f);
+            fillLight.intensity = 0.95f;
+            fillLight.renderMode = LightRenderMode.ForcePixel;
             fillLight.shadows = LightShadows.None;
 
             // Decoration is intentionally last and isolated. A missing or bad
@@ -720,9 +733,9 @@ namespace Sandplay.Core
             float wallCenterY = floorY + roomHeight / 2f;
 
             // Window opening dimensions
-            float winHalfD = roomDepth * 0.10f;                    // half-width along Z
-            float winBotY = floorY + roomHeight * 0.28f;
-            float winTopY = floorY + roomHeight * 0.62f;
+            float winHalfD = roomDepth * 0.175f;                   // broad landscape window, half-width along Z
+            float winBotY = floorY + roomHeight * 0.18f;
+            float winTopY = winBotY + roomHeight * 0.34f;
             float winH = winTopY - winBotY;
             float winCenterY = (winBotY + winTopY) / 2f;
 
@@ -747,8 +760,13 @@ namespace Sandplay.Core
                 new Vector3(wallX, floorY + belowH / 2f, 0),
                 new Vector3(wallThick, belowH, winHalfD * 2f), wallColor);
 
+            // This wall bounds the local sunlight beam at the window opening.
+            foreach (var renderer in parent.GetComponentsInChildren<Renderer>())
+                if (renderer.name.StartsWith("WallRight_"))
+                    renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+
             // === Window frame ===
-            float ft = roomHeight * 0.018f; // frame thickness proportional to room
+            float ft = roomHeight * 0.014f; // slimmer frame around the wider view
             float fd = wallThick * 2f;      // frame depth (protrudes outward slightly)
             // Top bar
             CreateRoomWall(parent, "WinFrame_Top",
@@ -769,11 +787,16 @@ namespace Sandplay.Core
             // Horizontal cross-bar
             CreateRoomWall(parent, "WinFrame_CrossH",
                 new Vector3(wallX, winCenterY, 0),
-                new Vector3(fd, ft, winHalfD * 2f), trimColor);
+                new Vector3(fd, ft * 0.55f, winHalfD * 2f), trimColor);
             // Vertical cross-bar
             CreateRoomWall(parent, "WinFrame_CrossV",
                 new Vector3(wallX, winCenterY, 0),
                 new Vector3(fd, winH, ft * 0.6f), trimColor);
+
+            BuildWindowRecess(parent, wallX, winHalfD, winBotY, winTopY, roomWidth, wallColor);
+            foreach (var renderer in parent.GetComponentsInChildren<Renderer>())
+                if (renderer.name.StartsWith("WinFrame_"))
+                    renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
 
             // === Window sill (interior ledge) ===
             float sillDepth = roomWidth * 0.02f;
@@ -795,39 +818,50 @@ namespace Sandplay.Core
             glass.transform.SetParent(parent, false);
             glass.transform.position = new Vector3(wallX, winCenterY, 0);
             glass.transform.localScale = new Vector3(wallThick * 0.25f, winH, winHalfD * 2f);
-            var standardShader = Shader.Find("Standard");
+            var standardShader = Shader.Find("Standard (Specular setup)");
             var glassMat = standardShader != null ? new Material(standardShader) : glass.GetComponent<Renderer>().material;
-            glassMat.color = new Color(0.75f, 0.90f, 1f, 0.18f);
+            glassMat.color = new Color(0.96f, 0.98f, 1f, 0.035f);
             glassMat.SetFloat("_Metallic", 0f);
-            glassMat.SetFloat("_Glossiness", 0.97f);
-            glassMat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            glassMat.SetColor("_SpecColor", new Color(.015f, .015f, .015f));
+            glassMat.SetFloat("_Glossiness", 0.92f);
+            glassMat.SetFloat("_Mode", 3f);
+            glassMat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
             glassMat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
             glassMat.SetInt("_ZWrite", 0);
             glassMat.DisableKeyword("_ALPHATEST_ON");
-            glassMat.EnableKeyword("_ALPHABLEND_ON");
-            glassMat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            glassMat.DisableKeyword("_ALPHABLEND_ON");
+            glassMat.EnableKeyword("_ALPHAPREMULTIPLY_ON");
             glassMat.renderQueue = 3000;
             var glassRenderer = glass.GetComponent<Renderer>();
             glassRenderer.material = glassMat;
             glassRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             glassRenderer.receiveShadows = false;
-            glass.layer = LayerMask.NameToLayer("Ignore Raycast");
+            glass.layer = LayerMask.NameToLayer("TransparentFX");
             Destroy(glass.GetComponent<Collider>());
 
             // === Sky backdrop outside the window ===
-            var sky = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            var sky = GameObject.CreatePrimitive(PrimitiveType.Cube);
             sky.name = "WindowSkyBackdrop";
             sky.transform.SetParent(parent, false);
-            sky.transform.position = new Vector3(wallX + wallThick, winCenterY, 0);
-            sky.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
-            sky.transform.localScale = new Vector3(winHalfD * 2.5f, winH * 1.3f, 1f);
-            var unlitShader = Shader.Find("Unlit/Color");
+            // Enclose the room with inward-facing scenery so steep or oblique
+            // views cannot expose the edge of a flat backdrop.
+            float landscapeSize = Mathf.Max(roomWidth, roomHeight, roomDepth) * 4f;
+            sky.transform.position = new Vector3(0, floorY + roomHeight * .5f, 0);
+            sky.transform.localScale = Vector3.one * landscapeSize;
+            var skyTexture = Resources.Load<Texture2D>("RoomDecor/SunnyLandscape");
+            var unlitShader = skyTexture != null ? Resources.Load<Shader>("RoomDecor/WindowSky") : null;
+            unlitShader = unlitShader ?? Shader.Find("Unlit/Color");
             var skyMat = unlitShader != null ? new Material(unlitShader) : sky.GetComponent<Renderer>().material;
-            skyMat.color = new Color(0.53f, 0.80f, 1f);
+            if (skyMat.HasProperty("_Color")) skyMat.color = new Color(0.65f, 0.84f, 1f);
+            if (skyTexture != null && skyMat.HasProperty("_MainTex")) skyMat.mainTexture = skyTexture;
             sky.GetComponent<Renderer>().material = skyMat;
             sky.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             sky.layer = LayerMask.NameToLayer("Ignore Raycast");
             Destroy(sky.GetComponent<Collider>());
+
+            CreateWindowSunlight(parent, wallX, winCenterY, roomWidth, roomHeight, roomDepth,
+                winHalfD, winBotY, winTopY, ft);
+            CreateWindowReflection(parent, wallX, winCenterY, floorY, roomWidth, roomHeight, roomDepth);
 
         }
 
@@ -977,7 +1011,7 @@ namespace Sandplay.Core
             var canvasGo = _canvasGo;
             var canvas = canvasGo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.pixelPerfect = true;
+            canvas.pixelPerfect = false; // SDF text and smooth UI motion retain subpixel positioning.
             canvas.sortingOrder = 10;
             var scaler = canvasGo.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -1141,6 +1175,8 @@ namespace Sandplay.Core
             // Toolbar button toggles flyout; if paint mode already active, just toggle flyout
             matBtn.onClick.AddListener(() => matPanel.SetActive(!matPanel.activeSelf));
 
+            matBtn.gameObject.AddComponent<ActiveToolIndicator>().Mode = ToolMode.SandPaint;
+
             // Dim the surface button when paint mode is not active
             EventBus.Subscribe<ToolModeChangedEvent>(evt =>
             {
@@ -1162,11 +1198,11 @@ namespace Sandplay.Core
             sy -= 8;
 
             // === Raise / Dig / Flatten ===
-            string[] sandKeys = { "tool.raise", "tool.dig", "tool.flatten" };
-            string[] sandNames = { Localization.Get(sandKeys[0]), Localization.Get(sandKeys[1]), Localization.Get(sandKeys[2]) };
+            string[] sandKeys = { "tool.raise", "tool.dig", "tool.flatten", "tool.draw" };
+            string[] sandNames = { Localization.Get(sandKeys[0]), Localization.Get(sandKeys[1]), Localization.Get(sandKeys[2]), Localization.Get(sandKeys[3]) };
             ToolMode[] sandModes = {
                 ToolMode.SandRaise, ToolMode.SandDig,
-                ToolMode.SandFlatten
+                ToolMode.SandFlatten, ToolMode.SandDraw
             };
             var sandButtons = new Button[sandNames.Length];
             var sandButtonDefaultColor = new Color(0.12f, 0.15f, 0.17f, 1f);
@@ -1183,7 +1219,7 @@ namespace Sandplay.Core
                 var terrainIcon = new GameObject("TerrainGlyph", typeof(RectTransform));
                 terrainIcon.transform.SetParent(btn.transform, false);
                 var terrainGlyph = terrainIcon.AddComponent<TerrainToolGlyph>();
-                terrainGlyph.Mode = i;
+                terrainGlyph.Mode = i == 3 ? 6 : i;
                 terrainGlyph.color = new Color(.84f,.89f,.91f);
                 terrainGlyph.raycastTarget = false;
                 var terrainRT = terrainIcon.GetComponent<RectTransform>();
@@ -1200,6 +1236,9 @@ namespace Sandplay.Core
                 });
                 sandButtons[i] = btn;
             }
+
+            for (int i = 0; i < sandButtons.Length; i++)
+                sandButtons[i].gameObject.AddComponent<ActiveToolIndicator>().Mode = sandModes[i];
 
             // Highlight active tool button
             EventBus.Subscribe<ToolModeChangedEvent>(evt =>
@@ -1218,6 +1257,7 @@ namespace Sandplay.Core
                 toolbarWidth, btnSize, ref sy, btnPad);
             TrackLocalized(walkBtn.GetComponentInChildren<TextMeshProUGUI>(), "tool.walk");
             walkBtn.onClick.AddListener(() => GameManager.Instance.SetToolMode(ToolMode.WalkMode));
+            walkBtn.gameObject.AddComponent<ActiveToolIndicator>().Mode = ToolMode.WalkMode;
 
             // Separator
             sy -= 8;
@@ -1274,10 +1314,10 @@ namespace Sandplay.Core
             exitBtnRT.anchorMin = new Vector2(0, 1);
             exitBtnRT.anchorMax = new Vector2(0, 1);
             exitBtnRT.pivot = new Vector2(0, 1);
-            exitBtnRT.anchoredPosition = new Vector2(toolbarWidth + 4, -4);
+            exitBtnRT.anchoredPosition = new Vector2(toolbarWidth + 24, -4);
             exitBtnRT.sizeDelta = new Vector2(50, 36);
             var exitBtnImg = exitBtnGo.AddComponent<Image>();
-            exitBtnImg.color = new Color(0.48f, 0.26f, 0.26f, 0.92f);
+            exitBtnImg.color = new Color(0.82f, 0.18f, 0.20f, 1f);
             ApplyRoundedCorners(exitBtnImg);
             var exitBtn = exitBtnGo.AddComponent<Button>();
             exitBtn.onClick.AddListener(() => ShowSandboxExitConfirmation(ReturnToMenu));
@@ -1303,7 +1343,7 @@ namespace Sandplay.Core
             undoRedoRT.anchorMin = new Vector2(0, 1);
             undoRedoRT.anchorMax = new Vector2(0, 1);
             undoRedoRT.pivot = new Vector2(0, 1);
-            undoRedoRT.anchoredPosition = new Vector2(toolbarWidth + 58, -4);
+            undoRedoRT.anchoredPosition = new Vector2(toolbarWidth + 78, -4);
             undoRedoRT.sizeDelta = new Vector2(134, 36);
             var undoRedoBg = undoRedoBar.AddComponent<Image>();
             undoRedoBg.color = new Color(0.15f, 0.15f, 0.15f, 0.9f);
@@ -1327,37 +1367,7 @@ namespace Sandplay.Core
             undoBtnColors.highlightedColor = new Color(0.34f, 0.34f, 0.40f);
             undoBtnColors.pressedColor = new Color(0.18f, 0.36f, 0.46f);
             undoBtn.colors = undoBtnColors;
-            Sprite undoIcon = LoadIconWhiteTinted("Undo");
-            if (undoIcon != null)
-            {
-                var undoIconGo = new GameObject("Icon");
-                undoIconGo.transform.SetParent(undoBtnGo.transform, false);
-                var undoIconImg = undoIconGo.AddComponent<Image>();
-                undoIconImg.sprite = undoIcon;
-                undoIconImg.preserveAspect = true;
-                undoIconImg.raycastTarget = false;
-                var undoIconRT = undoIconGo.GetComponent<RectTransform>();
-                undoIconRT.anchorMin = new Vector2(0.15f, 0.15f);
-                undoIconRT.anchorMax = new Vector2(0.85f, 0.85f);
-                undoIconRT.offsetMin = Vector2.zero;
-                undoIconRT.offsetMax = Vector2.zero;
-            }
-            else
-            {
-                var undoLblGo = new GameObject("Label");
-                undoLblGo.transform.SetParent(undoBtnGo.transform, false);
-                var undoLbl = undoLblGo.AddComponent<TextMeshProUGUI>();
-                undoLbl.text = "\u21A9";
-                undoLbl.fontSize = 20;
-                undoLbl.alignment = TextAlignmentOptions.Center;
-                undoLbl.color = Color.white;
-                undoLbl.font = GetUIFont();
-                var undoLblRT = undoLblGo.GetComponent<RectTransform>();
-                undoLblRT.anchorMin = Vector2.zero;
-                undoLblRT.anchorMax = Vector2.one;
-                undoLblRT.offsetMin = Vector2.zero;
-                undoLblRT.offsetMax = Vector2.zero;
-            }
+            CreateEditingToolIcon(undoBtnGo.transform, EditingIcon.Undo);
             undoBtn.onClick.AddListener(() => Sandplay.Data.UndoManager.Instance?.UndoLast());
 
             // Redo button
@@ -1371,85 +1381,24 @@ namespace Sandplay.Core
             redoBtnColors.highlightedColor = new Color(0.34f, 0.34f, 0.40f);
             redoBtnColors.pressedColor = new Color(0.18f, 0.36f, 0.46f);
             redoBtn.colors = redoBtnColors;
-            Sprite redoIcon = LoadIconWhiteTinted("Redo");
-            if (redoIcon != null)
-            {
-                var redoIconGo = new GameObject("Icon");
-                redoIconGo.transform.SetParent(redoBtnGo.transform, false);
-                var redoIconImg = redoIconGo.AddComponent<Image>();
-                redoIconImg.sprite = redoIcon;
-                redoIconImg.preserveAspect = true;
-                redoIconImg.raycastTarget = false;
-                var redoIconRT = redoIconGo.GetComponent<RectTransform>();
-                redoIconRT.anchorMin = new Vector2(0.15f, 0.15f);
-                redoIconRT.anchorMax = new Vector2(0.85f, 0.85f);
-                redoIconRT.offsetMin = Vector2.zero;
-                redoIconRT.offsetMax = Vector2.zero;
-            }
-            else
-            {
-                var redoLblGo = new GameObject("Label");
-                redoLblGo.transform.SetParent(redoBtnGo.transform, false);
-                var redoLbl = redoLblGo.AddComponent<TextMeshProUGUI>();
-                redoLbl.text = "\u21AA";
-                redoLbl.fontSize = 20;
-                redoLbl.alignment = TextAlignmentOptions.Center;
-                redoLbl.color = Color.white;
-                redoLbl.font = GetUIFont();
-                var redoLblRT = redoLblGo.GetComponent<RectTransform>();
-                redoLblRT.anchorMin = Vector2.zero;
-                redoLblRT.anchorMax = Vector2.one;
-                redoLblRT.offsetMin = Vector2.zero;
-                redoLblRT.offsetMax = Vector2.zero;
-            }
+            CreateEditingToolIcon(redoBtnGo.transform, EditingIcon.Redo);
             redoBtn.onClick.AddListener(() => Sandplay.Data.UndoManager.Instance?.RedoLast());
 
-            // Reset camera to the centered intro view
-            var resetViewBtnGo = new GameObject("Btn_ResetView");
-            resetViewBtnGo.transform.SetParent(undoRedoBar.transform, false);
-            var resetViewBtnImg = resetViewBtnGo.AddComponent<Image>();
-            resetViewBtnImg.color = new Color(0.22f, 0.22f, 0.27f, 1f);
-            ApplyRoundedCorners(resetViewBtnImg);
-            var resetViewBtn = resetViewBtnGo.AddComponent<Button>();
-            var resetViewBtnColors = resetViewBtn.colors;
-            resetViewBtnColors.highlightedColor = new Color(0.34f, 0.34f, 0.40f);
-            resetViewBtnColors.pressedColor = new Color(0.18f, 0.36f, 0.46f);
-            resetViewBtn.colors = resetViewBtnColors;
-
-            Sprite resetViewIcon = LoadIconWhiteTinted("Camera Reset");
-            if (resetViewIcon != null)
-            {
-                var resetViewIconGo = new GameObject("Icon");
-                resetViewIconGo.transform.SetParent(resetViewBtnGo.transform, false);
-                var resetViewIconImg = resetViewIconGo.AddComponent<Image>();
-                resetViewIconImg.sprite = resetViewIcon;
-                resetViewIconImg.preserveAspect = true;
-                resetViewIconImg.raycastTarget = false;
-                var resetViewIconRT = resetViewIconGo.GetComponent<RectTransform>();
-                resetViewIconRT.anchorMin = new Vector2(0.15f, 0.15f);
-                resetViewIconRT.anchorMax = new Vector2(0.85f, 0.85f);
-                resetViewIconRT.offsetMin = Vector2.zero;
-                resetViewIconRT.offsetMax = Vector2.zero;
-            }
-            else
-            {
-                var resetViewLblGo = new GameObject("Label");
-                resetViewLblGo.transform.SetParent(resetViewBtnGo.transform, false);
-                var resetViewLbl = resetViewLblGo.AddComponent<TextMeshProUGUI>();
-                resetViewLbl.text = "\u2302";
-                resetViewLbl.fontSize = 20;
-                resetViewLbl.alignment = TextAlignmentOptions.Center;
-                resetViewLbl.color = Color.white;
-                resetViewLbl.font = GetUIFont();
-                resetViewLbl.raycastTarget = false;
-                var resetViewLblRT = resetViewLblGo.GetComponent<RectTransform>();
-                resetViewLblRT.anchorMin = Vector2.zero;
-                resetViewLblRT.anchorMax = Vector2.one;
-                resetViewLblRT.offsetMin = Vector2.zero;
-                resetViewLblRT.offsetMax = Vector2.zero;
-            }
-            resetViewBtn.onClick.AddListener(() =>
-                FindAnyObjectByType<Sandplay.Camera.SandboxCamera>()?.ResetToIntroView());
+            // Orientation cube replaces the old home/reset button.
+            undoRedoRT.sizeDelta = new Vector2(90, 36);
+            var viewCubeGo = new GameObject("ViewCube", typeof(RectTransform), typeof(CanvasRenderer));
+            viewCubeGo.transform.SetParent(_sandboxUI.transform, false);
+            var viewCubeRT = viewCubeGo.GetComponent<RectTransform>();
+            viewCubeRT.anchorMin = viewCubeRT.anchorMax = Vector2.zero;
+            viewCubeRT.pivot = Vector2.zero;
+            viewCubeRT.anchoredPosition = new Vector2(4, 30);
+            viewCubeRT.sizeDelta = new Vector2(94, 94);
+            viewCubeRT.localScale = Vector3.one * .8f;
+            viewCubeGo.AddComponent<Sandplay.UI.BoardViewCube>().Initialize(GetUIFont());
+            var viewCubeCanvas = viewCubeGo.AddComponent<Canvas>();
+            viewCubeCanvas.overrideSorting = true;
+            viewCubeCanvas.sortingOrder = 50;
+            viewCubeGo.AddComponent<GraphicRaycaster>();
 
             // Exit, Undo/Redo, and Reset View are high-priority — ensure they always render and receive input
             // on top of any overlapping panels (e.g. BrushSettings, CatalogPanel) by giving
@@ -1756,8 +1705,15 @@ namespace Sandplay.Core
             {
                 bool isSand = evt.NewMode == ToolMode.SandRaise || evt.NewMode == ToolMode.SandDig ||
                               evt.NewMode == ToolMode.SandSmooth || evt.NewMode == ToolMode.SandFlatten ||
-                              evt.NewMode == ToolMode.SandPaint;
+                              evt.NewMode == ToolMode.SandPaint || evt.NewMode == ToolMode.SandDraw;
                 brushPanel.SetActive(isSand);
+                if (sandTool != null)
+                {
+                    radiusSlider.value = sandTool.BrushRadius;
+                    strengthSlider.value = sandTool.BrushStrength;
+                }
+                radiusLabel.GetComponent<TextMeshProUGUI>().text = Localization.Get("brush.radius");
+                strengthLabel.GetComponent<TextMeshProUGUI>().text = Localization.Get(evt.NewMode == ToolMode.SandDraw ? "brush.depth" : "brush.strength");
 
                 // Update tool label to show current mode
                 toolLabel.GetComponent<TextMeshProUGUI>().text = isSand ? evt.NewMode.ToString().Replace("Sand", "") : Localization.Get("toolbar.sand");
@@ -1766,12 +1722,12 @@ namespace Sandplay.Core
             {
                 var mode = GameManager.Instance.CurrentTool;
                 brushPanel.SetActive(mode == ToolMode.SandRaise || mode == ToolMode.SandDig ||
-                    mode == ToolMode.SandSmooth || mode == ToolMode.SandFlatten || mode == ToolMode.SandPaint);
+                    mode == ToolMode.SandSmooth || mode == ToolMode.SandFlatten || mode == ToolMode.SandPaint || mode == ToolMode.SandDraw);
             }
 
             // === Catalog Panel (right-side drawer — API-driven) ===
             _catalogPanel = CreatePanel(_sandboxUI.transform, "CatalogPanel",
-                new Vector2(1, 0), new Vector2(1, 1), new Vector2(-420, 0), new Vector2(0, 0));
+                new Vector2(1, 0), new Vector2(1, 1), new Vector2(-302.4f, 0), new Vector2(0, 0));
             var catalogPanelRT = _catalogPanel.GetComponent<RectTransform>();
             catalogPanelRT.pivot = new Vector2(1, 0.5f);
             catalogPanelRT.anchoredPosition = new Vector2(catalogPanelRT.rect.width, 0);
@@ -2097,7 +2053,7 @@ namespace Sandplay.Core
 
             // === Status bar (bottom, right of toolbar) ===
             var statusBar = CreatePanel(_sandboxUI.transform, "StatusBar",
-                new Vector2(0, 0), new Vector2(1, 0), new Vector2(toolbarWidth, 25), new Vector2(0, 0));
+                new Vector2(0, 0), new Vector2(1, 0), new Vector2(toolbarWidth + 16, 25), new Vector2(0, 0));
             statusBar.GetComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f, 0.7f);
 
             var statusText = CreateText(statusBar.transform, "StatusText", Localization.Get("status.hint"), 12,
@@ -2115,7 +2071,7 @@ namespace Sandplay.Core
             var actionRT = actionPanelGo.AddComponent<RectTransform>();
             actionRT.sizeDelta = new Vector2(310, 56);
             // Scale the complete strip, including icons, spacing and shortcut labels.
-            actionRT.localScale = Vector3.one * 0.81f;
+            actionRT.localScale = Vector3.one * 0.648f;
             actionRT.pivot = new Vector2(0.5f, 0f);
 
             var actionBg = actionPanelGo.AddComponent<Image>();
@@ -2129,13 +2085,14 @@ namespace Sandplay.Core
             actionLayout.childForceExpandWidth = true;
             actionLayout.childForceExpandHeight = true;
 
+            actionPanelGo.AddComponent<CanvasGroup>();
             var actionPanel = actionPanelGo.AddComponent<Sandplay.UI.ObjectActionPanel>();
 
             // Up/down button — drag vertically to raise or sink the selected object.
             var verticalBtnGo = new GameObject("Btn_Vertical");
             verticalBtnGo.transform.SetParent(actionPanelGo.transform, false);
             var verticalBtnImg = verticalBtnGo.AddComponent<Image>();
-            verticalBtnImg.color = new Color(0.32f, 0.30f, 0.52f, 1f);
+            verticalBtnImg.color = new Color(.12f, .20f, .23f, 1f);
             ApplyRoundedCorners(verticalBtnImg);
             var verticalBtn = verticalBtnGo.AddComponent<Button>();
             verticalBtn.targetGraphic = verticalBtnImg;
@@ -2143,38 +2100,14 @@ namespace Sandplay.Core
             verticalColors.highlightedColor = new Color(0.44f, 0.42f, 0.68f, 1f);
             verticalColors.pressedColor = new Color(0.24f, 0.22f, 0.44f, 1f);
             verticalBtn.colors = verticalColors;
-            Sprite verticalIcon = LoadIconWhiteTinted("vertical");
-            if (verticalIcon != null)
-            {
-                var verticalIconGo = new GameObject("Icon");
-                verticalIconGo.transform.SetParent(verticalBtnGo.transform, false);
-                var verticalIconImg = verticalIconGo.AddComponent<Image>();
-                verticalIconImg.sprite = verticalIcon;
-                verticalIconImg.preserveAspect = true;
-                verticalIconImg.raycastTarget = false;
-                var verticalIconRT = verticalIconGo.GetComponent<RectTransform>();
-                verticalIconRT.anchorMin = new Vector2(0.16f, 0.16f);
-                verticalIconRT.anchorMax = new Vector2(0.84f, 0.84f);
-                verticalIconRT.offsetMin = Vector2.zero;
-                verticalIconRT.offsetMax = Vector2.zero;
-            }
-            else
-            {
-                var verticalTxtGo = new GameObject("Label");
-                verticalTxtGo.transform.SetParent(verticalBtnGo.transform, false);
-                var verticalTxt = verticalTxtGo.AddComponent<TextMeshProUGUI>();
-                verticalTxt.text = Localization.Get("action.vertical");
-                verticalTxt.fontSize = 25;
-                verticalTxt.alignment = TextAlignmentOptions.Center;
-                verticalTxt.color = Color.white;
-                verticalTxt.font = GetUIFont();
-                verticalTxt.raycastTarget = false;
-                var verticalTxtRT = verticalTxtGo.GetComponent<RectTransform>();
-                verticalTxtRT.anchorMin = Vector2.zero;
-                verticalTxtRT.anchorMax = Vector2.one;
-                verticalTxtRT.offsetMin = Vector2.zero;
-                verticalTxtRT.offsetMax = Vector2.zero;
-            }
+            var moveIcon = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(EditingToolIcon));
+            moveIcon.transform.SetParent(verticalBtnGo.transform, false);
+            var moveRect = moveIcon.GetComponent<RectTransform>();
+            moveRect.anchorMin = new Vector2(.18f, .18f);
+            moveRect.anchorMax = new Vector2(.82f, .82f);
+            moveRect.offsetMin = moveRect.offsetMax = Vector2.zero;
+            moveIcon.GetComponent<EditingToolIcon>().Kind = EditingIcon.Move;
+            moveIcon.GetComponent<EditingToolIcon>().raycastTarget = false;
             var verticalTrigger = verticalBtnGo.AddComponent<UnityEngine.EventSystems.EventTrigger>();
             var verticalDown = new UnityEngine.EventSystems.EventTrigger.Entry();
             verticalDown.eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown;
@@ -2189,46 +2122,15 @@ namespace Sandplay.Core
             var rotateBtnGo = new GameObject("Btn_Rotate");
             rotateBtnGo.transform.SetParent(actionPanelGo.transform, false);
             var rotateBtnImg = rotateBtnGo.AddComponent<Image>();
-            rotateBtnImg.color = new Color(0.20f, 0.40f, 0.54f, 1f);
+            rotateBtnImg.color = new Color(.12f, .20f, .23f, 1f);
             ApplyRoundedCorners(rotateBtnImg);
             var rotateBtn = rotateBtnGo.AddComponent<Button>();
             rotateBtn.targetGraphic = rotateBtnImg;
             var rotateColors = rotateBtn.colors;
-            rotateColors.highlightedColor = new Color(0.28f, 0.54f, 0.70f, 1f);
-            rotateColors.pressedColor = new Color(0.14f, 0.31f, 0.46f, 1f);
+            rotateColors.highlightedColor = new Color(.85f, 1f, 1f, 1f);
+            rotateColors.pressedColor = new Color(.55f, .85f, .82f, 1f);
             rotateBtn.colors = rotateColors;
-            Sprite rotateIcon = LoadIconWhiteTinted("rotate");
-            if (rotateIcon != null)
-            {
-                var rotateIconGo = new GameObject("Icon");
-                rotateIconGo.transform.SetParent(rotateBtnGo.transform, false);
-                var rotateIconImg = rotateIconGo.AddComponent<Image>();
-                rotateIconImg.sprite = rotateIcon;
-                rotateIconImg.preserveAspect = true;
-                rotateIconImg.raycastTarget = false;
-                var rotateIconRT = rotateIconGo.GetComponent<RectTransform>();
-                rotateIconRT.anchorMin = new Vector2(0.1f, 0.1f);
-                rotateIconRT.anchorMax = new Vector2(0.9f, 0.9f);
-                rotateIconRT.offsetMin = Vector2.zero;
-                rotateIconRT.offsetMax = Vector2.zero;
-            }
-            else
-            {
-                var rotateTxtGo = new GameObject("Label");
-                rotateTxtGo.transform.SetParent(rotateBtnGo.transform, false);
-                var rotateTxt = rotateTxtGo.AddComponent<TextMeshProUGUI>();
-                rotateTxt.text = "\u21BB";
-                rotateTxt.fontSize = 20;
-                rotateTxt.alignment = TextAlignmentOptions.Center;
-                rotateTxt.color = Color.white;
-                rotateTxt.font = GetUIFont();
-                rotateTxt.raycastTarget = false;
-                var rotateTxtRT = rotateTxtGo.GetComponent<RectTransform>();
-                rotateTxtRT.anchorMin = Vector2.zero;
-                rotateTxtRT.anchorMax = Vector2.one;
-                rotateTxtRT.offsetMin = Vector2.zero;
-                rotateTxtRT.offsetMax = Vector2.zero;
-            }
+            CreateEditingToolIcon(rotateBtnGo.transform, EditingIcon.Rotate);
             // Drag-to-rotate via EventTrigger
             var rotateTrigger = rotateBtnGo.AddComponent<UnityEngine.EventSystems.EventTrigger>();
             var pointerDown = new UnityEngine.EventSystems.EventTrigger.Entry();
@@ -2244,46 +2146,15 @@ namespace Sandplay.Core
             var resizeBtnGo = new GameObject("Btn_Resize");
             resizeBtnGo.transform.SetParent(actionPanelGo.transform, false);
             var resizeBtnImg = resizeBtnGo.AddComponent<Image>();
-            resizeBtnImg.color = new Color(0.22f, 0.44f, 0.34f, 1f);
+            resizeBtnImg.color = new Color(.12f, .20f, .23f, 1f);
             ApplyRoundedCorners(resizeBtnImg);
             var resizeBtn = resizeBtnGo.AddComponent<Button>();
             resizeBtn.targetGraphic = resizeBtnImg;
             var resizeColors = resizeBtn.colors;
-            resizeColors.highlightedColor = new Color(0.30f, 0.58f, 0.45f, 1f);
-            resizeColors.pressedColor = new Color(0.16f, 0.34f, 0.26f, 1f);
+            resizeColors.highlightedColor = new Color(.85f, 1f, 1f, 1f);
+            resizeColors.pressedColor = new Color(.55f, .85f, .82f, 1f);
             resizeBtn.colors = resizeColors;
-            Sprite resizeIcon = LoadIconWhiteTinted("resize");
-            if (resizeIcon != null)
-            {
-                var resizeIconGo = new GameObject("Icon");
-                resizeIconGo.transform.SetParent(resizeBtnGo.transform, false);
-                var resizeIconImg = resizeIconGo.AddComponent<Image>();
-                resizeIconImg.sprite = resizeIcon;
-                resizeIconImg.preserveAspect = true;
-                resizeIconImg.raycastTarget = false;
-                var resizeIconRT = resizeIconGo.GetComponent<RectTransform>();
-                resizeIconRT.anchorMin = new Vector2(0.1f, 0.1f);
-                resizeIconRT.anchorMax = new Vector2(0.9f, 0.9f);
-                resizeIconRT.offsetMin = Vector2.zero;
-                resizeIconRT.offsetMax = Vector2.zero;
-            }
-            else
-            {
-                var resizeTxtGo = new GameObject("Label");
-                resizeTxtGo.transform.SetParent(resizeBtnGo.transform, false);
-                var resizeTxt = resizeTxtGo.AddComponent<TextMeshProUGUI>();
-                resizeTxt.text = "\u2922";
-                resizeTxt.fontSize = 20;
-                resizeTxt.alignment = TextAlignmentOptions.Center;
-                resizeTxt.color = Color.white;
-                resizeTxt.font = GetUIFont();
-                resizeTxt.raycastTarget = false;
-                var resizeTxtRT = resizeTxtGo.GetComponent<RectTransform>();
-                resizeTxtRT.anchorMin = Vector2.zero;
-                resizeTxtRT.anchorMax = Vector2.one;
-                resizeTxtRT.offsetMin = Vector2.zero;
-                resizeTxtRT.offsetMax = Vector2.zero;
-            }
+            CreateEditingToolIcon(resizeBtnGo.transform, EditingIcon.Resize);
             var resizeTrigger = resizeBtnGo.AddComponent<UnityEngine.EventSystems.EventTrigger>();
             var resizeDown = new UnityEngine.EventSystems.EventTrigger.Entry();
             resizeDown.eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown;
@@ -2298,49 +2169,15 @@ namespace Sandplay.Core
             var duplicateBtnGo = new GameObject("Btn_Duplicate");
             duplicateBtnGo.transform.SetParent(actionPanelGo.transform, false);
             var duplicateBtnImg = duplicateBtnGo.AddComponent<Image>();
-            duplicateBtnImg.color = new Color(0.43f, 0.34f, 0.58f, 1f);
+            duplicateBtnImg.color = new Color(.12f, .20f, .23f, 1f);
             ApplyRoundedCorners(duplicateBtnImg);
             var duplicateBtn = duplicateBtnGo.AddComponent<Button>();
             duplicateBtn.targetGraphic = duplicateBtnImg;
             var duplicateColors = duplicateBtn.colors;
-            duplicateColors.highlightedColor = new Color(0.56f, 0.46f, 0.73f, 1f);
-            duplicateColors.pressedColor = new Color(0.32f, 0.24f, 0.47f, 1f);
+            duplicateColors.highlightedColor = new Color(.85f, 1f, 1f, 1f);
+            duplicateColors.pressedColor = new Color(.55f, .85f, .82f, 1f);
             duplicateBtn.colors = duplicateColors;
-            Sprite duplicateIcon = LoadIconWhiteTinted("copy");
-            if (duplicateIcon != null)
-            {
-                var duplicateIconGo = new GameObject("Icon");
-                duplicateIconGo.transform.SetParent(duplicateBtnGo.transform, false);
-                var duplicateIconImg = duplicateIconGo.AddComponent<Image>();
-                duplicateIconImg.sprite = duplicateIcon;
-                duplicateIconImg.preserveAspect = true;
-                duplicateIconImg.raycastTarget = false;
-                var duplicateIconRT = duplicateIconGo.GetComponent<RectTransform>();
-                duplicateIconRT.anchorMin = new Vector2(0.14f, 0.14f);
-                duplicateIconRT.anchorMax = new Vector2(0.86f, 0.86f);
-                duplicateIconRT.offsetMin = Vector2.zero;
-                duplicateIconRT.offsetMax = Vector2.zero;
-            }
-            else
-            {
-                var duplicateTxtGo = new GameObject("Label");
-                duplicateTxtGo.transform.SetParent(duplicateBtnGo.transform, false);
-                var duplicateTxt = duplicateTxtGo.AddComponent<TextMeshProUGUI>();
-                duplicateTxt.text = Localization.Get("action.duplicate");
-                duplicateTxt.fontSize = 11;
-                duplicateTxt.enableAutoSizing = true;
-                duplicateTxt.fontSizeMin = 8;
-                duplicateTxt.fontSizeMax = 11;
-                duplicateTxt.alignment = TextAlignmentOptions.Center;
-                duplicateTxt.color = Color.white;
-                duplicateTxt.font = GetUIFont();
-                duplicateTxt.raycastTarget = false;
-                var duplicateTxtRT = duplicateTxtGo.GetComponent<RectTransform>();
-                duplicateTxtRT.anchorMin = Vector2.zero;
-                duplicateTxtRT.anchorMax = Vector2.one;
-                duplicateTxtRT.offsetMin = new Vector2(2, 2);
-                duplicateTxtRT.offsetMax = new Vector2(-2, -2);
-            }
+            CreateEditingToolIcon(duplicateBtnGo.transform, EditingIcon.Duplicate);
             duplicateBtn.onClick.AddListener(() => actionPanel.OnDuplicatePressed());
 
             // Delete button
@@ -2355,38 +2192,7 @@ namespace Sandplay.Core
             deleteColors.highlightedColor = new Color(0.62f, 0.34f, 0.34f, 1f);
             deleteColors.pressedColor = new Color(0.38f, 0.18f, 0.18f, 1f);
             deleteBtn.colors = deleteColors;
-            Sprite deleteIcon = LoadIconWhiteTinted("delete");
-            if (deleteIcon != null)
-            {
-                var deleteIconGo = new GameObject("Icon");
-                deleteIconGo.transform.SetParent(deleteBtnGo.transform, false);
-                var deleteIconImg = deleteIconGo.AddComponent<Image>();
-                deleteIconImg.sprite = deleteIcon;
-                deleteIconImg.preserveAspect = true;
-                deleteIconImg.raycastTarget = false;
-                var deleteIconRT = deleteIconGo.GetComponent<RectTransform>();
-                deleteIconRT.anchorMin = new Vector2(0.1f, 0.1f);
-                deleteIconRT.anchorMax = new Vector2(0.9f, 0.9f);
-                deleteIconRT.offsetMin = Vector2.zero;
-                deleteIconRT.offsetMax = Vector2.zero;
-            }
-            else
-            {
-                var deleteTxtGo = new GameObject("Label");
-                deleteTxtGo.transform.SetParent(deleteBtnGo.transform, false);
-                var deleteTxt = deleteTxtGo.AddComponent<TextMeshProUGUI>();
-                deleteTxt.text = "\u2716";
-                deleteTxt.fontSize = 18;
-                deleteTxt.alignment = TextAlignmentOptions.Center;
-                deleteTxt.color = Color.white;
-                deleteTxt.font = GetUIFont();
-                deleteTxt.raycastTarget = false;
-                var deleteTxtRT = deleteTxtGo.GetComponent<RectTransform>();
-                deleteTxtRT.anchorMin = Vector2.zero;
-                deleteTxtRT.anchorMax = Vector2.one;
-                deleteTxtRT.offsetMin = Vector2.zero;
-                deleteTxtRT.offsetMax = Vector2.zero;
-            }
+            CreateEditingToolIcon(deleteBtnGo.transform, EditingIcon.Delete);
             deleteBtn.onClick.AddListener(() => actionPanel.OnDeletePressed());
 
             actionPanel.ConfigureKeyboardHints(GetUIFont());
@@ -2557,14 +2363,11 @@ namespace Sandplay.Core
 
             if (_cjkFallbackAdded || _uiFont == null) return;
 
-            // Pre-baked TMP asset if present; else build dynamic from full NotoSansSC OTF.
-            _cjkFont = Resources.Load<TMP_FontAsset>("Fonts & Materials/NotoSansSC SDF");
-
+            // The bundled OTF is the normal source for a dynamic, multi-atlas font.
+            // A prebuilt SDF asset is optional, so its absence is not a warning.
             if (_cjkFont == null)
             {
-                Debug.LogWarning("[SceneBootstrapper] NotoSansSC SDF not found. Creating dynamic CJK font from bundled OTF…");
-
-                // Full NotoSansSC first (correct fix). STHeiti is a tiny UI subset — last resort only.
+                // Full NotoSansSC first. STHeiti is a small UI subset fallback.
                 string[] bundledPaths = { "Fonts/NotoSansSC-Regular", "Fonts/STHeiti-Medium" };
                 foreach (var fontPath in bundledPaths)
                 {
@@ -2637,6 +2440,7 @@ namespace Sandplay.Core
                     AtlasPopulationMode.Dynamic
                 );
                 if (asset == null) return null;
+                asset.name = sourceFont.name + " Dynamic SDF";
                 // Long AI reports need many unique glyphs — allow extra atlases.
                 asset.isMultiAtlasTexturesEnabled = true;
                 return asset;
@@ -2651,6 +2455,20 @@ namespace Sandplay.Core
         /// <summary>
         /// Apply rounded corner material to an Image component.
         /// </summary>
+        private static void CreateEditingToolIcon(Transform parent, EditingIcon kind)
+        {
+            var go = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer));
+            go.transform.SetParent(parent, false);
+            var icon = go.AddComponent<EditingToolIcon>();
+            icon.Kind = kind;
+            icon.color = new Color(.94f, .98f, 1f, 1f);
+            icon.raycastTarget = false;
+            var rt = icon.rectTransform;
+            rt.anchorMin = new Vector2(.18f, .18f);
+            rt.anchorMax = new Vector2(.82f, .82f);
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+        }
+
         private void ApplyRoundedCorners(Image img)
         {
             if (_roundedUIMaterial != null && img != null)

@@ -1,0 +1,42 @@
+{
+  "synthetic_only": true,
+  "results": [
+    {
+      "case": "single_burger",
+      "reflection": "OBSERVATIONS\nThe tray contains one placed object.\n\nCONCLUSION\nThere is not enough detail for a meaningful psychological reading. An isolated object or empty space alone does not establish personality, loneliness, or another emotional state.",
+      "sources": [],
+      "knowledge_version": "1e3679f2218299c3ab839edc67ed00f5524d41e38b87de0f1d2b63b2c581c32d",
+      "model": "insufficient-detail",
+      "tokens_used": 0,
+      "evaluated_release": "22544a742908cedab41e263ab119cc4235e3f251"
+    },
+    {
+      "case": "relational_en",
+      "reflection": "OBSERVATIONS\n• One person is placed on the left side of the tray.\n• A fence stands in the center, separating the left from the right side.\n• Two people and a house are placed together on the right side.\n\nCONCLUSION\nThe arrangement shows spatial separation between one figure and a group of figures with a house. One possible reading is a scene depicting distinction between solitary and shared space—such as a boundary between outside and inside, or between individuals with different roles or relationships. Another possibility is simple functional layout, like a property line or path divider, with no relational meaning intended. Without further context from the creator, the scene supports multiple neutral interpretations; its personal significance remains with them.",
+      "sources": [],
+      "knowledge_version": "1e3679f2218299c3ab839edc67ed00f5524d41e38b87de0f1d2b63b2c581c32d",
+      "model": "qwen-plus",
+      "tokens_used": 5821,
+      "evaluated_release": "22544a742908cedab41e263ab119cc4235e3f251"
+    },
+    {
+      "case": "relational_vision",
+      "reflection": "OBSERVATIONS\n• A single person stands isolated on the left, separated from the right-side group by a tall vertical fence in the center.\n• On the right, two people stand near a house, forming a close pair; their proximity contrasts with the lone figure’s distance.\n• The fence is the only structure dividing the horizontal zones, creating a clear spatial barrier between the left and right groupings.\n\nCONCLUSION\nOne possible reading is separation versus connection: the lone figure apart from a paired group suggests themes of distance or exclusion, while the right-side grouping near a house may evoke belonging or shared space. An alternative is ordinary spatial arrangement—people simply placed in different areas without relational intent. Given the clear division and contrasting groupings, the scene most plausibly depicts a narrative of separation and proximity, not an undifferentiated layout.",
+      "sources": [],
+      "knowledge_version": "1e3679f2218299c3ab839edc67ed00f5524d41e38b87de0f1d2b63b2c581c32d",
+      "model": "qwen3-vl-plus",
+      "tokens_used": 3226,
+      "evaluated_release": "22544a742908cedab41e263ab119cc4235e3f251"
+    },
+    {
+      "case": "relational_zh",
+      "reflection": "观察\n左侧有一人，中心有一道栅栏，右侧有两人和一座房屋。\n总结\n栅栏位于左侧人物与右侧人物及房屋之间，可能让人联想到分隔；右侧两人位置相近，且都靠近房屋，可能让人联想到共同生活。另一种合理解读是：栅栏只是中性空间构件，整体呈现日常环境中人物与建筑的自然分布。画面包含可辨识的人物关系和空间组织，足以支持对分隔与邻近的初步场景式理解。",
+      "sources": [],
+      "knowledge_version": "1e3679f2218299c3ab839edc67ed00f5524d41e38b87de0f1d2b63b2c581c32d",
+      "model": "qwen-plus",
+      "tokens_used": 5601,
+      "evaluated_release": "3cd86388e0bd795ce7a409db576a1c7af8f4c0dd"
+    }
+  ],
+  "notes": "Earlier live drafts exposed overcounting, unsupported negative observations, mixed language, routine terrain commentary and a Chinese counter false positive. Regression checks added. These checks are limited safeguards, not proof of semantic correctness or clinical validation."
+}

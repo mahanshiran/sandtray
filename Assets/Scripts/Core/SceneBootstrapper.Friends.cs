@@ -612,12 +612,8 @@ namespace Sandplay.Core
                 if(net==null || !net.IsOnline || !net.IsHost || !IsValidJoinRoomCode(net.RoomCode))
                 {
                     CloseFriendChat();
-                    ShowNameDialog(Localization.Get("dialog.new_board"),
-                        "Table "+DateTime.Now.ToString("yyyy-MM-dd HH:mm"),name=>
-                        {
-                            if(!string.IsNullOrWhiteSpace(name))ShowSizeDialog(name,hostOnline:true,
+                    ShowNewBoardDialog("Table "+DateTime.Now.ToString("yyyy-MM-dd HH:mm"),hostOnline:true,
                                 inviteTarget:InviteTargetForFriend(person));
-                        });
                     return;
                 }
                 sending=true;RefreshActions();service.Request<FriendMessage>("conversation/"+person.code+"/",new FriendSend{nonce=Guid.NewGuid().ToString(),room=net.RoomCode},value=>{if(Current()){sending=false;RefreshActions();messages[value.id]=value;Render(true);Load();}},SendError);

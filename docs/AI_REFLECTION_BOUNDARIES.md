@@ -1,19 +1,23 @@
-# AI-assisted reflection boundaries
+# AI report behavior
 
-AI-assisted reflection describes the visible session material. It is not a diagnosis, clinical conclusion, treatment recommendation, risk assessment, or claim about the creator's inner state.
+The backend uses the existing Bailian text/vision models and local bilingual knowledge retrieval. Knowledge stays internal: new model requests ask for only `reflection`, and generated reports have no reference or methodology appendix. The API retains an empty `sources` array for compatibility. Legacy passage-ID responses are validated if a provider supplies them, but their references are never appended.
 
-The backend requires three sections:
+## Report content
 
-1. **Observations** — visible or supplied facts only.
-2. **Optional hypotheses** — clearly tentative questions about a visible arrangement choice, always with a practical, non-symbolic alternative.
-3. **Questions for reflection** — open questions that leave personal meaning to the creator.
+- **Observations:** one to three short, supported facts about the scene.
+- **Conclusion:** for sufficiently detailed scenes, up to two tentative emotional or relational themes, tied to independent visible relationships, with a brief plausible alternative. These describe possible stories in the scene, not the creator's actual emotions or stable personality.
+- No questions, requests for answers, diagnosis, treatment advice, personality typing, fixed symbol dictionary, or universal direction/color meanings.
+- Empty and single-object scenes without distinct terrain receive a short deterministic insufficient-detail response. They do not invoke the model or invent significance for a lone hamburger. This still counts as an analysis request under the existing access policy.
+- Richer scenes are not automatically psychologically informative. The model is instructed to remain brief when supported relationships are limited.
 
-The safety prompt and response validator reject diagnoses, trauma or mental-health inferences, universal symbolism, archetypes, and inferred motives or emotions. They also reject inferential wording inside the observations section. An invalid provider response is rewritten once; if it remains invalid, the request fails instead of returning the unsafe draft.
+## Terrain
 
-The app labels AI material as a draft for human review. It keeps AI reflection separate from observed events, the client's own explanation, practitioner notes, and agreed next steps. Sharing defaults exclude private practitioner notes and unreviewed AI text.
+The app generates random uneven sand, including hills. The legacy `HasMeaningfulRelief` field indicates height variation only. It does not establish user action or psychological importance.
 
-## Verification
+New clients flag substantial terrain outside the default generator's theoretical height envelope, requiring more than isolated samples. This is a conservative signal, not an edit-history comparison: edits within that envelope may be missed. The prompt allows clearly distinctive image-supported formations to be described, while omitting ordinary unevenness. No claim of deliberate sculpting is justified without process evidence. Blue excavated patches expose the tray base; blue walls are the perimeter, and neither automatically means water.
 
-`analysis` backend tests cover authentication, prompt construction, unsafe symbolic output rewrite, and inferred-observation rewrite. Unity report tests cover the distinct saved sections, template snapshots, author-only editing, and sharing exclusion of private/unreviewed fields.
+## Presentation and verification
 
-These guardrails reduce inappropriate generated content. They do not establish clinical validation, professional licensure, or a guarantee about every third-party model response.
+Unity hides legacy reference sections from report cards and removes them before PDF requests. The backend also removes them when rendering PDFs, preserving saved originals.
+
+Tests cover sparse scenes, bilingual boundaries, legacy cleanup, PDF output, schema validation and terrain thresholds. Live synthetic provider checks are recorded separately. Wording checks are limited safeguards; they do not establish factual or clinical validity. No claim of clinical validation is made.

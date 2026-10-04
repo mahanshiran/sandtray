@@ -26,6 +26,7 @@ namespace Sandplay.Sand
         private bool _isDirty;
         private int _dirtyMinX, _dirtyMaxX, _dirtyMinZ, _dirtyMaxZ;
 
+        public bool IsCircular { get; private set; }
         public int Resolution => _resolution;
         public float Width => _width;
         public float Depth => _depth;
@@ -135,8 +136,25 @@ namespace Sandplay.Sand
             ApplyFullHeightmap();
         }
 
+        public Vector3 ClampLocalToTray(Vector3 local, float margin = 0f)
+        {
+            if (IsCircular)
+            {
+                var point = Vector2.ClampMagnitude(new Vector2(local.x, local.z), Mathf.Max(0, Mathf.Min(_width, _depth) * .5f - margin));
+                local.x = point.x; local.z = point.y;
+            }
+            else
+            {
+                local.x = Mathf.Clamp(local.x, -_width * .5f + margin, _width * .5f - margin);
+                local.z = Mathf.Clamp(local.z, -_depth * .5f + margin, _depth * .5f - margin);
+            }
+            return local;
+        }
+
         private void GenerateMesh()
         {
+            IsCircular = _config != null && _config.CircularTray;
+            if (_mesh != null) { if (Application.isPlaying) Destroy(_mesh); else DestroyImmediate(_mesh); }
             _mesh = new Mesh();
             _mesh.name = "SandMesh";
             _mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
@@ -153,7 +171,7 @@ namespace Sandplay.Sand
                     int i = z * _resolution + x;
                     float px = x * _cellW - _width * 0.5f;
                     float pz = z * _cellD - _depth * 0.5f;
-                    _vertices[i] = new Vector3(px, 0f, pz);
+                    _vertices[i] = ClampLocalToTray(new Vector3(px, 0f, pz));
                     _uvs[i] = new Vector2((float)x / (_resolution - 1), (float)z / (_resolution - 1));
                 }
             }
@@ -161,6 +179,18 @@ namespace Sandplay.Sand
             int triCount = (_resolution - 1) * (_resolution - 1) * 6;
             _triangles = new int[triCount];
             int t = 0;
+            bool Inside(int index)
+            {
+                float px = (index % _resolution) * _cellW - _width * .5f;
+                float pz = (index / _resolution) * _cellD - _depth * .5f;
+                float radius = Mathf.Min(_width, _depth) * .5f;
+                return px * px + pz * pz < radius * radius;
+            }
+            void Triangle(int a, int b, int c)
+            {
+                if (IsCircular && !Inside(a) && !Inside(b) && !Inside(c)) return;
+                _triangles[t++] = a; _triangles[t++] = b; _triangles[t++] = c;
+            }
             for (int z = 0; z < _resolution - 1; z++)
             {
                 for (int x = 0; x < _resolution - 1; x++)
@@ -170,20 +200,21 @@ namespace Sandplay.Sand
                     int tl = bl + _resolution;
                     int tr = tl + 1;
 
-                    _triangles[t++] = bl;
-                    _triangles[t++] = tl;
-                    _triangles[t++] = tr;
-                    _triangles[t++] = bl;
-                    _triangles[t++] = tr;
-                    _triangles[t++] = br;
+                    Triangle(bl, tl, tr);
+                    Triangle(bl, tr, br);
                 }
             }
+
+            System.Array.Resize(ref _triangles, t);
 
             // Use Set* methods instead of property assignment for better iOS compatibility
             _mesh.SetVertices(_vertices);
             _mesh.SetUVs(0, _uvs);
             _mesh.SetTriangles(_triangles, 0);
             _mesh.RecalculateNormals();
+            // SandSplat uses a tangent-space normal map. Missing tangents make
+            // the sand respond incorrectly to directional room lighting.
+            _mesh.RecalculateTangents();
             _mesh.RecalculateBounds();
             // DON'T upload yet - ApplyFullHeightmap() will do it after terrain gen
 
@@ -374,6 +405,7 @@ namespace Sandplay.Sand
 
             _mesh.SetVertices(_vertices);  // Use SetVertices for iOS compatibility
             _mesh.RecalculateNormals();
+            _mesh.RecalculateTangents();
             _mesh.RecalculateBounds();
             _mesh.UploadMeshData(false);  // Force GPU sync on iOS during sculpting
             _collider.sharedMesh = null;
@@ -398,6 +430,7 @@ namespace Sandplay.Sand
             // then force upload, THEN assign to collider
             _mesh.SetVertices(_vertices);  // Use SetVertices instead of vertices= (more reliable on iOS)
             _mesh.RecalculateNormals();
+            _mesh.RecalculateTangents();
             _mesh.RecalculateBounds();
             _mesh.UploadMeshData(false);  // Force GPU sync before collider reads it
 

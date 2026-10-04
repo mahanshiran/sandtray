@@ -45,6 +45,8 @@ namespace Sandplay.Tests
             ObjectPlacer.AllowObjectsInAir = oldAir;
             Object.DestroyImmediate(root);
             Object.DestroyImmediate(data);
+            // Manually initialized EditMode panels do not reliably receive OnDestroy.
+            EventBus.Clear();
         }
         [Test]
         public void Selection_HighlightsAllAndReplacesCleanly()
@@ -79,6 +81,143 @@ namespace Sandplay.Tests
             Assert.AreEqual(Vector3.one*2,b.transform.localScale);
             undo.UndoLast(); Assert.AreEqual(Vector3.one,a.transform.localScale);
         }
+        [Test]
+        public void AxisRotation_TiltsGroupAndUndoRestoresBothPoses()
+        {
+            placer.BeginGroupTransform();
+            placer.RotateGroup(90, Vector3.forward);
+            placer.EndGroupTransform();
+            Assert.That(Vector3.Distance(a.transform.position, new Vector3(0,0,0)), Is.LessThan(.001));
+            Assert.That(Vector3.Distance(b.transform.position, new Vector3(0,2,0)), Is.LessThan(.001));
+            Assert.That(Quaternion.Angle(a.transform.rotation, Quaternion.AngleAxis(90, Vector3.forward)), Is.LessThan(.001));
+            undo.UndoLast();
+            Assert.AreEqual(new Vector3(-1,1,0), a.transform.position);
+            Assert.AreEqual(Quaternion.identity, b.transform.rotation);
+            Assert.IsFalse(undo.CanUndo);
+        }
+
+        [Test]
+        public void GizmoDrag_CommitsOneUndoAndCancelRestoresPose()
+        {
+            var cameraGo = new GameObject("GizmoCamera");
+            cameraGo.transform.SetParent(root.transform);
+            var camera = cameraGo.AddComponent<UnityEngine.Camera>();
+            camera.transform.position = new Vector3(0, 1, -10);
+            camera.pixelRect = new Rect(0, 0, 800, 600);
+            var canvasGo = new GameObject("Canvas", typeof(Canvas));
+            canvasGo.transform.SetParent(root.transform);
+            canvasGo.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            var go = new GameObject("Gizmo", typeof(RectTransform));
+            go.transform.SetParent(canvasGo.transform, false);
+            var gizmo = go.AddComponent<ObjectTransformGizmo>();
+            gizmo.Initialize(camera, TMPro.TMP_Settings.defaultFontAsset);
+            gizmo.SetTarget(b);
+            gizmo.SetTool(ObjectTransformTool.Move);
+            Canvas.ForceUpdateCanvases();
+            typeof(ObjectTransformGizmo).GetMethod("Rebuild", Private).Invoke(gizmo, null);
+            var center = camera.WorldToScreenPoint(placer.SelectionBounds().center);
+            var press = (Vector2)center + Vector2.right * 60;
+            Assert.IsTrue(gizmo.Raycast(press, null));
+            Assert.IsFalse(gizmo.Raycast((Vector2)center + new Vector2(250, 250), null));
+            var events = new GameObject("Events", typeof(UnityEngine.EventSystems.EventSystem));
+            events.transform.SetParent(root.transform);
+            var pointer = new UnityEngine.EventSystems.PointerEventData(events.GetComponent<UnityEngine.EventSystems.EventSystem>())
+            { position = press, pointerId = -1, button = UnityEngine.EventSystems.PointerEventData.InputButton.Left };
+            var start = a.transform.position;
+            gizmo.OnPointerDown(pointer);
+            pointer.position = press + (Vector2)(camera.WorldToScreenPoint(placer.SelectionBounds().center + Vector3.right) - center);
+            gizmo.OnDrag(pointer);
+            Assert.That(Vector3.Distance(a.transform.position, start + Vector3.right), Is.LessThan(.001));
+            typeof(ObjectTransformGizmo).GetMethod("Rebuild", Private).Invoke(gizmo, null);
+            var movedCenter = (Vector2)camera.WorldToScreenPoint(placer.SelectionBounds().center);
+            Assert.IsTrue(gizmo.Raycast(movedCenter + Vector2.right * 75, null),
+                "Move handle must follow the selection while dragging.");
+            gizmo.OnPointerUp(pointer);
+            undo.UndoLast();
+            typeof(ObjectTransformGizmo).GetMethod("Rebuild", Private).Invoke(gizmo, null);
+            Assert.AreEqual(start, a.transform.position);
+            Assert.IsFalse(undo.CanUndo);
+
+            pointer.position = press;
+            gizmo.OnPointerDown(pointer);
+            pointer.position += Vector2.right * 40;
+            gizmo.OnDrag(pointer);
+            gizmo.Cancel();
+            Assert.AreEqual(start, a.transform.position);
+            Assert.IsFalse(undo.CanUndo);
+            Assert.IsFalse(gizmo.IsDragging);
+        }
+
+        [Test]
+        public void TransformGraphics_AddRequiredRendererAndParticipateInCanvasRaycasts()
+        {
+            var canvasGo = new GameObject("Canvas", typeof(Canvas), typeof(UnityEngine.UI.GraphicRaycaster));
+            canvasGo.transform.SetParent(root.transform);
+            canvasGo.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            var events = new GameObject("Events", typeof(UnityEngine.EventSystems.EventSystem));
+            events.transform.SetParent(root.transform);
+            foreach (var type in new[] { typeof(ObjectTransformGizmo), typeof(MoveToolIcon) })
+            {
+                var go = new GameObject(type.Name, typeof(RectTransform));
+                go.transform.SetParent(canvasGo.transform, false);
+                var graphic = (UnityEngine.UI.Graphic)go.AddComponent(type);
+                Assert.IsNotNull(go.GetComponent<CanvasRenderer>(), type.Name);
+                Assert.IsNotNull(graphic.canvasRenderer, type.Name);
+            }
+            Canvas.ForceUpdateCanvases();
+            var pointer = new UnityEngine.EventSystems.PointerEventData(events.GetComponent<UnityEngine.EventSystems.EventSystem>())
+                { position = new Vector2(Screen.width / 2f, Screen.height / 2f) };
+            Assert.DoesNotThrow(() => events.GetComponent<UnityEngine.EventSystems.EventSystem>().RaycastAll(
+                pointer, new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>()));
+        }
+
+        [Test]
+        public void ToolbarVisibility_RecoversMissingAndDestroyedCanvasGroup()
+        {
+            var go = new GameObject("Toolbar", typeof(RectTransform));
+            go.transform.SetParent(root.transform);
+            var panel = go.AddComponent<ObjectActionPanel>();
+            var refresh = typeof(ObjectActionPanel).GetMethod("RefreshToolbarVisibility", Private);
+            Assert.IsNull(go.GetComponent<CanvasGroup>());
+            Assert.DoesNotThrow(() => refresh.Invoke(panel, null));
+            var group = go.GetComponent<CanvasGroup>();
+            Assert.IsNotNull(group);
+            Assert.AreEqual(1f, group.alpha);
+            Assert.IsTrue(group.blocksRaycasts);
+            Object.DestroyImmediate(group);
+            Assert.DoesNotThrow(() => refresh.Invoke(panel, null));
+            Assert.IsNotNull(go.GetComponent<CanvasGroup>());
+            Assert.AreEqual(1f, go.GetComponent<CanvasGroup>().alpha);
+        }
+
+        [Test]
+        public void ToolbarTap_TogglesHandlesWithoutChangingObjectOrCreatingUndo()
+        {
+            var cameraGo = new GameObject("ToolbarCamera", typeof(UnityEngine.Camera));
+            cameraGo.transform.SetParent(root.transform);
+            var go = new GameObject("Toolbar", typeof(RectTransform));
+            go.transform.SetParent(root.transform);
+            var panel = go.AddComponent<ObjectActionPanel>();
+            panel.Initialize(cameraGo.GetComponent<UnityEngine.Camera>());
+            EventBus.Publish(new ObjectSelectedEvent { PlacedObject = b });
+            var gizmo = (ObjectTransformGizmo)typeof(ObjectActionPanel).GetField("_gizmo", Private).GetValue(panel);
+            Assert.IsNotNull(gizmo.GetComponent<CanvasRenderer>());
+            var original = b.transform.rotation;
+            panel.OnRotatePointerDown();
+            panel.OnRotatePointerUp();
+            Assert.AreEqual(ObjectTransformTool.Rotate, gizmo.Tool);
+            Assert.AreEqual(original, b.transform.rotation);
+            Assert.IsFalse(undo.CanUndo);
+            panel.OnRotatePointerDown();
+            panel.OnRotatePointerUp();
+            Assert.AreEqual(ObjectTransformTool.None, gizmo.Tool);
+            panel.OnResizePointerDown();
+            typeof(ObjectActionPanel).GetField("_toolbarPressTime", Private).SetValue(panel, Time.unscaledTime - 1);
+            panel.OnResizePointerUp();
+            Assert.AreEqual(ObjectTransformTool.None, gizmo.Tool);
+            Assert.IsFalse(panel.IsActionActive);
+        }
+
         [Test]
         public void GroupResize_UsesIntersectionOfEveryObjectsLimits()
         {

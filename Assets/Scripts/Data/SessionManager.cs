@@ -82,6 +82,7 @@ namespace Sandplay.Data
                 ModifiedAt = DateTime.UtcNow.ToString("o"),
                 SandboxWidth = _sandMesh.Width,
                 SandboxDepth = _sandMesh.Depth,
+                CircularTray = _sandMesh.IsCircular,
                 HeightmapResolution = _sandMesh.Resolution
             };
 
@@ -220,6 +221,7 @@ namespace Sandplay.Data
                 {
                     config.SandboxWidth = data.SandboxWidth;
                     config.SandboxDepth = data.SandboxDepth;
+                    config.CircularTray = data.CircularTray;
                 }
                 if (data.HeightmapResolution > 1 && data.HeightmapResolution != _sandMesh.Resolution)
                     _sandMesh.ReinitializeFromNetwork(data.SandboxWidth, data.SandboxDepth, data.HeightmapResolution);

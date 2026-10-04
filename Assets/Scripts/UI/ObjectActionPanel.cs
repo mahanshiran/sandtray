@@ -46,11 +46,22 @@ namespace Sandplay.UI
         }
         private void OnApplicationFocus(bool focused)
         {
-            if (focused || !_groupAction) return;
-            _groupPlacer.CancelGroupTransform();
+            if (focused) return;
+            _pendingTool = ObjectTransformTool.None;
+            if (_gizmo != null) _gizmo.Cancel();
+            if (_groupAction) _groupPlacer.CancelGroupTransform();
+            else if (_target != null && (_verticalHeld || _rotateHeld || _resizeHeld))
+            {
+                _target.transform.SetPositionAndRotation(_actionStartPos, _actionStartRot);
+                _target.transform.localScale = _actionStartScale;
+            }
             _groupAction = _verticalHeld = _rotateHeld = _resizeHeld = false;
         }
-        private void OnDisable() { OnApplicationFocus(false); }
+        private void OnDisable()
+        {
+            OnApplicationFocus(false);
+            if (_gizmo != null) _gizmo.SetTarget(null);
+        }
 
         // Undo tracking for vertical move, rotate, and resize
         private Vector3 _actionStartPos;
@@ -59,12 +70,14 @@ namespace Sandplay.UI
 
         /// <summary>True while a transform action is being dragged.</summary>
         public bool IsActionActive =>
-            _verticalHeld || _verticalDropping || _rotateHeld || _resizeHeld;
+            _verticalHeld || _verticalDropping || _rotateHeld || _resizeHeld ||
+            _pendingTool != ObjectTransformTool.None || (_gizmo != null && _gizmo.IsDragging);
 
         public void Initialize(UnityEngine.Camera cam)
         {
             _cam = cam;
             _rt = GetComponent<RectTransform>();
+            CreateGizmo();
             gameObject.SetActive(false);
 
             EventBus.Subscribe<ObjectSelectedEvent>(OnObjectSelected);
@@ -74,6 +87,7 @@ namespace Sandplay.UI
 
         private void OnDestroy()
         {
+            if (_gizmo != null) Destroy(_gizmo.gameObject);
             KeyboardShortcuts.Changed -= RefreshKeyboardHints;
             EventBus.Unsubscribe<ObjectSelectedEvent>(OnObjectSelected);
             EventBus.Unsubscribe<ObjectRemovedEvent>(OnObjectRemoved);
@@ -92,6 +106,7 @@ namespace Sandplay.UI
         {
             if (_groupAction) _groupPlacer.CancelGroupTransform();
             _groupAction = false;
+            OnApplicationFocus(false);
             _target = evt.PlacedObject;
             _verticalHeld = false;
             _verticalDropping = false;
@@ -101,6 +116,9 @@ namespace Sandplay.UI
             // Don't show action panel for Psychologists (they can only select, not modify)
             bool isPsychologist = GameManager.Instance != null && GameManager.Instance.IsPsychologist;
             gameObject.SetActive(_target != null && !isPsychologist);
+            if (_gizmo != null) _gizmo.SetTarget(isPsychologist ? null : _target);
+            SetTransformTool(ObjectTransformTool.None);
+            RefreshToolbarVisibility();
         }
 
         private void OnObjectRemoved(ObjectRemovedEvent evt)
@@ -118,13 +136,23 @@ namespace Sandplay.UI
 
         private void LateUpdate()
         {
-            if (_groupAction && (InputHelper.IsInputBlocked || InputHelper.IsTextInputFocused || Input.GetKeyDown(KeyCode.Escape)))
+            UpdatePanel();
+            RefreshToolbarVisibility();
+        }
+
+        private void UpdatePanel()
+        {
+            if (IsActionActive && (InputHelper.IsInputBlocked || InputHelper.IsTextInputFocused || Input.GetKeyDown(KeyCode.Escape)))
                 OnApplicationFocus(false);
             if (_target == null || _cam == null)
             {
                 gameObject.SetActive(false);
                 return;
             }
+
+            if (Input.GetKeyDown(KeyCode.Escape) && !InputHelper.IsTextInputFocused)
+                SetTransformTool(ObjectTransformTool.None);
+            UpdateToolbarPress();
 
             // Safety: release held state if all touches/mouse released
             if ((_verticalHeld || _rotateHeld || _resizeHeld) && InputHelper.GetPointerUp())
@@ -220,7 +248,9 @@ namespace Sandplay.UI
             }
         }
 
-        public void OnVerticalPointerDown()
+        public void OnVerticalPointerDown() => BeginToolbarPress(ObjectTransformTool.Move);
+
+        private void BeginVerticalDrag()
         {
             if (_verticalDropping) return;
             BeginSharedAction();
@@ -236,6 +266,7 @@ namespace Sandplay.UI
 
         public void OnVerticalPointerUp()
         {
+            if (EndToolbarPress(ObjectTransformTool.Move)) return;
             if (!_verticalHeld) return;
             _verticalHeld = false;
             if (EndSharedAction(true)) return;
@@ -269,7 +300,9 @@ namespace Sandplay.UI
                 CompleteDrop();
         }
 
-        public void OnRotatePointerDown()
+        public void OnRotatePointerDown() => BeginToolbarPress(ObjectTransformTool.Rotate);
+
+        private void BeginRotateDrag()
         {
             if (_verticalDropping) return;
             BeginSharedAction();
@@ -285,6 +318,7 @@ namespace Sandplay.UI
 
         public void OnRotatePointerUp()
         {
+            if (EndToolbarPress(ObjectTransformTool.Rotate)) return;
             if (!_rotateHeld) return;
             _rotateHeld = false;
             if (EndSharedAction()) return;
@@ -298,7 +332,9 @@ namespace Sandplay.UI
                 EventBus.Publish(new ObjectTransformedEvent { PlacedObject = _target });
         }
 
-        public void OnResizePointerDown()
+        public void OnResizePointerDown() => BeginToolbarPress(ObjectTransformTool.Resize);
+
+        private void BeginResizeDrag()
         {
             if (_verticalDropping) return;
             BeginSharedAction();
@@ -316,6 +352,7 @@ namespace Sandplay.UI
 
         public void OnResizePointerUp()
         {
+            if (EndToolbarPress(ObjectTransformTool.Resize)) return;
             if (!_resizeHeld) return;
             _resizeHeld = false;
             if (EndSharedAction()) return;

@@ -63,7 +63,8 @@ namespace Sandplay.Core
         ObjectMove,
         ObjectRotate,
         ObjectScale,
-        WalkMode
+        WalkMode,
+        SandDraw // Append to preserve existing serialized tool values.
     }
 
     public struct ToolModeChangedEvent

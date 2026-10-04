@@ -42,6 +42,8 @@ namespace Sandplay.UI
             _ghost = null;
             _canPlace = false;
             _dragScale = 1;
+            if (_dragOwner == this && GameManager.Instance != null && GameManager.Instance.CurrentTool == ToolMode.ObjectPlace)
+                GameManager.Instance.SetToolMode(ToolMode.ObjectSelect);
             ResetDragState();
         }
 
@@ -52,6 +54,8 @@ namespace Sandplay.UI
         public Action<bool> OnDownloadFinished { get; set; }
 
         private GameObject _ghost;
+        private CatalogPlacementPreview _preview;
+        private ObjectPlacer _previewPlacer;
         private UnityEngine.Camera _cam;
         private SandMesh _sand;
         private bool _canPlace;
@@ -203,11 +207,12 @@ namespace Sandplay.UI
         {
             IsDragging = false;
             if (_ghost == null) return;
+            UpdateGhostPosition(eventData);
 
             if (_canPlace && _cam != null && _sand != null)
             {
                 Ray ray = _cam.ScreenPointToRay(eventData.position);
-                if (Physics.Raycast(ray, out RaycastHit hit, 100f) &&
+                if (!InputHelper.IsPointerOverUI() && Physics.Raycast(ray, out RaycastHit hit, 100f) &&
                     hit.collider.gameObject == _sand.gameObject)
                 {
                     Vector3 pos = hit.point;
@@ -219,6 +224,8 @@ namespace Sandplay.UI
             Destroy(_ghost);
             _ghost = null;
             _dragScale = 1f;
+            if (GameManager.Instance != null && GameManager.Instance.CurrentTool == ToolMode.ObjectPlace)
+                GameManager.Instance.SetToolMode(ToolMode.ObjectSelect);
         }
 
         private void ResetDragState()
@@ -256,6 +263,8 @@ namespace Sandplay.UI
         private void Update()
         {
             if (_ghost == null) return;
+            if (Input.GetKeyDown(KeyCode.Escape)) { CancelDrag(); return; }
+            if (_activeEvent != null) UpdateGhostPosition(_activeEvent);
             float scroll = Input.GetAxis("Mouse ScrollWheel");
             if (scroll != 0f)
             {
@@ -276,7 +285,9 @@ namespace Sandplay.UI
             _ghost.name = "DragGhost";
             _ghost.transform.localScale = prefab.transform.localScale * _dragScale;
 
-            SetGhostTint(true);
+            _preview = _ghost.AddComponent<CatalogPlacementPreview>();
+            _preview.Initialize();
+            _previewPlacer = FindAnyObjectByType<ObjectPlacer>();
             foreach (var col in _ghost.GetComponentsInChildren<Collider>())
                 col.enabled = false;
 
@@ -290,6 +301,7 @@ namespace Sandplay.UI
             GameObject src = NetworkItem?.LoadedPrefab ?? ObjectData?.Prefab;
             Vector3 baseScale = src != null ? src.transform.localScale : Vector3.one;
             _ghost.transform.localScale = baseScale * _dragScale;
+            if (_activeEvent != null) UpdateGhostPosition(_activeEvent);
         }
 
         private void PlaceAtPosition(Vector3 pos)
@@ -298,14 +310,24 @@ namespace Sandplay.UI
             var placer = FindAnyObjectByType<ObjectPlacer>();
             if (placer == null) return;
 
+            PlacedObject placed = null;
             if (NetworkItem?.LoadedPrefab != null)
             {
-                placer.PlaceNetworkObject(NetworkItem, pos, Quaternion.identity, _dragScale);
+                var cmd = new PlaceNetworkObjectCommand(placer, NetworkItem, pos, Quaternion.identity, _dragScale);
+                if (UndoManager.Instance != null) UndoManager.Instance.Execute(cmd); else cmd.Execute();
+                placed = cmd.PlacedObject;
             }
             else if (ObjectData != null)
             {
                 var cmd = new PlaceObjectCommand(placer, ObjectData, pos, Quaternion.identity, _dragScale);
-                UndoManager.Instance?.Execute(cmd);
+                if (UndoManager.Instance != null) UndoManager.Instance.Execute(cmd); else cmd.Execute();
+                placed = cmd.PlacedObject;
+            }
+
+            if (placed != null)
+            {
+                GameManager.Instance?.SetToolMode(ToolMode.ObjectSelect);
+                placer.SelectObject(placed);
             }
         }
 
@@ -314,7 +336,7 @@ namespace Sandplay.UI
             if (_cam == null || _sand == null || _ghost == null) return;
 
             Ray ray = _cam.ScreenPointToRay(eventData.position);
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f) &&
+            if (!InputHelper.IsPointerOverUI() && Physics.Raycast(ray, out RaycastHit hit, 100f) &&
                 hit.collider.gameObject == _sand.gameObject)
             {
                 Vector3 pos = hit.point;
@@ -328,40 +350,19 @@ namespace Sandplay.UI
                     pos.y += _ghost.transform.position.y - bounds.min.y;
                 }
 
+                if (_previewPlacer != null) pos = _previewPlacer.ClampPlacementToBounds(pos, _ghost);
                 _ghost.transform.position = pos;
                 _ghost.SetActive(true);
 
-                if (!_canPlace) { _canPlace = true; SetGhostTint(true); }
+                _canPlace = true;
             }
             else
             {
                 _ghost.SetActive(true);
-                if (_canPlace) { _canPlace = false; SetGhostTint(false); }
+                _canPlace = false;
             }
+            _preview?.ShowFeedback(_sand, _canPlace, eventData.position);
         }
 
-        private void SetGhostTint(bool ok)
-        {
-            if (_ghost == null) return;
-            Color tint = ok
-                ? new Color(0.3f, 1f, 0.3f, 0.5f)
-                : new Color(1f, 0.3f, 0.3f, 0.5f);
-
-            foreach (var r in _ghost.GetComponentsInChildren<Renderer>())
-            {
-                foreach (var mat in r.materials)
-                {
-                    mat.color = tint;
-                    mat.SetFloat("_Mode", 3);
-                    mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    mat.SetInt("_ZWrite", 0);
-                    mat.DisableKeyword("_ALPHATEST_ON");
-                    mat.EnableKeyword("_ALPHABLEND_ON");
-                    mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    mat.renderQueue = 3000;
-                }
-            }
-        }
     }
 }

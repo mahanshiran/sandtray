@@ -453,11 +453,7 @@ namespace Sandplay.Core
 
         private void CreateClientTable(string clientId)
         {
-            ShowNameDialog(Localization.Get("dialog.new_board"),
-                "Table " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"), name =>
-                {
-                    if (!string.IsNullOrWhiteSpace(name)) ShowSizeDialog(name, clientId);
-                });
+            ShowNewBoardDialog("Table " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"), clientId);
         }
 
         public static string AssignmentClientLabel(string id, IEnumerable<ClientRecord> clients)
@@ -513,12 +509,8 @@ namespace Sandplay.Core
             _pendingHostMode = HostMode.None;
             // Practitioner hosts, client waits for explicit editing approval.
             _hostTherapistMode = true;
-            ShowNameDialog(Localization.Get("dialog.new_board"),
-                "Table " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"), name =>
-                {
-                    if (!string.IsNullOrWhiteSpace(name)) ShowSizeDialog(name, clientId, hostOnline: true,
+            ShowNewBoardDialog("Table " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"), clientId, hostOnline: true,
                         inviteTarget: InviteTargetForClient(client));
-                });
         }
 
         private void OpenClientHistoryAsHost(string boardName, string clientId)

@@ -134,16 +134,16 @@ namespace Sandplay.Core
 
         private void EnterSandbox(string boardName, bool isNew, float width = 10f, float depth = 10f,
             string clientId = null, string organizationId = null, string organizationClientId = null,
-            SessionInviteTarget inviteTarget = null)
+            SessionInviteTarget inviteTarget = null, bool circularTray = false)
         {
             if (isNew) { WithLocalBoardCreation(() => EnterAuthorizedSandbox(boardName, true, width, depth,
-                clientId, organizationId, organizationClientId, inviteTarget)); return; }
+                clientId, organizationId, organizationClientId, inviteTarget, circularTray)); return; }
             EnterAuthorizedSandbox(boardName, false, width, depth, clientId, organizationId, organizationClientId,
-                inviteTarget);
+                inviteTarget, circularTray);
         }
 
         private void EnterAuthorizedSandbox(string boardName, bool isNew, float width, float depth,
-            string clientId, string organizationId, string organizationClientId, SessionInviteTarget inviteTarget)
+            string clientId, string organizationId, string organizationClientId, SessionInviteTarget inviteTarget, bool circularTray = false)
         {
             if (LocalAccountStorage.RequiresRestart) { LocalAccountStorage.ShowRestartShield(); return; }
             if (_enterSandboxRoutine != null)
@@ -151,11 +151,11 @@ namespace Sandplay.Core
             if (isNew && SessionManager.Instance != null)
                 boardName = SessionManager.Instance.GetAvailableSessionName(boardName);
             _enterSandboxRoutine = StartCoroutine(EnterSandboxRoutine(boardName, isNew, width, depth,
-                clientId, organizationId, organizationClientId, inviteTarget));
+                clientId, organizationId, organizationClientId, inviteTarget, circularTray));
         }
 
         private IEnumerator EnterSandboxRoutine(string boardName, bool isNew, float width, float depth,
-            string clientId, string organizationId, string organizationClientId, SessionInviteTarget inviteTarget)
+            string clientId, string organizationId, string organizationClientId, SessionInviteTarget inviteTarget, bool circularTray = false)
         {
             // Game pattern: veil first so players never see a half-built board hitch.
             ShowBoardLoadingOverlay(boardName, isNew);
@@ -191,6 +191,7 @@ namespace Sandplay.Core
             {
                 if (isNew)
                 {
+                    _config.CircularTray = circularTray;
                     _config.SandboxWidth = width;
                     _config.SandboxDepth = depth;
                     SandMesh.Instance?.Reinitialize(width, depth);
@@ -288,21 +289,9 @@ namespace Sandplay.Core
             }
             _pendingHostMode = HostMode.None;
 
-            // Recording starts only after current capability policy is known.
-            int recordingEpoch = LocalAccountStorage.Epoch;
-            BackendClient.Instance.FetchAccessSnapshot(snapshot =>
-            {
-                if (this == null || _sandboxRoot == null || !_sandboxRoot.activeInHierarchy ||
-                    recordingEpoch != LocalAccountStorage.Epoch || _currentBoardName != boardName ||
-                    SessionManager.Instance == null || !SessionManager.Instance.BoardReady ||
-                    AccessPolicy.Evaluate(snapshot, "replays.record", checkUsage: false) != AccessDecision.Allowed) return;
-                _recordingPolicyDeadline = BackendClient.Instance.AccessCacheDeadline;
-                var recorder = SessionRecorder.GetOrCreate();
-                recorder.StartRecording(boardName);
-                if (recorder.IsRecording && NetworkBootstrapper.Instance != null)
-                    recorder.Record(SessionRecorder.Direction.Outgoing, NetMsgType.FullState, NetworkBootstrapper.Instance.BuildFullStatePayload());
-            }, error => Debug.LogWarning($"[Replay] Recording access could not be verified: {error}"),
-                force: false);
+            // Local recording is available to every account, including offline use.
+            // Plan checks apply when playing a saved replay, not when capturing it.
+            StartLocalReplayRecording(boardName);
 
             if (_sandboxUI != null) _sandboxUI.SetActive(true);
             ShowContextInviteCard(inviteTarget);
@@ -318,6 +307,15 @@ namespace Sandplay.Core
             cam?.PlayIntro();
 
             _enterSandboxRoutine = null;
+        }
+
+        private void StartLocalReplayRecording(string boardName)
+        {
+            var recorder = SessionRecorder.GetOrCreate();
+            recorder.StartRecording(boardName);
+            if (recorder.IsRecording && NetworkBootstrapper.Instance != null)
+                recorder.Record(SessionRecorder.Direction.Outgoing, NetMsgType.FullState,
+                    NetworkBootstrapper.Instance.BuildFullStatePayload());
         }
 
         private void ShowContextInviteCard(SessionInviteTarget target)
@@ -644,6 +642,11 @@ namespace Sandplay.Core
 
         private IEnumerator CompleteJoinedSessionLoading()
         {
+            // Joining clients also retain their own local replay after the initial
+            // snapshot has finished loading. Do not restart on a repeated ready event.
+            if (!(SessionRecorder.Instance?.IsRecording ?? false))
+                StartLocalReplayRecording(F("Online session", "在线会话") + " " +
+                    (_sessionLoadingNetwork != null ? _sessionLoadingNetwork.RoomCode : ""));
             SetBoardLoadingProgress(1f, Localization.Get("session.loading_success"));
             if (_boardLoadingSpinner != null) _boardLoadingSpinner.SetActive(false);
             yield return new WaitForSecondsRealtime(0.35f);
@@ -895,8 +898,7 @@ namespace Sandplay.Core
             {
                 if (!RequireMultiplayerAccount(ShowHostPanel)) return;
                 Destroy(_networkPanel);_networkPanel=null;_pendingHostMode=HostMode.None;
-                ShowNameDialog(Localization.Get("dialog.new_board"),"",name=>
-                {if(!string.IsNullOrEmpty(name))ShowSizeDialog(name,hostOnline:true);});
+                ShowNewBoardDialog("",hostOnline:true);
             });
             var search=ClientInput(chooser,"",Localization.Get("menu.search_boards"),.04f,.775f,.65f,.08f,100);
             var list=ClientScroll(chooser,"Boards",.02f,.025f,.96f,.72f);

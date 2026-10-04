@@ -5,14 +5,17 @@ Shader "Sandplay/SandSplat"
     {
         _MainTex      ("Base Texture (Sand)", 2D) = "white" {}
         _BumpMap      ("Normal Map", 2D) = "bump" {}
-        _BumpScale    ("Normal Scale", Float) = 0.8
+        _BumpScale    ("Normal Scale", Float) = 0.45
         _DetailTex    ("Detail Texture", 2D) = "grey" {}
+        _DigWaterColor ("Exposed Water Color", Color) = (0.15, 0.45, 0.75, 1)
+        _DampHeight ("Damp Sand Height", Float) = 0.12
+        _WaterRevealHeight ("Water Reveal Height", Float) = 0.04
 
         _SplatMap     ("Splat Map", 2D) = "black" {}
         _ExtraSplatMap ("Extra Splat Map", 2D) = "black" {}
 
         // Per-material albedo colours
-        _Color0 ("Sand Color",  Color) = (0.70, 0.60, 0.45, 1)
+        _Color0 ("Sand Color",  Color) = (0.8196078, 0.6980392, 0.5490196, 1) // #D1B28C
         _Color1 ("Rock Color",  Color) = (0.40, 0.38, 0.36, 1)
         _Color2 ("Grass Color", Color) = (0.24, 0.46, 0.22, 1)
         _Color3 ("Snow Color",  Color) = (0.88, 0.92, 0.96, 1)
@@ -36,7 +39,7 @@ Shader "Sandplay/SandSplat"
         LOD 200
 
         CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows
+        #pragma surface surf Standard fullforwardshadows vertex:vert
         #pragma target 3.0
 
         sampler2D _MainTex;
@@ -45,6 +48,8 @@ Shader "Sandplay/SandSplat"
         sampler2D _SplatMap;
         sampler2D _ExtraSplatMap;
         float     _BumpScale;
+        fixed4 _DigWaterColor;
+        float _DampHeight, _WaterRevealHeight;
 
         fixed4 _Color0, _Color1, _Color2, _Color3, _Color4, _Color5, _Color6;
         float  _Smooth0, _Smooth1, _Smooth2, _Smooth3, _Smooth4, _Smooth5, _Smooth6;
@@ -54,7 +59,14 @@ Shader "Sandplay/SandSplat"
             float2 uv_MainTex;
             float2 uv_SplatMap; // splat uses its own (untiled) UV scaling
             float2 uv_ExtraSplatMap;
+            float localHeight;
         };
+
+        void vert(inout appdata_full v, out Input o)
+        {
+            UNITY_INITIALIZE_OUTPUT(Input, o);
+            o.localHeight = v.vertex.y;
+        }
 
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
@@ -97,6 +109,16 @@ Shader "Sandplay/SandSplat"
             o.Smoothness = smoothness;
             o.Metallic   = 0;
             o.Normal     = UnpackScaleNormal(tex2D(_BumpMap, IN.uv_MainTex), _BumpScale);
+
+            // Reveal the existing blue tray base gradually as terrain approaches
+            // it. Height-driven shading also works on saved boards and replays;
+            // it does not modify the user's surface paint masks.
+            float damp = 1.0 - smoothstep(_WaterRevealHeight, max(_DampHeight, _WaterRevealHeight + .001), IN.localHeight);
+            float water = 1.0 - smoothstep(.005, max(.006, _WaterRevealHeight), IN.localHeight);
+            o.Albedo *= 1.0 - damp * w0 * .22;
+            o.Albedo = lerp(o.Albedo, _DigWaterColor.rgb, water);
+            o.Smoothness = lerp(max(o.Smoothness, damp * w0 * .28), .65, water);
+            o.Normal = normalize(lerp(o.Normal, float3(0, 0, 1), water));
         }
         ENDCG
     }

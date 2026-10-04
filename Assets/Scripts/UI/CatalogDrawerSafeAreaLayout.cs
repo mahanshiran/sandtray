@@ -14,8 +14,8 @@ namespace Sandplay.UI
         // Keep a usable minimum, but never force the drawer wider than a very
         // narrow split-screen/portrait safe area.
         private const float MinWidth = 220f;
-        private const float MaxWidth = 520f;
-        private const float WidthFraction = .92f;
+        private const float MaxWidth = 374.4f;
+        private const float WidthFraction = .6624f;
 
         private RectTransform _drawer;
         private RectTransform _parent;

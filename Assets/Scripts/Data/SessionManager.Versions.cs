@@ -76,7 +76,7 @@ namespace Sandplay.Data
             var saved = new SessionData {
                 SessionName = "Checkpoint", BoardHistoryId = data.BoardHistoryId,
                 CreatedAt = DateTime.UtcNow.ToString("o"), ModifiedAt = data.ModifiedAt,
-                SandboxWidth = data.SandboxWidth, SandboxDepth = data.SandboxDepth,
+                SandboxWidth = data.SandboxWidth, SandboxDepth = data.SandboxDepth, CircularTray = data.CircularTray,
                 HeightmapResolution = data.HeightmapResolution, HeightmapBase64 = data.HeightmapBase64,
                 SplatmapBase64 = data.SplatmapBase64, PlacedObjects = data.PlacedObjects
             };
@@ -105,7 +105,7 @@ namespace Sandplay.Data
                 throw new InvalidDataException("versions.invalid");
             // A durable safety checkpoint must succeed before replacement of the current layout.
             WriteCheckpoint(current);
-            current.SandboxWidth = saved.SandboxWidth; current.SandboxDepth = saved.SandboxDepth;
+            current.SandboxWidth = saved.SandboxWidth; current.SandboxDepth = saved.SandboxDepth; current.CircularTray = saved.CircularTray;
             current.HeightmapResolution = saved.HeightmapResolution; current.HeightmapBase64 = saved.HeightmapBase64;
             current.SplatmapBase64 = saved.SplatmapBase64; current.PlacedObjects = saved.PlacedObjects;
             current.ModifiedAt = DateTime.UtcNow.ToString("o");

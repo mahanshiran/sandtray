@@ -112,6 +112,9 @@ namespace Sandplay.Data
         private readonly float _scale;
         private readonly bool _skipOffset;
         private Objects.PlacedObject _placed;
+        private TerrainModifyCommand _impression;
+        private bool _executed;
+        private Vector3 _finalPosition;
         public Objects.PlacedObject PlacedObject => _placed;
 
         public PlaceObjectCommand(Objects.ObjectPlacer placer, Objects.SandplayObject data,
@@ -127,13 +130,21 @@ namespace Sandplay.Data
 
         public void Execute()
         {
-            _placed = _placer.PlaceObject(_data, _position, _rotation, _scale, _skipOffset);
+            _placed = _placer.PlaceObject(_data, _executed ? _finalPosition : _position, _rotation, _scale, _executed || _skipOffset);
+            if (!_executed)
+            {
+                if (_placed != null) _finalPosition = _placed.transform.position;
+                _impression = Sand.ObjectImpressions.Apply(_placed);
+                _executed = true;
+            }
+            else _impression?.Execute();
         }
 
         public void Undo()
         {
             if (_placed != null)
                 _placer.RemoveObject(_placed);
+            _impression?.Undo();
         }
     }
 
@@ -146,6 +157,9 @@ namespace Sandplay.Data
         private readonly float _scale;
         private readonly bool _skipOffset;
         private Objects.PlacedObject _placed;
+        private TerrainModifyCommand _impression;
+        private bool _executed;
+        private Vector3 _finalPosition;
         public Objects.PlacedObject PlacedObject => _placed;
 
         public PlaceNetworkObjectCommand(Objects.ObjectPlacer placer, Objects.NetworkCatalogItem item,
@@ -161,13 +175,21 @@ namespace Sandplay.Data
 
         public void Execute()
         {
-            _placed = _placer.PlaceNetworkObject(_item, _position, _rotation, _scale, _skipOffset);
+            _placed = _placer.PlaceNetworkObject(_item, _executed ? _finalPosition : _position, _rotation, _scale, _executed || _skipOffset);
+            if (!_executed)
+            {
+                if (_placed != null) _finalPosition = _placed.transform.position;
+                _impression = Sand.ObjectImpressions.Apply(_placed);
+                _executed = true;
+            }
+            else _impression?.Execute();
         }
 
         public void Undo()
         {
             if (_placed != null)
                 _placer.RemoveObject(_placed);
+            _impression?.Undo();
         }
     }
 

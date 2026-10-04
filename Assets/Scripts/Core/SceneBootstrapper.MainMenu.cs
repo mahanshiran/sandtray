@@ -323,9 +323,7 @@ namespace Sandplay.Core
                 Localization.Get("menu.new_board"), Localization.Get("menu.cta_new_desc"),
                 Vector2.zero, Vector2.one, HomeBlue, () =>
                 {
-                    ShowNameDialog(Localization.Get("dialog.new_board"),
-                        "Board " + DateTime.Now.ToString("MMM dd HH:mm"),
-                        name => { if (!string.IsNullOrEmpty(name)) ShowSizeDialog(name); });
+                    ShowNewBoardDialog("Board " + DateTime.Now.ToString("MMM dd HH:mm"));
                 });
             CreateHomeCtaCard(ctaRow.transform, "Btn_HostOnline", "host",
                 Localization.Get("menu.host_online"), Localization.Get("menu.cta_host_desc"),
@@ -609,9 +607,7 @@ namespace Sandplay.Core
                 _secondaryHomeHeaderNewBoard = ClientButton(header,
                     F("+ New board", "+ 新建沙盘"), .79f, .12f, .18f, .76f, () =>
                     {
-                        ShowNameDialog(Localization.Get("dialog.new_board"),
-                            "Board " + DateTime.Now.ToString("MMM dd HH:mm"),
-                            name => { if (!string.IsNullOrEmpty(name)) ShowSizeDialog(name); });
+                        ShowNewBoardDialog("Board " + DateTime.Now.ToString("MMM dd HH:mm"));
                     }, true);
                 _secondaryHomeHeaderNewBoard.name = "NewBoard";
                 ApplyHomeRoundedCorners(_secondaryHomeHeaderNewBoard.GetComponent<Image>(), 10f);
@@ -927,9 +923,7 @@ namespace Sandplay.Core
                         _myBoardsSearchInput.ActivateInputField();
                     }
                 },
-                () => ShowNameDialog(Localization.Get("dialog.new_board"),
-                    "Board " + DateTime.Now.ToString("MMM dd HH:mm"),
-                    name => { if (!string.IsNullOrEmpty(name)) ShowSizeDialog(name); }));
+                () => ShowNewBoardDialog("Board " + DateTime.Now.ToString("MMM dd HH:mm")));
         }
 
         private void ShowHomeSection(string key)
@@ -1096,7 +1090,7 @@ namespace Sandplay.Core
             ClearClientChildren(_homeReplaysListContent.transform);
             CloseBoardOverflowMenu();
             bool vip=HasCapability("replays.play");
-            _homeReplaysNoteTxt.text=vip ? Localization.Get("replays.storage_note") : F("Replay access depends on your current plan and grants.", "回放权限由当前方案及授权决定。");
+            _homeReplaysNoteTxt.text=vip ? Localization.Get("replays.storage_note") : F("Replays are saved on this device. Playback depends on your plan and grants.", "回放保存在此设备上，播放权限取决于您的方案及授权。");
             var files=ListSessionFiles();string latest=files.Count>0?files[0]:null;
             string query=_replaySearch.text.Trim();
             files.RemoveAll(path=>{SessionPlayer.TryPeek(path,out var meta);string name=string.IsNullOrEmpty(meta.BoardName)?System.IO.Path.GetFileNameWithoutExtension(path):meta.BoardName;return name.IndexOf(query,StringComparison.CurrentCultureIgnoreCase)<0;});
@@ -1920,9 +1914,7 @@ namespace Sandplay.Core
                     createLabel.fontSizeMin = 9;
                     createLabel.fontSizeMax = 12;
                 }
-                createBtn.onClick.AddListener(() => ShowNameDialog(Localization.Get("dialog.new_board"),
-                    "Board " + DateTime.Now.ToString("MMM dd HH:mm"),
-                    name => { if (!string.IsNullOrEmpty(name)) ShowSizeDialog(name); }));
+                createBtn.onClick.AddListener(() => ShowNewBoardDialog("Board " + DateTime.Now.ToString("MMM dd HH:mm")));
 
                 var joinBtn = CreateMenuButton(emptyGo.transform, "Btn_JoinFirstSession",
                     Localization.Get("menu.empty_join"),
@@ -2208,9 +2200,7 @@ namespace Sandplay.Core
                 if (filteredEmpty)
                     createBtn.onClick.AddListener(ClearMyBoardsFilters);
                 else
-                    createBtn.onClick.AddListener(() => ShowNameDialog(Localization.Get("dialog.new_board"),
-                        "Board " + DateTime.Now.ToString("MMM dd HH:mm"),
-                        name => { if (!string.IsNullOrEmpty(name)) ShowSizeDialog(name); }));
+                    createBtn.onClick.AddListener(() => ShowNewBoardDialog("Board " + DateTime.Now.ToString("MMM dd HH:mm")));
 
                 contentRT.sizeDelta = new Vector2(0f, 130f);
                 return;
@@ -2615,13 +2605,13 @@ namespace Sandplay.Core
 
         private void CompleteNewBoardSetup(string boardName, float width, float depth, string clientId,
             bool hostOnline, string organizationId = null, string organizationClientId = null,
-            SessionInviteTarget inviteTarget = null)
+            SessionInviteTarget inviteTarget = null, bool circularTray = false)
         {
             if (hostOnline && !RequireMultiplayerAccount(() => CompleteNewBoardSetup(
-                    boardName, width, depth, clientId, true, organizationId, organizationClientId, inviteTarget))) return;
+                    boardName, width, depth, clientId, true, organizationId, organizationClientId, inviteTarget, circularTray))) return;
             SetNewBoardHosting(hostOnline);
             EnterSandbox(boardName, isNew: true, width, depth, clientId,
-                organizationId, organizationClientId, inviteTarget);
+                organizationId, organizationClientId, inviteTarget, circularTray);
         }
 
         private void SetNewBoardHosting(bool hostOnline)
@@ -2629,263 +2619,132 @@ namespace Sandplay.Core
             _pendingHostMode = hostOnline ? HostMode.Cloud : HostMode.None;
         }
 
-        private void ShowSizeDialog(string boardName, string clientId = null, bool hostOnline = false,
+        private void ShowNewBoardDialog(string defaultName, string clientId = null, bool hostOnline = false,
             string organizationId = null, string organizationClientId = null,
             SessionInviteTarget inviteTarget = null, Action onHostingBoardChosen = null)
         {
-            if (_nameDialogPanel != null)
-                Destroy(_nameDialogPanel);
-
-            _nameDialogPanel = new GameObject("SizeDialog");
-            _nameDialogPanel.transform.SetParent(_safeArea.transform, false);
-
-            // Full-screen dim overlay
-            var overlay = _nameDialogPanel.AddComponent<Image>();
+            if (_nameDialogPanel != null) Destroy(_nameDialogPanel);
+            var dialog = new GameObject("NewBoardDialog", typeof(RectTransform), typeof(Image));
+            _nameDialogPanel = dialog;
+            dialog.transform.SetParent(_safeArea.transform, false);
+            StretchFull(dialog);
+            var overlay = dialog.GetComponent<Image>();
             overlay.color = new Color(0, 0, 0, HomeIsLight ? .42f : .68f);
             Sandplay.UI.DialogBackdrop.Apply(overlay);
-            ApplyRoundedCorners(overlay);
-            var overlayRT = _nameDialogPanel.GetComponent<RectTransform>();
-            overlayRT.anchorMin = Vector2.zero;
-            overlayRT.anchorMax = Vector2.one;
-            overlayRT.offsetMin = Vector2.zero;
-            overlayRT.offsetMax = Vector2.zero;
 
-            // Dialog box
-            var box = new GameObject("DialogBox");
-            box.transform.SetParent(_nameDialogPanel.transform, false);
-            var boxImg = box.AddComponent<Image>();
-            boxImg.color = HomeCard;
-            ApplyHomeRoundedCorners(boxImg, 14f);
-            var boxOutline = box.AddComponent<Outline>();
-            boxOutline.effectColor = HomeCardBorder;
-            boxOutline.effectDistance = new Vector2(1,-1);
-            var boxRT = box.GetComponent<RectTransform>();
-            boxRT.anchorMin = new Vector2(0.15f, 0.2f);
-            boxRT.anchorMax = new Vector2(0.85f, 0.8f);
-            boxRT.offsetMin = Vector2.zero;
-            boxRT.offsetMax = Vector2.zero;
+            var box = ClientRect(dialog.transform, "DialogBox", .12f, .12f, .76f, .76f);
+            var background = box.gameObject.AddComponent<Image>(); background.color = HomeCard;
+            ApplyHomeRoundedCorners(background, 14f);
+            var border = box.gameObject.AddComponent<Outline>();
+            border.effectColor = HomeCardBorder; border.effectDistance = new Vector2(1, -1);
+            ClientText(box, Localization.Get("dialog.new_board"), 22, .07f, .86f, .86f, .09f, HomeText)
+                .alignment = TextAlignmentOptions.Center;
+            ClientText(box, F("Board name", "沙盘名称"), 16, .07f, .79f, .86f, .05f, HomeMuted);
+            var nameInput = ClientInput(box, defaultName ?? "", F("Enter a board name", "输入沙盘名称"),
+                .07f, .67f, .86f, .11f, 40);
+            nameInput.name = "BoardName";
+            nameInput.textComponent.richText = false;
+            nameInput.lineType = TMP_InputField.LineType.SingleLine;
+            ClientText(box, F("Table type", "沙盘形状"), 16, .07f, .59f, .86f, .05f, HomeMuted);
 
-            // Title
-            var titleGo = new GameObject("Title");
-            titleGo.transform.SetParent(box.transform, false);
-            var titleTxt = titleGo.AddComponent<TextMeshProUGUI>();
-            titleTxt.text = Localization.Get("size.title");
-            titleTxt.fontSize = 22;
-            titleTxt.alignment = TextAlignmentOptions.Center;
-            titleTxt.color = HomeText;
-            titleTxt.font = GetUIFont();
-            var titleRT = titleGo.GetComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0.05f, 0.85f);
-            titleRT.anchorMax = new Vector2(0.95f, 0.97f);
-            titleRT.offsetMin = Vector2.zero;
-            titleRT.offsetMax = Vector2.zero;
-
-            // Keep the close target visible and touch-sized at every dialog size.
-            var sizeDialog = _nameDialogPanel;
-            var closeSize = CreateMenuButton(box.transform, "Btn_CloseSize", "×",
-                Vector2.one, Vector2.one, HomeChromeButton);
-            var closeSizeRT = closeSize.GetComponent<RectTransform>();
-            closeSizeRT.pivot = Vector2.one;
-            closeSizeRT.anchoredPosition = new Vector2(-8f, -8f);
-            closeSizeRT.sizeDelta = new Vector2(44f, 44f);
-            var closeSizeText = closeSize.GetComponentInChildren<TextMeshProUGUI>();
-            closeSizeText.color = HomeText;
-            closeSizeText.fontSize = 28;
-            titleRT.offsetMax = new Vector2(-48f, 0f);
-            closeSize.onClick.AddListener(() =>
+            bool circular = false;
+            Button squareButton = null, circleButton = null, start = null;
+            var rectangularFields = ClientRect(box, "RectangularDimensions", .07f, .22f, .86f, .15f);
+            var circularFields = ClientRect(box, "CircularDimensions", .07f, .22f, .86f, .15f);
+            TMP_InputField Dimension(Transform parent, string name, string label, string value, float x, float width)
             {
-                if (sizeDialog != null) Destroy(sizeDialog);
-                if (_nameDialogPanel == sizeDialog) _nameDialogPanel = null;
-            });
-
-            // --- Standard button (10x10) ---
-            var stdBtn = CreateMenuButton(box.transform, "Btn_Standard", Localization.Get("size.standard"),
-                new Vector2(0.08f, 0.58f), new Vector2(0.92f, 0.78f),
-                HomePrimary);
-            var stdDesc = new GameObject("StdDesc");
-            stdDesc.transform.SetParent(stdBtn.transform, false);
-            var stdTxt = stdDesc.AddComponent<TextMeshProUGUI>();
-            stdTxt.text = Localization.Get("size.standard_desc");
-            stdTxt.fontSize = 14;
-            stdTxt.alignment = TextAlignmentOptions.Center;
-            stdTxt.color = new Color(1f,1f,1f,.78f);
-            stdTxt.font = GetUIFont();
-            var stdDescRT = stdDesc.GetComponent<RectTransform>();
-            stdDescRT.anchorMin = Vector2.zero;
-            stdDescRT.anchorMax = new Vector2(1f, 0.4f);
-            stdDescRT.offsetMin = Vector2.zero;
-            stdDescRT.offsetMax = Vector2.zero;
-            stdBtn.onClick.AddListener(() =>
-            {
-                Destroy(_nameDialogPanel);
-                _nameDialogPanel = null;
-                onHostingBoardChosen?.Invoke();
-                CompleteNewBoardSetup(boardName, 10f, 10f, clientId, hostOnline,
-                    organizationId, organizationClientId, inviteTarget);
-            });
-
-            // --- Medium button (10x13) ---
-            var medBtn = CreateMenuButton(box.transform, "Btn_Medium", Localization.Get("size.medium"),
-                new Vector2(0.08f, 0.33f), new Vector2(0.92f, 0.53f),
-                HomePrimary);
-            var medDesc = new GameObject("MedDesc");
-            medDesc.transform.SetParent(medBtn.transform, false);
-            var medTxt = medDesc.AddComponent<TextMeshProUGUI>();
-            medTxt.text = Localization.Get("size.medium_desc");
-            medTxt.fontSize = 14;
-            medTxt.alignment = TextAlignmentOptions.Center;
-            medTxt.color = new Color(1f,1f,1f,.78f);
-            medTxt.font = GetUIFont();
-            var medDescRT = medDesc.GetComponent<RectTransform>();
-            medDescRT.anchorMin = Vector2.zero;
-            medDescRT.anchorMax = new Vector2(1f, 0.4f);
-            medDescRT.offsetMin = Vector2.zero;
-            medDescRT.offsetMax = Vector2.zero;
-            medBtn.onClick.AddListener(() =>
-            {
-                Destroy(_nameDialogPanel);
-                _nameDialogPanel = null;
-                onHostingBoardChosen?.Invoke();
-                CompleteNewBoardSetup(boardName, 10f, 13f, clientId, hostOnline,
-                    organizationId, organizationClientId, inviteTarget);
-            });
-
-            // --- Custom button ---
-            TMP_InputField widthInput = null;
-            TMP_InputField depthInput = null;
-
-            var customBtn = CreateMenuButton(box.transform, "Btn_Custom", Localization.Get("size.custom"),
-                new Vector2(0.55f, 0.04f), new Vector2(0.92f, 0.18f),
-                HomeChromeButton);
-            customBtn.GetComponentInChildren<TextMeshProUGUI>().color = HomeText;
-
-            // Width label + input
-            var wLabel = new GameObject("WLabel");
-            wLabel.transform.SetParent(box.transform, false);
-            var wTxt = wLabel.AddComponent<TextMeshProUGUI>();
-            wTxt.text = Localization.Get("size.width");
-            wTxt.fontSize = 16;
-            wTxt.color = HomeMuted;
-            wTxt.alignment = TextAlignmentOptions.Right;
-            wTxt.font = GetUIFont();
-            var wLabelRT = wLabel.GetComponent<RectTransform>();
-            wLabelRT.anchorMin = new Vector2(0.08f, 0.04f);
-            wLabelRT.anchorMax = new Vector2(0.16f, 0.18f);
-            wLabelRT.offsetMin = Vector2.zero;
-            wLabelRT.offsetMax = Vector2.zero;
-
-            widthInput = CreateNumberInput(box.transform, "WidthInput", "10",
-                new Vector2(0.17f, 0.04f), new Vector2(0.30f, 0.18f));
-
-            // Depth label + input
-            var dLabel = new GameObject("DLabel");
-            dLabel.transform.SetParent(box.transform, false);
-            var dTxt = dLabel.AddComponent<TextMeshProUGUI>();
-            dTxt.text = Localization.Get("size.depth");
-            dTxt.fontSize = 16;
-            dTxt.color = HomeMuted;
-            dTxt.alignment = TextAlignmentOptions.Right;
-            dTxt.font = GetUIFont();
-            var dLabelRT = dLabel.GetComponent<RectTransform>();
-            dLabelRT.anchorMin = new Vector2(0.32f, 0.04f);
-            dLabelRT.anchorMax = new Vector2(0.40f, 0.18f);
-            dLabelRT.offsetMin = Vector2.zero;
-            dLabelRT.offsetMax = Vector2.zero;
-
-            depthInput = CreateNumberInput(box.transform, "DepthInput", "10",
-                new Vector2(0.41f, 0.04f), new Vector2(0.54f, 0.18f));
-
-            TopViewTrayPreview AddPreview(Button button, float width, float depth)
-            {
-                var rect = ClientRect(button.transform, "TopViewPreview", .025f, .12f, .20f, .76f);
-                var preview = rect.gameObject.AddComponent<TopViewTrayPreview>();
-                preview.SetDimensions(width, depth);
-                preview.raycastTarget = false;
-                var label = button.GetComponentInChildren<TextMeshProUGUI>();
-                label.rectTransform.anchorMin = new Vector2(.25f, .36f);
-                label.rectTransform.anchorMax = new Vector2(.97f, .94f);
-                label.rectTransform.offsetMin = label.rectTransform.offsetMax = Vector2.zero;
-                return preview;
+                ClientText(parent, label, 14, x, .68f, width, .32f, HomeMuted);
+                var input = ClientInput(parent, value, "", x, 0, width, .63f, 6);
+                input.name = name;
+                input.contentType = TMP_InputField.ContentType.DecimalNumber;
+                input.lineType = TMP_InputField.LineType.SingleLine;
+                return input;
             }
-            AddPreview(stdBtn, 10, 10);
-            AddPreview(medBtn, 10, 13);
-            stdDescRT.anchorMin = medDescRT.anchorMin = new Vector2(.25f, 0);
-            var customPreview = AddPreview(customBtn, 10, 10);
-            customBtn.GetComponentInChildren<TextMeshProUGUI>().rectTransform.anchorMin = new Vector2(.25f, .05f);
-            void UpdatePreview(string ignored)
+            var widthInput = Dimension(rectangularFields, "BoardWidth", F("Width (1–30)", "宽度（1–30）"), "10", 0, .47f);
+            var heightInput = Dimension(rectangularFields, "BoardHeight", F("Height (1–30)", "高度（1–30）"), "10", .53f, .47f);
+            var radiusInput = Dimension(circularFields, "BoardRadius", F("Radius (0.5–15)", "半径（0.5–15）"), "5", 0, 1);
+            bool ReadDimension(TMP_InputField input, float min, float max, out float value) =>
+                float.TryParse(input.text.Trim().Replace(',', '.'), System.Globalization.NumberStyles.AllowDecimalPoint,
+                    System.Globalization.CultureInfo.InvariantCulture, out value) && value >= min && value <= max;
+            bool ReadDimensions(out float width, out float height)
             {
-                float.TryParse(widthInput.text, out float width);
-                float.TryParse(depthInput.text, out float depth);
-                customPreview.SetDimensions(Mathf.Clamp(width, 1, 30), Mathf.Clamp(depth, 1, 30));
+                width = height = 0;
+                if (circular)
+                {
+                    if (!ReadDimension(radiusInput, .5f, 15, out float radius)) return false;
+                    width = height = radius * 2;
+                    return true;
+                }
+                bool validWidth = ReadDimension(widthInput, 1, 30, out width);
+                bool validHeight = ReadDimension(heightInput, 1, 30, out height);
+                return validWidth && validHeight;
             }
-            widthInput.onValueChanged.AddListener(UpdatePreview);
-            depthInput.onValueChanged.AddListener(UpdatePreview);
+            void RefreshStart()
+            {
+                if (start != null) start.interactable = !string.IsNullOrWhiteSpace(nameInput.text) && ReadDimensions(out _, out _);
+                if (squareButton != null && ReadDimension(widthInput, 1, 30, out float width) && ReadDimension(heightInput, 1, 30, out float height))
+                    squareButton.GetComponentInChildren<TopViewTrayPreview>().SetDimensions(width, height);
+            }
+            widthInput.onValueChanged.AddListener(_ => RefreshStart());
+            heightInput.onValueChanged.AddListener(_ => RefreshStart());
+            radiusInput.onValueChanged.AddListener(_ => RefreshStart());
+            void RefreshSelection()
+            {
+                rectangularFields.gameObject.SetActive(!circular);
+                circularFields.gameObject.SetActive(circular);
+                RefreshStart();
+                foreach (var button in new[] { squareButton, circleButton })
+                {
+                    bool selected = button == (circular ? circleButton : squareButton);
+                    button.GetComponent<Image>().color = selected ? HomePrimary : HomeChromeButton;
+                    button.GetComponent<Outline>().effectColor = selected ? new Color(.20f, .85f, .77f) : HomeCardBorder;
+                    button.GetComponentInChildren<TextMeshProUGUI>().color = selected ? Color.white : HomeText;
+                }
+            }
+            Button ShapeChoice(string name, string label, float x, bool round)
+            {
+                var button = CreateMenuButton(box, name, label, new Vector2(x, .40f),
+                    new Vector2(x + .41f, .57f), HomeChromeButton);
+                var outline = button.gameObject.AddComponent<Outline>(); outline.effectDistance = new Vector2(2, -2);
+                var previewRect = ClientRect(button.transform, "TopViewPreview", .08f, .19f, .30f, .62f);
+                var preview = previewRect.gameObject.AddComponent<TopViewTrayPreview>();
+                preview.SetDimensions(10, 10); if (round) preview.SetCircular(); preview.raycastTarget = false;
+                var labelText = button.GetComponentInChildren<TextMeshProUGUI>();
+                labelText.rectTransform.anchorMin = new Vector2(.43f, .08f);
+                labelText.rectTransform.anchorMax = new Vector2(.96f, .92f);
+                labelText.rectTransform.offsetMin = labelText.rectTransform.offsetMax = Vector2.zero;
+                button.onClick.AddListener(() => { circular = round; RefreshSelection(); });
+                return button;
+            }
+            squareButton = ShapeChoice("Btn_Square", F("Square", "正方形"), .07f, false);
+            circleButton = ShapeChoice("Btn_Circle", F("Circle", "圆形"), .52f, true);
+            RefreshSelection();
 
-            // Clamp inputs to max 30 when user finishes typing
-            var wInput = widthInput;
-            var dInput = depthInput;
-            wInput.onEndEdit.AddListener((val) =>
+            void Close()
             {
-                if (float.TryParse(val, out float v) && v > 30f) wInput.text = "30";
-                else if (float.TryParse(val, out float v2) && v2 < 1f) wInput.text = "1";
-            });
-            dInput.onEndEdit.AddListener((val) =>
+                if (dialog != null) Destroy(dialog);
+                if (_nameDialogPanel == dialog) _nameDialogPanel = null;
+            }
+            var cancel = CreateMenuButton(box, "Btn_Cancel", Localization.Get("dialog.cancel"),
+                new Vector2(.07f, .06f), new Vector2(.48f, .19f), HomeChromeButton);
+            cancel.GetComponentInChildren<TextMeshProUGUI>().color = HomeText;
+            cancel.onClick.AddListener(Close);
+            start = CreateMenuButton(box, "Btn_Start", F("Start", "开始"),
+                new Vector2(.52f, .06f), new Vector2(.93f, .19f), HomePrimary);
+            RefreshStart();
+            nameInput.onValueChanged.AddListener(_ => RefreshStart());
+            bool started = false;
+            start.onClick.AddListener(() =>
             {
-                if (float.TryParse(val, out float v) && v > 30f) dInput.text = "30";
-                else if (float.TryParse(val, out float v2) && v2 < 1f) dInput.text = "1";
-            });
-
-            customBtn.onClick.AddListener(() =>
-            {
-                float cw = 10f, cd = 10f;
-                float.TryParse(widthInput.text, out cw);
-                float.TryParse(depthInput.text, out cd);
-                cw = Mathf.Clamp(cw, 1f, 30f);
-                cd = Mathf.Clamp(cd, 1f, 30f);
-                Destroy(_nameDialogPanel);
-                _nameDialogPanel = null;
+                if (started || dialog == null || dialog != _nameDialogPanel || string.IsNullOrWhiteSpace(nameInput.text)) return;
+                if (!ReadDimensions(out float width, out float height)) return;
+                started = true;
+                string boardName = nameInput.text.Trim();
+                Close();
                 onHostingBoardChosen?.Invoke();
-                CompleteNewBoardSetup(boardName, cw, cd, clientId, hostOnline,
-                    organizationId, organizationClientId, inviteTarget);
+                CompleteNewBoardSetup(boardName, width, height, clientId, hostOnline,
+                    organizationId, organizationClientId, inviteTarget, circular);
             });
-        }
-
-        private TMP_InputField CreateNumberInput(Transform parent, string name, string defaultVal,
-            Vector2 anchorMin, Vector2 anchorMax)
-        {
-            var bg = new GameObject(name);
-            bg.transform.SetParent(parent, false);
-            var bgImg = bg.AddComponent<Image>();
-            bgImg.color = HomeIsLight ? new Color(.965f,.972f,.97f) : new Color(.045f,.09f,.11f);
-            ApplyRoundedCorners(bgImg);
-            var outline = bg.AddComponent<Outline>();
-            outline.effectColor = HomeCardBorder;
-            outline.effectDistance = new Vector2(1,-1);
-            var bgRT = bg.GetComponent<RectTransform>();
-            bgRT.anchorMin = anchorMin;
-            bgRT.anchorMax = anchorMax;
-            bgRT.offsetMin = Vector2.zero;
-            bgRT.offsetMax = Vector2.zero;
-
-            var textGo = new GameObject("Text");
-            textGo.transform.SetParent(bg.transform, false);
-            var txt = textGo.AddComponent<TextMeshProUGUI>();
-            txt.font = GetUIFont();
-            txt.fontSize = 16;
-            txt.color = HomeText;
-            txt.alignment = TextAlignmentOptions.Center;
-            var textRT = textGo.GetComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
-            textRT.offsetMin = new Vector2(4, 2);
-            textRT.offsetMax = new Vector2(-4, -2);
-
-            var field = bg.AddComponent<TMP_InputField>();
-            field.textComponent = txt;
-            field.text = defaultVal;
-            field.contentType = TMP_InputField.ContentType.DecimalNumber;
-            field.characterLimit = 4;
-            return field;
         }
 
         private void ShowCatalogManagementPanel()
@@ -2915,6 +2774,8 @@ namespace Sandplay.Core
     public sealed class TopViewTrayPreview : MaskableGraphic
     {
         private float width = 10, trayDepth = 10;
+        private bool circular;
+        public void SetCircular() { circular = true; SetVerticesDirty(); }
         public void SetDimensions(float w, float d)
         { width = Mathf.Max(1, w); trayDepth = Mathf.Max(1, d); SetVerticesDirty(); }
         protected override void OnPopulateMesh(VertexHelper mesh)
@@ -2925,6 +2786,18 @@ namespace Sandplay.Core
             var tray = new Rect(bounds.center.x - width * scale / 2, bounds.center.y - trayDepth * scale / 2, width * scale, trayDepth * scale);
             void Fill(Rect r, Color tint)
             {
+                if (circular)
+                {
+                    int start = mesh.currentVertCount;
+                    mesh.AddVert(r.center, tint, Vector2.zero);
+                    for (int i = 0; i <= 64; i++)
+                    {
+                        float angle = i * Mathf.PI * 2 / 64;
+                        mesh.AddVert(r.center + new Vector2(Mathf.Cos(angle) * r.width / 2, Mathf.Sin(angle) * r.height / 2), tint, Vector2.zero);
+                        if (i > 0) mesh.AddTriangle(start, start + i, start + i + 1);
+                    }
+                    return;
+                }
                 int v = mesh.currentVertCount;
                 mesh.AddVert(new Vector2(r.xMin,r.yMin),tint,Vector2.zero);
                 mesh.AddVert(new Vector2(r.xMin,r.yMax),tint,Vector2.zero);

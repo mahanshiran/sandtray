@@ -1,9 +1,12 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityGLTF;
+using UnityGLTF.Loader;
 
 namespace Sandplay.Objects
 {
@@ -14,6 +17,21 @@ namespace Sandplay.Objects
     /// </summary>
     public static class NetworkCatalogLoader
     {
+        // Catalog models arrive as single GLB files. An explicit loader avoids
+        // UnityGLTF's missing-filename warning and reports malformed GLBs with
+        // external references instead of silently dropping their resources.
+        private sealed class EmbeddedGlbDataLoader : IDataLoader
+        {
+            public Task<Stream> LoadStreamAsync(string relativeFilePath)
+            {
+                throw new FileNotFoundException(
+                    "Catalog GLB references an external resource: " + relativeFilePath,
+                    relativeFilePath);
+            }
+        }
+
+        private static readonly IDataLoader EmbeddedGlbLoader = new EmbeddedGlbDataLoader();
+
         // Mobile downloads from the current API can take more than 30 seconds
         // for a 2 MB GLB. Keep this aligned with the API proxy's read timeout so
         // a healthy, progressing transfer is not repeatedly restarted at 15 s.
@@ -298,6 +316,7 @@ namespace Sandplay.Objects
             var opts = new ImportOptions
             {
                 AsyncCoroutineHelper = holder.AddComponent<AsyncCoroutineHelper>(),
+                DataLoader = EmbeddedGlbLoader,
             };
 
             GLTFSceneImporter importer = null;
@@ -387,7 +406,47 @@ namespace Sandplay.Objects
 
             float maxDim = Mathf.Max(b.size.x, b.size.y, b.size.z);
             if (maxDim > 0.0001f)
-                go.transform.localScale *= 0.6f / maxDim;
+            {
+                float scale = 0.6f / maxDim;
+                if (!TryBakeLargeStaticModelScale(go, scale))
+                    go.transform.localScale *= scale;
+            }
+        }
+
+        // Some catalog exports contain million-unit coordinates. Normalizing these
+        // with a tiny Transform scale overflows lighting calculations on Metal,
+        // producing black silhouettes. Bake the unit conversion into static mesh
+        // geometry instead; keep the original normals, UVs and materials intact.
+        static bool TryBakeLargeStaticModelScale(GameObject root, float scale)
+        {
+            if (scale <= 0f || scale >= 0.001f || float.IsNaN(scale) ||
+                root.GetComponentInChildren<SkinnedMeshRenderer>(true) != null ||
+                root.GetComponentInChildren<Animation>(true) != null ||
+                root.GetComponentInChildren<Animator>(true) != null)
+                return false;
+
+            var meshes = new HashSet<Mesh>();
+            foreach (var filter in root.GetComponentsInChildren<MeshFilter>(true))
+            {
+                var mesh = filter.sharedMesh;
+                if (mesh == null) continue;
+                if (!mesh.isReadable || mesh.blendShapeCount != 0) return false;
+                meshes.Add(mesh);
+            }
+            if (meshes.Count == 0) return false;
+
+            // Meshes belong to this freshly imported template. Multiple nodes may
+            // share a mesh, so convert each mesh once and every node's translation.
+            foreach (var mesh in meshes)
+            {
+                var vertices = mesh.vertices;
+                for (int i = 0; i < vertices.Length; i++) vertices[i] *= scale;
+                mesh.vertices = vertices;
+                mesh.RecalculateBounds();
+            }
+            foreach (var node in root.GetComponentsInChildren<Transform>(true))
+                if (node != root.transform) node.localPosition *= scale;
+            return true;
         }
     }
 }

@@ -82,6 +82,7 @@ namespace Sandplay.Camera
             var selection = FindAnyObjectByType<Sandplay.Objects.ObjectPlacer>();
             if (selection != null && selection.IsSelectionGestureActive) return;
 
+            if (Sandplay.UI.ObjectTransformGizmo.HasCapturedPointer) return;
             HandleInput();
             SmoothApply();
             ApplyTransform();
@@ -124,6 +125,31 @@ namespace Sandplay.Camera
             var door = FindAnyObjectByType<RoomDoorIntro>();
             if (door != null) door.SnapClosed();
             StartCoroutine(ResetViewAnimation());
+        }
+
+        /// <summary>Choose a board direction without replaying the room entrance.</summary>
+        public void SetBoardView(float yaw, float pitch)
+        {
+            if (_config == null || !_enabled || _isAnimatingIntro) return;
+            _targetYaw = _yaw + Mathf.DeltaAngle(_yaw, yaw);
+            _targetPitch = Mathf.Clamp(pitch, 0f, 90f);
+            _targetPanOffset = Vector3.zero;
+            _targetDistance = GetIdealDistance();
+            _yawVelocity = _pitchVelocity = _distVelocity = 0f;
+            _panVelocity = Vector3.zero;
+        }
+
+        /// <summary>Center on an object at a consistent close-up distance, keeping the viewing direction.</summary>
+        public void FocusObject(Sandplay.Objects.PlacedObject obj)
+        {
+            if (obj == null || _config == null || !_enabled || _isAnimatingIntro) return;
+            var center = Sandplay.Objects.ObjectPlacer.ObjectBounds(obj).center;
+            _targetPanOffset = center - (_target != null ? _target.position : Vector3.zero);
+            _targetDistance = Mathf.Clamp(4f, _config.CameraMinDistance, _config.CameraMaxDistance);
+            _targetYaw = _yaw;
+            _targetPitch = Mathf.Clamp(_pitch, 20f, 80f);
+            _yawVelocity = _pitchVelocity = _distVelocity = 0f;
+            _panVelocity = Vector3.zero;
         }
 
         private IEnumerator DoorEnterIntroAnimation(RoomDoorIntro door)
