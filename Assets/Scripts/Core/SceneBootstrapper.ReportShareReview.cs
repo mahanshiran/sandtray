@@ -23,18 +23,33 @@ namespace Sandplay.Core
             bool Current() => overlay != null && _clientDialog == dialog && account == BackendClient.Instance &&
                 account.UserId == user && account.AccessToken == token && manager == SessionManager.Instance;
             ClientText(overlay, Localization.Get("sharing.preview_title"), 22, .04f, .88f, .92f, .09f, HomeText);
-            ClientText(overlay, Localization.Get(report.Sections == null ? "sharing.legacy_notice" : "sharing.private_notice"), 14,
-                .04f, .72f, .92f, .14f, HomeMuted);
-            var preview = ClientInput(overlay, "", "", .04f, .29f, .92f, .41f, 0);
+            var preview = ClientInput(overlay, "", "", .04f, .29f, .92f, .57f, 0);
             preview.name = "SharedTextPreview";
             StyleReportInput(preview);
             preview.readOnly = true; preview.lineType = TMP_InputField.LineType.MultiLineNewline;
             preview.textComponent.richText = false; preview.textComponent.alignment = TextAlignmentOptions.TopLeft;
             bool includeAI = false;
+            bool rich = RichReportDocument.IsRich(report);
+            Sandplay.UI.RichReportEditor formattedPreview = null;
+            if (rich) preview.gameObject.SetActive(false);
             Button approve = null, ai = null;
             void Refresh()
             {
                 preview.SetTextWithoutNotify(ReportSharingText.Draft(report, includeAI));
+                if (rich)
+                {
+                    if (formattedPreview != null)
+                    {
+                        formattedPreview.gameObject.SetActive(false);
+                        Destroy(formattedPreview.gameObject);
+                    }
+                    var area=ClientRect(overlay,"FormattedSharePreview",.04f,.29f,.92f,.57f);
+                    formattedPreview=area.gameObject.AddComponent<Sandplay.UI.RichReportEditor>();
+                    formattedPreview.Initialize(area,
+                        new Sandplay.UI.RichReportEditor.Document {
+                            html=RichReportDocument.ExportHtml(report),readOnly=true,light=true },
+                        Current,null,null,message=>{if(Current()&&approve!=null)approve.interactable=false;});
+                }
                 if (approve != null) approve.interactable = !string.IsNullOrWhiteSpace(preview.text);
                 if (ai != null) ai.GetComponentInChildren<TMP_Text>().text = Localization.Get(includeAI ? "sharing.ai_included" : "sharing.ai_excluded");
             }

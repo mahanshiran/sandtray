@@ -28,10 +28,12 @@ namespace Sandplay.Core
         {
             var service=ReportDeliveryClient.Instance;
             service.EnsureAccount();
-            var badge=CreateRequestBadge(nav);
+            var badge=CreateHomeNavigationBadge(nav);
+            _therapistReportNavBadge=badge;
             void Render()
             {
                 if(badge==null)return;
+                if(CanUsePersonalClientDirectory)return;
                 int count=service.Inbox?.reports_unread??0;
                 badge.transform.parent.gameObject.SetActive(count>0);
                 badge.text=count>99?"99+":count.ToString();
@@ -39,6 +41,22 @@ namespace Sandplay.Core
             service.Changed+=Render;
             nav.gameObject.AddComponent<FriendViewLifetime>().Released=()=>service.Changed-=Render;
             Render();
+        }
+
+        TMP_Text CreateHomeNavigationBadge(Transform nav)
+        {
+            var badge=CreateRequestBadge(nav);
+            var badgeRect=(RectTransform)badge.transform.parent;
+            badgeRect.anchorMin=badgeRect.anchorMax=new Vector2(1f,.5f);
+            badgeRect.pivot=new Vector2(1f,.5f);
+            badgeRect.anchoredPosition=new Vector2(-12f,0f);
+            var labelRect=nav.Find("Label") as RectTransform;
+            if(labelRect!=null)
+            {
+                labelRect.anchorMax=new Vector2(1f,1f);
+                labelRect.offsetMax=new Vector2(-36f,0f);
+            }
+            return badge;
         }
 
         void OpenReceivedReports()
@@ -301,7 +319,9 @@ namespace Sandplay.Core
                 {
                     var row=ClientRow(list,"Schedule notification",92);
                     Track(row,notice.created_at);
-                    string title=notice.@event=="request"?F("Session request","会话预约请求"):
+                    string title=notice.@event=="report_pending"?F("Test completed · Report pending","测试已完成 · 待撰写报告"):
+                        notice.@event=="request"?F("Session request","会话预约请求"):
+                        notice.@event=="updated"?F("Schedule updated","日程已更新"):
                         notice.@event=="confirmed"?F("Session confirmed","会话预约已确认"):
                         notice.@event=="cancelled"?F("Session cancelled","会话预约已取消"):
                         notice.@event=="declined"?F("Session declined","会话预约已拒绝"):
@@ -420,12 +440,12 @@ namespace Sandplay.Core
                 new FriendResult(),_=>
                 {
                     ReportDeliveryClient.Instance.Refresh();
-                    ShowScheduleDetail(notice.schedule_id);
+                    ShowScheduleDetail(notice.schedule_id,notice.@event=="report_pending");
                 },error=>
                 {
                     // A stale notice must not prevent the participant from opening
                     // the appointment through its participant-only endpoint.
-                    ShowScheduleDetail(notice.schedule_id);
+                    ShowScheduleDetail(notice.schedule_id,notice.@event=="report_pending");
                 });
         }
         void OpenReportNotice(long id) => OpenSharedReport("notifications/"+id+"/", false);
@@ -483,6 +503,16 @@ namespace Sandplay.Core
             FriendsClient.Instance.Request<SharedReportInfo>(path,null,report=>{
                 if(!Current())return;
                 loaded=report;
+                if(!string.IsNullOrEmpty(report.rich_html))
+                {
+                    var viewport=(RectTransform)content.parent;content.gameObject.SetActive(false);
+                    var native=ClientRect(box,"Rich received report",.04f,.16f,.92f,.66f);
+                    native.gameObject.AddComponent<Sandplay.UI.RichReportEditor>().Initialize(native,
+                        new Sandplay.UI.RichReportEditor.Document {html=report.rich_html,readOnly=true,light=true},
+                        Current,null,null,message=>{if(Current())status.text=message;});
+                }
+                else
+                {
                 DocumentText(F("SESSION REPORT","会话报告"),25,ink);
                 DocumentText(report.table_name,20,teal);
                 string issued=DateTimeOffset.TryParse(report.created,out var date)?date.ToLocalTime().ToString("f",Localization.Culture):report.created;
@@ -498,6 +528,7 @@ namespace Sandplay.Core
                     }
                 else DocumentText(report.text,16,ink);
                 DocumentText(F("Report ID: ","报告编号：")+report.id,11,new Color(.38f,.45f,.48f));
+                }
                 status.text="";export.interactable=true;
                 Canvas.ForceUpdateCanvases();content.parent.GetComponent<ScrollRect>().verticalNormalizedPosition=1;
                 FriendsClient.Instance.Request<FriendResult>(path,new FriendResult(),_=>ReportDeliveryClient.Instance.Refresh(),error=>{if(Current())status.text=error;});
@@ -507,12 +538,106 @@ namespace Sandplay.Core
         }
         [Serializable] private sealed class ClientReportPublication
         {
-            public string local_id, table_name, source, text, organization_id, organization_client_id;
+            public string local_id, table_name, source, text, rich_html, organization_id, organization_client_id;
             public int revision, client_user_id;
             public bool send_to_client = true;
         }
 
-        private void SendSavedReportToClient(string board, AnalysisReport report, Button button, TMP_Text status)
+        [Serializable] private class ProfileReportRecipient { public string name,email,digest;public bool client_self,supports_rich_reports; }
+        [Serializable] private class ProfileReportDelivery { public string id,status,recipient_name,email; }
+        [Serializable] private class ProfileReportRequest { public string client_id,local_id,table_name,source,text,rich_html,recipient_digest; }
+        private void SendSavedReportToClient(string board,AnalysisReport report,Button button,TMP_Text status)
+        {
+            if(report==null||!SessionManager.CanEditReport(report))return;
+            var manager=SessionManager.Instance;var session=manager.LoadSessionData(board);
+            if(session==null)return;
+            if(!string.IsNullOrEmpty(session.OrganizationId)) {SendSavedReportToClientLegacy(board,report,button,status);return;}
+            var client=ClientStore.GetAll().Find(item=>item.Id==session.ClientId);
+            if(client==null){status.text=F("Assign this table to a client before sending its report.","请先将此沙盘分配给来访者，再发送报告。");return;}
+            if(!ReportSharingText.TryPublication(report,out var text,out var error)){status.text=Localization.Get(error);return;}
+            int owner=BackendClient.Instance.UserId,epoch=LocalAccountStorage.Epoch;
+            string expectedText=report.ResultText,expectedFingerprint=ReportSharingText.Fingerprint(report);
+            string reportTitle=string.IsNullOrEmpty(session.ScheduledReviewId)?board:client.Name+F(" · Test report"," · 测试报告");
+            var dialog=_clientDialog;var host=dialog!=null?dialog.transform.Find("Card"):null;
+            if(host==null)return;
+            var overlay=ClientRect(host,"ReportRecipientReview",0,0,1,1);
+            overlay.gameObject.AddComponent<Image>().color=HomeCard;
+            ClientText(overlay,F("Send report","发送报告"),20,.04f,.89f,.92f,.08f,HomeText);
+            var recipientText=ClientText(overlay,F("Loading recipient from the client profile…","正在从来访者资料加载接收人…"),14,.04f,.70f,.92f,.17f,HomeText);recipientText.richText=false;
+            var preview=ClientScroll(overlay,"ReportToSend",.04f,.23f,.92f,.44f);
+            var row=ClientRow(preview,"PublicReport",100);
+            var body=ClientText(row,text,14,.03f,0,.94f,1,HomeText);body.richText=false;
+            Canvas.ForceUpdateCanvases();
+            row.GetComponent<LayoutElement>().preferredHeight=Mathf.Max(100,body.GetPreferredValues(text,Mathf.Max(180,((RectTransform)host).rect.width*.84f),0).y+24);
+            var info=ClientText(overlay,"",12,.04f,.13f,.92f,.08f,HomeMuted);info.richText=false;
+            bool Current()=>overlay!=null&&dialog!=null&&_clientDialog==dialog&&BackendClient.Instance.UserId==owner&&LocalAccountStorage.Epoch==epoch;
+            if (RichReportDocument.IsRich(report))
+            {
+                preview.parent.gameObject.SetActive(false);
+                var formattedPreview=ClientRect(overlay,"FormattedReportToSend",.04f,.23f,.92f,.44f);
+                formattedPreview.gameObject.AddComponent<Sandplay.UI.RichReportEditor>().Initialize(formattedPreview,
+                    new Sandplay.UI.RichReportEditor.Document {html=RichReportDocument.ExportHtml(report),readOnly=true,light=true},
+                    Current,null,null,message=>{if(Current())info.text=message;});
+            }
+            button.interactable=false;
+            void Close(){if(button!=null)button.interactable=true;if(overlay!=null){overlay.gameObject.SetActive(false);if(Application.isPlaying)Destroy(overlay.gameObject);else DestroyImmediate(overlay.gameObject);}}
+            var cancel=ClientButton(overlay,F("Cancel","取消"),.04f,.035f,.44f,.07f,Close);
+            ProfileReportRecipient recipient=null;
+            Button send=null;
+            send=ClientButton(overlay,F("Send report","发送报告"),.52f,.035f,.44f,.07f,()=>
+            {
+                if(!Current()||recipient==null)return;
+                if(!manager.IsCurrentReportText(board,report.ReportId,expectedText)||ReportSharingText.Fingerprint(manager.LoadSessionData(board).Reports.Find(r=>r.ReportId==report.ReportId))!=expectedFingerprint){info.text=F("The report changed. Reopen it before sending.","报告已更改，请重新打开后发送。");return;}
+                send.interactable=false;info.text=F("Queuing report…","正在加入报告发送队列…");
+                FriendsClient.Instance.Request<ProfileReportDelivery>("reports/deliver/",new ProfileReportRequest{client_id=client.Id,
+                    local_id=report.ReportId,table_name=reportTitle,source=report.Source=="ai"?"ai":"manual",text=text,rich_html=RichReportDocument.ExportHtml(report),recipient_digest=recipient.digest},job=>
+                {
+                    if(!Current())return;
+                    cancel.GetComponentInChildren<TMP_Text>().text=F("Done","完成");
+                    ShowDelivery(job);if(job.status=="pending"||job.status=="sending")StartCoroutine(Poll(job.id));
+                },failure=>{if(Current()){send.interactable=true;info.text=failure;}});
+            },true);send.interactable=false;
+            void ShowDelivery(ProfileReportDelivery job)
+            {
+                string message=job.status=="sent"?F("Sent to ","已发送至 ")+job.email:
+                    job.status=="pending"||job.status=="sending"?F("Queued for ","已排队发送至 ")+job.email:
+                    job.status=="cancelled"?F("Receiver settings changed. Close and review the current recipient.","接收人设置已更改，请关闭后重新核对。"):F("Delivery could not be confirmed. Check the recipient's inbox before sending again.","尚无法确认送达。再次发送前请先检查接收人邮箱。");
+                info.text=message;if(status!=null)status.text=message;
+            }
+            IEnumerator Poll(string id)
+            {
+                double until=Time.realtimeSinceStartupAsDouble+45;
+                bool finished=false;
+                while(Current()&&!finished&&Time.realtimeSinceStartupAsDouble<until)
+                {
+                    yield return new WaitForSecondsRealtime(2);if(!Current())yield break;
+                    bool done=false;
+                    FriendsClient.Instance.Request<ProfileReportDelivery>("reports/deliver/"+id+"/",null,job=>
+                    {done=true;if(Current()){ShowDelivery(job);finished=job.status!="pending"&&job.status!="sending";}},_=>done=true);
+                    double started=Time.realtimeSinceStartupAsDouble;
+                    while(Current()&&!done&&Time.realtimeSinceStartupAsDouble-started<16)yield return null;
+                }
+            }
+            StartCoroutine(LoadRecipient());
+            IEnumerator LoadRecipient()
+            {
+                var sync=PersonalClientSyncClient.Instance;sync.Refresh();double start=Time.realtimeSinceStartupAsDouble;
+                while(Current()&&sync.Busy&&Time.realtimeSinceStartupAsDouble-start<20)yield return null;
+                if(!Current())yield break;
+                if(sync.Busy){info.text=F("The client profile is still syncing. Please try again shortly.","来访者资料仍在同步，请稍后重试。");yield break;}
+                FriendsClient.Instance.Request<ProfileReportRecipient>("reports/deliver/?client_id="+Uri.EscapeDataString(client.Id),null,value=>
+                {
+                    if(!Current())return;recipient=value;
+                    if(RichReportDocument.IsRich(report)&&!value.supports_rich_reports)
+                    {info.text=F("The server needs the report-editor update before formatted reports can be sent.","服务器需要更新报告编辑器后才能发送格式化报告。");return;}
+                    recipientText.text=F("Report recipient: ","报告接收人：")+value.name+"\n"+value.email+"\n"+
+                        (value.client_self?F("Client himself · from client profile","来访者本人 · 按资料设置"):F("Named receiver only · from client profile","仅指定接收人 · 按资料设置"));
+                    info.text=F("The saved report will be emailed as a PDF to this recipient.","将把已保存报告的 PDF 发送至此接收人的邮箱。");send.interactable=true;
+                },failure=>{if(Current())info.text=failure;});
+            }
+        }
+
+        private void SendSavedReportToClientLegacy(string board, AnalysisReport report, Button button, TMP_Text status)
         {
             if (report == null || !SessionManager.CanEditReport(report)) return;
             var manager = SessionManager.Instance;
@@ -534,7 +659,7 @@ namespace Sandplay.Core
             button.interactable = false;
             status.text = F("Sending report…", "正在发送报告…");
             FriendsClient.Instance.Request<SharedReportInfo>("reports/publish/", new ClientReportPublication {
-                local_id = report.ReportId, table_name = board, source = report.Source, text = text,
+                local_id = report.ReportId, table_name = board, source = report.Source, text = text, rich_html = RichReportDocument.ExportHtml(report),
                 revision = PlayerPrefs.GetInt(revisionKey, 0), client_user_id = client?.Account?.UserId ?? 0,
                 organization_id = session.OrganizationId, organization_client_id = session.OrganizationClientId
             }, sent => {

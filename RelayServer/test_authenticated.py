@@ -1,4 +1,4 @@
-"""Isolated TLS v4 integration: run with backend test Python (PyJWT installed)."""
+"""Isolated TLS v4/v5 integration: run with backend test Python (PyJWT installed)."""
 import os
 import socket
 import ssl
@@ -12,6 +12,7 @@ import jwt
 from test_protocol import send, receive
 
 KEY = 'test-only-relay-signing-key-32-bytes-minimum'
+PROTOCOL = int(os.environ.get('SANDTRAY_TEST_PROTOCOL', '4'))
 
 
 def string(value):
@@ -58,8 +59,8 @@ def run(dll):
             return context.wrap_socket(raw, server_hostname='localhost')
 
         def hello(client):
-            send(client, 24, struct.pack('<I', 4))
-            assert receive(client) == b'\x19\x04\x00\x00\x00'
+            send(client, 24, struct.pack('<I', PROTOCOL))
+            assert receive(client) == b'\x19' + struct.pack('<I', PROTOCOL)
 
         try:
             for _ in range(50):
@@ -94,6 +95,13 @@ def run(dll):
                 assert created[0] == 11
                 room = created[2:].decode()
                 assert len(room) == 6 and all(c in 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' for c in room)
+                # Mixed capability rooms must fail before any board state is sent.
+                with connect() as mismatch:
+                    other = 5 if PROTOCOL == 4 else 4
+                    send(mismatch, 24, struct.pack('<I', other))
+                    assert receive(mismatch) == b'\x19' + struct.pack('<I', other)
+                    send(mismatch, 12, string(ticket(2, 'join', room)) + string(room))
+                    assert receive(mismatch)[:2] == b'\x0d\x00'
                 with connect() as replay:
                     hello(replay)
                     send(replay, 10, string(host_ticket))

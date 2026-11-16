@@ -4,6 +4,24 @@ namespace Sandplay.Core
     public static class SubscriptionPlans
     {
         public static readonly string[] Codes = { "personal_basic", "personal_pro", "therapist_basic", "therapist_plus", "therapist_pro" };
+        // Presentation only: retain all product mappings for existing subscribers and restores.
+        public static string[] VisibleCodes(string userType) => userType == "psychologist"
+            ? new[] { "therapist_plus", "therapist_pro" }
+            : new[] { "personal_pro" };
+
+        public static string DisplayName(string code)
+        {
+            switch (code)
+            {
+                case "free": return "Free";
+                case "personal_basic": return "Basic";
+                case "personal_pro": return "Plus";
+                case "therapist_basic": return "Basic";
+                case "therapist_plus": return "Plus";
+                case "therapist_pro": return "Pro";
+                default: return "Existing plan";
+            }
+        }
         public static string Product(string code) => Array.IndexOf(Codes, code) >= 0 ? "sandtray." + code.Replace('_', '.') + ".monthly" : null;
         public static string Code(string product) => Array.Find(Codes, c => Product(c) == product);
 
@@ -39,7 +57,7 @@ namespace Sandplay.Core
         }
 
         public static int SectionForPlan(string code) => code != null && code.StartsWith("therapist_", StringComparison.Ordinal)
-            ? 1 : code != null && code.StartsWith("personal_", StringComparison.Ordinal) ? 0 : 2;
+            ? 1 : 0;
     }
     public sealed class ActiveSubscriptionPlan
     {

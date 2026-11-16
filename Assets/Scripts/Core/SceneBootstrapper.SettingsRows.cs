@@ -134,7 +134,7 @@ namespace Sandplay.Core
             SettingsDropdown(theme, "ThemeDropdown",
                 new[] { Localization.Get("settings.theme_light"), Localization.Get("settings.theme_dark") },
                 (int)CurrentHomeTheme, index => SetHomeTheme((HomeTheme)index));
-            if (account)
+            if (account && !BackendClient.Instance.IsClientAccount)
             {
                 var client = BackendClient.Instance;
                 BuildAccountTypeSettings(list);
@@ -151,7 +151,7 @@ namespace Sandplay.Core
                     Localization.Get(client.IsSubscribed ? "sub.subscribed_badge" : "settings.view_plans"), () => ShowPaywallPanel()).GetComponentInChildren<TMP_Text>();
             }
             BuildSupportSettingsRows(list);
-            SettingsAction(list, "shortcuts.title", "Btn_KeyboardShortcuts", "settings.configure", () =>
+            if (!BackendClient.Instance.IsClientAccount) SettingsAction(list, "shortcuts.title", "Btn_KeyboardShortcuts", "settings.configure", () =>
             { CloseHomeSettingsSheet(); ShowKeyboardShortcutSettings(); });
             SettingsAction(list, "credits.title", "Btn_Attributions", "settings.view", () =>
             { CloseHomeSettingsSheet(); ShowAttributionsPanel(); });

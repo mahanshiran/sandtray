@@ -3,6 +3,7 @@ Shader "Sandplay/WindowSky"
     Properties
     {
         _MainTex ("Sunny Landscape", 2D) = "white" {}
+        _ViewYaw ("Window Direction", Float) = 0
     }
     SubShader
     {
@@ -17,6 +18,7 @@ Shader "Sandplay/WindowSky"
             #include "UnityCG.cginc"
 
             sampler2D _MainTex;
+            float _ViewYaw;
 
             struct v2f
             {
@@ -38,6 +40,11 @@ Shader "Sandplay/WindowSky"
                 // The horizon stays at eye level and the frame reveals different
                 // scenery as the viewer moves, instead of stretching a poster.
                 float3 direction = normalize(i.worldPosition - _WorldSpaceCameraPos);
+                float angle = radians(_ViewYaw);
+                float sine, cosine;
+                sincos(angle, sine, cosine);
+                direction.xz = float2(cosine * direction.x + sine * direction.z,
+                    -sine * direction.x + cosine * direction.z);
                 float2 uv = float2(.5 + atan2(direction.z, direction.x) / 2.4,
                                    .32 + asin(clamp(direction.y, -.999, .999)) / 1.2);
 

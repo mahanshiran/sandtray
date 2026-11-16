@@ -19,9 +19,16 @@ namespace Sandplay.Objects
         public string model_hash;   // SHA-256, used as disk-cache key
         public string description;
         public string[] tags;
+        // Optional initial catalog placement multiplier. Never applied on restore.
+        [Range(1, 3)] public int objectSize = 1;
+        // Cache provenance: recommendations may change; explicit API overrides must not.
+        [HideInInspector] public bool objectSizeExplicit;
 
         // Set after the thumbnail Sprite is downloaded
         [NonSerialized] public Sprite ThumbnailSprite;
+
+        // Rendered directly from the model for transparent, consistent shelf presentation.
+        [NonSerialized] public Sprite ObjectPreviewSprite;
 
         // Set after the GLB GameObject is loaded
         [NonSerialized] public GameObject LoadedPrefab;

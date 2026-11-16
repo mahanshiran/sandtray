@@ -125,8 +125,8 @@ namespace Sandplay.Sand
                     h += Mathf.PerlinNoise(seed + nx * 7f, seed + nz * 7f) * 0.25f;  // medium bumps
                     h += Mathf.PerlinNoise(seed + nx * 15f, seed + nz * 15f) * 0.1f; // fine detail
 
-                    // Map to a range around baseHeight
-                    float height = baseH + (h - 0.35f) * maxH * 0.8f;
+                    // Keep a little natural variation, with gentler starting bumps.
+                    float height = baseH + (h - 0.35f) * maxH * 0.6f;
                     height = Mathf.Clamp(height, 0.05f, maxH);
 
                     _heightmap[z * _resolution + x] = height;

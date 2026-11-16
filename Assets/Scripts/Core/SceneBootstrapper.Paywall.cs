@@ -100,6 +100,7 @@ namespace Sandplay.Core
 
         private void ShowPaywallPanel()
         {
+            if (BackendClient.Instance.IsClientAccount) return;
             if (_paywallPanel != null) Destroy(_paywallPanel);
             _paywallPanel = BuildPaywallPanel();
             _paywallPanel.SetActive(true);
@@ -182,27 +183,6 @@ namespace Sandplay.Core
             }
         }
 
-        private void ShowOrganizationPlanContact()
-        {
-            var box = ClientDialog(F("Contact us", "联系我们"), 580, 340);
-            var description = ClientText(box,
-                F("Organization plans are tailored to your team size and hosting needs. Contact us to discuss your plan.",
-                    "机构方案会根据团队规模和主持需求定制。请联系我们了解方案。"),
-                15,.06f,.55f,.88f,.25f,HomeMuted);
-            description.enableWordWrapping=true;
-            var emailRow=ClientRect(box,"OrganizationContactEmail",.06f,.34f,.88f,.16f);
-            var emailBackground=emailRow.gameObject.AddComponent<Image>();emailBackground.color=HomeChromeButton;
-            ApplyHomeRoundedCorners(emailBackground,10);
-            var email=ClientText(emailRow,SupportEmail,17,.05f,.08f,.90f,.84f,HomeText);
-            email.alignment=TextAlignmentOptions.Center;
-            Button copy=null;
-            copy=ClientButton(box,F("Copy email","复制邮箱"),.06f,.08f,.42f,.16f,()=>
-            {
-                GUIUtility.systemCopyBuffer=SupportEmail;
-                if(copy)copy.GetComponentInChildren<TMP_Text>().text=F("Copied","已复制");
-            },true);
-            ClientButton(box,F("Close","关闭"),.52f,.08f,.42f,.16f,CloseClientDialog);
-        }
 
         private void ShowPhoneSubscriptionDialog()
         {
@@ -248,12 +228,15 @@ namespace Sandplay.Core
             var panel = ClientRect(backdrop, "Plans", .025f, .025f, .95f, .95f);
             var surface = panel.gameObject.AddComponent<Image>(); surface.color = HomeCard;
             ApplyHomeRoundedCorners(surface, 20);
-            var title = ClientText(panel, F("Choose your Sandtray plan", "选择你的沙盘方案"), 28, .025f,.89f,.83f,.08f,HomeText);
+            var title = ClientText(panel, F("Choose your Sandtray plan", "选择你的沙盘方案"), 28, .025f,.89f,
+                Application.isMobilePlatform ? .51f : .63f,.08f,HomeText);
             title.fontStyle = FontStyles.Bold;
+            title.enableAutoSizing = true; title.fontSizeMin = 16; title.fontSizeMax = 28;
             var close = ClientButton(panel,"×",.935f,.91f,.04f,.065f,ClosePaywallPanel);
             ApplyHomeRoundedCorners(close.GetComponent<Image>(),10);
-            var tabs = new List<Button>();
-            var viewport = ClientRect(panel,"PlanViewport",.025f,.08f,.95f,.71f);
+            // Store controls live in the header so the cards can use the bottom space.
+            float contentBottom = .025f;
+            var viewport = ClientRect(panel,"PlanViewport",.025f,contentBottom,.95f,.79f-contentBottom);
             viewport.gameObject.AddComponent<RectMask2D>();
             var content = ClientRect(viewport,"PlanCards",0,1,1,0);
             content.pivot = new Vector2(.5f,1);
@@ -265,14 +248,16 @@ namespace Sandplay.Core
             var scroll = viewport.gameObject.AddComponent<ScrollRect>();
             scroll.viewport = viewport; scroll.content = content; scroll.horizontal = false;
             scroll.movementType = ScrollRect.MovementType.Clamped; scroll.scrollSensitivity = 32;
-            _paywallStatusTxt = ClientText(panel,F("Loading store…", "正在加载商店…"),12,.71f,.018f,.265f,.045f,HomeMuted);
+            _paywallStatusTxt = Application.isMobilePlatform
+                ? ClientText(panel,F("Loading store…", "正在加载商店…"),12,.55f,.885f,.37f,.025f,HomeMuted)
+                : ClientText(panel,"",12,.675f,.89f,.245f,.03f,HomeMuted);
             _paywallStatusTxt.alignment = TextAlignmentOptions.MidlineRight;
             _paywallStatusTxt.enableWordWrapping = false;
             _paywallStatusTxt.overflowMode = TextOverflowModes.Ellipsis;
             _paywallStatusTxt.enableAutoSizing = true; _paywallStatusTxt.fontSizeMin = 9; _paywallStatusTxt.fontSizeMax = 12;
-            var privacy = ClientButton(panel,Localization.Get("sub.privacy"),.30f,.018f,.19f,.045f,
+            var privacy = ClientButton(panel,Localization.Get("sub.privacy"),.675f,.925f,.12f,.045f,
                 () => Application.OpenURL(PrivacyPolicyUrl));
-            var terms = ClientButton(panel,Localization.Get("sub.terms_link"),.51f,.018f,.19f,.045f,
+            var terms = ClientButton(panel,Localization.Get("sub.terms_link"),.80f,.925f,.12f,.045f,
                 () => Application.OpenURL(TermsOfUseUrl));
             foreach (var link in new[] { privacy, terms })
             {
@@ -286,9 +271,8 @@ namespace Sandplay.Core
             AccessSnapshot accountAccess = backend.CurrentAccess;
             ActiveSubscriptionPlan currentPlan = SubscriptionPlans.ActivePlan(accountAccess,
                 backend.AccessSource == "manual_contract" ? null : backend.StoreSubscriptionState, DateTimeOffset.UtcNow);
-            int selectedSection = currentPlan == null ? 0 : SubscriptionPlans.SectionForPlan(currentPlan.Code);
-            bool userSelectedSection = false;
-            var restore = ClientButton(panel,F("Restore", "恢复购买"),.025f,.018f,.12f,.045f,()=>
+            var currentPlanLabel = ClientText(panel,"",13,.025f,.82f,.63f,.055f,HomeMuted);
+            var restore = ClientButton(panel,F("Restore", "恢复购买"),.55f,.925f,.12f,.045f,()=>
             {
                 if (!backend.IsLoggedIn) { ClosePaywallPanel(); OpenLoginScreen(ShowPaywallPanel); return; }
                 RevenueCatManager.Instance?.RestorePurchases((ok,error)=>
@@ -298,9 +282,17 @@ namespace Sandplay.Core
                         _refreshPaywallPlan?.Invoke());
                 });
             });
-            var manage = ClientButton(panel,F("Manage / cancel", "管理 / 取消"),.15f,.018f,.14f,.045f,
+            var manage = ClientButton(panel,F("Manage / cancel", "管理 / 取消"),
+                .70f, .82f, .22f, .045f,
                 ()=>RevenueCatManager.Instance?.ManageSubscription());
             restore.GetComponent<Image>().color=manage.GetComponent<Image>().color=Color.clear;
+            foreach (var link in new[] { restore, manage })
+            {
+                var label = link.GetComponentInChildren<TMP_Text>();
+                label.color = HomePrimary; label.fontSize = 12;
+                label.enableAutoSizing = true; label.fontSizeMin = 9; label.fontSizeMax = 12;
+                label.fontStyle = FontStyles.Underline;
+            }
             restore.gameObject.SetActive(Application.isMobilePlatform);
             manage.gameObject.SetActive(Application.isMobilePlatform);
             var store = RevenueCatManager.Instance;
@@ -312,54 +304,34 @@ namespace Sandplay.Core
                 restore.gameObject.SetActive(Application.isMobilePlatform && backend.AccessSource != "manual_contract" &&
                     (currentPlan == null || currentPlan.IsStorePurchase));
                 manage.gameObject.SetActive(Application.isMobilePlatform && currentPlan?.IsStorePurchase == true);
-                foreach (Transform child in content) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
-                for (int t = 0; t < tabs.Count; t++)
-                    StyleContentTab(tabs[t], selectedSection == t);
-                string[] names = selectedSection == 0 ? new[] { "Free", "Basic", "Pro" }
-                    : selectedSection == 1 ? new[] { "Basic", "Plus", "Pro" } : new[] { F("Custom", "定制") };
-                for (int n = 0; n < names.Length; n++)
+                if (currentPlanLabel != null)
                 {
-                    int tier = n;
-                    string key = selectedSection + ":" + n;
-                    string planCode = selectedSection == 0 ? (n == 0 ? "free" : "personal_" + (n == 1 ? "basic" : "pro"))
-                        : selectedSection == 1 ? "therapist_" + new[] { "basic", "plus", "pro" }[n] : null;
+                    string currentName = currentPlan == null ? F("Free", "免费")
+                        : SubscriptionPlans.DisplayName(currentPlan.Code);
+                    currentPlanLabel.text = F("Current plan: ", "当前方案：") + currentName;
+                }
+                foreach (Transform child in content) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
+                var visiblePlans = SubscriptionPlans.VisibleCodes(backend.UserType);
+                for (int n = 0; n < visiblePlans.Length; n++)
+                {
+                    string planCode = visiblePlans[n];
+                    string key = planCode;
                     var package = store?.AvailablePackages.Find(p=>p.PlanCode==planCode);
-                    bool chosen = currentPlan != null && (selectedSection == 2
-                        ? SubscriptionPlans.SectionForPlan(currentPlan.Code) == 2
-                        : currentPlan.Code == planCode);
+                    bool chosen = currentPlan == null ? planCode == "free" : currentPlan.Code == planCode;
                     var card = ClientRect(content,"Plan_"+key,0,0,1,1);
                     var image = card.gameObject.AddComponent<Image>(); image.color = HomeIsLight ? Color.white : HomeChromeButton;
                     ApplyHomeRoundedCorners(image,16);
                     var border = card.gameObject.AddComponent<Outline>();
                     border.effectColor = chosen ? HomePrimary : HomeCardBorder; border.effectDistance = new Vector2(chosen ? 2 : 1,-1);
-                    string audience = selectedSection == 0 ? F("NORMAL", "个人") : selectedSection == 1 ? F("THERAPIST", "治疗师") : F("ORGANIZATION", "机构");
-                    ClientText(card,names[n],27,.07f,.89f,.86f,.085f,HomeText).fontStyle = FontStyles.Bold;
-                    ClientText(card,selectedSection == 2 ? F("Tailored to your organization", "为您的机构定制") : planCode == "free" ? F("Free", "免费")
-                        : !Application.isMobilePlatform ? (chosen ? F("Your active plan", "您当前的方案") : F("Purchase on phone", "请在手机上购买"))
-                        : chosen && currentPlan?.IsStorePurchase == false ? F("Manually assigned plan", "手动分配的方案")
-                        : chosen && package == null ? F("Your active plan", "您当前的方案")
-                        : package != null ? package.PriceString + F(" / month", " / 月") : loading ? F("Loading price…", "正在加载价格…") : F("Unavailable", "暂不可用"),13,.07f,.825f,.86f,.05f,HomeMuted);
-                    if (planCode != "free" && selectedSection != 2)
-                        ClientText(card,chosen && currentPlan?.IsStorePurchase == false
-                            ? F("Assigned by your account administrator", "由账户管理员分配")
-                            : F("Auto-renews · Cancel anytime in the store", "自动续订 · 可随时在商店取消"),10,.07f,.787f,.86f,.035f,HomeMuted);
+                    ClientText(card,SubscriptionPlans.DisplayName(planCode),27,.07f,.89f,.86f,.085f,HomeText).fontStyle = FontStyles.Bold;
                     var lines = new List<string>();
-                    if (selectedSection == 2)
-                    {
-                        lines.Add(F("✓ Therapist seats and managed accounts", "✓ 治疗师席位与托管账户"));
-                        lines.Add(F("✓ Shared organization client workspace", "✓ 机构共享来访者工作区"));
-                        lines.Add(F("✓ Hosting allocations and usage tracking", "✓ 主持时长分配与用量跟踪"));
-                        lines.Add(F("✓ Organization branding and administration", "✓ 机构品牌与管理"));
-                        lines.Add(F("✓ Operational activity history", "✓ 运营活动历史"));
-                    }
-                    else
                     {
                         var policy = planCatalog?.Find(planCode);
                         if (policy == null)
                             lines.Add(planError ?? F("Loading plan details…", "正在加载方案详情…"));
-                        else foreach (var capability in new[] { "tables.capacity", "objects.builtin.read", "sessions.join",
+                        else foreach (var capability in new[] { "sessions.host_minutes", "tables.capacity", "objects.builtin.read",
                             "ai.analyze", "reports.capacity", "pdf.export", "replays.play", "catalog.custom.capacity",
-                            "sessions.host_minutes", "clients.capacity" })
+                            "clients.capacity" })
                         {
                             var item = AccessPolicy.Find(policy.capabilities, capability);
                             if (item == null) continue;
@@ -373,7 +345,7 @@ namespace Sandplay.Core
                     }
                     for (int row = 0; row < lines.Count; row++)
                     {
-                        float y = .737f-row*.060f;
+                        float y = .825f-row*.066f;
                         bool included = lines[row].StartsWith("✓");
                         bool unsupported = lines[row].StartsWith("*");
                         string feature = included || unsupported ? lines[row].Substring(2) : lines[row];
@@ -392,7 +364,6 @@ namespace Sandplay.Core
                     }
                     var select = ClientButton(card,"",.07f,.055f,.86f,.09f,()=>
                     {
-                        if (selectedSection == 2) { ShowOrganizationPlanContact(); return; }
                         if (!Application.isMobilePlatform)
                         {
                             if (planCode != "free") ShowPhoneSubscriptionDialog();
@@ -410,38 +381,36 @@ namespace Sandplay.Core
                         {
                             if (!ok) { if (backdrop != null) UpdatePaywallStatus(error ?? F("Purchase cancelled", "已取消购买")); return; }
                             SyncPurchasedPlan(backdrop != null ? backdrop.gameObject : null, () =>
-                            { userSelectedSection = false; RefreshCurrentPlan(); });
+                            { RefreshCurrentPlan(); });
                         });
                     });
-                    select.GetComponent<Image>().color = chosen || selectedSection == 2 ? HomePrimary : HomeChromeButton;
+                    select.GetComponent<Image>().color = chosen ? HomePrimary : HomeChromeButton;
                     ApplyHomeRoundedCorners(select.GetComponent<Image>(),10);
                     bool manualAccount = backend.AccessSource == "manual_contract" ||
                         (currentPlan != null && !currentPlan.IsStorePurchase);
                     bool accountReady = !backend.IsLoggedIn || backend.AccessSource == "revenuecat";
-                    select.interactable = selectedSection == 2 ||
+                    select.interactable =
                         (!Application.isMobilePlatform && planCode != "free") ||
                         (Application.isMobilePlatform && accountReady && !manualAccount && planCatalog?.Find(planCode) != null &&
-                         (chosen || (planCode == "free" ? currentPlan?.IsStorePurchase == true : package != null)));
-                    select.GetComponentInChildren<TMP_Text>().text = selectedSection == 2 ? F("Contact us", "联系我们")
-                        : !Application.isMobilePlatform && planCode != "free" ? F("Please use phone to purchase", "请使用手机购买")
+                         (planCode == "free" ? currentPlan?.IsStorePurchase == true : chosen || package != null));
+                    select.GetComponentInChildren<TMP_Text>().text = !Application.isMobilePlatform && planCode != "free" ? F("Please use phone to purchase", "请使用手机购买")
                         : chosen && manualAccount ? F("Current plan", "当前方案")
                         : manualAccount && planCode != "free" ? F("Managed manually", "手动管理的方案")
                         : !accountReady && planCode != "free" ? F("Checking account…", "正在核对账户…")
-                        : chosen ? F("Manage plan", "管理方案") : planCode == "free"
+                        : chosen && planCode != "free" ? F("Manage plan", "管理方案") : planCode == "free"
                         ? (currentPlan?.IsStorePurchase == true ? F("Switch to Free", "转为免费方案") : F("Free plan", "免费方案"))
                         : currentPlan != null ? F("Change plan", "更改方案") : F("Subscribe", "订阅");
-                    select.GetComponentInChildren<TMP_Text>().color = chosen || selectedSection == 2 ? Color.white : HomeText;
+                    // Keep the actual store price with the purchase action rather
+                    // than reserving subtitle rows above the features.
+                    if (Application.isMobilePlatform && package != null && !manualAccount && planCode != "free")
+                    {
+                        select.GetComponentInChildren<TMP_Text>().text += " · " + package.PriceString + F(" / month", " / 月");
+                        ClientText(card,F("Auto-renews · Cancel anytime in the store", "自动续订 · 可随时在商店取消"),
+                            10,.07f,.012f,.86f,.03f,HomeMuted);
+                    }
+                    select.GetComponentInChildren<TMP_Text>().color = chosen ? Color.white : HomeText;
                 }
                 scroll.verticalNormalizedPosition = 1;
-            }
-            string[] sections = { F("Normal", "个人"), F("Therapist", "治疗师"), F("Organization", "机构") };
-            for (int i = 0; i < sections.Length; i++)
-            {
-                int section = i;
-                var tab = ClientButton(panel,"",.025f+i*(.95f/3f),.82f,.95f/3f,.065f,()=>
-                { userSelectedSection = true; selectedSection = section; Render(); });
-                tab.GetComponentInChildren<TMP_Text>().text = sections[i];
-                tabs.Add(tab);
             }
             Render();
             void RefreshCurrentPlan()
@@ -452,16 +421,12 @@ namespace Sandplay.Core
                     if (backdrop == null) return;
                     accountAccess = snapshot;
                     currentPlan = SubscriptionPlans.ActivePlan(accountAccess, backend.StoreSubscriptionState, DateTimeOffset.UtcNow);
-                    if (currentPlan != null && !userSelectedSection)
-                        selectedSection = SubscriptionPlans.SectionForPlan(currentPlan.Code);
                     Render();
                 }, _ =>
                 {
                     if (backdrop == null) return;
                     currentPlan = SubscriptionPlans.ActivePlan(accountAccess,
                         backend.AccessSource == "manual_contract" ? null : backend.StoreSubscriptionState, DateTimeOffset.UtcNow);
-                    if (currentPlan != null && !userSelectedSection)
-                        selectedSection = SubscriptionPlans.SectionForPlan(currentPlan.Code);
                     Render();
                 });
             }
@@ -886,13 +851,22 @@ namespace Sandplay.Core
     }
     public sealed class PlanComparisonLayout : MonoBehaviour
     {
+        public bool BalancedPairs;
         private void LateUpdate()
         {
             var grid = GetComponent<GridLayoutGroup>();
             float width = ((RectTransform)transform.parent).rect.width - 8;
-            int columns = Mathf.Clamp(Mathf.FloorToInt((width + 18) / 280),1,3);
+            int cardCount = 0;
+            foreach (Transform child in transform)
+                if (child.gameObject.activeSelf) cardCount++;
+            int columns = Mathf.Min(Mathf.Max(1, cardCount),
+                Mathf.Clamp(Mathf.FloorToInt((width + 18) / 280),1,BalancedPairs ? 4 : 3));
+            if (BalancedPairs && columns == 3) columns = 2;
             grid.constraintCount = columns;
-            grid.cellSize = new Vector2(Mathf.Max(100,(width - 18 * (columns - 1)) / columns), 490);
+            grid.childAlignment = TextAnchor.UpperCenter;
+            float cardWidth = Mathf.Max(100,(width - 18 * (columns - 1)) / columns);
+            if (cardCount == 1) cardWidth = Mathf.Min(500, cardWidth);
+            grid.cellSize = new Vector2(cardWidth, 440);
         }
     }
 

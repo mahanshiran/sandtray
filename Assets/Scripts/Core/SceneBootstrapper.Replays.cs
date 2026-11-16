@@ -488,7 +488,7 @@ namespace Sandplay.Core
                 var avatar = ClientRect(badge, "Avatar", 0, .05f, .14f, .90f);
 
                 var circle = avatar.gameObject.AddComponent<Image>();
-                circle.sprite = Sandplay.UI.SessionAvatars.Circle(); circle.color = HomeTeal; circle.raycastTarget = false;
+                circle.sprite = Sandplay.UI.SessionAvatars.Circle(); circle.color = HomeAvatarBackground; circle.raycastTarget = false;
                 var initial = ClientText(avatar, string.IsNullOrWhiteSpace(client.name) ? "?" : client.name.Substring(0,1), 14, 0,0,1,1,HomeText);
                 initial.alignment = TextAlignmentOptions.Center;
                 avatar.gameObject.AddComponent<Sandplay.UI.AccountAvatar>().SetPerson(client.linked_user_id, client.avatar_url, initial);

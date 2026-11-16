@@ -18,8 +18,20 @@ namespace Sandplay.Data
         private readonly Stack<ICommand> _redoStack = new();
         private int _maxSteps = 50;
 
-        public bool CanUndo => _undoStack.Count > 0;
-        public bool CanRedo => _redoStack.Count > 0;
+        private static bool WaitingForSmartPlacement
+        {
+            get
+            {
+                var network=Core.NetworkBootstrapper.Instance;
+                if (network==null || !network.IsOnline || network.IsHost) return false;
+                var placer=FindAnyObjectByType<Objects.ObjectPlacer>();
+                if (placer!=null) foreach (var placed in placer.PlacedObjects)
+                    if (Objects.SmartLinearObject.AwaitingConfirmation(placed)) return true;
+                return false;
+            }
+        }
+        public bool CanUndo => _undoStack.Count > 0 && !WaitingForSmartPlacement;
+        public bool CanRedo => _redoStack.Count > 0 && !WaitingForSmartPlacement;
 
         private void Awake()
         {
@@ -55,7 +67,7 @@ namespace Sandplay.Data
         public void UndoLast()
         {
             if (GameManager.Instance != null && GameManager.Instance.IsSpectator) return;
-            if (_undoStack.Count == 0) return;
+            if (!CanUndo) return;
             var cmd = _undoStack.Pop();
             cmd.Undo();
             _redoStack.Push(cmd);
@@ -67,7 +79,7 @@ namespace Sandplay.Data
         public void RedoLast()
         {
             if (GameManager.Instance != null && GameManager.Instance.IsSpectator) return;
-            if (_redoStack.Count == 0) return;
+            if (!CanRedo) return;
             var cmd = _redoStack.Pop();
             cmd.Execute();
             _undoStack.Push(cmd);
@@ -114,6 +126,7 @@ namespace Sandplay.Data
         private Objects.PlacedObject _placed;
         private TerrainModifyCommand _impression;
         private bool _executed;
+        private string _instanceId;
         private Vector3 _finalPosition;
         public Objects.PlacedObject PlacedObject => _placed;
 
@@ -131,6 +144,11 @@ namespace Sandplay.Data
         public void Execute()
         {
             _placed = _placer.PlaceObject(_data, _executed ? _finalPosition : _position, _rotation, _scale, _executed || _skipOffset);
+            if (_placed != null)
+            {
+                if (_instanceId == null) _instanceId = _placed.InstanceId;
+                else _placed.InstanceId = _instanceId;
+            }
             if (!_executed)
             {
                 if (_placed != null) _finalPosition = _placed.transform.position;
@@ -142,8 +160,8 @@ namespace Sandplay.Data
 
         public void Undo()
         {
-            if (_placed != null)
-                _placer.RemoveObject(_placed);
+            var live = _placed != null ? _placed : Objects.PlacedObject.ResolveInstance(_instanceId);
+            if (live != null) _placer.RemoveObject(live);
             _impression?.Undo();
         }
     }
@@ -159,6 +177,7 @@ namespace Sandplay.Data
         private Objects.PlacedObject _placed;
         private TerrainModifyCommand _impression;
         private bool _executed;
+        private string _instanceId;
         private Vector3 _finalPosition;
         public Objects.PlacedObject PlacedObject => _placed;
 
@@ -176,6 +195,11 @@ namespace Sandplay.Data
         public void Execute()
         {
             _placed = _placer.PlaceNetworkObject(_item, _executed ? _finalPosition : _position, _rotation, _scale, _executed || _skipOffset);
+            if (_placed != null)
+            {
+                if (_instanceId == null) _instanceId = _placed.InstanceId;
+                else _placed.InstanceId = _instanceId;
+            }
             if (!_executed)
             {
                 if (_placed != null) _finalPosition = _placed.transform.position;
@@ -187,8 +211,8 @@ namespace Sandplay.Data
 
         public void Undo()
         {
-            if (_placed != null)
-                _placer.RemoveObject(_placed);
+            var live = _placed != null ? _placed : Objects.PlacedObject.ResolveInstance(_instanceId);
+            if (live != null) _placer.RemoveObject(live);
             _impression?.Undo();
         }
     }
@@ -220,7 +244,11 @@ namespace Sandplay.Data
             _placed = _objectData != null
                 ? _placer.PlaceObject(_objectData, _savedData.Position, Quaternion.Euler(_savedData.Rotation), _savedData.Scale, skipOffset: true)
                 : _placer.PlaceNetworkObject(_networkItem, _savedData.Position, Quaternion.Euler(_savedData.Rotation), _savedData.Scale, skipOffset: true);
-            if (_placed != null) _placed.PlacementTime = _savedData.PlacementTime;
+            if (_placed != null)
+            {
+                _placed.PlacementTime = _savedData.PlacementTime;
+                if (!string.IsNullOrEmpty(_savedData.InstanceId)) _placed.InstanceId = _savedData.InstanceId;
+            }
         }
     }
 
@@ -299,7 +327,9 @@ namespace Sandplay.Data
 
     public class MoveObjectCommand : ICommand
     {
-        private readonly Objects.PlacedObject _placed;
+        private readonly Objects.PlacedObject _original;
+        private readonly string _instanceId;
+        private Objects.PlacedObject _placed => _original != null ? _original : Objects.PlacedObject.ResolveInstance(_instanceId);
         private readonly Vector3 _beforePos;
         private readonly Quaternion _beforeRot;
         private readonly Vector3 _beforeScale;
@@ -310,7 +340,8 @@ namespace Sandplay.Data
         public MoveObjectCommand(Objects.PlacedObject placed, Vector3 beforePos, Quaternion beforeRot,
             Vector3 afterPos, Quaternion afterRot)
         {
-            _placed = placed;
+            _original = placed;
+            _instanceId = placed != null ? placed.InstanceId : null;
             _beforePos = beforePos;
             _beforeRot = beforeRot;
             _beforeScale = placed != null ? placed.transform.localScale : Vector3.one;
@@ -322,7 +353,8 @@ namespace Sandplay.Data
         public MoveObjectCommand(Objects.PlacedObject placed, Vector3 beforePos, Quaternion beforeRot, Vector3 beforeScale,
             Vector3 afterPos, Quaternion afterRot, Vector3 afterScale)
         {
-            _placed = placed;
+            _original = placed;
+            _instanceId = placed != null ? placed.InstanceId : null;
             _beforePos = beforePos;
             _beforeRot = beforeRot;
             _beforeScale = beforeScale;
@@ -333,21 +365,27 @@ namespace Sandplay.Data
 
         public void Execute()
         {
-            if (_placed != null)
+            var placed = _placed;
+            if (placed != null)
             {
-                _placed.transform.position = _afterPos;
-                _placed.transform.rotation = _afterRot;
-                _placed.transform.localScale = _afterScale;
+                placed.transform.position = _afterPos;
+                placed.transform.rotation = _afterRot;
+                placed.transform.localScale = _afterScale;
+                if (placed.GetComponent<Objects.SmartLinearObject>() != null)
+                    EventBus.Publish(new ObjectTransformedEvent { PlacedObject = placed });
             }
         }
 
         public void Undo()
         {
-            if (_placed != null)
+            var placed = _placed;
+            if (placed != null)
             {
-                _placed.transform.position = _beforePos;
-                _placed.transform.rotation = _beforeRot;
-                _placed.transform.localScale = _beforeScale;
+                placed.transform.position = _beforePos;
+                placed.transform.rotation = _beforeRot;
+                placed.transform.localScale = _beforeScale;
+                if (placed.GetComponent<Objects.SmartLinearObject>() != null)
+                    EventBus.Publish(new ObjectTransformedEvent { PlacedObject = placed });
             }
         }
     }

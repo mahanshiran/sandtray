@@ -169,7 +169,7 @@ namespace Sandplay.Objects
                     Ray dragRay = _cam.ScreenPointToRay(InputHelper.GetPointerPosition());
 
                     // Temporarily disable dragged object's colliders
-                    var selfColliders = _selectedPlaced.GetComponentsInChildren<Collider>();
+                    var selfColliders = Array.FindAll(_selectedPlaced.GetComponentsInChildren<Collider>(), collider => collider.enabled);
                     foreach (var c in selfColliders) c.enabled = false;
 
                     // Use RaycastAll to find both sand and object hits
@@ -312,7 +312,7 @@ namespace Sandplay.Objects
 
                 if (InputHelper.GetPointerDown())
                 {
-                    var cmd = new PlaceObjectCommand(this, _selectedCatalogObject, pos, Quaternion.identity, 1f);
+                    var cmd = new PlaceObjectCommand(this, _selectedCatalogObject, pos, Quaternion.identity, ObjectSizing.Valid(_selectedCatalogObject.objectSize));
                     UndoManager.Instance?.Execute(cmd);
                 }
             }
@@ -492,11 +492,16 @@ namespace Sandplay.Objects
         /// </summary>
         public PlacedObject PlaceNetworkObject(NetworkCatalogItem item, Vector3 position, Quaternion rotation, float scale, bool skipOffset = false, bool placementFeedback = true)
         {
-            if (item?.LoadedPrefab == null) return null;
+            if (item == null) return null;
+            SmartLinearCatalog.EnsureTemplate(item);
+            if (item.LoadedPrefab == null) return null;
 
             GameObject go = Instantiate(item.LoadedPrefab, position, rotation);
+            go.hideFlags = HideFlags.None;
             go.SetActive(true);
             go.transform.localScale = item.LoadedPrefab.transform.localScale * scale;
+            if (LinearObjectState.TryParse(item.id, out var linearState))
+                go.GetComponent<SmartLinearObject>().Apply(linearState);
 
             if (!skipOffset)
             {
@@ -550,6 +555,7 @@ namespace Sandplay.Objects
         public PlacedObject DuplicateObject(PlacedObject source, Vector3? sharedOffset = null, bool select = true)
         {
             if (source == null || source.gameObject == null) return null;
+            if (SmartLinearObject.AwaitingConfirmation(source)) return null;
             if (source.ObjectData == null && source.NetworkItem == null) return null;
 
             Vector3 screenRight = _cam != null
@@ -666,7 +672,7 @@ namespace Sandplay.Objects
                 if (obj.transform.position.y <= groundY + 0.01f) continue;
 
                 // Raycast downward to see if still supported by another object
-                var selfColliders = obj.GetComponentsInChildren<Collider>();
+                var selfColliders = Array.FindAll(obj.GetComponentsInChildren<Collider>(), collider => collider.enabled);
                 foreach (var c in selfColliders) c.enabled = false;
 
                 bool supported = false;
@@ -770,7 +776,7 @@ namespace Sandplay.Objects
             float currentBottom = obj.transform.position.y - bottomOffset;
 
             // Ignore the falling object's own colliders while finding support below it.
-            var selfColliders = obj.GetComponentsInChildren<Collider>();
+            var selfColliders = Array.FindAll(obj.GetComponentsInChildren<Collider>(), collider => collider.enabled);
             foreach (var collider in selfColliders)
                 collider.enabled = false;
 
@@ -886,6 +892,15 @@ namespace Sandplay.Objects
                 pos.x = center.x - offset.x; pos.z = center.y - offset.z;
                 return pos;
             }
+            if (obj.GetComponent<SmartLinearObject>() != null && renderers.Length > 0)
+            {
+                Bounds smartBounds = renderers[0].bounds;
+                foreach (var r in renderers) smartBounds.Encapsulate(r.bounds);
+                Vector3 offset = smartBounds.center - obj.transform.position;
+                pos.x = Mathf.Clamp(pos.x + offset.x, -halfW + extentX, halfW - extentX) - offset.x;
+                pos.z = Mathf.Clamp(pos.z + offset.z, -halfD + extentZ, halfD - extentZ) - offset.z;
+                return pos;
+            }
             pos.x = Mathf.Clamp(pos.x, -halfW + extentX, halfW - extentX);
             pos.z = Mathf.Clamp(pos.z, -halfD + extentZ, halfD - extentZ);
             return pos;
@@ -928,6 +943,7 @@ namespace Sandplay.Objects
             _ghostPreview = Instantiate(_selectedCatalogObject.Prefab);
             _ghostPreview.SetActive(true);
             _ghostPreview.name = "GhostPreview";
+            _ghostPreview.transform.localScale = _selectedCatalogObject.Prefab.transform.localScale * ObjectSizing.Valid(_selectedCatalogObject.objectSize);
 
             // Make translucent
             foreach (var r in _ghostPreview.GetComponentsInChildren<Renderer>())

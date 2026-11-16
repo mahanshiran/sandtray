@@ -49,10 +49,14 @@ namespace Sandplay.Data
             RenderTexture rt = new RenderTexture(width, height, 24);
             RenderTexture previousActive = RenderTexture.active;
             RenderTexture previousTarget = cam.targetTexture;
+            Rect previousViewport = cam.rect;
 
             try
             {
                 cam.targetTexture = rt;
+                // Side panes narrow the live camera viewport. Captures own the whole
+                // render target, otherwise that reserved pane area is saved as black.
+                cam.rect = new Rect(0, 0, 1, 1);
                 cam.Render();
 
                 RenderTexture.active = rt;
@@ -71,6 +75,7 @@ namespace Sandplay.Data
             finally
             {
                 cam.targetTexture = previousTarget;
+                cam.rect = previousViewport;
                 RenderTexture.active = previousActive;
                 Destroy(rt);
             }

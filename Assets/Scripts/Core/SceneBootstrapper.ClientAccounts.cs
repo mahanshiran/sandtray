@@ -7,6 +7,48 @@ namespace Sandplay.Core
 {
     public partial class SceneBootstrapper
     {
+        private void ShowNewClientAccount(Transform parent, Action<FriendPerson> selected)
+        {
+            var backend = BackendClient.Instance;
+            if (!backend.IsTherapistAccount) return;
+            int user = backend.UserId;
+            var overlay = ClientRect(parent, "NewClientAccount", 0, 0, 1, 1);
+            overlay.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, .8f);
+            var box = ClientRect(overlay, "Card", .5f, .5f, 0, 0);
+            var available = ((RectTransform)parent).rect.size;
+            box.sizeDelta = new Vector2(Mathf.Min(620, available.x - 32), Mathf.Min(480, available.y - 32));
+            box.gameObject.AddComponent<Image>().color = HomeCard;
+            ApplyHomeRoundedCorners(box.GetComponent<Image>(), 14);
+            ClientText(box, F("New account", "新建账号"), 24, .06f, .85f, .88f, .10f, HomeText);
+            ClientText(box, F("Username (email optional)", "用户名（无需邮箱）"), 13, .06f, .73f, .88f, .07f, HomeMuted);
+            var username = ClientInput(box, "", "", .06f, .60f, .88f, .12f, 150);
+            ClientText(box, F("Password", "密码"), 13, .06f, .49f, .88f, .07f, HomeMuted);
+            var password = ClientInput(box, "", "", .06f, .36f, .88f, .12f, 128);
+            password.contentType = TMPro.TMP_InputField.ContentType.Password;
+            var status = ClientText(box, F("Share these credentials with your client. Their new account will automatically send you a friend request.",
+                "请将账号和密码告知来访者。新账号将自动向您发送好友请求。"), 12, .06f, .17f, .88f, .16f, HomeMuted);
+            bool busy = false;
+            void Close() { password.text = ""; overlay.gameObject.SetActive(false); Destroy(overlay.gameObject); }
+            ClientButton(box, F("Cancel", "取消"), .06f, .04f, .40f, .10f, () => { if (!busy) Close(); });
+            Button create = null;
+            create = ClientButton(box, F("Create account", "创建账号"), .52f, .04f, .42f, .10f, () =>
+            {
+                if (busy) return;
+                busy = true; create.interactable = false;
+                status.text = F("Creating account…", "正在创建账号…");
+                backend.CreateClientAccount(username.text.Trim(), password.text, person =>
+                {
+                    if (overlay == null || backend.UserId != user) return;
+                    FriendsClient.Instance.Refresh();
+                    selected(person); Close();
+                }, error =>
+                {
+                    if (overlay == null || backend.UserId != user) return;
+                    busy = false; create.interactable = true; status.text = error;
+                });
+            }, true);
+        }
+
         // A nested picker keeps all unsaved therapist fields intact.
         private void ShowClientAccountPicker(Transform parent, bool friends, Action<FriendPerson> selected)
         {

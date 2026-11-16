@@ -54,10 +54,9 @@ namespace Sandplay.Core
         private GameObject _catalogButton;   // catalog toggle button (right edge)
         private RectTransform _catalogButtonRT;
         private Image _catalogButtonImage;
-        private GameObject _catalogButtonHandleVisual;
-        private GameObject _catalogButtonGlyph;
-        private bool _catalogPhoneLayout;
-        private Coroutine _catalogDrawerRoutine;
+        private Sandplay.UI.ResizableReportDock _catalogDock;
+        private RectTransform _catalogGameHud;
+        private float _catalogDockFraction=-1f;
         private bool _catalogDrawerOpen;
         private GameObject _colorPickerDialog; // color picker dialog
         private GameObject _networkPanel;      // host/join UI overlay
@@ -125,6 +124,7 @@ namespace Sandplay.Core
 
         private void OnDestroy()
         {
+            if(!string.IsNullOrEmpty(_runningTestId)) Sandplay.UI.LiveSessionTimer.EndTestCountdown();
             if (_windowSunlightCookie != null) Destroy(_windowSunlightCookie);
             ClearJoinedSessionLoadingHandlers();
             Localization.OnLanguageChanged -= RefreshAllLocalizedTexts;
@@ -249,22 +249,9 @@ namespace Sandplay.Core
             UpdateHostingWallet();
             UpdateHostingWarning();
             RefreshScheduleBadgeClock();
-            // Close catalog on tap outside when open
-            if (_catalogPanel != null && _catalogPanel.activeSelf)
-            {
-                if (InputHelper.GetPointerDown())
-                {
-                    // Check if pointer is over the catalog panel itself
-                    if (!RectTransformUtility.RectangleContainsScreenPoint(
-                        _catalogPanel.GetComponent<RectTransform>(),
-                        InputHelper.GetPointerPosition(),
-                        null))
-                    {
-                        CloseCatalogPanel();
-                    }
-                }
-            }
-
+            UpdatePendingTestSubmissions();
+            UpdateTherapistReportWork();
+            UpdateTestReviewReopenButton();
             // Update replay HUD time/seek bar (no-op when not replaying)
             TickReplayHUD();
         }
@@ -436,18 +423,17 @@ namespace Sandplay.Core
 
         private void CreateEnvironment()
         {
-            ApplyEnvironmentLighting();
             BuildTherapyRoom();
         }
 
         private void ApplyEnvironmentLighting()
         {
-            // Bright bounced daylight keeps vertical surfaces and tray sides
-            // readable, while a slightly warmer ground fill preserves depth.
+            // Soft bounced daylight keeps the room readable without flattening
+            // the sand relief. A darker ground bounce gives objects more depth.
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.84f, 0.87f, 0.90f);
-            RenderSettings.ambientEquatorColor = new Color(0.76f, 0.78f, 0.77f);
-            RenderSettings.ambientGroundColor = new Color(0.60f, 0.56f, 0.49f);
+            RenderSettings.ambientSkyColor = new Color(0.72f, 0.77f, 0.82f);
+            RenderSettings.ambientEquatorColor = new Color(0.63f, 0.66f, 0.66f);
+            RenderSettings.ambientGroundColor = new Color(0.48f, 0.44f, 0.38f);
 
             // The room owns its lighting. SceneSetup and Unity's template scene
             // may also contain these lights; don't stack them onto the room rig.
@@ -480,6 +466,9 @@ namespace Sandplay.Core
         /// </summary>
         private void BuildTherapyRoom()
         {
+            // Every entry path (new, loaded, or network board) must reset the
+            // same ambient/camera state before constructing the room rig.
+            ApplyEnvironmentLighting();
             // Destroy previous room if resizing
             if (_therapyRoom != null)
             {
@@ -490,13 +479,13 @@ namespace Sandplay.Core
             }
 
             // === Dynamic Room Dimensions ===
-            // Scale room based on board size with a generous multiplier, minimum 80
+            // Give the taller table 20% more room in every dimension.
             float boardW = _config != null ? _config.SandboxWidth : 10f;
             float boardD = _config != null ? _config.SandboxDepth : 10f;
             float boardMax = Mathf.Max(boardW, boardD);
-            float roomWidth = Mathf.Max(80f, boardMax * 8f);   // X
-            float roomDepth = Mathf.Max(80f, boardMax * 8f);   // Z
-            float roomHeight = Mathf.Max(40f, boardMax * 4f);  // Y
+            float roomWidth = Mathf.Max(80f, boardMax * 8f) * 1.2f;   // X
+            float roomDepth = Mathf.Max(80f, boardMax * 8f) * 1.2f;   // Z
+            float roomHeight = Mathf.Max(40f, boardMax * 4f) * 1.2f;  // Y
             float wallThick = 0.15f;
             float floorY = SandboxFrame.RoomFloorY;
 
@@ -518,7 +507,7 @@ namespace Sandplay.Core
             var floorMat = floor.GetComponent<Renderer>().material;
             floorMat.color = floorColor;
             floorMat.SetFloat("_Metallic", 0f);
-            floorMat.SetFloat("_Glossiness", 0.32f);
+            floorMat.SetFloat("_Glossiness", 0.22f);
             floorMat.mainTexture = GenerateWoodFloorTexture(512, 512);
             floorMat.mainTextureScale = new Vector2(8f, 8f);
             floorMat.EnableKeyword("_NORMALMAP");
@@ -542,10 +531,10 @@ namespace Sandplay.Core
             ceiling.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
             // === Walls ===
-            // Back wall (far +Z)
-            CreateRoomWall(roomParent.transform, "WallBack",
-                new Vector3(0, floorY + roomHeight / 2f, roomDepth / 2f),
-                new Vector3(roomWidth, roomHeight, wallThick), wallColor);
+            // Right wall (+X) now holds the map.
+            CreateRoomWall(roomParent.transform, "WallRight",
+                new Vector3(roomWidth / 2f, floorY + roomHeight / 2f, 0),
+                new Vector3(wallThick, roomHeight, roomDepth), wallColor);
 
             // Front wall (near -Z) — door on the same side as the board overview camera
             BuildFrontDoorWall(roomParent.transform, roomWidth, roomHeight, roomDepth, wallThick, floorY, wallColor, trimColor);
@@ -555,8 +544,17 @@ namespace Sandplay.Core
                 new Vector3(-roomWidth / 2f, floorY + roomHeight / 2f, 0f),
                 new Vector3(wallThick, roomHeight, roomDepth), wallColor);
 
-            // Right wall — has a window
-            BuildWindowWall(roomParent.transform, roomWidth, roomHeight, roomDepth, wallThick, floorY, wallColor, trimColor);
+            // Move the complete window wall from +X to the back (+Z), including
+            // its opening, sill, sunlight and reflection probe. Swap dimensions
+            // before rotating so rectangular rooms retain the correct footprint.
+            var windowWall = new GameObject("BackWindowWall");
+            windowWall.transform.SetParent(roomParent.transform, false);
+            BuildWindowWall(windowWall.transform, roomDepth, roomHeight, roomWidth,
+                wallThick, floorY, wallColor, trimColor);
+            windowWall.transform.localRotation = Quaternion.Euler(0, -90f, 0);
+            var backdrop = windowWall.transform.Find("WindowSkyBackdrop");
+            if (backdrop != null)
+                backdrop.GetComponent<Renderer>().sharedMaterial.SetFloat("_ViewYaw", 90f);
 
             // === Baseboards (trim along bottom of walls) ===
             float trimH = 0.25f;
@@ -612,15 +610,15 @@ namespace Sandplay.Core
             var roomLight = lightGo.AddComponent<Light>();
             roomLight.type = LightType.Spot;
             roomLight.color = new Color(1f, 0.98f, 0.93f); // gentle warm white
-            roomLight.intensity = 2.2f;
+            roomLight.intensity = 1.85f;
             roomLight.range = roomHeight * 2.5f;
             roomLight.spotAngle = 110f;
             roomLight.renderMode = LightRenderMode.ForcePixel;
             roomLight.shadows = LightShadows.Soft;
-            roomLight.shadowStrength = 0.35f;
+            roomLight.shadowStrength = 0.42f;
             roomLight.shadowResolution = UnityEngine.Rendering.LightShadowResolution.High;
             roomLight.shadowBias = 0.05f;
-            roomLight.shadowNormalBias = 0.4f;
+            roomLight.shadowNormalBias = 0.2f;
 
             // Force project-wide shadow quality
             QualitySettings.shadows = ShadowQuality.All;
@@ -633,11 +631,12 @@ namespace Sandplay.Core
             // fade across this large room or change brightness when resizing.
             var fillGo = new GameObject("FillLight");
             fillGo.transform.SetParent(roomParent.transform, false);
-            fillGo.transform.rotation = Quaternion.Euler(50f, -90f, 0f);
+            fillGo.transform.rotation = Quaternion.Euler(50f, -180f, 0f);
             var fillLight = fillGo.AddComponent<Light>();
             fillLight.type = LightType.Directional;
-            fillLight.color = new Color(1f, 0.96f, 0.87f);
-            fillLight.intensity = 0.95f;
+            // Neutral daylight balances the warm fixture and oak floor.
+            fillLight.color = new Color(0.94f, 0.97f, 1f);
+            fillLight.intensity = 0.65f;
             fillLight.renderMode = LightRenderMode.ForcePixel;
             fillLight.shadows = LightShadows.None;
 
@@ -649,6 +648,23 @@ namespace Sandplay.Core
             try { PlaceRoomWallMap(roomParent.transform, roomWidth, roomHeight, roomDepth, wallThick, floorY); }
             catch (System.Exception error)
             { Debug.LogWarning("[Sandplay] Room wall map skipped: " + error.GetType().Name); }
+            LogRoomLightingState();
+        }
+
+        private void LogRoomLightingState()
+        {
+            var lights = new System.Text.StringBuilder();
+            foreach (var light in FindObjectsByType<Light>(FindObjectsSortMode.None))
+            {
+                if (!light.isActiveAndEnabled) continue;
+                if (lights.Length > 0) lights.Append("; ");
+                lights.Append(light.name).Append(" (").Append(light.type)
+                    .Append(", intensity=").Append(light.intensity)
+                    .Append(", mask=").Append(light.cullingMask).Append(')');
+            }
+            Debug.Log($"[Sandplay Lighting] colorSpace={QualitySettings.activeColorSpace}, " +
+                $"ambient={RenderSettings.ambientMode}, sandShader={_sandMaterial?.shader?.name}, " +
+                $"activeLights=[{lights}]");
         }
 
         /// <summary>
@@ -734,7 +750,7 @@ namespace Sandplay.Core
 
             // Window opening dimensions
             float winHalfD = roomDepth * 0.175f;                   // broad landscape window, half-width along Z
-            float winBotY = floorY + roomHeight * 0.18f;
+            float winBotY = floorY + roomHeight * 0.24f;
             float winTopY = winBotY + roomHeight * 0.34f;
             float winH = winTopY - winBotY;
             float winCenterY = (winBotY + winTopY) / 2f;
@@ -766,32 +782,33 @@ namespace Sandplay.Core
                     renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
 
             // === Window frame ===
+            Color windowFrameColor = Color.black;
             float ft = roomHeight * 0.014f; // slimmer frame around the wider view
             float fd = wallThick * 2f;      // frame depth (protrudes outward slightly)
             // Top bar
             CreateRoomWall(parent, "WinFrame_Top",
                 new Vector3(wallX, winTopY + ft / 2f, 0),
-                new Vector3(fd, ft, winHalfD * 2f + ft * 2f), trimColor);
+                new Vector3(fd, ft, winHalfD * 2f + ft * 2f), windowFrameColor);
             // Bottom bar
             CreateRoomWall(parent, "WinFrame_Bottom",
                 new Vector3(wallX, winBotY - ft / 2f, 0),
-                new Vector3(fd, ft, winHalfD * 2f + ft * 2f), trimColor);
+                new Vector3(fd, ft, winHalfD * 2f + ft * 2f), windowFrameColor);
             // Left bar
             CreateRoomWall(parent, "WinFrame_Left",
                 new Vector3(wallX, winCenterY, -(winHalfD + ft / 2f)),
-                new Vector3(fd, winH + ft * 2f, ft), trimColor);
+                new Vector3(fd, winH + ft * 2f, ft), windowFrameColor);
             // Right bar
             CreateRoomWall(parent, "WinFrame_Right",
                 new Vector3(wallX, winCenterY, winHalfD + ft / 2f),
-                new Vector3(fd, winH + ft * 2f, ft), trimColor);
+                new Vector3(fd, winH + ft * 2f, ft), windowFrameColor);
             // Horizontal cross-bar
             CreateRoomWall(parent, "WinFrame_CrossH",
                 new Vector3(wallX, winCenterY, 0),
-                new Vector3(fd, ft * 0.55f, winHalfD * 2f), trimColor);
+                new Vector3(fd, ft * 0.55f, winHalfD * 2f), windowFrameColor);
             // Vertical cross-bar
             CreateRoomWall(parent, "WinFrame_CrossV",
                 new Vector3(wallX, winCenterY, 0),
-                new Vector3(fd, winH, ft * 0.6f), trimColor);
+                new Vector3(fd, winH, ft * 0.6f), windowFrameColor);
 
             BuildWindowRecess(parent, wallX, winHalfD, winBotY, winTopY, roomWidth, wallColor);
             foreach (var renderer in parent.GetComponentsInChildren<Renderer>())
@@ -807,7 +824,7 @@ namespace Sandplay.Core
             sill.transform.position = new Vector3(wallX - sillDepth / 2f, winBotY - sillH / 2f, 0);
             sill.transform.localScale = new Vector3(sillDepth, sillH, winHalfD * 2f + ft * 2f);
             var sillMat = sill.GetComponent<Renderer>().material;
-            sillMat.color = new Color(0.95f, 0.92f, 0.88f);
+            sillMat.color = windowFrameColor;
             sillMat.SetFloat("_Glossiness", 0.4f);
             sill.layer = LayerMask.NameToLayer("Ignore Raycast");
             sill.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -818,20 +835,11 @@ namespace Sandplay.Core
             glass.transform.SetParent(parent, false);
             glass.transform.position = new Vector3(wallX, winCenterY, 0);
             glass.transform.localScale = new Vector3(wallThick * 0.25f, winH, winHalfD * 2f);
-            var standardShader = Shader.Find("Standard (Specular setup)");
-            var glassMat = standardShader != null ? new Material(standardShader) : glass.GetComponent<Renderer>().material;
+            // A Resources shader with fixed transparency survives player-build
+            // stripping; Standard's runtime-only transparent variant may not.
+            var glassShader = Resources.Load<Shader>("RoomDecor/WindowGlass");
+            var glassMat = new Material(glassShader);
             glassMat.color = new Color(0.96f, 0.98f, 1f, 0.035f);
-            glassMat.SetFloat("_Metallic", 0f);
-            glassMat.SetColor("_SpecColor", new Color(.015f, .015f, .015f));
-            glassMat.SetFloat("_Glossiness", 0.92f);
-            glassMat.SetFloat("_Mode", 3f);
-            glassMat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-            glassMat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            glassMat.SetInt("_ZWrite", 0);
-            glassMat.DisableKeyword("_ALPHATEST_ON");
-            glassMat.DisableKeyword("_ALPHABLEND_ON");
-            glassMat.EnableKeyword("_ALPHAPREMULTIPLY_ON");
-            glassMat.renderQueue = 3000;
             var glassRenderer = glass.GetComponent<Renderer>();
             glassRenderer.material = glassMat;
             glassRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -936,7 +944,7 @@ namespace Sandplay.Core
         }
 
         /// <summary>
-        /// Places RoomDecor/WallMap on the back wall (+Z). The GLB is a flat XZ map,
+        /// Places RoomDecor/WallMap on the right wall (+X). The GLB is a flat XZ map,
         /// so it is tilted upright to face into the room.
         /// </summary>
         private void PlaceRoomWallMap(Transform parent, float roomWidth, float roomHeight, float roomDepth,
@@ -946,15 +954,15 @@ namespace Sandplay.Core
             if (prefab == null) return;
 
             float targetH = roomHeight * 0.32f;
-            float targetW = roomWidth * 0.28f;
+            float targetW = roomDepth * 0.28f;
             float centerY = floorY + roomHeight * 0.48f;
-            float backZ = roomDepth / 2f - wallThick;
-            Vector3 anchor = new Vector3(0f, centerY, backZ);
+            float rightX = roomWidth / 2f - wallThick;
+            Vector3 anchor = new Vector3(rightX, centerY, 0f);
 
             var go = Instantiate(prefab, parent);
             go.name = "WallMap";
-            // Flat on XZ originally; -90° X makes +Y face into the room (-Z).
-            go.transform.SetPositionAndRotation(anchor, Quaternion.Euler(-90f, 0f, 0f));
+            // Stand the flat XZ map upright and face it inward from +X (-X).
+            go.transform.SetPositionAndRotation(anchor, Quaternion.Euler(-90f, 90f, 0f));
 
             var rends = go.GetComponentsInChildren<Renderer>(true);
             if (rends.Length > 0)
@@ -962,12 +970,12 @@ namespace Sandplay.Core
                 var b = rends[0].bounds;
                 foreach (var r in rends) b.Encapsulate(r.bounds);
                 float h = Mathf.Max(0.001f, b.size.y);
-                float w = Mathf.Max(0.001f, b.size.x);
+                float w = Mathf.Max(0.001f, b.size.z);
                 go.transform.localScale = Vector3.one * Mathf.Min(targetH / h, targetW / w);
 
                 b = rends[0].bounds;
                 foreach (var r in rends) b.Encapsulate(r.bounds);
-                Vector3 inward = Vector3.back;
+                Vector3 inward = Vector3.left;
                 float push = Vector3.Dot(anchor - b.center, inward)
                     + Vector3.Dot(b.extents, new Vector3(Mathf.Abs(inward.x), Mathf.Abs(inward.y), Mathf.Abs(inward.z)))
                     + 0.08f;
@@ -1272,9 +1280,11 @@ namespace Sandplay.Core
 
             var analyzeBtn = CreateVerticalToolButton(sandRow.transform, "Btn_Analyze", Localization.Get("tool.ai_analysis"),
                 toolbarWidth, btnSize, ref sy, btnPad);
+            _scheduledAnalyzeButton=analyzeBtn.gameObject;
             TrackLocalized(analyzeBtn.GetComponentInChildren<TextMeshProUGUI>(), "tool.ai_analysis");
             analyzeBtn.onClick.AddListener(() =>
             {
+                if (_scheduledTableMode) return;
                 if (BackendClient.Instance == null || !BackendClient.Instance.IsLoggedIn)
                     OpenLoginScreen();
                 else
@@ -1286,8 +1296,9 @@ namespace Sandplay.Core
 
             var manualBtn = CreateVerticalToolButton(sandRow.transform, "Btn_ManualReport", Localization.Get("report.reports"),
                 toolbarWidth, btnSize, ref sy, btnPad);
+            _scheduledReportsButton=manualBtn.gameObject;
             TrackLocalized(manualBtn.GetComponentInChildren<TextMeshProUGUI>(), "report.reports");
-            manualBtn.onClick.AddListener(() => ToggleManualReportPanel());
+            manualBtn.onClick.AddListener(() => { if(!_scheduledTableMode) ToggleManualReportPanel(); });
 
             // Center the complete group in the available sidebar height, retaining
             // existing spacing between controls and adapting to window resizing.
@@ -1320,7 +1331,7 @@ namespace Sandplay.Core
             exitBtnImg.color = new Color(0.82f, 0.18f, 0.20f, 1f);
             ApplyRoundedCorners(exitBtnImg);
             var exitBtn = exitBtnGo.AddComponent<Button>();
-            exitBtn.onClick.AddListener(() => ShowSandboxExitConfirmation(ReturnToMenu));
+            exitBtn.onClick.AddListener(() => RequestGamePaneNavigation(()=>ShowSandboxExitConfirmation(ReturnToMenu)));
             var exitBtnTxtGo = new GameObject("Label");
             exitBtnTxtGo.transform.SetParent(exitBtnGo.transform, false);
             var exitBtnTxt = exitBtnTxtGo.AddComponent<TextMeshProUGUI>();
@@ -1647,6 +1658,7 @@ namespace Sandplay.Core
                 };
                 NetworkBootstrapper.Instance.OnDisconnected += () =>
                 {
+                    PauseActiveScheduledSession();
                     UpdateRoomCodeDisplay();
                     LeaveAgoraSession();
                     if (_agoraPanelGo != null) _agoraPanelGo.SetActive(false);
@@ -1731,10 +1743,7 @@ namespace Sandplay.Core
             var catalogPanelRT = _catalogPanel.GetComponent<RectTransform>();
             catalogPanelRT.pivot = new Vector2(1, 0.5f);
             catalogPanelRT.anchoredPosition = new Vector2(catalogPanelRT.rect.width, 0);
-            _catalogPanel.AddComponent<Sandplay.UI.CatalogDrawerSafeAreaLayout>();
-            _catalogPanel.GetComponent<Image>().color = new Color(0.12f, 0.12f, 0.12f, 0.92f);
-            var catalogPanelGesture = _catalogPanel.AddComponent<Sandplay.UI.CatalogDrawerGesture>();
-            catalogPanelGesture.Initialize(OpenCatalogPanel, CloseCatalogPanel);
+            _catalogPanel.GetComponent<Image>().color = new Color(0.16f, 0.105f, 0.065f, 1f);
             _catalogPanel.SetActive(false);
 
             // Header row: title + close button
@@ -1758,7 +1767,7 @@ namespace Sandplay.Core
                 closeBtnRT.anchorMin = new Vector2(0, 0.5f);
                 closeBtnRT.anchorMax = new Vector2(0, 0.5f);
                 closeBtnRT.pivot = new Vector2(0, 0.5f);
-                closeBtnRT.anchoredPosition = new Vector2(4, 0);
+                closeBtnRT.anchoredPosition = new Vector2(10, 0);
                 closeBtnRT.sizeDelta = new Vector2(30, 30);
                 var closeBtnImg = closeBtnGo.AddComponent<Image>();
                 closeBtnImg.color = new Color(0.42f, 0.22f, 0.22f, 0.92f);
@@ -1817,6 +1826,7 @@ namespace Sandplay.Core
                 _catalogContentGo = new GameObject("CatalogContent");
                 _catalogContentGo.transform.SetParent(viewportGo.transform, false);
                 var contentRT = _catalogContentGo.AddComponent<RectTransform>();
+                _catalogContentGo.AddComponent<Sandplay.UI.CatalogShelfResponsiveLayout>();
                 contentRT.anchorMin = new Vector2(0, 1);
                 contentRT.anchorMax = new Vector2(1, 1);
                 contentRT.pivot = new Vector2(0.5f, 1);
@@ -1953,90 +1963,38 @@ namespace Sandplay.Core
                     WalkModeController.Instance?.ExitWalkMode();
             });
 
-            // === Catalog button (right-edge drawer toggle) ===
-            _catalogPhoneLayout = IsPhoneCatalogLayout();
+            // === Catalog button: the same compact top-right control on every device ===
             _catalogButton = new GameObject("Btn_Catalog");
             _catalogButton.transform.SetParent(_sandboxUI.transform, false);
             _catalogButtonRT = _catalogButton.AddComponent<RectTransform>();
             _catalogButtonImage = _catalogButton.AddComponent<Image>();
-            if (_catalogPhoneLayout)
-            {
-                // Phones use the compact pre-drawer control. A full-height rail
-                // consumes too much of the safe-area viewport on small screens.
-                _catalogButtonRT.anchorMin = new Vector2(1, 1);
-                _catalogButtonRT.anchorMax = new Vector2(1, 1);
-                _catalogButtonRT.pivot = new Vector2(1, 1);
-                _catalogButtonRT.anchoredPosition = new Vector2(-10, -10);
-                _catalogButtonRT.sizeDelta = new Vector2(80, 36);
-                _catalogButtonImage.color = new Color(0.22f, 0.42f, 0.52f, 0.92f);
-                ApplyRoundedCorners(_catalogButtonImage);
-            }
-            else
-            {
-                _catalogButtonRT.anchorMin = new Vector2(1, 0);
-                _catalogButtonRT.anchorMax = new Vector2(1, 1);
-                _catalogButtonRT.pivot = new Vector2(1, 0.5f);
-                // Sit flush against the right edge; the grab handle protrudes
-                // from the opposite side like a conventional drawer pull.
-                _catalogButtonRT.anchoredPosition = Vector2.zero;
-                _catalogButtonRT.sizeDelta = new Vector2(56, 0);
-                _catalogButtonImage.color = new Color(0.045f, 0.055f, 0.06f, 1f);
-            }
+            RestoreCatalogButtonToTopRight();
             catalogBtn = _catalogButton.AddComponent<Button>();
             catalogBtn.onClick.AddListener(ToggleCatalogPanel);
-            var catalogGesture = _catalogButton.AddComponent<Sandplay.UI.CatalogDrawerGesture>();
-            catalogGesture.Initialize(OpenCatalogPanel, CloseCatalogPanel);
             var catalogHint = _catalogButton.AddComponent<Sandplay.UI.CatalogButtonHint>();
             catalogHint.Initialize(_catalogButtonImage);
             // The first use teaches the affordance, then the cue stays out of the way.
             catalogBtn.onClick.AddListener(catalogHint.Dismiss);
-
-            var catalogHandleGo = new GameObject("DrawerHandle");
-            catalogHandleGo.transform.SetParent(_catalogButton.transform, false);
-            _catalogButtonHandleVisual = catalogHandleGo;
-            var catalogHandleImg = catalogHandleGo.AddComponent<Image>();
-            catalogHandleImg.color = new Color(0.015f, 0.02f, 0.025f, 1f);
-            catalogHandleImg.raycastTarget = false;
-            ApplyRoundedCorners(catalogHandleImg);
-            var catalogHandleRT = catalogHandleGo.GetComponent<RectTransform>();
-            catalogHandleRT.anchorMin = new Vector2(0, 0.5f);
-            catalogHandleRT.anchorMax = new Vector2(0, 0.5f);
-            catalogHandleRT.pivot = new Vector2(1, 0.5f);
-            catalogHandleRT.anchoredPosition = Vector2.zero;
-            catalogHandleRT.sizeDelta = new Vector2(14, 150);
-            if (_catalogPhoneLayout)
-                catalogHandleGo.SetActive(false);
 
             var catalogIcon = LoadIconWhiteTinted("catalog");
             if (catalogIcon != null)
             {
                 var catalogIconGo = new GameObject("Icon");
                 catalogIconGo.transform.SetParent(_catalogButton.transform, false);
-                _catalogButtonGlyph = catalogIconGo;
                 var catalogIconImg = catalogIconGo.AddComponent<Image>();
                 catalogIconImg.sprite = catalogIcon;
                 catalogIconImg.preserveAspect = true;
                 catalogIconImg.raycastTarget = false;
                 var catalogIconRT = catalogIconGo.GetComponent<RectTransform>();
-                if (_catalogPhoneLayout)
-                {
-                    catalogIconRT.anchorMin = new Vector2(.15f, .15f);
-                    catalogIconRT.anchorMax = new Vector2(.85f, .85f);
-                    catalogIconRT.offsetMin = Vector2.zero;
-                    catalogIconRT.offsetMax = Vector2.zero;
-                }
-                else
-                {
-                    catalogIconRT.anchorMin = catalogIconRT.anchorMax = new Vector2(0.5f, 0.5f);
-                    catalogIconRT.sizeDelta = new Vector2(30, 30);
-                    catalogIconRT.anchoredPosition = Vector2.zero;
-                }
+                catalogIconRT.anchorMin = new Vector2(.15f, .15f);
+                catalogIconRT.anchorMax = new Vector2(.85f, .85f);
+                catalogIconRT.offsetMin = Vector2.zero;
+                catalogIconRT.offsetMax = Vector2.zero;
             }
             else
             {
                 var catalogLabel = new GameObject("Label");
                 catalogLabel.transform.SetParent(_catalogButton.transform, false);
-                _catalogButtonGlyph = catalogLabel;
                 var catalogText = catalogLabel.AddComponent<TextMeshProUGUI>();
                 catalogText.text = Localization.Get("button.catalog");
                 TrackLocalized(catalogText, "button.catalog");

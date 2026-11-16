@@ -105,6 +105,7 @@ namespace Sandplay.Objects
 
         private void OnObjectTransformed(ObjectTransformedEvent evt)
         {
+            if (SuppressNetworkSync) return;
             var net = NetworkBootstrapper.Instance;
             if (net == null) return;
             bool offlineRecording = !net.IsOnline && IsRecordingActive();
@@ -165,6 +166,9 @@ namespace Sandplay.Objects
             bool offlineRecording = !net.IsOnline && IsRecordingActive();
             if (!net.IsOnline && !offlineRecording) return;
             if (evt.PlacedObject == null || evt.PlacedObject.NetworkId == 0) return;
+            // Destruction completes at the end of the frame. Remove the live
+            // dictionary entry now so an immediate undo snapshot cannot revive it.
+            net.UnregisterNetworkObject(evt.PlacedObject.NetworkId);
 
             if (net.IsHost)
             {

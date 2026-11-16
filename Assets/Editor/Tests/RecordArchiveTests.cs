@@ -63,7 +63,7 @@ namespace Sandplay.Tests
             Assert.AreEqual(1, manager.GetSavedSessions().Count);
             Assert.AreEqual(original.ClientId, manager.LoadSessionData("Test board").ClientId);
         }
-        [Test] public void ReportArchiveChecksAuthorAndPreservesTextRevisionsAndExportState()
+        [Test] public void ReportArchiveChecksAuthorAndPreservesTextAndExportState()
         {
             var manager = SessionManager.Instance;
             var report = new AnalysisReport { ReportId="archive-report", ResultText="Private notes", CloudId="existing-export", Source="manual" };

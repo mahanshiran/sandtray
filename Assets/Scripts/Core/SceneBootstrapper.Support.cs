@@ -12,7 +12,7 @@ namespace Sandplay.Core
 
         private void BuildSupportSettingsRows(Transform list)
         {
-            SettingsAction(list, "support.delete_account", "Btn_AccountDeletion", "support.request",
+            if (!BackendClient.Instance.IsClientAccount) SettingsAction(list, "support.delete_account", "Btn_AccountDeletion", "support.request",
                 ShowAccountDeletion);
             SettingsAction(list, "support.title", "Btn_HelpSupport", "settings.view", () =>
             {

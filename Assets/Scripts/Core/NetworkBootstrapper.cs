@@ -372,9 +372,6 @@ namespace Sandplay.Core
             {
                 socket?.Close();
                 Debug.LogError("[Network] Relay host connect failed: " + ex.Message);
-                if (ex is RelayLoginRequiredException) EnqueueMain(() =>
-                { if (attempt == _relayAttempt) OnConnectionError?.Invoke(ex.Message); });
-                if (ex is RelayVersionException) EnqueueMain(() => OnConnectionError?.Invoke(Localization.Get("net.update_required")));
                 EnqueueMain(() =>
                 {
                     if (attempt != _relayAttempt) return;
@@ -382,6 +379,8 @@ namespace Sandplay.Core
                     _isHost = false;
                     _relayMode = false;
                     OnDisconnected?.Invoke();
+                    OnConnectionError?.Invoke(ex is RelayVersionException
+                        ? Localization.Get("net.update_required") : ex.Message);
                 });
             }
         }
@@ -1390,7 +1389,7 @@ namespace Sandplay.Core
                 objList.Add(new SpawnObjectData
                 {
                     NetId = kvp.Key,
-                    ObjectId = kvp.Value.ObjectData != null ? kvp.Value.ObjectData.DisplayName : "",
+                    ObjectId = kvp.Value.ObjectData != null ? kvp.Value.ObjectData.DisplayName : kvp.Value.NetworkItem?.id ?? "",
                     Position = kvp.Value.transform.position,
                     Rotation = kvp.Value.transform.rotation,
                     Scale = GetRelativeScale(kvp.Value)
@@ -1604,17 +1603,32 @@ namespace Sandplay.Core
 
         private void ApplyAndRebroadcastSpawn(byte[] payload)
         {
-            NetSerializer.ReadSpawnObject(payload, out uint _, out string oid,
+            NetSerializer.ReadSpawnObject(payload, out uint requestedId, out string oid,
                 out Vector3 pos, out Quaternion rot, out float scale);
             scale = SanitizeNetworkScale(scale);
+            if (requestedId != 0)
+            {
+                // Existing-ID requests are reserved for a structural edit by the
+                // current authorized editor; normal placement always sends zero.
+                var existing = GetNetworkObject(requestedId);
+                var smart = existing != null ? existing.GetComponent<SmartLinearObject>() : null;
+                if (smart == null) return;
+                if (LinearObjectState.TryParse(oid, out var state) &&
+                    state.DefinitionId == smart.State.DefinitionId && smart.FitsTray(state)) smart.Apply(state);
+                // Echo canonical state on rejection as well, undoing optimistic changes.
+                SendLinearObjectState(existing);
+                return;
+            }
+            if (oid.StartsWith("smart.", StringComparison.Ordinal) &&
+                (!LinearObjectState.TryParse(oid, out var initialState) || !NetworkCatalogRegistry.IsPlacementEnabled(initialState.DefinitionId) ||
+                 !SmartLinearObject.FitsTray(initialState, Matrix4x4.TRS(pos, rot, Vector3.one * scale)))) return;
             // Allocate authoritative NetId on host
             uint newId = NextNetId();
             // Spawn locally on host
             SpawnObjectLocally(oid, newId, pos, rot, scale, placementFeedback: true);
             // Broadcast to all clients (including the originating patient) so they
             // can match-or-spawn with this NetId.
-            var outPayload = NetSerializer.WriteSpawnObject(newId, oid, pos, rot, scale);
-            SendToRelay(NetSerializer.Pack(NetMsgType.SpawnObject, outPayload));
+            SendSpawnObject(newId, oid, pos, rot, scale);
         }
 
         private void ApplyAndRebroadcastMove(byte[] payload)
@@ -1762,6 +1776,7 @@ namespace Sandplay.Core
             if (_loadingObjects.Contains(netId)) return;
             if (GetNetworkObject(netId) != null)
             {
+                ApplyLinearStateToExisting(GetNetworkObject(netId), objectId, pos, rot, scale);
                 ResolveSnapshotObject(netId, true);
                 return;
             }
@@ -1835,6 +1850,17 @@ namespace Sandplay.Core
             // 2. Try API catalog (objectId is the UUID from the server)
             if (NetworkCatalogRegistry.TryGet(objectId, out var netItem))
             {
+                if (SmartLinearCatalog.EnsureTemplate(netItem))
+                {
+                    bool suppression = ObjectSyncManager.SuppressNetworkSync;
+                    PlacedObject placed;
+                    ObjectSyncManager.SuppressNetworkSync = true;
+                    try { placed = placer.PlaceNetworkObject(netItem, pos, rot, scale, skipOffset: true, placementFeedback: placementFeedback); }
+                    finally { ObjectSyncManager.SuppressNetworkSync = suppression; }
+                    if (placed != null) { placed.NetworkId = netId; RegisterNetworkObject(netId, placed); ResolveSnapshotObject(netId, true); }
+                    else { _snapshotApplied = false; ResolveSnapshotObject(netId, false, "Could not generate " + netItem.display_name); }
+                    return;
+                }
                 var ticket = BeginModelLoad(netId);
                 StartCoroutine(SpawnNetworkItemCoroutine(netItem, netId, pos, rot, scale, ticket, placementFeedback));
                 return;
@@ -2040,6 +2066,8 @@ namespace Sandplay.Core
                 foreach (var o in objects)
                 {
                     var existing = GetNetworkObject(o.NetId);
+                    if (existing != null && ApplyLinearStateToExisting(existing, o.ObjectId, o.Position, o.Rotation, o.Scale))
+                        continue;
                     if (existing != null)
                     {
                         existing.transform.position = o.Position;

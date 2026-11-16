@@ -62,6 +62,8 @@ namespace Sandplay.UI
                 using(var request=UnityWebRequest.Get(uri.AbsoluteUri))
                 {
                     request.timeout=10;
+                    if(Sandplay.Core.UnityRequestLifetime.IsStopping){request.Dispose();yield break;}
+                    using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(request,null);
                     yield return request.SendWebRequest();
                     if(request.result==UnityWebRequest.Result.Success && request.downloadedBytes<=1024*1024) bytes=request.downloadHandler.data;
                 }

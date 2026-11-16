@@ -20,6 +20,7 @@ namespace Sandplay.UI
                 (InputHelper.GetPointerHeld() && (_verticalHeld || _rotateHeld || _resizeHeld ||
                  (_groupPlacer != null && _groupPlacer.IsDraggingSelection)));
             // Keep the component active so captured drags and pointer-up still finish.
+            _toolbarVisibility.interactable = !WaitingForLinearConfirmation;
             _toolbarVisibility.alpha = dragging ? 0f : 1f;
             _toolbarVisibility.blocksRaycasts = !dragging;
         }

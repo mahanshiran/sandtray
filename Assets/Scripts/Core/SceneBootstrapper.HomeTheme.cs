@@ -21,6 +21,9 @@ namespace Sandplay.Core
         private bool HomeIsLight => CurrentHomeTheme == HomeTheme.Light;
         private Color HomeBg => HomeIsLight ? new Color(.982f,.978f,.965f,1) : new Color(.035f,.075f,.09f,1);
         private Color HomeSidebar => HomeIsLight ? new Color(.035f,.235f,.225f,1) : new Color(.025f,.145f,.15f,1);
+        private Color HomeAvatarBackground => HomeIsLight
+            ? new Color(.78f,.87f,.90f,1)
+            : new Color(.24f,.37f,.43f,1);
         private Color HomeCard => HomeIsLight ? Color.white : new Color(.07f,.125f,.15f,1);
         private Color HomeCardBorder => HomeIsLight ? new Color(.90f,.92f,.925f,.34f) : new Color(.22f,.32f,.35f,.48f);
         private Color HomeText => HomeIsLight ? new Color(.025f,.075f,.145f,1) : new Color(.965f,.97f,.965f,1);

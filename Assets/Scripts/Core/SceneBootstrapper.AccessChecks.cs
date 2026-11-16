@@ -33,7 +33,7 @@ namespace Sandplay.Core
         private void WithAccess(string key, Action allowed, bool checkUsage = false, bool forceRefresh = true)
         {
             var client = BackendClient.Instance;
-            if (!client.IsLoggedIn) { OpenLoginScreen(() => WithAccess(key, allowed, checkUsage, forceRefresh)); return; }
+            if (!client.IsLoggedIn || client.RequiresSignIn) { OpenLoginScreen(() => WithAccess(key, allowed, checkUsage, forceRefresh)); return; }
             var loading = BeginUiOperation();
             int user = client.UserId; string token = client.AccessToken;
             bool current() => client != null && client.UserId == user && client.AccessToken == token;

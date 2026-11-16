@@ -211,6 +211,12 @@
       "dependencies": {},
       "url": "https://package.openupm.com"
     },
+    "net.gree.unity-webview": {
+      "version": "file:net.gree.unity-webview",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "org.khronos.unitygltf": {
       "version": "2.15.0",
       "depth": 0,

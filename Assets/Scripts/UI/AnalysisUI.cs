@@ -50,6 +50,13 @@ namespace Sandplay.UI
         private string _localReportBoard;
         public System.Action<Image> RoundReflectionCard;
         public System.Action OpenHistory;
+        public System.Action<System.Action> OpenInSidePane;
+        public bool SavePendingEdits()
+        {
+            if(!_editingReflection)return true;
+            SaveInlineEdit();
+            return !_editingReflection;
+        }
         public Color ReflectionCardColor = Color.white;
         public Color ReflectionAccent = new Color(0f, .42f, .39f);
         private string _renderedReflection;
@@ -158,8 +165,8 @@ namespace Sandplay.UI
 
         private void OnAnalysisRequested(AnalysisRequestedEvent evt)
         {
-            gameObject.SetActive(true);
-            ShowInitialState();
+            void Open(){gameObject.SetActive(true);ShowInitialState();}
+            if(OpenInSidePane!=null)OpenInSidePane(Open);else Open();
         }
 
         private void ShowInitialState()

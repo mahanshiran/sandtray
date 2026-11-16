@@ -4,7 +4,7 @@
   "creator_url": "https://poly.pizza/u/Poly%20by%20Google",
   "license": "CC BY 3.0",
   "license_url": "https://creativecommons.org/licenses/by/3.0/",
-  "changes": "Original supplied GLBs retained unchanged. Tent converted from OBJ/MTL to GLB with embedded texture, corrected diffuse tint and centimetres-to-metres conversion. Previews supplied from Poly Pizza or rendered in Unity. Application scales models for display.",
+  "changes": "Original downloads retained unchanged. Some prepared copies have centered placement origins as noted per model. Preview images rendered in Unity; application scales models for display.",
   "models": [
     {
       "file": "Chair",
@@ -359,6 +359,3609 @@
         "buildings"
       ],
       "thumbnail_ext": ".jpg"
+    },
+    {
+      "file": "001-Bear",
+      "title": "Bear",
+      "source_url": "https://poly.pizza/m/a4hZyH8vVph",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "forest",
+        "carnivore",
+        "predator",
+        "mammal",
+        "bear"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "002-Wolf",
+      "title": "Wolf",
+      "source_url": "https://poly.pizza/m/cx7dMDUDzhG",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "canine",
+        "lupus",
+        "mammal",
+        "predator",
+        "wolf"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "003-Squirrel",
+      "title": "Squirrel",
+      "source_url": "https://poly.pizza/m/794lutNHni-",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "park",
+        "rodent",
+        "mammal",
+        "nuts",
+        "squirrel"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "004-Raccoon",
+      "title": "Raccoon",
+      "source_url": "https://poly.pizza/m/2iYORwFng3_",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "animal",
+        "raccoon"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "005-Owl",
+      "title": "Owl",
+      "source_url": "https://poly.pizza/m/eoAo21aoZHJ",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "hoot",
+        "nocturnal",
+        "bird",
+        "flying",
+        "predator",
+        "\n",
+        "owl"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "006-Eagle",
+      "title": "Eagle",
+      "source_url": "https://poly.pizza/m/d7CSLvsHULY",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "bird",
+        "endangered",
+        "eagle"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "007-Pig",
+      "title": "Pig",
+      "source_url": "https://poly.pizza/m/brcb6xLELnz",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "farm",
+        "porcine",
+        "mammal",
+        "pig"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "008-Goat",
+      "title": "Goat",
+      "source_url": "https://poly.pizza/m/d7dImmjtF8E",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "farm",
+        "mammal",
+        "hooves",
+        "buck",
+        "goat"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "009-Donkey",
+      "title": "Donkey",
+      "source_url": "https://poly.pizza/m/dv8Isf3WRlE",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "domestic ass",
+        "equus asinus",
+        "mule",
+        "donkey"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "010-Kangaroo",
+      "title": "Kangaroo",
+      "source_url": "https://poly.pizza/m/7uiVArqEC80",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "marsupial",
+        "wildlife",
+        "australia",
+        "kangaroo"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "011-Penguin",
+      "title": "Penguin",
+      "source_url": "https://poly.pizza/m/fBXvsC6pe_V",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "penguin",
+        "bird",
+        "seabird",
+        "flightless"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "012-Dolphin",
+      "title": "Dolphin",
+      "source_url": "https://poly.pizza/m/1y2iPj1CFg7",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "mammal",
+        "marine",
+        "porpoise",
+        "dolphin"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "013-Shark",
+      "title": "Shark",
+      "source_url": "https://poly.pizza/m/cS32XNX4Dw2",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "Fish",
+        "Ocean",
+        "shark"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "014-Turtle",
+      "title": "Turtle",
+      "source_url": "https://poly.pizza/m/2LCcq8vhqJ3",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "shell",
+        "reptile",
+        "turtle"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "015-Snake",
+      "title": "Snake",
+      "source_url": "https://poly.pizza/m/37rHvkGh3nT",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "serpent",
+        "reptile",
+        "python",
+        "cobra",
+        "\n",
+        "snake"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "016-Crocodile",
+      "title": "Crocodile",
+      "source_url": "https://poly.pizza/m/2an6E2WjW3z",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "reptile",
+        "",
+        "crocodile"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "017-Dinosaur",
+      "title": "Dinosaur",
+      "source_url": "https://poly.pizza/m/f5AfWX7Fyeb",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "jurassic",
+        "sauropod",
+        "dinosaur"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "018-Seahorse",
+      "title": "Seahorse",
+      "source_url": "https://poly.pizza/m/d_36p3CahYa",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "marine",
+        "ocean",
+        "coralreefs",
+        "seahorse"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "019-Goldfish",
+      "title": "Goldfish",
+      "source_url": "https://poly.pizza/m/3GPUntjwqCa",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "goldfish",
+        "fish",
+        "pet"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "020-Seal",
+      "title": "Seal",
+      "source_url": "https://poly.pizza/m/fudlK4rnsI-",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "seal",
+        "mammal",
+        "aquatic"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "021-Hospital",
+      "title": "Hospital",
+      "source_url": "https://poly.pizza/m/asNvyjkcSG1",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "hospital",
+        "clinic",
+        "building",
+        "structure"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "022-Schoolhouse",
+      "title": "Schoolhouse",
+      "source_url": "https://poly.pizza/m/ftnL_OvlkCx",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "education",
+        "institute",
+        "academy",
+        "schoolhouse"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "023-Prison",
+      "title": "Prison",
+      "source_url": "https://poly.pizza/m/b4xwta-oNXi",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "jail\nhightech\nsecurity",
+        "prison"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "024-Fountain",
+      "title": "Fountain",
+      "source_url": "https://poly.pizza/m/4KKY7CmNe_r",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "park",
+        "fountain"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "025-Water-tower",
+      "title": "Water tower",
+      "source_url": "https://poly.pizza/m/9ula4286qq1",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "structure",
+        "water",
+        "tower"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "026-Staircase",
+      "title": "Staircase",
+      "source_url": "https://poly.pizza/m/0pEtBW3giNY",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "stairway",
+        "stairs",
+        "steps",
+        "staircase"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "027-Waterfall",
+      "title": "Waterfall",
+      "source_url": "https://poly.pizza/m/7mrPbZToHh2",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "cascade",
+        "cataract",
+        "falls",
+        "waterfall"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "028-River",
+      "title": "River",
+      "source_url": "https://poly.pizza/m/1k7vlBS5CLB",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "landscape\n",
+        "river"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "029-Mountain",
+      "title": "Mountain",
+      "source_url": "https://poly.pizza/m/7Jhw3p6TusU",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "landscape",
+        "mountain"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "030-Rose",
+      "title": "Rose",
+      "source_url": "https://poly.pizza/m/bRp3GPJJJoG",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "flower",
+        "thorn",
+        "flora",
+        "bud",
+        "blossom",
+        "rose"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "031-Water-lilies",
+      "title": "Water lilies",
+      "source_url": "https://poly.pizza/m/birD7XV2A44",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "monet",
+        "lotus",
+        "nelumbo",
+        "water",
+        "lilies"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "032-Birds-nest",
+      "title": "Birds nest",
+      "source_url": "https://poly.pizza/m/fq_bAKD1Khg",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "aerie",
+        "cowbird",
+        "kingbird",
+        "birds",
+        "nest"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "033-Vine",
+      "title": "Vine",
+      "source_url": "https://poly.pizza/m/eI7GSQpnVUL",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "plant",
+        "vine"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "034-Leaf",
+      "title": "Leaf",
+      "source_url": "https://poly.pizza/m/4_FetA14dDV",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "foliage",
+        "Tree",
+        "leaf"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "035-Lantern",
+      "title": "Lantern",
+      "source_url": "https://poly.pizza/m/9YMVn5hMiv8",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "light",
+        "lantern"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "036-Map",
+      "title": "Map",
+      "source_url": "https://poly.pizza/m/bU3B6P0ngfi",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "map",
+        "world",
+        "countries",
+        "navigation"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "037-Binoculars",
+      "title": "Binoculars",
+      "source_url": "https://poly.pizza/m/6nj5FdUlsEW",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "lenses",
+        "binoculars"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "038-Kite",
+      "title": "Kite",
+      "source_url": "https://poly.pizza/m/8Qq-NaPoBt6",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "toy",
+        "",
+        "kite"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "039-Hammock",
+      "title": "Hammock",
+      "source_url": "https://poly.pizza/m/bsp0Uzr6cSI",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "lounge",
+        "chair",
+        "relax",
+        "tree",
+        "hammock"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "040-Basket",
+      "title": "Basket",
+      "source_url": "https://poly.pizza/m/a0umk-CRRwo",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "hoop",
+        "basketful",
+        "field goal",
+        "basket"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "041-Throne",
+      "title": "Throne",
+      "source_url": "https://poly.pizza/m/bpFCWQSs-aT",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "seat",
+        "chair",
+        "royal",
+        "throne"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "042-Baby-bottle",
+      "title": "Baby bottle",
+      "source_url": "https://poly.pizza/m/9Mxn_5Lry3S",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "children",
+        "milk",
+        "drink",
+        "baby",
+        "bottle"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "043-Anchor",
+      "title": "Anchor",
+      "source_url": "https://poly.pizza/m/fjAwIosTQHy",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "naval",
+        "moor",
+        "ships",
+        "boat",
+        "anchor"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "044-Coffin",
+      "title": "Coffin",
+      "source_url": "https://poly.pizza/m/egmks2_joYD",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "death",
+        "coffin"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "045-Sled",
+      "title": "Sled",
+      "source_url": "https://poly.pizza/m/1_Sd_OBmf5P",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "Sled",
+        "Winter",
+        "Snow",
+        "sled"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "046-Bus",
+      "title": "Bus",
+      "source_url": "https://poly.pizza/m/4CPpvEmrMoF",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "transportation",
+        "bus"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "047-Rocket-ship",
+      "title": "Rocket ship",
+      "source_url": "https://poly.pizza/m/42PQqEaxb-P",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "launch",
+        "space",
+        "spaceship",
+        "galaxy",
+        "rocket",
+        "ship"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "048-Submarine",
+      "title": "Submarine",
+      "source_url": "https://poly.pizza/m/dfSQmeuuYt3",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "underwater",
+        "marine",
+        "submersible",
+        "uboat\n",
+        "submarine"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "049-Wheelchair",
+      "title": "Wheelchair",
+      "source_url": "https://poly.pizza/m/eeoGDcg9a-a",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "disability",
+        "hospital",
+        "chair",
+        "wheelchair"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "050-Tricycle",
+      "title": "Tricycle",
+      "source_url": "https://poly.pizza/m/fj-aQ4hAbNr",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "bike",
+        "pedal",
+        "children",
+        "recreation\n",
+        "tricycle"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "051-Bison",
+      "title": "Bison",
+      "source_url": "https://poly.pizza/m/9sTrha-TxdS",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "brown",
+        "plains",
+        "animal",
+        "mammal",
+        "bison"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "052-Hippopotamus",
+      "title": "Hippopotamus",
+      "source_url": "https://poly.pizza/m/eau2X1phgjJ",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "mammal",
+        "swamp",
+        "Africa",
+        "hippopotamus"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "053-Rhinoceros",
+      "title": "Rhinoceros",
+      "source_url": "https://poly.pizza/m/7XutktqrTj_",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "rhino",
+        "rhinos",
+        "hornbill",
+        "rhinoceros"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "054-Panda",
+      "title": "Panda",
+      "source_url": "https://poly.pizza/m/2T6A0o4Kq2h",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "wildlife",
+        "bear",
+        "panda"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "055-Koala",
+      "title": "Koala",
+      "source_url": "https://poly.pizza/m/fzCu8FM0HfB",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "wildlife",
+        "australia",
+        "bear",
+        "koala"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "056-Bat",
+      "title": "Bat",
+      "source_url": "https://poly.pizza/m/5_XBqyrOY7x",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "flying\nbat\ncave",
+        "bat"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "057-Frog",
+      "title": "Frog",
+      "source_url": "https://poly.pizza/m/97NtujixdN7",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "amphibian",
+        "toad",
+        "croak",
+        "pond\n",
+        "frog"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "058-Crab",
+      "title": "Crab",
+      "source_url": "https://poly.pizza/m/1O5Q4pE8X6e",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "beach",
+        "crustacean",
+        "shellfish",
+        "sea",
+        "ocean",
+        "creature",
+        "crab"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "059-Whale",
+      "title": "Whale",
+      "source_url": "https://poly.pizza/m/7-TgeTuwbzw",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "mammal",
+        "marine",
+        "cetacean",
+        "whale"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "060-Snail",
+      "title": "Snail",
+      "source_url": "https://poly.pizza/m/aZ_cT-AIu2y",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "snail",
+        "shell",
+        "escargot",
+        "slug"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "061-Tree-stump",
+      "title": "Tree stump",
+      "source_url": "https://poly.pizza/m/7etYPFVlpgm",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "stump",
+        "tree trunk",
+        "tree"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "062-Willow-tree",
+      "title": "Willow tree",
+      "source_url": "https://poly.pizza/m/2acu5nrdDYl",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "plant",
+        "timber",
+        "forest",
+        "woods",
+        "flora\n",
+        "willow",
+        "tree"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "063-Coral",
+      "title": "Coral",
+      "source_url": "https://poly.pizza/m/4KUXdtDdgHR",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "marine",
+        "ocean",
+        "invertebrate",
+        "coral"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "064-Seashell",
+      "title": "Seashell",
+      "source_url": "https://poly.pizza/m/5ovn4mnRejL",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "shell",
+        "beach",
+        "seashell"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "065-Iceberg",
+      "title": "Iceberg",
+      "source_url": "https://poly.pizza/m/9U2KjmvOJvY",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "ice",
+        "cold",
+        "iceberg"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "066-Coconut",
+      "title": "Coconut",
+      "source_url": "https://poly.pizza/m/fY5jzVAVuCl",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "fruit",
+        "coconut"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "067-Spider-web",
+      "title": "Spider web",
+      "source_url": "https://poly.pizza/m/cM0NzColM_0",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "cobweb",
+        "arachnid",
+        "prey",
+        "",
+        "spider",
+        "web"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "068-Snowman",
+      "title": "Snowman",
+      "source_url": "https://poly.pizza/m/bN280ReeZvq",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "sculpture",
+        "decoration",
+        "winter",
+        "snowman"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "069-Treehouse",
+      "title": "Treehouse",
+      "source_url": "https://poly.pizza/m/5jnXittYHwG",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "tree",
+        "fort",
+        "ladder",
+        "wood",
+        "treehouse"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "070-Bird-house",
+      "title": "Bird house",
+      "source_url": "https://poly.pizza/m/asIp36y3k0t",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "nest",
+        "home",
+        "box",
+        "bird",
+        "house"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "071-Palace",
+      "title": "Palace",
+      "source_url": "https://poly.pizza/m/3Xf6ko_eSAC",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "royalty",
+        "palace"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "072-Radio-tower",
+      "title": "Radio tower",
+      "source_url": "https://poly.pizza/m/5c41ysnNFio",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "control tower",
+        "radio",
+        "tower"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "073-Mailbox",
+      "title": "Mailbox",
+      "source_url": "https://poly.pizza/m/5S86YsVBun8",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "mail",
+        "post",
+        "mailbox"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "074-Door-and-frame",
+      "title": "Door and frame",
+      "source_url": "https://poly.pizza/m/2F9VFWWTLs7",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "entry",
+        "opening",
+        "gate",
+        "entrance",
+        "door",
+        "and",
+        "frame"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "075-Acoustic-guitar",
+      "title": "Acoustic guitar",
+      "source_url": "https://poly.pizza/m/ccd__UcZBye",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "string",
+        "music",
+        "instrument\n",
+        "acoustic",
+        "guitar"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "076-Piano",
+      "title": "Piano",
+      "source_url": "https://poly.pizza/m/1YoE664mJTd",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "instrument",
+        "keyboard",
+        "music",
+        "piano"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "077-Drum",
+      "title": "Drum",
+      "source_url": "https://poly.pizza/m/c3RNKJflc4O",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "percussion",
+        "music",
+        "instrument",
+        "drum"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "078-Flute",
+      "title": "Flute",
+      "source_url": "https://poly.pizza/m/0YJGsl2use2",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "instrument",
+        "music",
+        "flute"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "079-Harp",
+      "title": "Harp",
+      "source_url": "https://poly.pizza/m/102E7hcxEPT",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "string",
+        "music",
+        "instrument\n",
+        "harp"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "080-Candle",
+      "title": "Candle",
+      "source_url": "https://poly.pizza/m/aH83BlSFxJu",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "matches",
+        "light",
+        "fire",
+        "candle"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "081-Camera",
+      "title": "Camera",
+      "source_url": "https://poly.pizza/m/dp6b5ILj6At",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "photography",
+        "camera"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "082-Phone",
+      "title": "Phone",
+      "source_url": "https://poly.pizza/m/dRhaLbaDSuI",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "communication",
+        "technology",
+        "telephone",
+        "phone"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "083-Alarm-clock",
+      "title": "Alarm clock",
+      "source_url": "https://poly.pizza/m/4t8wFjBwJVI",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "alarm",
+        "snooze",
+        "beep",
+        "clock"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "084-Gem",
+      "title": "Gem",
+      "source_url": "https://poly.pizza/m/09p9-Mnp4Sc",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "gemstone",
+        "gem"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "085-Flag",
+      "title": "Flag",
+      "source_url": "https://poly.pizza/m/0okBVouy3-T",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "flagpole",
+        "flag"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "086-Bucket",
+      "title": "Bucket",
+      "source_url": "https://poly.pizza/m/dcrlVo3eQ_S",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "pail",
+        "bucketful",
+        "basket",
+        "bucket"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "087-Shovel",
+      "title": "Shovel",
+      "source_url": "https://poly.pizza/m/fCeaY97tP4r",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "tools",
+        "shovel",
+        "gardening",
+        "garden"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "088-Watering-can",
+      "title": "Watering can",
+      "source_url": "https://poly.pizza/m/5LfzGFQ2yTw",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "container",
+        "plants",
+        "portable",
+        "tool",
+        "watering",
+        "can"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "089-Wheelbarrow",
+      "title": "Wheelbarrow",
+      "source_url": "https://poly.pizza/m/7rvJk5Cc9T0",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "barrow",
+        "garden cart",
+        "lawn cart",
+        "wheelbarrow"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "090-Toolbox",
+      "title": "Toolbox",
+      "source_url": "https://poly.pizza/m/6tNIeYHCQ0-",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "construction",
+        "toolbox"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "091-Soccer-ball",
+      "title": "Soccer ball",
+      "source_url": "https://poly.pizza/m/fnDmeCySRhV",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "sports",
+        "soccer",
+        "ball"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "092-Balloon",
+      "title": "Balloon",
+      "source_url": "https://poly.pizza/m/5eJ1LoekHuW",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "helium",
+        "rubber",
+        "circus",
+        "decoration",
+        "balloon"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "093-Shopping-cart",
+      "title": "Shopping cart",
+      "source_url": "https://poly.pizza/m/4lhRcMbl1pw",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "supermarket",
+        "shopping",
+        "cart"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "094-Ring",
+      "title": "Ring",
+      "source_url": "https://poly.pizza/m/f9AVG7oFxBi",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "jewelry",
+        "adornment",
+        "finger",
+        "accessory",
+        "ring"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "095-Wizard-hat",
+      "title": "Wizard hat",
+      "source_url": "https://poly.pizza/m/7VVumyY7L_u",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "cap",
+        "hat",
+        "wizard",
+        "magic",
+        "costume"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "096-Scooter",
+      "title": "Scooter",
+      "source_url": "https://poly.pizza/m/eHdEFPwUfCt",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "motor scooter",
+        "scoter",
+        "bike",
+        "scooter"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "097-Tugboat",
+      "title": "Tugboat",
+      "source_url": "https://poly.pizza/m/eEbXA8_6MeJ",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "ship",
+        "cargo",
+        "maritime",
+        "vessels",
+        "tugboat"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "098-Airship",
+      "title": "Airship",
+      "source_url": "https://poly.pizza/m/cr7RPZ4RfGM",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "dirigible",
+        "aircraft",
+        "aviation",
+        "blimp",
+        "\n",
+        "airship"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "099-Parachute",
+      "title": "Parachute",
+      "source_url": "https://poly.pizza/m/3Z7vJ96JIEB",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "dive",
+        "deploy",
+        "nylon",
+        "parachute"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "100-Space-Shuttle",
+      "title": "Space Shuttle",
+      "source_url": "https://poly.pizza/m/djxolbz_CYC",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "spaceship",
+        "rocket",
+        "orbit",
+        "spacecraft",
+        "rocketship",
+        "",
+        "space",
+        "shuttle"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    {
+      "file": "001-Crib",
+      "title": "Crib",
+      "display_name": "Crib",
+      "source_url": "https://poly.pizza/m/4iV2yZ0wIf1",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "home and care",
+        "sandtray",
+        "Cradle",
+        "Baby Bed",
+        "Infant",
+        "crib"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "002-Crutches",
+      "title": "Crutches",
+      "display_name": "Crutches",
+      "source_url": "https://poly.pizza/m/2V9ccKGCo-r",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "home and care",
+        "sandtray",
+        "disabled\ninjury",
+        "crutches"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "003-Walking-stick",
+      "title": "Walking stick",
+      "display_name": "Walking stick",
+      "source_url": "https://poly.pizza/m/91iXx7Bqnrq",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "home and care",
+        "sandtray",
+        "cane",
+        "walking",
+        "stick"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "004-Pillow",
+      "title": "Pillow",
+      "display_name": "Pillow",
+      "source_url": "https://poly.pizza/m/f60emm1Xkas",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "home and care",
+        "sandtray",
+        "bed",
+        "sleeping",
+        "pillow"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "005-Blankets",
+      "title": "Blankets",
+      "display_name": "Blankets",
+      "source_url": "https://poly.pizza/m/5CEwkJvkU9V",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "home and care",
+        "sandtray",
+        "blankets",
+        "warmth",
+        "throw",
+        "Quilt"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "006-Luggage",
+      "title": "Luggage",
+      "display_name": "Luggage",
+      "source_url": "https://poly.pizza/m/ezEfa_eupwK",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "home and care",
+        "sandtray",
+        "travel",
+        "luggage"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "007-Bookcase",
+      "title": "Bookcase",
+      "display_name": "Bookcase",
+      "source_url": "https://poly.pizza/m/0zkVPX0T5k8",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "home and care",
+        "sandtray",
+        "shelves",
+        "wood",
+        "bookcase"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "008-Closet",
+      "title": "Closet",
+      "display_name": "Closet",
+      "source_url": "https://poly.pizza/m/2qdm7DZVG94",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "home and care",
+        "sandtray",
+        "clothes",
+        "storing",
+        "cupboard",
+        "dresser",
+        "closet"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "009-Stove",
+      "title": "Stove",
+      "display_name": "Wood-burning stove",
+      "source_url": "https://poly.pizza/m/d7rvLCzGFgM",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "home and care",
+        "sandtray",
+        "cooking",
+        "kitchen",
+        "enclosed",
+        "heating",
+        "stove"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "010-Curtains",
+      "title": "Curtains",
+      "display_name": "Curtains",
+      "source_url": "https://poly.pizza/m/1B9JneFqd-a",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "home and care",
+        "sandtray",
+        "drapery",
+        "drape",
+        "pall",
+        "curtains"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "011-Bank",
+      "title": "Bank",
+      "display_name": "Bank",
+      "source_url": "https://poly.pizza/m/2gYeniBQ8RH",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "community and work",
+        "sandtray",
+        "deposit",
+        "savings bank",
+        "trust",
+        "bank"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "012-Hotel",
+      "title": "Hotel",
+      "display_name": "Hotel",
+      "source_url": "https://poly.pizza/m/3ZMq1s7B76q",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "community and work",
+        "sandtray",
+        "lodging",
+        "resort",
+        "motel",
+        "hostel",
+        "hotel"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "013-Coliseum",
+      "title": "Coliseum",
+      "display_name": "Coliseum",
+      "source_url": "https://poly.pizza/m/4raJTBfhAfc",
+      "category": "buildings",
+      "tags": [
+        "buildings",
+        "community and work",
+        "sandtray",
+        "rome",
+        "theater",
+        "theatre",
+        "stadium",
+        "coliseum"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "014-Bird-Cage",
+      "title": "Bird Cage",
+      "display_name": "Bird Cage",
+      "source_url": "https://poly.pizza/m/0d4ExMmqXUV",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "community and work",
+        "sandtray",
+        "cage",
+        "birdcage",
+        "bird"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "015-Payphone",
+      "title": "Payphone",
+      "display_name": "Payphone",
+      "source_url": "https://poly.pizza/m/dqzY-cxJJsZ",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "community and work",
+        "sandtray",
+        "telephone",
+        "phone",
+        "payphone"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "016-Lamp-post",
+      "title": "Lamp post",
+      "display_name": "Lamp post",
+      "source_url": "https://poly.pizza/m/ez9fM9NvtRB",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "community and work",
+        "sandtray",
+        "light",
+        "lamp",
+        "post"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "017-Telephone-pole",
+      "title": "Telephone pole",
+      "display_name": "Telephone pole",
+      "source_url": "https://poly.pizza/m/7YIloiV4cAt",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "community and work",
+        "sandtray",
+        "telephone",
+        "lines",
+        "wires",
+        "poles",
+        "pole"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "018-Dumpster",
+      "title": "Dumpster",
+      "display_name": "Dumpster",
+      "source_url": "https://poly.pizza/m/3F0yCeWeTZP",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "community and work",
+        "sandtray",
+        "garbage",
+        "waste",
+        "trash",
+        "storage",
+        "receptacle",
+        "dumpster"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "019-Walkie-talkie",
+      "title": "Walkie talkie",
+      "display_name": "Walkie talkie",
+      "source_url": "https://poly.pizza/m/3ti6jnq4VAJ",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "community and work",
+        "sandtray",
+        "communication",
+        "call",
+        "talk",
+        "speak",
+        "walkie",
+        "talkie"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "020-Cash-register",
+      "title": "Cash register",
+      "display_name": "Cash register",
+      "source_url": "https://poly.pizza/m/crXBxFOkCIp",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "community and work",
+        "sandtray",
+        "register",
+        "till",
+        "tilling",
+        "cash"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "021-See-saw",
+      "title": "See-saw",
+      "display_name": "See-saw",
+      "source_url": "https://poly.pizza/m/02pjtk5YkvC",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "play and sport",
+        "sandtray",
+        "playground",
+        "see",
+        "saw"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "022-Trampoline",
+      "title": "Trampoline",
+      "display_name": "Trampoline",
+      "source_url": "https://poly.pizza/m/44njxNdC0gt",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "play and sport",
+        "sandtray",
+        "recreation",
+        "bounce",
+        "device",
+        "fun",
+        "trampoline"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "023-Jungle-gym",
+      "title": "Jungle gym",
+      "display_name": "Jungle gym",
+      "source_url": "https://poly.pizza/m/0-7U_RTHzKT",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "play and sport",
+        "sandtray",
+        "playground",
+        "jungle",
+        "gym"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "024-Bouncy-castle",
+      "title": "Bouncy castle",
+      "display_name": "Bouncy castle",
+      "source_url": "https://poly.pizza/m/0oKmmPJ_cD8",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "play and sport",
+        "sandtray",
+        "carnival",
+        "fun",
+        "house",
+        "bouncy",
+        "castle"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "025-Jump-rope",
+      "title": "Jump rope",
+      "display_name": "Jump rope",
+      "source_url": "https://poly.pizza/m/762eGUhYpfq",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "play and sport",
+        "sandtray",
+        "gym",
+        "rope",
+        "exercise",
+        "jump"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "026-Frisbee",
+      "title": "Frisbee",
+      "display_name": "Frisbee",
+      "source_url": "https://poly.pizza/m/51T1pmZ73vP",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "play and sport",
+        "sandtray",
+        "sports",
+        "disc",
+        "throw",
+        "frisbee"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "027-Basketball",
+      "title": "Basketball",
+      "display_name": "Basketball",
+      "source_url": "https://poly.pizza/m/eopD_12UuB8",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "play and sport",
+        "sandtray",
+        "basketball",
+        "ball",
+        "sports"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "028-Tennis-racket",
+      "title": "Tennis racket",
+      "display_name": "Tennis racket",
+      "source_url": "https://poly.pizza/m/72XCHXgHlg7",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "play and sport",
+        "sandtray",
+        "tennis",
+        "racket",
+        "sports"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "029-Tennis-ball",
+      "title": "Tennis ball",
+      "display_name": "Tennis ball",
+      "source_url": "https://poly.pizza/m/0aPpwgcBbk1",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "play and sport",
+        "sandtray",
+        "racquet",
+        "sport",
+        "tennis",
+        "ball"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "030-Trophy",
+      "title": "Trophy",
+      "display_name": "Trophy",
+      "source_url": "https://poly.pizza/m/cdbfm0fJFU_",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "play and sport",
+        "sandtray",
+        "award",
+        "trophy"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "031-Blackboard",
+      "title": "Blackboard",
+      "display_name": "Blackboard",
+      "source_url": "https://poly.pizza/m/2Qv_L8pbv6W",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "learning, art and music",
+        "sandtray",
+        "writing",
+        "learning",
+        "school",
+        "teaching",
+        "blackboard"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "032-Easel",
+      "title": "Easel",
+      "display_name": "Easel",
+      "source_url": "https://poly.pizza/m/6UQpoYGTvkL",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "learning, art and music",
+        "sandtray",
+        "art",
+        "painting",
+        "drawing",
+        "easel"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "033-Palette",
+      "title": "Palette",
+      "display_name": "Palette",
+      "source_url": "https://poly.pizza/m/9QVrdl0i2c3",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "learning, art and music",
+        "sandtray",
+        "artist",
+        "paint",
+        "art",
+        "mix",
+        "",
+        "palette"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "034-Crayons",
+      "title": "Crayons",
+      "display_name": "Crayons",
+      "source_url": "https://poly.pizza/m/6OwmHI56znP",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "learning, art and music",
+        "sandtray",
+        "coloring",
+        "crayons"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "035-Sewing-machine",
+      "title": "Sewing machine",
+      "display_name": "Sewing machine",
+      "source_url": "https://poly.pizza/m/dwLFqHHYBxB",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "learning, art and music",
+        "sandtray",
+        "stitch",
+        "fabric",
+        "needle",
+        "embroider",
+        "sewing",
+        "machine"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "036-Graduation-cap",
+      "title": "Graduation cap",
+      "display_name": "Graduation cap",
+      "source_url": "https://poly.pizza/m/4v0sRFH6PN9",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "learning, art and music",
+        "sandtray",
+        "grad",
+        "hat",
+        "cap",
+        "graduation"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "037-Electric-guitar",
+      "title": "Electric guitar",
+      "display_name": "Electric guitar",
+      "source_url": "https://poly.pizza/m/eoSib2-NN9Y",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "learning, art and music",
+        "sandtray",
+        "string",
+        "instrument",
+        "music\n",
+        "electric",
+        "guitar"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "038-Violin",
+      "title": "Violin",
+      "display_name": "Violin",
+      "source_url": "https://poly.pizza/m/4yO-XrJiBlc",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "learning, art and music",
+        "sandtray",
+        "string",
+        "music",
+        "instrument\n",
+        "violin"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "039-Trumpet",
+      "title": "Trumpet",
+      "display_name": "Trumpet",
+      "source_url": "https://poly.pizza/m/dKjB2Gm4-rj",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "learning, art and music",
+        "sandtray",
+        "music",
+        "instrument",
+        "band",
+        "trumpet"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "040-Microphone",
+      "title": "Microphone",
+      "display_name": "Microphone",
+      "source_url": "https://poly.pizza/m/2cDNCSVfAfv",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "learning, art and music",
+        "sandtray",
+        "sound",
+        "handheld",
+        "mike",
+        "transducer",
+        "microphone"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "041-Bamboo",
+      "title": "Bamboo",
+      "display_name": "Bamboo",
+      "source_url": "https://poly.pizza/m/cJGWEi_T3pA",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "plants and woodland",
+        "sandtray",
+        "plant",
+        "bamboo"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "042-Bonsai",
+      "title": "Bonsai",
+      "display_name": "Bonsai",
+      "source_url": "https://poly.pizza/m/1BtyNc_gX5a",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "plants and woodland",
+        "sandtray",
+        "tree",
+        "potted",
+        "plant",
+        "Japanese",
+        "bonsai"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "043-Dead-tree",
+      "title": "Dead tree",
+      "display_name": "Dead tree",
+      "source_url": "https://poly.pizza/m/aPFov1IaCWu",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "plants and woodland",
+        "sandtray",
+        "deadwood",
+        "knot",
+        "snag",
+        "dead",
+        "tree"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "044-Tree-roots",
+      "title": "Tree roots",
+      "display_name": "Tree roots",
+      "source_url": "https://poly.pizza/m/eYfjQLsebfA",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "plants and woodland",
+        "sandtray",
+        "roots",
+        "plants",
+        "tree"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "045-Tree-branch",
+      "title": "Tree branch",
+      "display_name": "Tree branch",
+      "source_url": "https://poly.pizza/m/8w-ed__H6Tl",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "plants and woodland",
+        "sandtray",
+        "leaf",
+        "tree",
+        "branch"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "046-Tuft-of-grass",
+      "title": "Tuft of grass",
+      "display_name": "Tuft of grass",
+      "source_url": "https://poly.pizza/m/3tyh15Fbmsx",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "plants and woodland",
+        "sandtray",
+        "knot",
+        "knotting",
+        "mopping",
+        "tuft",
+        "of",
+        "grass"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "047-Clover",
+      "title": "Clover",
+      "display_name": "Clover",
+      "source_url": "https://poly.pizza/m/7v1ouc7EWYX",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "plants and woodland",
+        "sandtray",
+        "goodluck",
+        "plant",
+        "leaf",
+        "",
+        "clover"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "048-Tulip",
+      "title": "Tulip",
+      "display_name": "Tulip",
+      "source_url": "https://poly.pizza/m/ciFymz3YR9I",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "plants and woodland",
+        "sandtray",
+        "flower",
+        "tulip"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "049-Daffodil",
+      "title": "Daffodil",
+      "display_name": "Daffodil",
+      "source_url": "https://poly.pizza/m/2Gw0Pca1YRS",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "plants and woodland",
+        "sandtray",
+        "flower",
+        "plant",
+        "park",
+        "garden",
+        "daffodil"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "050-Dandelion",
+      "title": "Dandelion",
+      "display_name": "Dandelion",
+      "source_url": "https://poly.pizza/m/fo-P-qRPeRZ",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "plants and woodland",
+        "sandtray",
+        "flower",
+        "blossom",
+        "weed",
+        "flora",
+        "dandelion"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "051-Ocean",
+      "title": "Ocean",
+      "display_name": "Ocean",
+      "source_url": "https://poly.pizza/m/faUostvShTI",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "water, farming and weather",
+        "sandtray",
+        "sea",
+        "oceanic",
+        "seas",
+        "ocean"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "052-Wave",
+      "title": "Wave",
+      "display_name": "Wave",
+      "source_url": "https://poly.pizza/m/6mpwUZqCgzy",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "water, farming and weather",
+        "sandtray",
+        "water",
+        "ocean",
+        "sea",
+        "wave"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "053-Kelp",
+      "title": "Kelp",
+      "display_name": "Kelp",
+      "source_url": "https://poly.pizza/m/4cFllH6Iazk",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "water, farming and weather",
+        "sandtray",
+        "seaweed",
+        "ocean",
+        "marine",
+        "plant",
+        "kelp"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "054-Cliff",
+      "title": "Cliff",
+      "display_name": "Cliff",
+      "source_url": "https://poly.pizza/m/bN-rWrWm3mC",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "water, farming and weather",
+        "sandtray",
+        "rock",
+        "stone",
+        "geology",
+        "formation",
+        "landform",
+        "cliff"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "055-Cattail",
+      "title": "Cattail",
+      "display_name": "Cattail",
+      "source_url": "https://poly.pizza/m/9uT74BMpRrl",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "water, farming and weather",
+        "sandtray",
+        "plant",
+        "cattail"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "056-Field-of-wheat",
+      "title": "Field of wheat",
+      "display_name": "Field of wheat",
+      "source_url": "https://poly.pizza/m/eWhaaKNh755",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "water, farming and weather",
+        "sandtray",
+        "cornfield",
+        "field",
+        "of",
+        "wheat"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "057-Haystack",
+      "title": "Haystack",
+      "display_name": "Haystack",
+      "source_url": "https://poly.pizza/m/6LeCqyw00RK",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "water, farming and weather",
+        "sandtray",
+        "hay",
+        "barn",
+        "farm",
+        "grass",
+        "haystack"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "058-Tornado",
+      "title": "Tornado",
+      "display_name": "Tornado",
+      "source_url": "https://poly.pizza/m/2TBzV_5N0ci",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "water, farming and weather",
+        "sandtray",
+        "weather",
+        "tornado"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "059-Lightning-bolt",
+      "title": "Lightning bolt",
+      "display_name": "Lightning bolt",
+      "source_url": "https://poly.pizza/m/7IBFbOFdkcp",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "water, farming and weather",
+        "sandtray",
+        "weather",
+        "rain",
+        "storm",
+        "clouds",
+        "shower",
+        "lightning",
+        "bolt"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "060-Icicle",
+      "title": "Icicle",
+      "display_name": "Icicle",
+      "source_url": "https://poly.pizza/m/dEz_atLOlje",
+      "category": "nature",
+      "tags": [
+        "nature",
+        "water, farming and weather",
+        "sandtray",
+        "glacier",
+        "frozen",
+        "spike",
+        "water",
+        "icicle"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "061-Cake",
+      "title": "Cake",
+      "display_name": "Cake",
+      "source_url": "https://poly.pizza/m/2WvdDP8C3a5",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "everyday and personal objects",
+        "sandtray",
+        "dessert",
+        "sweets",
+        "pastry",
+        "baked",
+        "cake"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "062-Teapot",
+      "title": "Teapot",
+      "display_name": "Teapot",
+      "source_url": "https://poly.pizza/m/3pxNWuQ-iii",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "everyday and personal objects",
+        "sandtray",
+        "pot",
+        "tea",
+        "kettle",
+        "water",
+        "hot",
+        "teapot"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "063-Cooking-pot",
+      "title": "Cooking pot",
+      "display_name": "Cooking pot",
+      "source_url": "https://poly.pizza/m/9W7fuCdO6j2",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "everyday and personal objects",
+        "sandtray",
+        "cookware",
+        "pot",
+        "pan",
+        "",
+        "cooking"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "064-Frying-pan",
+      "title": "Frying pan",
+      "display_name": "Frying pan",
+      "source_url": "https://poly.pizza/m/cqm_Lxzu-Ko",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "everyday and personal objects",
+        "sandtray",
+        "skillet",
+        "kitchenware",
+        "cookware",
+        "frying",
+        "pan"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "065-Fruit-bowl",
+      "title": "Fruit bowl",
+      "display_name": "Fruit bowl",
+      "source_url": "https://poly.pizza/m/1xRm2gPIjGh",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "everyday and personal objects",
+        "sandtray",
+        "plate",
+        "dish",
+        "fruit",
+        "bowl"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "066-Cup-of-tea",
+      "title": "Cup of tea",
+      "display_name": "Cup of tea",
+      "source_url": "https://poly.pizza/m/8XYelOAA63f",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "everyday and personal objects",
+        "sandtray",
+        "tea",
+        "cup",
+        "drink",
+        "of"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "067-Vase",
+      "title": "Vase",
+      "display_name": "Vase",
+      "source_url": "https://poly.pizza/m/flynTOOHK_z",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "everyday and personal objects",
+        "sandtray",
+        "urn",
+        "jar",
+        "amphora",
+        "vase"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "068-Picture-frame",
+      "title": "Picture frame",
+      "display_name": "Picture frame",
+      "source_url": "https://poly.pizza/m/4jf7PTHIMTe",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "everyday and personal objects",
+        "sandtray",
+        "art",
+        "frame",
+        "picture"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "069-Piggy-bank",
+      "title": "Piggy bank",
+      "display_name": "Piggy bank",
+      "source_url": "https://poly.pizza/m/dpvS2kdW6I9",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "everyday and personal objects",
+        "sandtray",
+        "storage",
+        "money",
+        "change",
+        "savings",
+        "coins\n",
+        "piggy",
+        "bank"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "070-Bell",
+      "title": "Bell",
+      "display_name": "Bell",
+      "source_url": "https://poly.pizza/m/2cNZ44Ddrps",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "everyday and personal objects",
+        "sandtray",
+        "ring",
+        "instrument",
+        "noise",
+        "music",
+        "sound",
+        "bell"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "071-Robot",
+      "title": "Robot",
+      "display_name": "Robot",
+      "source_url": "https://poly.pizza/m/9A6cuitiB_4",
+      "category": "mythological",
+      "tags": [
+        "mythological",
+        "fantasy and roleplay",
+        "sandtray",
+        "machine",
+        "robot"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "072-Magic-wand",
+      "title": "Magic wand",
+      "display_name": "Magic wand",
+      "source_url": "https://poly.pizza/m/26F-mHntpvj",
+      "category": "mythological",
+      "tags": [
+        "mythological",
+        "fantasy and roleplay",
+        "sandtray",
+        "baton",
+        "stick",
+        "scepter",
+        "magic",
+        "wand"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "073-Scroll",
+      "title": "Scroll",
+      "display_name": "Scroll",
+      "source_url": "https://poly.pizza/m/arIYNl9gMyr",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "fantasy and roleplay",
+        "sandtray",
+        "paper",
+        "scroll"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "074-Beanstalk",
+      "title": "Beanstalk",
+      "display_name": "Beanstalk",
+      "source_url": "https://poly.pizza/m/5rHLdbIH1r9",
+      "category": "mythological",
+      "tags": [
+        "mythological",
+        "fantasy and roleplay",
+        "sandtray",
+        "plant",
+        "green",
+        "beans",
+        "vine",
+        "beanstalk"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "075-Archer",
+      "title": "Archer",
+      "display_name": "Archer",
+      "source_url": "https://poly.pizza/m/0jlabhnBscv",
+      "category": "people",
+      "tags": [
+        "people",
+        "fantasy and roleplay",
+        "sandtray",
+        "archery",
+        "archer"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "076-Bow-and-arrow",
+      "title": "Bow and arrow",
+      "display_name": "Bow and arrow",
+      "source_url": "https://poly.pizza/m/cX-rDjPMQJx",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "fantasy and roleplay",
+        "sandtray",
+        "sport",
+        "archery",
+        "bow",
+        "and",
+        "arrow"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "077-Pirate-hat",
+      "title": "Pirate hat",
+      "display_name": "Pirate hat",
+      "source_url": "https://poly.pizza/m/73a4yE7VyqD",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "fantasy and roleplay",
+        "sandtray",
+        "buccaneer",
+        "headwear",
+        "accessory",
+        "pirate",
+        "hat"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "078-Trident",
+      "title": "Trident",
+      "display_name": "Trident",
+      "source_url": "https://poly.pizza/m/6InWFmvjYZS",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "fantasy and roleplay",
+        "sandtray",
+        "spear",
+        "devil",
+        "satan",
+        "trident"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "079-Cannon",
+      "title": "Cannon",
+      "display_name": "Cannon",
+      "source_url": "https://poly.pizza/m/00gto_PcYMp",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "fantasy and roleplay",
+        "sandtray",
+        "artillery",
+        "gunpowder",
+        "projectile",
+        "cannon"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "080-Shepherd-s-Staff",
+      "title": "Shepherd's Staff",
+      "display_name": "Shepherd's Staff",
+      "source_url": "https://poly.pizza/m/4OziPMQV37E",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "fantasy and roleplay",
+        "sandtray",
+        "crook",
+        "crosier",
+        "pastoral",
+        "shepherd",
+        "s",
+        "staff"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "081-Jeep",
+      "title": "Jeep",
+      "display_name": "Jeep",
+      "source_url": "https://poly.pizza/m/bSUF7N6ZGmn",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "travel and exploration",
+        "sandtray",
+        "automobile",
+        "car",
+        "vehicle",
+        "Truck",
+        "jeep"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "082-Taxi",
+      "title": "Taxi",
+      "display_name": "Taxi",
+      "source_url": "https://poly.pizza/m/40_vZove67z",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "travel and exploration",
+        "sandtray",
+        "cab",
+        "taxicab",
+        "hack",
+        "taxi"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "083-Kayak",
+      "title": "Kayak",
+      "display_name": "Kayak",
+      "source_url": "https://poly.pizza/m/20qFHKv9i2Z",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "travel and exploration",
+        "sandtray",
+        "paddle",
+        "row",
+        "boat",
+        "canoe\n",
+        "kayak"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "084-Hang-glider",
+      "title": "Hang glider",
+      "display_name": "Hang glider",
+      "source_url": "https://poly.pizza/m/bIRUD686yoA",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "travel and exploration",
+        "sandtray",
+        "air",
+        "travel",
+        "wind",
+        "hang",
+        "glider"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "085-Bullet-train",
+      "title": "Bullet train",
+      "display_name": "Bullet train",
+      "source_url": "https://poly.pizza/m/adPIQfcfgBD",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "travel and exploration",
+        "sandtray",
+        "train",
+        "rail",
+        "bullet"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "086-Jet",
+      "title": "Jet",
+      "display_name": "Jet",
+      "source_url": "https://poly.pizza/m/3B3Pa6BHXn1",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "travel and exploration",
+        "sandtray",
+        "aviation",
+        "flight",
+        "aircraft",
+        "jet"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "087-Jetpack",
+      "title": "Jetpack",
+      "display_name": "Jetpack",
+      "source_url": "https://poly.pizza/m/a19dX3Vgo3S",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "travel and exploration",
+        "sandtray",
+        "fly\ntechnology\nspace\nsky",
+        "jetpack"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "088-Space-rover",
+      "title": "Space rover",
+      "display_name": "Space rover",
+      "source_url": "https://poly.pizza/m/dhLVA8z7cGo",
+      "category": "vehicles",
+      "tags": [
+        "vehicles",
+        "travel and exploration",
+        "sandtray",
+        "space",
+        "rover",
+        "robot",
+        "Curiosity Rover"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "089-Telescope",
+      "title": "Telescope",
+      "display_name": "Telescope",
+      "source_url": "https://poly.pizza/m/1ZoSwQQOBJX",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "travel and exploration",
+        "sandtray",
+        "astronomy",
+        "telescope"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "090-Life-preserver",
+      "title": "Life preserver",
+      "display_name": "Life preserver",
+      "source_url": "https://poly.pizza/m/7n1vrlFN0GH",
+      "category": "abstract",
+      "tags": [
+        "abstract",
+        "travel and exploration",
+        "sandtray",
+        "safe",
+        "throwrings",
+        "life",
+        "preserver"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "091-Beaver",
+      "title": "Beaver",
+      "display_name": "Beaver",
+      "source_url": "https://poly.pizza/m/fwtA7VLrXPr",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "wildlife",
+        "sandtray",
+        "beaver",
+        "rodent"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "092-Hedgehog",
+      "title": "Hedgehog",
+      "display_name": "Hedgehog",
+      "source_url": "https://poly.pizza/m/8UNni5IvK_c",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "wildlife",
+        "sandtray",
+        "mammal",
+        "rodent",
+        "spine",
+        "forest",
+        "hedgehog"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "093-River-otter",
+      "title": "River otter",
+      "display_name": "River otter",
+      "source_url": "https://poly.pizza/m/dJW3JeUWXQ-",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "wildlife",
+        "sandtray",
+        "otter",
+        "animal",
+        "river"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "094-Badger",
+      "title": "Badger",
+      "display_name": "Badger",
+      "source_url": "https://poly.pizza/m/8k4cduyRhi4",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "wildlife",
+        "sandtray",
+        "bug",
+        "tease",
+        "weasel",
+        "badger"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "095-Armadillo",
+      "title": "Armadillo",
+      "display_name": "Armadillo",
+      "source_url": "https://poly.pizza/m/81WIGctw3se",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "wildlife",
+        "sandtray",
+        "idea",
+        "tatou",
+        "apar",
+        "armadillo"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "096-Antelope",
+      "title": "Antelope",
+      "display_name": "Antelope",
+      "source_url": "https://poly.pizza/m/dC2-G-IF8rz",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "wildlife",
+        "sandtray",
+        "antlers",
+        "antelope"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "097-Gorilla",
+      "title": "Gorilla",
+      "display_name": "Gorilla",
+      "source_url": "https://poly.pizza/m/bmfQ1j9CeO2",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "wildlife",
+        "sandtray",
+        "monkey",
+        "primate",
+        "jungle",
+        "gorilla"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "098-Llama",
+      "title": "Llama",
+      "display_name": "Llama",
+      "source_url": "https://poly.pizza/m/5XUgcfxfBWJ",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "wildlife",
+        "sandtray",
+        "lama",
+        "mud",
+        "dalai",
+        "llama"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "099-T-Rex",
+      "title": "T-Rex",
+      "display_name": "T-Rex",
+      "source_url": "https://poly.pizza/m/9GyZw9gGPMq",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "wildlife",
+        "sandtray",
+        "dinosaur",
+        "tyrannosaurus",
+        "t",
+        "rex"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
+    },
+    {
+      "file": "100-Jellyfish",
+      "title": "Jellyfish",
+      "display_name": "Jellyfish",
+      "source_url": "https://poly.pizza/m/5PxIqPamrag",
+      "category": "animals",
+      "tags": [
+        "animals",
+        "wildlife",
+        "sandtray",
+        "medusa",
+        "man-of-war",
+        "medusan",
+        "jellyfish"
+      ],
+      "creator": "Poly by Google",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "changes": "Original downloaded GLB retained unchanged in the source archive. Published copy has its placement origin centered horizontally at the base using a scene wrapper; mesh geometry, materials and textures are unchanged. Preview rendered in Unity; application scales the model."
     }
   ]
 }

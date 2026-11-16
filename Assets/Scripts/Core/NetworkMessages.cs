@@ -210,9 +210,17 @@ namespace Sandplay.Core
                 w.Write(item.model_hash ?? "");
                 w.Write(item.description ?? "");
                 int tagCount = Mathf.Min(item.tags?.Length ?? 0, MaxTagsPerItem);
-                w.Write(tagCount);
-                for (int tagIndex = 0; tagIndex < tagCount; tagIndex++)
-                    w.Write(item.tags[tagIndex] ?? "");
+                bool packedLastTag = tagCount == MaxTagsPerItem;
+                w.Write(packedLastTag ? tagCount : tagCount + 1);
+                for (int tagIndex = 0; tagIndex < tagCount - (packedLastTag ? 1 : 0); tagIndex++)
+                {
+                    string tag = item.tags[tagIndex] ?? "";
+                    if (tag.StartsWith(ObjectSizing.SizeTag, StringComparison.Ordinal) || tag.StartsWith(ObjectSizing.EscapedTag, StringComparison.Ordinal))
+                        tag = ObjectSizing.EscapedTag + tag;
+                    w.Write(tag);
+                }
+                w.Write(ObjectSizing.SizeTag + ObjectSizing.Valid(item.objectSize) +
+                    (packedLastTag ? ":" + (item.tags[tagCount-1] ?? "") : ""));
             }
             return ms.ToArray();
         }
@@ -380,9 +388,26 @@ namespace Sandplay.Core
                     description = r.ReadString(),
                 };
                 int tagCount = ReadLength(r, "catalog tag count", MaxTagsPerItem);
-                item.tags = new string[tagCount];
+                var tags = new System.Collections.Generic.List<string>();
+                item.objectSize = ObjectSizing.DefaultFor(item);
                 for (int tagIndex = 0; tagIndex < tagCount; tagIndex++)
-                    item.tags[tagIndex] = r.ReadString();
+                {
+                    string tag = r.ReadString();
+                    if (tag.StartsWith(ObjectSizing.EscapedTag, StringComparison.Ordinal))
+                        tags.Add(tag.Substring(ObjectSizing.EscapedTag.Length));
+                    else if (tag.StartsWith(ObjectSizing.SizeTag, StringComparison.Ordinal))
+                    {
+                        string value = tag.Substring(ObjectSizing.SizeTag.Length);
+                        if (value.Length >= 1 && value[0] >= '1' && value[0] <= '3' && (value.Length == 1 || value[1] == ':'))
+                        {
+                            item.objectSize = value[0] - '0';
+                            if (value.Length > 1) tags.Add(value.Substring(2));
+                        }
+                        else tags.Add(tag);
+                    }
+                    else tags.Add(tag);
+                }
+                item.tags = tags.ToArray();
                 items[i] = item;
             }
             return items;

@@ -1,0 +1,2123 @@
+{
+  "date": "2026-11-11",
+  "catalog_count": 352,
+  "counts": {
+    "3": 106,
+    "1": 173,
+    "2": 73
+  },
+  "objects": [
+    {
+      "id": "fa103006-ce50-4edd-bfe5-d6e6eb701003",
+      "display_name": "Above-ground Swimming Pool",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "208a0ae5-aa61-4fc3-84ba-018fa051aff7",
+      "display_name": "Acoustic guitar",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "7210309d-2b4c-44c9-9b9c-246b5e840648",
+      "display_name": "Alarm clock",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "752406d5-7086-46cb-80b6-3d56fc29a48e",
+      "display_name": "Anchor",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "fa5d51c4-b595-4953-bd4e-0a5ec0159074",
+      "display_name": "Baby bottle",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "7b3de3e6-3de1-4740-8798-a4483067d925",
+      "display_name": "Balloon",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "19029749-02eb-4a39-a361-4fa237a880eb",
+      "display_name": "Banana",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "2356798e-905a-4a4f-92a0-5994ce2c954d",
+      "display_name": "Basket",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "63a92237-df25-4db0-b088-a9fb73206627",
+      "display_name": "Basketball",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "949e8b81-e979-4b68-9f37-e83e9da7a953",
+      "display_name": "Basketball Court",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "5c7ec3ee-9ea4-4b97-8bb7-372b0436b783",
+      "display_name": "Beach Chair",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "ca3fa085-d77f-4ab3-b40c-e5ea7af7ddf0",
+      "display_name": "Beach umbrella",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "aadf3c4b-8bcc-4268-80c8-bf419c99ce00",
+      "display_name": "Bed",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "50494707-fc90-4313-aa0f-a9febfd9d5cf",
+      "display_name": "Bell",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "3eb817cc-e1d8-4343-b0a6-ecee5a95560a",
+      "display_name": "Bench",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "df895b16-62c2-43c3-9908-4a5fb577e22f",
+      "display_name": "Binoculars",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "f9ed6df0-3920-4236-8bb5-ee8ebae40d0a",
+      "display_name": "Bird Cage",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "22b51f2f-15f5-43aa-8142-d0af5d1c1282",
+      "display_name": "Blackboard",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "78eb6668-4cd6-49d9-b97d-591c2921c3e7",
+      "display_name": "Blankets",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "ef5f6ee5-7b6d-4ffa-ae1c-b65ec962c65e",
+      "display_name": "Bomb",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "6426803a-2503-4ee1-bd15-d91ed9e484a9",
+      "display_name": "Book",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "fb4800fe-99c4-44a3-ba69-be202780ccf9",
+      "display_name": "Bookcase",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "fc6c983e-91fe-4fc4-a789-46e18ad79e4f",
+      "display_name": "Boombox",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "7116b104-42f7-45f5-b77f-e708fb3210af",
+      "display_name": "Bouncy castle",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "1ea0581a-8ce6-4a27-943c-1f35c3ddaab3",
+      "display_name": "Bow and arrow",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "e795d0db-f344-488e-bb18-9eea52ed4d89",
+      "display_name": "Bowling Pins",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "3820e1f6-28b7-441f-9766-d4cd4b6491a4",
+      "display_name": "Bucket",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "203acde9-7435-4a9c-ac5d-971dd672da03",
+      "display_name": "Cake",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "122997c5-a61f-496d-91a3-1e72625186f2",
+      "display_name": "Camera",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "05fb9cc0-8e2d-482d-bbcc-39cf85585048",
+      "display_name": "Campfire",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "63f17133-1571-4b7a-8850-1151416bbaf6",
+      "display_name": "Candle",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "67ff6c14-8dbf-4dd2-981e-72b782d02465",
+      "display_name": "Cannon",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "78b3ccf0-8736-4d3d-b210-93fbe886b65f",
+      "display_name": "Cash register",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "d34932d3-6701-4b51-a117-5dd172a50adc",
+      "display_name": "Chair",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "6cc3227f-4e4a-47dd-8b20-6608c42182b3",
+      "display_name": "Cheeseburger",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "e9a48b82-6b3a-4d32-9f84-8e55363fee87",
+      "display_name": "Closet",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "10795da8-7368-42d1-9b53-53f3743e43fa",
+      "display_name": "Coffee Cup",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "d0463aad-57e4-4036-b9fa-72a17168194b",
+      "display_name": "Coffin",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "4a911d67-0daa-4d86-98b8-0782a7980352",
+      "display_name": "Computer",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "821aada2-ca0f-48c1-bc48-b29269f449c6",
+      "display_name": "Concert Stage",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "550c745c-6810-4208-a109-7ae6b9ebcd3d",
+      "display_name": "Cooking pot",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "0b26bb9a-08f9-4e77-95e5-951d5f66f0db",
+      "display_name": "Couch",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "37c229a1-857c-416c-bdc8-b481b9a39bbe",
+      "display_name": "Crayons",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "9470222f-73b9-4693-9be6-fcb40506fcfc",
+      "display_name": "Crib",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "8047e97e-79d4-432b-8e72-66e9b8479634",
+      "display_name": "Crown",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "9983e896-2b4f-44a6-b9f9-53740ce02ea1",
+      "display_name": "Crutches",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "64a15faf-6344-4b40-b2f5-0e7e34e90945",
+      "display_name": "Cup of tea",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "0729cc0a-0b49-4547-9c46-0ac6e23327ee",
+      "display_name": "Curtains",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "2193e2a5-3fcf-47f8-9c20-8d59d80d4ffa",
+      "display_name": "Curved Road",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "ecc0197b-9f8f-4df4-8dae-9124cd4f5a92",
+      "display_name": "Divided Highway",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "24d5aa0c-22a6-4e87-8402-6e1a2deb1428",
+      "display_name": "Drum",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "e380c023-980c-4456-acbe-3582fc9fbf9b",
+      "display_name": "Dumpster",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "69950716-3495-4574-ab62-a894ea9744c1",
+      "display_name": "Easel",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "504cd8a8-5950-4f8f-8656-9812e862061c",
+      "display_name": "Electric guitar",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "7d1ba728-1ebc-49b0-828f-e6a5d4055e86",
+      "display_name": "Ferris Wheel",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "d72b0b3b-35f8-491d-94d5-7f8bc5712b20",
+      "display_name": "Flag",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "96cf251f-b467-429b-915e-00f8f1394aca",
+      "display_name": "Flute",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "bf3dd793-211f-422c-80d6-6b29ed8324d4",
+      "display_name": "Frisbee",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "6b865b3a-f290-4f80-bd18-f62221caf416",
+      "display_name": "Fruit bowl",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "e2950039-a714-44f6-ace5-23075dbdbd5b",
+      "display_name": "Frying pan",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "b7908491-00c5-4c25-961d-9624b8ca7d2f",
+      "display_name": "Gem",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "04cfaf31-a0ce-4e23-957a-87360225bd12",
+      "display_name": "Graduation cap",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "80519129-99cc-48d5-9e1a-6db75ebc68f7",
+      "display_name": "Gun",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "65bb44a8-7c88-40ec-bd3b-1127d4d39af3",
+      "display_name": "Hammock",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "9df79f98-1261-40ae-9828-7fc06c428200",
+      "display_name": "Harp",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "d9d7545e-021f-4d1d-a04b-da99055512e5",
+      "display_name": "Heart",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "46ace148-d484-4dc2-9323-6bd4a139b3ff",
+      "display_name": "Jump rope",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "e2e7cdbd-6ead-4bce-a974-09bccb8d5f41",
+      "display_name": "Jungle gym",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "76cb03b6-ed71-44bb-8b04-0c2e7f0b5895",
+      "display_name": "Key",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "d0a7f4fc-efa9-44d0-bfc1-3d174e997c4c",
+      "display_name": "Kite",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "10a044ef-7b24-4b0d-af37-4ad090a5e953",
+      "display_name": "Ladder",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "a090f8fc-803e-40c9-9121-dedc92c9552f",
+      "display_name": "Lamp post",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "86763c81-a46e-4d48-92e9-d1487d1bfd33",
+      "display_name": "Lantern",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "8163b43e-2ff7-49e9-9e1b-f08e989a735a",
+      "display_name": "Laptop",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "a79557a2-70b7-4f25-bb36-93bc04ae0854",
+      "display_name": "Life preserver",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "570ffdf1-6945-4663-b78a-e3e2e55a8a29",
+      "display_name": "Luggage",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "febefbd6-998b-40db-a3ad-b727cfeaf931",
+      "display_name": "Mailbox",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "f8d1c8c2-9f09-4f7e-a3a8-63f4019cf97f",
+      "display_name": "Map",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "24b39604-664c-435c-b9a9-939fa3277184",
+      "display_name": "Microphone",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "72390dd5-a6c6-4327-85eb-1e7d5ae04439",
+      "display_name": "Mirror",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "47735648-f5d0-4bc0-b545-c03f77c2537b",
+      "display_name": "Oil pump",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "82efa6fe-109a-4d26-a191-501e16fbcfbe",
+      "display_name": "Palette",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "63982684-9409-46d9-a91d-483ddfef5837",
+      "display_name": "Payphone",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "e110c7b0-dd9d-41bb-8725-e0bab0352f56",
+      "display_name": "Pens",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "4ad7c73b-589a-429a-91ff-caccaf493ecc",
+      "display_name": "Pepperoni Pizza",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "b90b6bf8-857a-4c48-bc19-b65a89308311",
+      "display_name": "Phone",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "a8757ba1-4e4a-4701-b858-c9ca7b7135bf",
+      "display_name": "Piano",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "52d0fa3d-9782-4959-b086-97b7625719ae",
+      "display_name": "Picture frame",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "ea28a7c1-151b-4ffa-b5ff-96df0850888f",
+      "display_name": "Piggy bank",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "126facba-8ba3-44e1-8820-fb6ec42dda09",
+      "display_name": "Pillow",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "1500485f-0927-494d-9eda-8a5722354983",
+      "display_name": "Pirate hat",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "59964b72-cb16-46ee-94c2-f567848ca706",
+      "display_name": "Printer",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "5026c3e0-6642-4c79-b81a-678e979e3430",
+      "display_name": "Ring",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "a1c5f497-9a44-4af6-9ce1-f3c6db778826",
+      "display_name": "Road Lane Markings",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "8bee279b-6f68-44a8-a008-9bc2bec852e5",
+      "display_name": "Satellite",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "6491a2ef-9c31-42ce-a858-bea7b1724275",
+      "display_name": "Scroll",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "25b516be-3544-46f8-b668-20fa71033ef8",
+      "display_name": "See-saw",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "4cca7954-9490-4d81-943f-2307459388d4",
+      "display_name": "Sewing machine",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "09bed87c-9040-400e-bcc8-d419b4768244",
+      "display_name": "Shepherd's Staff",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "0cc61bc4-914d-4f61-bc06-0c008b8b9f03",
+      "display_name": "Shopping cart",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "df9860b3-d493-46b0-bfca-5d193493f943",
+      "display_name": "Shovel",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "e4c29f70-5cb2-4218-9f92-356d1f5d704f",
+      "display_name": "Slide",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "3807b129-7359-4647-bc0f-7be82ef1f8ab",
+      "display_name": "Soccer Goal",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "432b8f30-16af-434a-a0fc-9752c1821c4d",
+      "display_name": "Soccer ball",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "580b6c15-e8bc-4736-bca7-2ed0d3d026e4",
+      "display_name": "Swing set",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "a18266eb-01a7-4827-9fd7-86a49f3853d8",
+      "display_name": "Table",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "c219286c-ed80-4c08-a525-fc3ad645c130",
+      "display_name": "Teapot",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "ba78bb99-661d-4de3-8e96-3e1cd6edce1d",
+      "display_name": "Telephone pole",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "588174f0-3663-4038-aabe-08b8e0522745",
+      "display_name": "Telescope",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "d13eac88-7fa6-4888-bef1-8ad395ee746a",
+      "display_name": "Tennis ball",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "a2ea12ef-ca94-4a0e-953c-96f253443c41",
+      "display_name": "Tennis racket",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "52659db4-f8d4-4232-abeb-b0dc504c624e",
+      "display_name": "Throne",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "dae9e849-733d-4376-9240-47e7eb5743a5",
+      "display_name": "Toolbox",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "b7ce7e63-eca0-4dab-950b-57f78ed6fcc9",
+      "display_name": "Trampoline",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "a0583160-3006-4ea6-9c28-186bb25c4999",
+      "display_name": "Trident",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "f514eb9d-6c68-4139-acb3-4eb854bc6565",
+      "display_name": "Trophy",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "4d88958d-9aec-4239-8504-74281aa8f234",
+      "display_name": "Trumpet",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "04a8ea1d-1624-4264-8bd6-2c6f45fb26f5",
+      "display_name": "Vase",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "91b93ece-c90d-4277-8c19-406306392062",
+      "display_name": "Violin",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "23ac988b-8388-4f56-9763-e542c51fa3de",
+      "display_name": "Walkie talkie",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "99a71f93-91ff-4081-b12c-c7ff1f2134ef",
+      "display_name": "Walking stick",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "be6698b9-1cd4-4622-bb18-825e323e7a86",
+      "display_name": "Watering can",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "4939c77a-5b8b-4a16-a734-2017b2f6010f",
+      "display_name": "Wheelbarrow",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "6b181e28-d530-46a7-81a8-82b0aa826ffa",
+      "display_name": "Wine Bottle",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "a0f51bc9-466f-44a4-9e2d-ff32e815b594",
+      "display_name": "Wizard hat",
+      "category": "abstract",
+      "objectSize": 1
+    },
+    {
+      "id": "a8ebc40e-3507-4829-a765-32ad9df0133d",
+      "display_name": "Wood-burning stove",
+      "category": "abstract",
+      "objectSize": 3
+    },
+    {
+      "id": "bc976b00-d4c8-45e6-b920-bb8ec2628c7f",
+      "display_name": "Antelope",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "a02a20d5-b341-41f6-a962-03f8b9255080",
+      "display_name": "Armadillo",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "c6dc36cb-2bb4-4815-8585-bc257700a01e",
+      "display_name": "Badger",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "01532ee4-2746-4e08-935a-e95b0c9f0fa5",
+      "display_name": "Bat",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "a53a6db1-7e14-4df6-98b0-20facca63147",
+      "display_name": "Bear",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "98a09a6c-c7ea-48b8-91c7-8b4b510b367d",
+      "display_name": "Beaver",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "6bc60ab6-99d9-40f6-a3e5-d8ef3f6b4240",
+      "display_name": "Bison",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "f19f1716-bc09-4795-b130-3cc04e2ea662",
+      "display_name": "Bull Terrier",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "1940ff77-fef4-41fb-88bb-362eca112289",
+      "display_name": "Butterfly",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "ac2e5f22-1128-49be-b91f-23aa14d6bfc9",
+      "display_name": "Camel",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "6b0173d0-e0cf-497f-b3a0-afe4cba1dc01",
+      "display_name": "Cat",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "5a8a9bfe-de1e-4e99-85ed-c69d19d9a84a",
+      "display_name": "Cow",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "be0f2a51-c016-4bb2-b2f7-3ba6c16e463c",
+      "display_name": "Cow",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "5ffd7917-fc26-49d7-955c-37e8db9d5478",
+      "display_name": "Crab",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "54eee913-3e11-48d7-a19a-b5b55374d520",
+      "display_name": "Crocodile",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "22d1c84a-2fbc-453e-8d14-e09d912df16c",
+      "display_name": "Crow",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "d66eada4-3c5b-404b-8b81-e97dd7242b50",
+      "display_name": "Deer",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "c171f7b8-fc26-46fc-80b6-8d5b7683364d",
+      "display_name": "Dinosaur",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "0333f2a7-77e2-4149-a89b-044bac20d8f6",
+      "display_name": "Dog",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "12dc28cf-9a01-454c-82ba-2156a5fbf8ed",
+      "display_name": "Dolphin",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "60b83484-c65e-4a60-a9a4-2a0f142fb8cd",
+      "display_name": "Donkey",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "befcf8a5-b28f-4816-8c5f-15858f058871",
+      "display_name": "Duck",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "5f3e3d04-194e-4faf-be15-e6d174a48971",
+      "display_name": "Eagle",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "1e6de2cf-aefd-415b-96c8-01e403a19933",
+      "display_name": "Elephant",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "00c8d192-be53-4fd9-b11c-c85385e9d0f1",
+      "display_name": "Flying gull",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "5fe157f2-d495-45b9-b3e3-c3b3f3741079",
+      "display_name": "Fox",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "2bbf363f-4a9f-4d4f-baaa-7d59e4c5b621",
+      "display_name": "Frog",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "b9bc36d4-b271-4a78-8cd0-4f1223e10eba",
+      "display_name": "Giraffe",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "01e945a9-087d-4998-bd56-df07f861ed42",
+      "display_name": "Goat",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "fc4223c1-2b04-41e0-9545-f1d14c264464",
+      "display_name": "Goldfish",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "5b43d011-8325-4b7a-8e10-43e21845d6d0",
+      "display_name": "Gorilla",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "77c55b57-75d7-4731-a302-cd16a3d101bb",
+      "display_name": "Grasshopper",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "5017c7ba-0228-4b6f-8cf9-ee1fa54ae6a3",
+      "display_name": "Hedgehog",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "cfbf37a4-3459-4302-964f-208d8245767d",
+      "display_name": "Hen",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "2a67cf99-d636-4f4d-bde2-c2e598770e58",
+      "display_name": "Hippopotamus",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "62852878-a25f-4047-b461-48a9e94590d9",
+      "display_name": "Horse",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "bee74d24-7b37-4a7c-9607-6810672fdfd5",
+      "display_name": "Jellyfish",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "cc8baf72-aef6-48f1-b360-2defc39f13b4",
+      "display_name": "Kangaroo",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "661b8558-9d80-4112-91f9-0a1607c06308",
+      "display_name": "Koala",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "3d19f2df-7c0d-4295-b376-598030b28dfe",
+      "display_name": "Lion",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "d179ae0d-e88f-4196-8199-23a19e329ba7",
+      "display_name": "Llama",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "f3fdeed5-e670-4e3b-8dcc-227cc8dee7a4",
+      "display_name": "Monkey",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "335cb4d3-8a55-4705-9077-a09338c9ab71",
+      "display_name": "Octopus",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "29a98607-7409-42b9-93d9-c1beab23c22f",
+      "display_name": "Owl",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "bd3514f2-0d89-400d-8548-e171789f8214",
+      "display_name": "Panda",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "26021de3-2ddd-4665-b855-899f8ce736bb",
+      "display_name": "Penguin",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "037aacd4-46ea-446b-ac7a-f6a73eee9c49",
+      "display_name": "Pig",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "3c16422a-f465-40a3-b89b-a4e6d3ccffbe",
+      "display_name": "Rabbit",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "e644b788-8f56-42ad-9204-49dd93e5b707",
+      "display_name": "Raccoon",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "cd02e77a-fcf2-42c1-852e-c7667d6b3775",
+      "display_name": "Rhinoceros",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "9cc32c47-ee44-4cf7-a948-772df35dc833",
+      "display_name": "River otter",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "58181b4b-cdfa-4b9f-b7f2-b5ccacb39855",
+      "display_name": "Seahorse",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "9e16bf88-de90-4337-b2e8-a818c3c7e047",
+      "display_name": "Seal",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "548ceab6-bb5b-4012-b3dd-c11f651a8586",
+      "display_name": "Shark",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "9b593036-c50e-41b7-9d4f-8a44a04b11f2",
+      "display_name": "Sheep",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "82bb0248-65ae-4a87-85c9-6df3e62d329c",
+      "display_name": "Snail",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "7b3f819f-2a44-4aa3-b82c-df4ca2814888",
+      "display_name": "Snake",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "04926274-91ac-48be-9445-375f9b9bfa01",
+      "display_name": "Sparrow",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "8b8c00ce-75ed-48dd-b2a9-8031a2c39799",
+      "display_name": "Squirrel",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "11d711df-96c3-4f3c-ae4e-0b06e62fa90f",
+      "display_name": "T-Rex",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "b5cb9139-9187-494d-ad13-27d1a83e9478",
+      "display_name": "Tiger",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "0df54e5c-a61b-4983-a579-a0a91e773390",
+      "display_name": "Turtle",
+      "category": "animals",
+      "objectSize": 1
+    },
+    {
+      "id": "8eb41b79-aec5-45c7-b5b0-636c78e96dc2",
+      "display_name": "Whale",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "768cc344-810d-4401-ac2f-24d892983833",
+      "display_name": "Wolf",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "cb2b7f33-de60-4865-8390-014b28f17390",
+      "display_name": "Zebra",
+      "category": "animals",
+      "objectSize": 2
+    },
+    {
+      "id": "a72f133f-60e3-4e08-9b4d-604c6ffc012c",
+      "display_name": "Apartment",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "37bd8cf2-5e63-4937-9144-72a3bc01c697",
+      "display_name": "Archway",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "1ed0bbb7-2073-4b61-841c-0ce7f0ad48a1",
+      "display_name": "Bank",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "5637de0a-48c2-4402-8600-b872bbf49078",
+      "display_name": "Bar",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "5148fdd2-a099-4a5d-bfa2-bc427d2d0bea",
+      "display_name": "Barn",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "483eb275-1298-44b2-8d08-350f55769306",
+      "display_name": "Billboard",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "f4697389-073c-41a2-8504-14f068607fd7",
+      "display_name": "Bird house",
+      "category": "buildings",
+      "objectSize": 1
+    },
+    {
+      "id": "248de0f5-ffac-416c-a3ca-cebc225f32ba",
+      "display_name": "Bridge1",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "6dbf3ea5-7dcc-40a1-b2a5-f5bebd5485c5",
+      "display_name": "Castle",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "580499fc-9d07-401f-b2da-eb9be5e31952",
+      "display_name": "Chimney",
+      "category": "buildings",
+      "objectSize": 1
+    },
+    {
+      "id": "cf9d78e2-93b2-49e8-8ee5-c6e028e53524",
+      "display_name": "Club",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "b3bc2e7f-1806-404a-9825-c80f14d3a37b",
+      "display_name": "Coliseum",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "b9d7c0c5-d3cb-4a57-b26d-55cffb1c1c7e",
+      "display_name": "Door and frame",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "ae680145-fe39-4578-9d0e-4bf4dd4c9d2b",
+      "display_name": "Factory",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "801102ca-8d6a-481a-b436-1e0de6c5f478",
+      "display_name": "Farm House",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "smart.fence.v1",
+      "display_name": "Fence",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "a04805e0-e5fb-473e-aca3-c32eabfa2ab3",
+      "display_name": "Fireplace",
+      "category": "buildings",
+      "objectSize": 1
+    },
+    {
+      "id": "6743ca23-3dd1-43ee-8776-279d1c68b7e2",
+      "display_name": "Fountain",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "08f02b19-69ab-4b02-9940-5fd4180d94b5",
+      "display_name": "Gate",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "dbb27614-ae2c-4a69-ad43-4b1f8839e0fa",
+      "display_name": "Gazebo",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "0224040e-01ae-4563-be34-25464a93208c",
+      "display_name": "Hospital",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "3cbea485-c23a-45a7-9fae-842fbcfd2f39",
+      "display_name": "Hostel",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "24e899c7-0cc6-4309-aa42-60a9a7bdc99c",
+      "display_name": "Hotel",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "69981ce0-aa3b-4313-8a90-95adf89480b1",
+      "display_name": "House",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "871ebe4f-5b7c-473e-baf8-1336f594afb6",
+      "display_name": "Igloo",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "1adf5d2b-68ca-4c81-8752-ac9ecbe89e47",
+      "display_name": "Lighthouse",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "9999c78d-e9ca-4a68-851e-fe0683064c96",
+      "display_name": "Palace",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "42fa3cd7-a325-4c2d-840d-0521f8ea0737",
+      "display_name": "Prison",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "00dad2aa-8231-4876-9ebb-50018f842da5",
+      "display_name": "Pyramid",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "6dda9a3f-7e55-46ff-b596-fb511e12b706",
+      "display_name": "Radio tower",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "smart.road.v1",
+      "display_name": "Road",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "b7cd0bdb-7194-44b8-b97f-a734b20e4a7e",
+      "display_name": "Sand castle",
+      "category": "buildings",
+      "objectSize": 1
+    },
+    {
+      "id": "e015cbd9-d8de-440a-b9db-fb2f131abdfe",
+      "display_name": "Schoolhouse",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "508fb607-1bef-4ecd-ae65-3502b8d7dbbb",
+      "display_name": "Silo",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "bda002b7-39c0-41ce-b16a-7bd7e7ebd118",
+      "display_name": "Skyscraper",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "a092bca6-5419-4b1b-b525-ceae82dc7862",
+      "display_name": "Staircase",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "291bbc87-cbfb-4edd-8b92-3e41195f6b1e",
+      "display_name": "Tent",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "6e34f604-f76e-42b0-afa2-ea4b1a68f4c2",
+      "display_name": "Treehouse",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "smart.wall.v1",
+      "display_name": "Wall",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "78f39d69-be07-465d-b90e-44247b920b0b",
+      "display_name": "Water tower",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "18af7054-dc4e-4e98-9896-3ecd4e404280",
+      "display_name": "Well",
+      "category": "buildings",
+      "objectSize": 1
+    },
+    {
+      "id": "2b4ee10a-bb3e-436c-b4e9-5d6a4f64624e",
+      "display_name": "Windmill",
+      "category": "buildings",
+      "objectSize": 3
+    },
+    {
+      "id": "83af37ff-d32b-45fb-a175-f230686eff78",
+      "display_name": "Wrought-Iron Gate",
+      "category": "buildings",
+      "objectSize": 2
+    },
+    {
+      "id": "d54beb92-099d-4983-8960-e3a68dbd81c8",
+      "display_name": "Beanstalk",
+      "category": "mythological",
+      "objectSize": 3
+    },
+    {
+      "id": "21c7f886-0c9c-416b-8dbc-fd8b339d76ac",
+      "display_name": "Dragon",
+      "category": "mythological",
+      "objectSize": 2
+    },
+    {
+      "id": "112ff921-c6fe-4360-bfea-cb049f9fb888",
+      "display_name": "Magic wand",
+      "category": "mythological",
+      "objectSize": 1
+    },
+    {
+      "id": "8c6a7f40-946b-4d98-86a3-e2678b98935d",
+      "display_name": "Robot",
+      "category": "mythological",
+      "objectSize": 2
+    },
+    {
+      "id": "f962cc4a-3eff-4df6-96a8-03d64c22d33b",
+      "display_name": "Unicorn",
+      "category": "mythological",
+      "objectSize": 2
+    },
+    {
+      "id": "ef55f86b-dc13-4c9c-add4-f071b78e2804",
+      "display_name": "Apple tree",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "a90d8ca9-cb41-4c44-a789-6faf103d46a6",
+      "display_name": "Arched Rainbow",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "8e627b2d-9d06-4540-9704-e93872bcc26a",
+      "display_name": "Bamboo",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "ed4a900f-2b3f-4c80-b0b8-d2d55d5dbbba",
+      "display_name": "Birds nest",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "8baa5d03-a603-4656-8b6f-11f184f3efc7",
+      "display_name": "Bonsai",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "9c21c856-1968-4dbb-9da3-35a19e876629",
+      "display_name": "Cactus",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "ad6371b4-4357-4d53-ac32-aab6e910f561",
+      "display_name": "Cattail",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "f4d1698a-5ff2-468c-be07-4ac8f94dc804",
+      "display_name": "Cliff",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "3a032066-664c-42d6-8fca-5c26bbfeb3ad",
+      "display_name": "Cloud",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "6031aa5b-7429-4e1a-91bc-66b446a992f2",
+      "display_name": "Clover",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "bf79cc06-22a6-4dd9-ba71-b9a6ae0b006a",
+      "display_name": "Coconut",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "3e556ed0-1e7e-4289-9ded-6155e8c17040",
+      "display_name": "Coral",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "a1f2d4cc-5257-43e0-a46f-81e86249780b",
+      "display_name": "Daffodil",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "bcc5be0c-3226-4721-943b-079ea6e9b297",
+      "display_name": "Dandelion",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "653483b6-6fcf-4ebb-99c1-b42c9513ebd7",
+      "display_name": "Dead tree",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "1d694ab7-671b-47ce-82e6-c1864fc27c80",
+      "display_name": "Evergreen Tree",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "5b753c38-376d-462b-92ed-6272ed41c1a5",
+      "display_name": "Field of wheat",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "4c827519-f3ff-464a-a228-2563c2676699",
+      "display_name": "Haystack",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "acd58d88-1a08-4e4c-abae-56be1870aec5",
+      "display_name": "Iceberg",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "3eef1fd9-e3e0-44d2-a3f9-2e3ac18b8153",
+      "display_name": "Icicle",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "7875a630-e664-4c20-a5df-92cc396d7182",
+      "display_name": "Island",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "40f2fb27-049b-4387-b5ba-b004d85b3bde",
+      "display_name": "Kelp",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "5dceb55c-b47b-4b6e-9a9f-53434b65baca",
+      "display_name": "Leaf",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "86c88c94-2103-4914-bc4b-22ab71d550b7",
+      "display_name": "Lightning bolt",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "512f3af2-010b-4490-8c93-2148f53afb44",
+      "display_name": "Moon",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "14db5edf-24b1-4a44-90b7-c4e78f5dcd00",
+      "display_name": "Mountain",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "0d7e24e4-2b37-421e-945d-facc33524380",
+      "display_name": "Mushrooms",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "6b6501b6-4816-481c-8ada-1e38a52c2ce4",
+      "display_name": "Ocean",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "110f9c59-4074-4e86-aebf-fd0355a14662",
+      "display_name": "Pond",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "622917a9-1401-4619-a7d4-d9be2d8c9f18",
+      "display_name": "Rainbow",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "54d6458d-0d39-4e9b-88b8-6ea37890b4f6",
+      "display_name": "River",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "4b8189bb-3f68-4856-9a81-4dba24f621a4",
+      "display_name": "Rock",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "5179b615-e70f-4722-8092-46f968e9c38c",
+      "display_name": "Rose",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "82589793-325d-4a32-9415-301356257871",
+      "display_name": "Seashell",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "4244e036-13e2-4258-8fc9-c489eec81ad0",
+      "display_name": "Snowman",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "b951e659-2e88-4154-ad7e-f36209648925",
+      "display_name": "Spider web",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "bfc47618-8f30-4803-b6dd-2633231a7247",
+      "display_name": "Star",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "57242e1e-6213-4b60-9c8b-f7d2638917f7",
+      "display_name": "Stone",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "fb505908-4169-4c41-a862-735c5e3c7c0f",
+      "display_name": "Sun",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "b337736d-cf95-434b-b141-c08c385da67d",
+      "display_name": "Sunflower",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "ca1a39b0-9445-4e4c-aab9-2facad919426",
+      "display_name": "Tornado",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "404ce40b-790d-4b2c-9083-baf64ac2f50d",
+      "display_name": "Tree",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "04aa2258-90fe-4cbb-8fe6-7d7a5a53bfde",
+      "display_name": "Tree branch",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "5f75d7b5-d2e8-4a67-a439-2ec12d493a57",
+      "display_name": "Tree roots",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "4c9bbcec-e2f5-4844-9743-dc6a6e065ee9",
+      "display_name": "Tree stump",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "75483861-1534-418a-a0f3-a2c1160b5496",
+      "display_name": "Tuft of grass",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "400b125f-f000-45fc-9907-907a0d799d66",
+      "display_name": "Tulip",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "1b87d822-fcc1-49b7-90e8-7ea017ebebf6",
+      "display_name": "Umbrella Palm Tree",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "8536e609-1db7-4de9-9bd3-8336e610acf3",
+      "display_name": "Vine",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "8548caea-c7e9-4070-a5c0-b4b0e047216d",
+      "display_name": "Volcano",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "ec0c4daa-49ad-46e6-825f-aad7bdb8889f",
+      "display_name": "Water lilies",
+      "category": "nature",
+      "objectSize": 1
+    },
+    {
+      "id": "18227ba3-ae93-4024-8951-f5344fe7d18e",
+      "display_name": "Waterfall",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "111d292d-0ab2-40ba-88c9-db30d198582f",
+      "display_name": "Wave",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "c531cf96-2545-4137-b00d-d4db028e732b",
+      "display_name": "Willow tree",
+      "category": "nature",
+      "objectSize": 3
+    },
+    {
+      "id": "31d936cb-89e7-4dd1-8341-a553d2c26bd7",
+      "display_name": "Alien",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "7fa1e476-81df-42f2-91da-5bfaea49ed93",
+      "display_name": "Archer",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "5d6d7279-818b-428b-9957-c9eeabaf99fc",
+      "display_name": "Astronaut",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "e2fea13a-2e79-48d8-8e93-b8960871607e",
+      "display_name": "King",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "89bbb0b3-8972-45f0-8775-1adc13fb10cf",
+      "display_name": "Man Casual 1",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "57694bdf-d77a-4b8c-9642-e053df010ada",
+      "display_name": "Man Casual 2",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "d854bb1f-9ab5-4f7c-bd9f-6a95f0232925",
+      "display_name": "Man in Long Sleeves",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "1a89cf63-5311-4fbb-9593-07bf148474d9",
+      "display_name": "Man in Suit",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "2bc81442-7864-49c7-897c-21869b30b14e",
+      "display_name": "SWAT",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "ee7b394f-bb30-43de-9ec1-960ec061084f",
+      "display_name": "Scarecrow",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "3bd2386c-946a-4027-bf69-4a2a11f57136",
+      "display_name": "Witch",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "5d368d0b-5b8b-48df-9ca1-b1326d84c33a",
+      "display_name": "Woman in Dress",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "3c193649-c451-498a-a15e-e9c368445b24",
+      "display_name": "Woman in Long Sleeves",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "08c3bdae-ec53-4241-8c72-84e3ed2dc0b9",
+      "display_name": "Zombie",
+      "category": "people",
+      "objectSize": 2
+    },
+    {
+      "id": "abaaf66b-3113-4550-b6d5-c3a7abd036ff",
+      "display_name": "Cemetery Scene",
+      "category": "religious",
+      "objectSize": 3
+    },
+    {
+      "id": "9d7eef59-2c9b-442a-b89f-32ad12f1adb0",
+      "display_name": "Church",
+      "category": "religious",
+      "objectSize": 3
+    },
+    {
+      "id": "deb01b24-d373-401e-857c-de2fd094ba9c",
+      "display_name": "Pagoda",
+      "category": "religious",
+      "objectSize": 3
+    },
+    {
+      "id": "66e47c71-115d-4c3d-bdeb-79ca28acd281",
+      "display_name": "Temple",
+      "category": "religious",
+      "objectSize": 3
+    },
+    {
+      "id": "436c56e4-67bf-4225-831c-8606851bd16c",
+      "display_name": "Airplane",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "656b4d7a-096f-408b-9109-d46619072a96",
+      "display_name": "Airship",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "e66f1d7b-76bb-4e8f-9f3f-d488cea31f9f",
+      "display_name": "Ambulance",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "782a9e06-9045-4c7a-a524-71e729981409",
+      "display_name": "Bicycle",
+      "category": "vehicles",
+      "objectSize": 2
+    },
+    {
+      "id": "80e6b9d0-9a5a-4aba-9f33-545c25190fa6",
+      "display_name": "Bicycle",
+      "category": "vehicles",
+      "objectSize": 2
+    },
+    {
+      "id": "4c44e310-8b8c-48b6-bd04-04e3e1656c1a",
+      "display_name": "Boat",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "63ae590e-2def-44bd-9453-8ca42b5ccfd4",
+      "display_name": "Bulldozer",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "477b030e-2990-4d1a-859e-d44710ab2924",
+      "display_name": "Bullet train",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "e6220679-e42b-4369-81d2-2da9a2ef349b",
+      "display_name": "Bus",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "d2124b5c-b875-4219-ad64-0c9650d3a9c4",
+      "display_name": "Caravan",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "5cd8de78-5e93-42e0-9b9a-bfe3e1524880",
+      "display_name": "Convertible",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "c8d93fda-bc24-417d-9d03-59fcd5f7c0d5",
+      "display_name": "Hang glider",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "5d0d52a4-b243-4d46-9cac-4ca84fa5e988",
+      "display_name": "Helicopter",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "97a363e3-c9b5-4a7f-9501-9796ed011f53",
+      "display_name": "Hot-Air Balloon",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "968268fd-82d8-491c-8066-55e57daf75de",
+      "display_name": "Jeep",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "a90be57b-3cd9-4078-958f-a67091cc8517",
+      "display_name": "Jet",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "9bd873f6-b96b-4d02-8540-f1a1dec9b442",
+      "display_name": "Jetpack",
+      "category": "vehicles",
+      "objectSize": 1
+    },
+    {
+      "id": "57f9abfb-db0c-424a-aee7-53c593032b66",
+      "display_name": "Kayak",
+      "category": "vehicles",
+      "objectSize": 2
+    },
+    {
+      "id": "1d72fb09-ae93-4390-bead-9a5aa425a82d",
+      "display_name": "Motorcycle",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "f9e113db-abc4-44d7-bfcf-f4d6d740bf8b",
+      "display_name": "Parachute",
+      "category": "vehicles",
+      "objectSize": 1
+    },
+    {
+      "id": "a6873986-a7e1-46a1-a449-47d0d2ccd4ff",
+      "display_name": "Police Car",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "e5a50afc-7c11-4964-81c6-f5296b3af2d7",
+      "display_name": "Red Biplane",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "27e36b1b-ee08-4d18-9a03-6dd7dbc4ce5e",
+      "display_name": "Rocket ship",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "a2f1c820-8d87-4b37-91f0-a8ade65c2c63",
+      "display_name": "Scooter",
+      "category": "vehicles",
+      "objectSize": 2
+    },
+    {
+      "id": "c5f34a40-d128-473c-98b8-1ed110d5da38",
+      "display_name": "Skateboard",
+      "category": "vehicles",
+      "objectSize": 1
+    },
+    {
+      "id": "d8cd83e4-ad09-453b-a21a-ded28aacf5f9",
+      "display_name": "Sled",
+      "category": "vehicles",
+      "objectSize": 2
+    },
+    {
+      "id": "388c036f-b6ef-4758-82bd-7cca1342ceed",
+      "display_name": "Space Shuttle",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "54ba12bb-60f0-4dea-a32f-6aa8154d5ac7",
+      "display_name": "Space rover",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "85eb677b-270e-41b4-9500-4ff729678886",
+      "display_name": "Submarine",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "445981bc-b4a6-4699-b935-2efd9ee30e1f",
+      "display_name": "Tank",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "5fe9e7aa-a26d-4cd1-a036-622402ed1e6d",
+      "display_name": "Taxi",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "c2df40ab-502b-4dd8-85af-bbd4f15cc25c",
+      "display_name": "Tractor",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "034b4336-f213-4a54-a29e-c17ea10d68f0",
+      "display_name": "Tram",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "5e8865e3-70b8-4a03-91e9-0f242e5ea8bb",
+      "display_name": "Tricycle",
+      "category": "vehicles",
+      "objectSize": 2
+    },
+    {
+      "id": "084f5966-a7f5-4278-aa14-96e1bb7cd880",
+      "display_name": "Truck",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "cef1380f-db6e-4545-b8f9-304ac51ac17b",
+      "display_name": "Tugboat",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "2f7dac47-fee9-4067-ae0e-2bff6750405f",
+      "display_name": "UFO",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "fb213a51-45e2-4b99-8fd9-e9580278ecf3",
+      "display_name": "Van",
+      "category": "vehicles",
+      "objectSize": 3
+    },
+    {
+      "id": "54f3a778-c324-4c8f-b154-da254a3427f0",
+      "display_name": "Wagon",
+      "category": "vehicles",
+      "objectSize": 2
+    },
+    {
+      "id": "b5e5ab82-d915-43f7-bc7e-27648722a2b0",
+      "display_name": "Wheelchair",
+      "category": "vehicles",
+      "objectSize": 2
+    },
+    {
+      "id": "ab3d0a62-9998-4272-84b5-49ef5bac12d8",
+      "display_name": "Yellow Motorcycle",
+      "category": "vehicles",
+      "objectSize": 3
+    }
+  ]
+}

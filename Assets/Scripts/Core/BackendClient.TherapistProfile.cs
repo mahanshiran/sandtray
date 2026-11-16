@@ -51,6 +51,8 @@ namespace Sandplay.Core
             }
             var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){request.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(request,this);
             yield return request.SendWebRequest();
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
             if (!current() || UserType != "psychologist") { failure("Account changed. Reopen your therapist profile."); yield break; }
@@ -91,6 +93,8 @@ namespace Sandplay.Core
             request.SetRequestHeader("Authorization", "Bearer " + AccessToken);
             var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){request.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(request,this);
             yield return request.SendWebRequest();
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
             if (!current() || UserType != "psychologist") yield break;

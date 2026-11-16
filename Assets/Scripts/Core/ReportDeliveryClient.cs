@@ -7,9 +7,9 @@ using UnityEngine;
 namespace Sandplay.Core
 {
     [Serializable] public class ReportRecipients { public string owner_code,client_code; }
-    [Serializable] public class ReportPublication { public string local_id,table_name,owner_code,client_code,source,text,organization_id,organization_client_id; public int revision; }
+    [Serializable] public class ReportPublication { public string local_id,table_name,owner_code,client_code,source,text,rich_html,organization_id,organization_client_id; public int revision; }
     [Serializable] public class SharedReportSection { public string heading,body; }
-    [Serializable] public class SharedReportInfo { public string id,table_name,author_name,client_name,source,text,created,updated; public int revision; public SharedReportSection[] sections; }
+    [Serializable] public class SharedReportInfo { public string id,table_name,author_name,client_name,source,text,rich_html,created,updated; public int revision; public SharedReportSection[] sections; }
     [Serializable] public class ReportNoticeInfo { public long id;public string report_id,table_name,author_name,source,created; public bool read; }
     [Serializable] public class OrganizationNoticeInfo { public string id,organization_id,organization_name,invited_by_name,expires_at,created_at; }
     [Serializable] public class SessionInvitationNoticeInfo { public long id;public string sender_name,created_at,expires_at; }
@@ -55,15 +55,15 @@ namespace Sandplay.Core
             try{queue=JsonUtility.FromJson<ReportQueue>(PlayerPrefs.GetString(Key("queue"),"{}"))??new ReportQueue();}catch{queue=new ReportQueue();}
             if(queue.items==null)queue.items=new List<PendingReport>();Changed?.Invoke();
         }
-        void Update(){EnsureAccount();if(user==0)return;if(!polling && Time.unscaledTime>=nextPoll)Refresh();if(!sending && Time.unscaledTime>=nextSend)SendNext();}
+        void Update(){EnsureAccount();if(user==0 || !BackendClient.Instance.CanUseCloudSession)return;if(!polling && Time.unscaledTime>=nextPoll)Refresh();if(!sending && Time.unscaledTime>=nextSend)SendNext();}
         public void Refresh()
         {
-            EnsureAccount();if(user==0 || polling)return;polling=true;nextPoll=Time.unscaledTime+20;
+            EnsureAccount();if(user==0 || !BackendClient.Instance.CanUseCloudSession || polling)return;polling=true;nextPoll=Time.unscaledTime+20;
             int requestUser=user;string requestToken=token;
             bool Current()=>BackendClient.Instance.IsLoggedIn && BackendClient.Instance.UserId==requestUser && BackendClient.Instance.AccessToken==requestToken;
             FriendsClient.Instance.Request<ReportInbox>("notifications/",null,result=>{if(!Current())return;Inbox=result;Error=null;polling=false;Changed?.Invoke();},error=>{if(!Current())return;Error=error;polling=false;nextPoll=Time.unscaledTime+40;Changed?.Invoke();});
         }
-        void SendNext()
+        void SendNext(bool richServerReady=false)
         {
             nextSend=Time.unscaledTime+30;if(queue.items.Count==0 || SessionManager.Instance==null)return;
             var item=queue.items[0];AnalysisReport report;
@@ -74,15 +74,22 @@ namespace Sandplay.Core
             {queue.items.Remove(item);SaveQueue();Error=Localization.Get(reviewError);Changed?.Invoke();return;}
             int requestUser=user;string requestToken=token;
             bool Current()=>BackendClient.Instance.UserId==requestUser && BackendClient.Instance.AccessToken==requestToken && user==requestUser && token==requestToken;
+            if(RichReportDocument.IsRich(report)&&!richServerReady)
+            {
+                sending=true;
+                BackendClient.Instance.RequireRichReportServer(()=>{if(Current()){sending=false;SendNext(true);}},error=>
+                {if(Current()){sending=false;Error=error;nextSend=Time.unscaledTime+60;Changed?.Invoke();}});
+                return;
+            }
             var session=SessionManager.Instance.LoadSessionData(item.board);
-            var body=new ReportPublication{local_id=report.ReportId,table_name=item.board,owner_code=recipients.owner_code,client_code=recipients.client_code,source=report.Source,text=publicationText,revision=PlayerPrefs.GetInt(Key("revision_"+item.id),0),organization_id=session?.OrganizationId,organization_client_id=session?.OrganizationClientId};
+            var body=new ReportPublication{local_id=report.ReportId,table_name=item.board,owner_code=recipients.owner_code,client_code=recipients.client_code,source=report.Source,text=publicationText,rich_html=RichReportDocument.ExportHtml(report),revision=PlayerPrefs.GetInt(Key("revision_"+item.id),0),organization_id=session?.OrganizationId,organization_client_id=session?.OrganizationClientId};
             sending=true;
             FriendsClient.Instance.Request<SharedReportInfo>("reports/publish/",body,result=>{
                 if(!Current())return;
                 PlayerPrefs.SetInt(Key("revision_"+item.id),result.revision);
                 AnalysisReport latest=null;
                 try{latest=SessionManager.Instance?.LoadSessionData(item.board)?.Reports?.Find(r=>r.ReportId==item.id);}catch{sending=false;SaveQueue();return;}
-                if(latest==null || ReportSharingText.TryPublication(latest,out var latestText,out _) && latestText==body.text)queue.items.Remove(item);
+                if(latest==null || ReportSharingText.TryPublication(latest,out var latestText,out _) && latestText==body.text && RichReportDocument.ExportHtml(latest)==body.rich_html)queue.items.Remove(item);
                 SaveQueue();sending=false;nextSend=0;Error=null;Refresh();Changed?.Invoke();
             },error=>{if(!Current())return;sending=false;Error=error;queue.items.Remove(item);queue.items.Add(item);SaveQueue();Changed?.Invoke();});
         }

@@ -173,13 +173,12 @@ namespace Sandplay.Core
 
         private void ToggleSettingsPanel()
         {
-            if (_settingsPanel == null)
-                CreateSettingsPanel();
-            else
+            if(_settingsPanel!=null&&_settingsPanel.activeInHierarchy){_settingsPanel.SetActive(false);return;}
+            RequestGameSidePane("settings",()=>
             {
-                bool newState = !_settingsPanel.activeSelf;
-                _settingsPanel.SetActive(newState);
-            }
+                if(_settingsPanel==null)CreateSettingsPanel();else _settingsPanel.SetActive(true);
+                DockGameSidePane(_settingsPanel,"settings",(RectTransform)_settingsPanel.transform,360);
+            });
         }
 
         private Transform _settingsRowsContent;
@@ -282,15 +281,21 @@ namespace Sandplay.Core
             SettingsAction(_settingsRowsContent, "credits.title", "Btn_Attributions", "settings.view", ShowAttributionsPanel);
         }
 
-        private void RebuildSettingsPanel()
+        private void RebuildSettingsPanel(bool openAsPane=true)
         {
             if (_settingsPanel != null)
             {
+                _settingsPanel.SetActive(false);
                 Destroy(_settingsPanel);
                 _settingsPanel = null;
             }
             CreateSettingsPanel();
-            _settingsPanel.SetActive(true);
+            _settingsPanel.SetActive(false);
+            if(openAsPane)RequestGameSidePane("settings",()=>
+            {
+                _settingsPanel.SetActive(true);
+                DockGameSidePane(_settingsPanel,"settings",(RectTransform)_settingsPanel.transform,360);
+            });
         }
 
         private void ShowQRCodeDialog()
@@ -370,23 +375,6 @@ namespace Sandplay.Core
         }
 
         // ── Network Catalog ────────────────────────────────────────────────────
-        private static bool IsPhoneCatalogLayout()
-        {
-            if (!Application.isMobilePlatform) return false;
-
-            // Prefer the physical diagonal when the device reports a usable
-            // density. This separates phones from tablets even at high pixel
-            // resolutions. Some Android emulators report no DPI, so retain a
-            // conservative short-side fallback for those devices.
-            if (Screen.dpi > 120f)
-            {
-                float diagonalInches = Mathf.Sqrt(
-                    Screen.width * Screen.width + Screen.height * Screen.height) / Screen.dpi;
-                if (diagonalInches > .1f) return diagonalInches < 7.5f;
-            }
-            return Mathf.Min(Screen.width, Screen.height) < 1400f;
-        }
-
         private void ToggleCatalogPanel()
         {
             if (_catalogDrawerOpen)
@@ -399,7 +387,9 @@ namespace Sandplay.Core
             }
         }
 
-        private void OpenCatalogPanel()
+        private void OpenCatalogPanel()=>RequestGameSidePane("catalog",OpenCatalogPaneNow);
+
+        private void OpenCatalogPaneNow()
         {
             if (_catalogPanel == null) return;
             if (GameManager.Instance != null && GameManager.Instance.IsSpectator)
@@ -409,30 +399,10 @@ namespace Sandplay.Core
             }
 
             _catalogDrawerOpen = true;
-            // The handle and catalog both live on the right. Reassert the anchors
-            // here so the drawer cannot inherit a left-side layout configuration.
-            var drawerRT = _catalogPanel.GetComponent<RectTransform>();
-            drawerRT.anchorMin = new Vector2(1, 0);
-            drawerRT.anchorMax = new Vector2(1, 1);
-            drawerRT.pivot = new Vector2(1, 0.5f);
-            if (_catalogPhoneLayout)
-            {
-                // Keep the compact phone button out of the drawer while it is
-                // open; the drawer's own close button remains available.
-                if (_catalogButton != null) _catalogButton.SetActive(false);
-            }
-            else
-            {
-                AttachCatalogHandleToDrawer();
-            }
+            // The panel has its own close control; no side rail or pull handle is needed.
+            if (_catalogButton != null) _catalogButton.SetActive(false);
             _catalogPanel.SetActive(true);
             _catalogPanel.transform.SetAsLastSibling();
-            if (_catalogButton != null && !_catalogPhoneLayout)
-            {
-                // Keep the drawer pull visible on the edge while the panel is open.
-                _catalogButton.SetActive(true);
-                _catalogButton.transform.SetAsLastSibling();
-            }
 
             // Board enter primes _networkCatalogItems for restore, but does not build the UI.
             // Always populate if the list is empty; refresh from API when first opening.
@@ -440,7 +410,8 @@ namespace Sandplay.Core
             if (_networkCatalogItems == null || uiEmpty || _catalogUiDirty)
                 LoadCatalogFromAPI();
 
-            AnimateCatalogDrawer(true);
+            ConfigureCatalogSplit();
+            _catalogPanel.transform.SetAsLastSibling();
         }
 
         private void ShowCatalogEditPermissionMessage()
@@ -459,121 +430,63 @@ namespace Sandplay.Core
         {
             if (_catalogPanel == null) return;
             _catalogDrawerOpen = false;
-            AnimateCatalogDrawer(false);
+            _catalogPanel.SetActive(false);
+            if(_catalogGameHud!=null&&(_activeGameSidePane==null||_activeGameSidePane==_catalogPanel))_catalogGameHud.anchorMax=Vector2.one;
+            RestoreCatalogButtonToTopRight();
+            if(_catalogButton!=null)_catalogButton.SetActive(GameManager.Instance==null||GameManager.Instance.CurrentTool!=ToolMode.WalkMode);
         }
 
-        private void AttachCatalogHandleToDrawer()
+        private void ConfigureCatalogSplit()
         {
-            if (_catalogButtonRT == null || _catalogPanel == null) return;
-            _catalogButton.transform.SetParent(_catalogPanel.transform, false);
-            _catalogButtonRT.anchorMin = new Vector2(0, 0.5f);
-            _catalogButtonRT.anchorMax = new Vector2(0, 0.5f);
-            _catalogButtonRT.pivot = new Vector2(1, 0.5f);
-            _catalogButtonRT.anchoredPosition = Vector2.zero;
-            _catalogButtonRT.sizeDelta = new Vector2(14, 150);
-            // Keep the same compact rounded pill visible while the drawer is
-            // open; only the button's hit area follows the drawer edge.
-            if (_catalogButtonImage != null)
-                _catalogButtonImage.color = new Color(0f, 0f, 0f, 0f);
-            var openHandleRT = _catalogButtonHandleVisual != null
-                ? _catalogButtonHandleVisual.GetComponent<RectTransform>() : null;
-            if (openHandleRT != null)
+            var previousLayout=_catalogPanel.GetComponent<CatalogDrawerSafeAreaLayout>();
+            if(previousLayout!=null)previousLayout.enabled=false;
+            var previousGesture=_catalogPanel.GetComponent<CatalogDrawerGesture>();
+            if(previousGesture!=null)previousGesture.enabled=false;
+            EnsureGameViewHud();
+            RegisterGameSidePane(_catalogPanel,"catalog");
+            if(_catalogDock==null)
             {
-                openHandleRT.anchorMin = new Vector2(1, 0.5f);
-                openHandleRT.anchorMax = new Vector2(1, 0.5f);
-                openHandleRT.pivot = new Vector2(1, 0.5f);
-                openHandleRT.anchoredPosition = Vector2.zero;
-                openHandleRT.sizeDelta = new Vector2(14, 150);
+                _catalogDock=_catalogPanel.AddComponent<ResizableReportDock>();
+                _catalogDock.Resized=value=>_catalogDockFraction=value;
+                _catalogDock.Closed=()=>{_catalogDrawerOpen=false;ReleaseGameSidePane(_catalogPanel);};
+                _catalogDock.LayoutChanged=()=>
+                {
+                    ResizeGameViewHud(_catalogPanel,_catalogDock.ReportFraction);
+                    _catalogContentGo?.GetComponent<CatalogShelfResponsiveLayout>()?.RefreshLayout();
+                };
+                var divider=ClientRect(_catalogPanel.transform,"CatalogDivider",0,0,0,1);
+                divider.pivot=new Vector2(.5f,.5f);divider.sizeDelta=new Vector2(12,0);
+                divider.gameObject.AddComponent<Image>().color=new Color(.10f,.12f,.13f);
+                var line=ClientRect(divider,"Line",.42f,0,.16f,1).gameObject.AddComponent<Image>();
+                line.color=HomeCardBorder;line.raycastTarget=false;
+                var grip=ClientRect(divider,"Grip",.25f,.47f,.50f,.06f).gameObject.AddComponent<Image>();
+                grip.color=HomeMuted;grip.raycastTarget=false;ApplyHomeRoundedCorners(grip,3);
+                var drag=divider.gameObject.AddComponent<ReportDockDivider>();
+                drag.Dock=_catalogDock;drag.Line=line;drag.Idle=HomeCardBorder;drag.Active=HomePrimary;
             }
-            _catalogButtonHandleVisual?.SetActive(true);
-            _catalogButtonGlyph?.SetActive(false);
-            _catalogButton.transform.SetAsLastSibling();
+            var panel=(RectTransform)_catalogPanel.transform;
+            var camera=FindAnyObjectByType<Sandplay.Camera.SandboxCamera>()?.GetComponent<UnityEngine.Camera>();
+            var surface=(RectTransform)_sandboxUI.transform;
+            float defaultFraction=CatalogShelfResponsiveLayout.DefaultPaneWidth/Mathf.Max(1,surface.rect.width);
+            _catalogDock.Initialize(surface,panel,camera,_catalogDockFraction>0?_catalogDockFraction:defaultFraction,1f,defaultFraction,
+                CatalogShelfResponsiveLayout.MinimumPaneWidth,CatalogShelfResponsiveLayout.DefaultPaneWidth,CatalogShelfResponsiveLayout.MaximumPaneWidth);
         }
 
-        private void RestoreCatalogHandleToRight()
+        private void RestoreCatalogButtonToTopRight()
         {
             if (_catalogButtonRT == null || _sandboxUI == null) return;
             _catalogButton.transform.SetParent(_sandboxUI.transform, false);
-            if (_catalogPhoneLayout)
-            {
-                _catalogButtonRT.anchorMin = new Vector2(1, 1);
-                _catalogButtonRT.anchorMax = new Vector2(1, 1);
-                _catalogButtonRT.pivot = new Vector2(1, 1);
-                _catalogButtonRT.anchoredPosition = new Vector2(-10, -10);
-                _catalogButtonRT.sizeDelta = new Vector2(80, 36);
-                if (_catalogButtonImage != null)
-                {
-                    _catalogButtonImage.color = new Color(0.22f, 0.42f, 0.52f, 0.92f);
-                    ApplyRoundedCorners(_catalogButtonImage);
-                }
-                _catalogButtonHandleVisual?.SetActive(false);
-                _catalogButtonGlyph?.SetActive(true);
-                _catalogButton.transform.SetAsLastSibling();
-                return;
-            }
-            _catalogButtonRT.anchorMin = new Vector2(1, 0);
+            _catalogButtonRT.anchorMin = new Vector2(1, 1);
             _catalogButtonRT.anchorMax = new Vector2(1, 1);
-            _catalogButtonRT.pivot = new Vector2(1, 0.5f);
-            _catalogButtonRT.anchoredPosition = Vector2.zero;
-            _catalogButtonRT.sizeDelta = new Vector2(56, 0);
+            _catalogButtonRT.pivot = new Vector2(1, 1);
+            _catalogButtonRT.anchoredPosition = new Vector2(-10, -10);
+            _catalogButtonRT.sizeDelta = new Vector2(80, 36);
             if (_catalogButtonImage != null)
-                _catalogButtonImage.color = new Color(0.045f, 0.055f, 0.06f, 1f);
-            var closedHandleRT = _catalogButtonHandleVisual != null
-                ? _catalogButtonHandleVisual.GetComponent<RectTransform>() : null;
-            if (closedHandleRT != null)
             {
-                closedHandleRT.anchorMin = new Vector2(0, 0.5f);
-                closedHandleRT.anchorMax = new Vector2(0, 0.5f);
-                closedHandleRT.pivot = new Vector2(1, 0.5f);
-                closedHandleRT.anchoredPosition = Vector2.zero;
-                closedHandleRT.sizeDelta = new Vector2(14, 150);
+                _catalogButtonImage.color = new Color(0.22f, 0.42f, 0.52f, 0.92f);
+                ApplyRoundedCorners(_catalogButtonImage);
             }
-            _catalogButtonHandleVisual?.SetActive(true);
-            _catalogButtonGlyph?.SetActive(true);
             _catalogButton.transform.SetAsLastSibling();
-        }
-
-        private void AnimateCatalogDrawer(bool opening)
-        {
-            if (_catalogPanel == null) return;
-            if (_catalogDrawerRoutine != null)
-                StopCoroutine(_catalogDrawerRoutine);
-            _catalogDrawerRoutine = StartCoroutine(AnimateCatalogDrawerRoutine(opening));
-        }
-
-        private IEnumerator AnimateCatalogDrawerRoutine(bool opening)
-        {
-            var panelRT = _catalogPanel != null ? _catalogPanel.GetComponent<RectTransform>() : null;
-            if (panelRT == null) yield break;
-
-            float width = Mathf.Max(1f, panelRT.rect.width);
-            float fromX = opening ? width : panelRT.anchoredPosition.x;
-            float toX = opening ? 0f : width;
-            if (opening) panelRT.anchoredPosition = new Vector2(fromX, 0f);
-
-            const float duration = 0.26f;
-            float elapsed = 0f;
-            while (elapsed < duration && panelRT != null)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(elapsed / duration);
-                // Smooth drawer motion without overshoot, so it feels calm on touch screens.
-                t = t * t * (3f - 2f * t);
-                panelRT.anchoredPosition = new Vector2(Mathf.Lerp(fromX, toX, t), 0f);
-                yield return null;
-            }
-
-            if (panelRT == null) yield break;
-            panelRT.anchoredPosition = new Vector2(toX, 0f);
-            _catalogDrawerRoutine = null;
-            if (!opening && _catalogPanel != null)
-            {
-                _catalogPanel.SetActive(false);
-                RestoreCatalogHandleToRight();
-                if (_catalogButton != null)
-                    _catalogButton.SetActive(GameManager.Instance == null ||
-                        GameManager.Instance.CurrentTool != ToolMode.WalkMode);
-            }
         }
 
         private void LoadCatalogFromAPI()
@@ -771,7 +684,7 @@ namespace Sandplay.Core
 
         private void PopulateCatalogItems(NetworkCatalogItem[] items)
         {
-            _catalogFilterItems = items ?? System.Array.Empty<NetworkCatalogItem>();
+            _catalogFilterItems = BundledCatalog.FilterForPlacement(items);
             _catalogUiDirty = false;
             BuildCatalogCategoryChips();
             RefreshCatalogFilter();
@@ -806,19 +719,23 @@ namespace Sandplay.Core
                 groups[cat].Add(item);
             }
 
-            // Keep each card as tall as its 56px thumbnail. The status badge
-            // overlays the lower-right corner instead of adding extra height.
-            const float itemHeight = 56f;
+            // Objects sit above continuous wooden ledges, with labels underneath.
+            const float itemHeight = 84f;
             const float headerHeight = 24f;
-            const float spacing = 5f;
+            const float spacing = 10f;
             const float columnGap = 5f;
             float contentWidth = Mathf.Max(0f, _catalogPanel.GetComponent<RectTransform>().rect.width - 14f);
-            int columns = contentWidth < 320f ? 2 : 3;
+            int columns = CatalogShelfResponsiveLayout.ColumnsForWidth(contentWidth);
             float cardWidth = (contentWidth - columnGap * (columns - 1)) / columns;
             float itemY = 0f;
 
-            foreach (var kvp in groups)
+            var orderedCategories = new List<string>(groups.Keys);
+            orderedCategories.Sort(CatalogDisplayOrder.CompareCategories);
+            foreach (var category in orderedCategories)
             {
+                var kvp = new KeyValuePair<string, List<NetworkCatalogItem>>(category, groups[category]);
+                kvp.Value.Sort(_selectedCatalogCategory == null
+                    ? CatalogDisplayOrder.CompareItems : CatalogDisplayOrder.CompareWithinCategory);
                 // Category header
                 var catGo = new GameObject($"Cat_{kvp.Key}");
                 catGo.transform.SetParent(_catalogContentGo.transform, false);
@@ -841,12 +758,22 @@ namespace Sandplay.Core
                 int itemIndex = 0;
                 foreach (var item in kvp.Value)
                 {
+                    if (itemIndex % columns == 0)
+                    {
+                        var shelf = new GameObject("DisplayShelf", typeof(RectTransform), typeof(CanvasRenderer), typeof(CatalogShelfGraphic));
+                        shelf.transform.SetParent(_catalogContentGo.transform, false);
+                        var shelfRT = shelf.GetComponent<RectTransform>();
+                        shelfRT.anchorMin = shelfRT.anchorMax = new Vector2(0, 1);
+                        shelfRT.pivot = new Vector2(0, 1);
+                        shelfRT.anchoredPosition = new Vector2(0, itemY - (itemIndex / columns) * (itemHeight + spacing));
+                        shelfRT.sizeDelta = new Vector2(contentWidth, itemHeight + spacing);
+                        shelf.GetComponent<CatalogShelfGraphic>().raycastTarget = false;
+                    }
                     var row = new GameObject($"Item_{item.id}");
                     row.transform.SetParent(_catalogContentGo.transform, false);
 
                     var rowImg = row.AddComponent<Image>();
-                    rowImg.color = new Color(0.18f, 0.18f, 0.22f, 1f);
-                    ApplyRoundedCorners(rowImg);
+                    rowImg.color = new Color(0.95f, 0.83f, 0.64f, 0.055f);
 
                     var rowBtn = row.AddComponent<Button>();
                     var bc = rowBtn.colors;
@@ -866,19 +793,18 @@ namespace Sandplay.Core
                     var drag = row.AddComponent<CatalogDragHandler>();
                     drag.NetworkItem = item;
 
-                    // Thumbnail image (left side, square)
+                    // Center the object above its shelf label.
                     var thumbGo = new GameObject("Thumb");
                     thumbGo.transform.SetParent(row.transform, false);
                     var thumbImg = thumbGo.AddComponent<Image>();
-                    thumbImg.color = new Color(0.3f, 0.3f, 0.3f, 0.8f);
+                    thumbImg.color = Color.clear;
                     thumbImg.raycastTarget = false;
-                    ApplyRoundedCorners(thumbImg);
                     var thumbRT = thumbGo.GetComponent<RectTransform>();
-                    thumbRT.anchorMin = new Vector2(0, 1);
-                    thumbRT.anchorMax = new Vector2(0, 1);
-                    thumbRT.pivot = new Vector2(0, 1);
-                    thumbRT.anchoredPosition = new Vector2(5, -5);
-                    thumbRT.sizeDelta = new Vector2(45, 45);
+                    thumbRT.anchorMin = thumbRT.anchorMax = new Vector2(.5f, 1);
+                    thumbRT.pivot = new Vector2(.5f, 1);
+                    thumbRT.anchoredPosition = new Vector2(0, -4);
+                    thumbRT.sizeDelta = Vector2.one * CatalogObjectPreview.ShelfSize;
+                    thumbImg.preserveAspect = true;
 
                     // === Download button (compact status action) ===
                     const float dlBtnW = 22f;
@@ -892,7 +818,7 @@ namespace Sandplay.Core
                     dlBtnRT.anchorMin = new Vector2(1, 0);
                     dlBtnRT.anchorMax = new Vector2(1, 0);
                     dlBtnRT.pivot = new Vector2(1, 0);
-                    dlBtnRT.anchoredPosition = new Vector2(-dlBtnMargin, dlBtnMargin);
+                    dlBtnRT.anchoredPosition = new Vector2(-dlBtnMargin, 30f);
                     dlBtnRT.sizeDelta = new Vector2(dlBtnW, dlBtnW);
 
                     var dlLblGo = new GameObject("Lbl");
@@ -955,21 +881,22 @@ namespace Sandplay.Core
                     loadingFallbackGo.SetActive(loadingIcon == null);
                     loadingGo.SetActive(false);
 
-                    // Name label (between thumbnail and download button)
+                    // Small centered name plate below the object.
                     var lblGo = new GameObject("Label");
                     lblGo.transform.SetParent(row.transform, false);
                     var lbl = lblGo.AddComponent<TextMeshProUGUI>();
                     lbl.text = item.display_name;
                     lbl.fontSize = 10;
                     lbl.color = Color.white;
-                    lbl.alignment = TextAlignmentOptions.TopLeft;
+                    lbl.alignment = TextAlignmentOptions.Center;
                     lbl.font = GetUIFont();
                     lbl.raycastTarget = false;
                     var lblRT = lblGo.GetComponent<RectTransform>();
                     lblRT.anchorMin = new Vector2(0, 1);
                     lblRT.anchorMax = new Vector2(1, 1);
-                    lblRT.offsetMin = new Vector2(55, -52);
-                    lblRT.offsetMax = new Vector2(-6, -6);
+                    lblRT.offsetMin = new Vector2(4, -80);
+                    lblRT.offsetMax = new Vector2(-4, -57);
+                    lbl.enableAutoSizing = true; lbl.fontSizeMin = 8; lbl.fontSizeMax = 10;
                     lbl.enableWordWrapping = true;
                     lbl.overflowMode = TextOverflowModes.Ellipsis;
                     lbl.maxVisibleLines = 2;
@@ -1053,19 +980,19 @@ namespace Sandplay.Core
                         });
                     }
 
-                    // Thumbnail — load only when this row approaches the viewport.
-                    if (item.ThumbnailSprite != null)
+                    // Object-only preview — render only when this row approaches the viewport.
+                    if (item.ObjectPreviewSprite != null)
                     {
-                        thumbImg.sprite = item.ThumbnailSprite;
+                        thumbImg.sprite = item.ObjectPreviewSprite;
                         thumbImg.color = Color.white;
                     }
-                    else if (!string.IsNullOrEmpty(item.thumbnail_url))
+                    else if (CatalogObjectPreview.CanRender(item))
                     {
                         // Rows are created up front for smooth scrolling, but their
                         // images are fetched only as they approach the viewport.
                         var viewport = _catalogPanel.GetComponent<ScrollRect>().viewport;
                         row.AddComponent<LazyCatalogThumbnail>().Initialize(
-                            item, thumbImg, viewport, rowRT);
+                            item, thumbImg, viewport, rowRT, MarkDownloaded);
                     }
 
                     itemIndex++;
@@ -1077,6 +1004,7 @@ namespace Sandplay.Core
 
             var contentRT = _catalogContentGo.GetComponent<RectTransform>();
             contentRT.sizeDelta = new Vector2(0, Mathf.Abs(itemY) + 8f);
+            _catalogContentGo.GetComponent<CatalogShelfResponsiveLayout>()?.RefreshLayout();
         }
 
         private void TrackLocalized(TextMeshProUGUI text, string key)
@@ -1118,8 +1046,7 @@ namespace Sandplay.Core
             {
                 bool visible = _settingsPanel.activeSelf;
                 _settingsPanel.SetActive(false);
-                RebuildSettingsPanel();
-                _settingsPanel.SetActive(visible);
+                RebuildSettingsPanel(visible);
             }
         }
 

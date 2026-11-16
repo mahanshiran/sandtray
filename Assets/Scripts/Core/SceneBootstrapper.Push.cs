@@ -9,7 +9,7 @@ namespace Sandplay.Core
         public bool OpenPushDestination(PushDestination target)
         {
             if(_safeArea==null)return false;
-            if(target.kind=="schedules"){if(Guid.TryParse(target.schedule_id,out _))ShowScheduleDetail(target.schedule_id);else ShowSchedules();return true;}
+            if(target.kind=="schedules"){if(Guid.TryParse(target.schedule_id,out _))ShowScheduleDetail(target.schedule_id,true);else ShowSchedules();return true;}
             if(target.kind=="reports"){ReportDeliveryClient.Instance.Refresh();if(target.notice_id>0)OpenSharedReport("notifications/"+target.notice_id+"/",true);else OpenReceivedReports();return true;}
             if(target.kind=="session_invitations"){OpenNotificationCenter();return true;}
             if(target.kind=="requests"){if(BackendClient.Instance.ExternalContactsAllowed)OpenFriendsTab("requests");return true;}

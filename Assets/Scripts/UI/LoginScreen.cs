@@ -57,9 +57,9 @@ namespace Sandplay.UI
             bg.color = new Color(0.015f, 0.025f, 0.035f, IsLightTheme ? 0.54f : 0.72f);
 
             // If already logged in, show the "logged in" state instead
-            if (BackendClient.Instance != null && BackendClient.Instance.IsLoggedIn)
+            if (BackendClient.Instance != null && BackendClient.Instance.IsLoggedIn && !BackendClient.Instance.RequiresSignIn)
             {
-                if (!BackendClient.Instance.AccountTypeSelected)
+                if (BackendClient.Instance.NeedsAccountTypeSelection)
                 {
                     ShowAccountTypeOnboarding(BackendClient.Instance.UserName);
                     return;
@@ -69,6 +69,10 @@ namespace Sandplay.UI
             }
 
             BuildAuthForm();
+            if (BackendClient.Instance != null && BackendClient.Instance.RequiresSignIn)
+                SetStatus(Localization.Current == Language.Chinese
+                    ? "登录已过期，请重新登录以连接会话。"
+                    : "Your login expired. Please sign in again to connect.", true);
         }
 
         // ── Logged-in view ────────────────────────────────────────────────────
@@ -143,12 +147,12 @@ namespace Sandplay.UI
             _nameField = MakeInputField("NameField", _nameRow.transform, font,
                 AuthText("login.name_placeholder"), false, Vector2.zero, Vector2.one);
 
-            _emailLabel = MakeFieldLabel("EmailLabel", card.transform, font, AuthText("login.email_address"));
+            _emailLabel = MakeFieldLabel("EmailLabel", card.transform, font, Copy("Email or username", "邮箱或用户名"));
             var emailRow = MakePanel("EmailRow", card.transform, Vector2.zero, Vector2.zero, Color.clear);
             _emailRowRt = emailRow.GetComponent<RectTransform>();
             _emailField = MakeInputField("EmailField", emailRow.transform, font,
-                AuthText("login.email_placeholder"), false, Vector2.zero, Vector2.one);
-            _emailField.contentType = TMP_InputField.ContentType.EmailAddress;
+                Copy("Email or username", "邮箱或用户名"), false, Vector2.zero, Vector2.one);
+            _emailField.contentType = TMP_InputField.ContentType.Standard;
 
             _passwordLabel = MakeFieldLabel("PasswordLabel", card.transform, font, AuthText("login.password"));
             var passRow = MakePanel("PassRow", card.transform, Vector2.zero, Vector2.zero, Color.clear);
@@ -461,7 +465,7 @@ namespace Sandplay.UI
         {
             if (this == null) return;
             ClearPendingRegistrationCredentials();
-            if (BackendClient.Instance != null && !BackendClient.Instance.AccountTypeSelected)
+            if (BackendClient.Instance != null && BackendClient.Instance.NeedsAccountTypeSelection)
             {
                 ShowAccountTypeOnboarding(userName);
                 return;

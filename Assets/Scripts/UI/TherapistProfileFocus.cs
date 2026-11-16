@@ -80,6 +80,7 @@ namespace Sandplay.UI
 
         private bool CanHandleKeyboard()
         {
+            if (RichReportEditor.HasKeyboardFocus) return false;
             if (!isActiveAndEnabled || EventSystem.current == null) return false;
             for (int i = ModalScopes.Count - 1; i >= 0; i--)
             {

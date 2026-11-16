@@ -160,7 +160,17 @@ namespace Sandplay.Data
             var data = ReadValidCopy(path, name);
             if (data != null)
             {
-                if (repair) RecoverInterruptedAiReports(path, name, data);
+                if (repair)
+                {
+                    // Repair review copies imported before stable local identities were assigned.
+                    // Report drafts remain drafts and still reserve their own capacity when saved.
+                    if(!string.IsNullOrWhiteSpace(data.ScheduledReviewId)&&string.IsNullOrWhiteSpace(data.BoardHistoryId))
+                    {
+                        data.BoardHistoryId=Guid.NewGuid().ToString("N");
+                        TableCapacity.Write(path,JsonUtility.ToJson(data,true));
+                    }
+                    RecoverInterruptedAiReports(path, name, data);
+                }
                 return data;
             }
             data = ReadValidCopy(path + ".bak", name);
@@ -172,6 +182,11 @@ namespace Sandplay.Data
                 // with a damaged primary during the next atomic save.
                 if (File.Exists(path)) File.Move(path, path + ".corrupt-" + Guid.NewGuid().ToString("N"));
                 WriteTableRecord(path, JsonUtility.ToJson(data, true));
+                if(!string.IsNullOrWhiteSpace(data.ScheduledReviewId)&&string.IsNullOrWhiteSpace(data.BoardHistoryId))
+                {
+                    data.BoardHistoryId=Guid.NewGuid().ToString("N");
+                    TableCapacity.Write(path,JsonUtility.ToJson(data,true));
+                }
             }
             return data;
         }

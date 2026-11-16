@@ -21,9 +21,7 @@ namespace Sandplay.Core
                 {
                     Localization.Get("account.personal"),
                     Localization.Get("account.therapist"),
-                    Localization.Get("account.organization"),
-                }, 0, index => ChangeAccountType(index == 1 ? "psychologist" :
-                    index == 2 ? "organization" : "normal"));
+                }, 0, index => ChangeAccountType(index == 1 ? "psychologist" : "normal"));
             var control = _accountTypeDropdown.GetComponent<RectTransform>();
             control.anchorMin = new Vector2(.55f,.66f); control.anchorMax = new Vector2(.975f,.94f);
             var hint = ClientText(row, Localization.Get("account.type_hint"), 12, .025f,.20f,.95f,.41f, HomeMuted);
@@ -32,7 +30,6 @@ namespace Sandplay.Core
             _accountTypeStatus = ClientText(row, "", 12, .025f,.035f,.95f,.16f, HomeMuted);
             _accountTypeStatus.name = "AccountTypeStatus";
             _therapistProfileButton = SettingsAction(parent, "Therapist profile", "TherapistProfileButton", "Edit profile", OpenTherapistProfile);
-            _organizationWorkspaceButton = SettingsAction(parent, "Organization workspace", "OrganizationWorkspaceButton", "Open", OpenOrganizationWorkspace);
             RefreshAccountTypeSettings();
             var backend = BackendClient.Instance;
             if (backend.IsLoggedIn)
@@ -56,17 +53,15 @@ namespace Sandplay.Core
             if (_therapistProfileButton != null)
                 _therapistProfileButton.transform.parent.gameObject.SetActive(BackendClient.Instance.IsLoggedIn && BackendClient.Instance.UserType == "psychologist");
             if (_organizationWorkspaceButton != null)
-                _organizationWorkspaceButton.transform.parent.gameObject.SetActive(BackendClient.Instance.IsLoggedIn &&
-                    (BackendClient.Instance.UserType == "organization" || BackendClient.Instance.IsTherapistAccount));
+                _organizationWorkspaceButton.transform.parent.gameObject.SetActive(false);
             RefreshClientNavigationVisibility();
             RefreshSettingsValues();
             if (_accountTypeDropdown == null) return;
             var client = BackendClient.Instance;
             bool loggedIn = client.IsLoggedIn;
-            // Only the internal organization-issued type is fixed. Normal test
-            // accounts remain free to switch among the three public types.
+            // Personal and therapist accounts can switch account type.
             bool editable = loggedIn && client.UserType != "admin" && !client.IsOrganizationTherapist;
-            int selected = client.UserType == "psychologist" ? 1 : client.UserType == "organization" ? 2 : 0;
+            int selected = client.UserType == "psychologist" ? 1 : 0;
             _accountTypeDropdown.SetValueWithoutNotify(selected);
             _accountTypeDropdown.interactable = editable && !client.IsUpdatingUserType;
             if (!editable)

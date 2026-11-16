@@ -228,7 +228,7 @@ namespace Sandplay.Core
         {
             if (string.IsNullOrEmpty(appId))
             {
-                Debug.Log("[Agora] No App ID configured — voice/video disabled.");
+                Debug.Log("[Agora] Waiting for server App ID and RTC token; engine initializes when joining a session.");
                 return;
             }
 

@@ -62,7 +62,7 @@ namespace Sandplay.Core
                     stream = tls;
                     tls.AuthenticateAsClient(address, null, SslProtocols.Tls12, true);
                 }
-                RelayCompatibility.Check(stream, UseAuthenticatedRelay ? 4 : 2);
+                RelayCompatibility.Check(stream, UseAuthenticatedRelay ? 5 : 3);
                 return stream;
             }
             catch { stream.Dispose(); socket.Close(); throw; }

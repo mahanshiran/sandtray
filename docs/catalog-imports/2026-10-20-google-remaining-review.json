@@ -1,0 +1,2944 @@
+{
+  "review_date": "2026-10-20",
+  "author": "Poly by Google",
+  "author_url": "https://poly.pizza/u/Poly%20by%20Google",
+  "existing_live_catalog_count": 351,
+  "author_profile_model_entries": 2292,
+  "remaining_distinct_normalized_titles_after_known_asset_exclusions": 952,
+  "previewed_candidates": 145,
+  "counts": {
+    "strong": 82,
+    "excluded": 1,
+    "conditional": 62
+  },
+  "scope": "Conservative shortlist from author profile metadata and visual preview review. Not an exhaustive rating of every remaining model. No new assets downloaded or published by this review. GLB structure, pivots, materials, performance and Unity placement still require import validation. Suitability means potential sandtray storytelling usefulness, not a clinical assessment.",
+  "groups": {
+    "Places and practical props": {
+      "strong": 19,
+      "excluded": 1,
+      "conditional": 1
+    },
+    "Play, roles and celebration": {
+      "strong": 15,
+      "conditional": 1
+    },
+    "Sport and music": {
+      "strong": 10
+    },
+    "Nature and familiar objects": {
+      "strong": 14,
+      "conditional": 1
+    },
+    "Distinct wildlife": {
+      "strong": 19,
+      "conditional": 3
+    },
+    "Conditional — preparation or overlap": {
+      "conditional": 56,
+      "strong": 5
+    }
+  },
+  "candidates": [
+    {
+      "id": 1570,
+      "title": "Hut",
+      "alt": "Hut",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/5KNeQg_znOu",
+      "previewUrl": "https://static.poly.pizza/1a6c6430-df50-499a-8972-cd4e1d09c314.webp",
+      "publicID": "5KNeQg_znOu",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 1,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/5KNeQg_znOu"
+    },
+    {
+      "id": 496,
+      "title": "Pillar",
+      "alt": "Pillar",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/aSFrJ2XJNyL",
+      "previewUrl": "https://static.poly.pizza/e122b84a-4ab8-4b51-bad9-0defb84d8382.webp",
+      "publicID": "aSFrJ2XJNyL",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "excluded",
+      "review_number": 2,
+      "review_reason": "Preview is a utility pole, not an architectural pillar; overlaps existing Telephone pole.",
+      "source_url": "https://poly.pizza/m/aSFrJ2XJNyL"
+    },
+    {
+      "id": 827,
+      "title": "Gravestone",
+      "alt": "Gravestone",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/125x68MbyA0",
+      "previewUrl": "https://static.poly.pizza/8cc2b568-f2b3-433f-ab87-ef9456a999c8.webp",
+      "publicID": "125x68MbyA0",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 3,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/125x68MbyA0"
+    },
+    {
+      "id": 1037,
+      "title": "Rails",
+      "alt": "Rails",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/fk2GfvHXN1A",
+      "previewUrl": "https://static.poly.pizza/acad2a36-9f0f-469b-a9c3-43631a701a5b.webp",
+      "publicID": "fk2GfvHXN1A",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 4,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/fk2GfvHXN1A"
+    },
+    {
+      "id": 772,
+      "title": "Feeding trough",
+      "alt": "Feeding trough",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/8yBTH_Bwfnn",
+      "previewUrl": "https://static.poly.pizza/11a4292d-85d0-44b0-a171-390e933849af.webp",
+      "publicID": "8yBTH_Bwfnn",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 5,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/8yBTH_Bwfnn"
+    },
+    {
+      "id": 920,
+      "title": "Barrel",
+      "alt": "Barrel",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/22QmtJi62zQ",
+      "previewUrl": "https://static.poly.pizza/25991bc2-a56c-446d-86c4-03e406cc4a40.webp",
+      "publicID": "22QmtJi62zQ",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 6,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/22QmtJi62zQ"
+    },
+    {
+      "id": 940,
+      "title": "Empty box",
+      "alt": "Empty box",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/86_1dd-Z27K",
+      "previewUrl": "https://static.poly.pizza/aafd4d39-d818-44b3-83e7-51cdf8e74b86.webp",
+      "publicID": "86_1dd-Z27K",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 7,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/86_1dd-Z27K"
+    },
+    {
+      "id": 2200,
+      "title": "Desk",
+      "alt": "Desk",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/dptlMEX4tF_",
+      "previewUrl": "https://static.poly.pizza/2735a3d6-0b9b-40f4-909f-19b6e54dff9e.webp",
+      "publicID": "dptlMEX4tF_",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 8,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/dptlMEX4tF_"
+    },
+    {
+      "id": 302,
+      "title": "Lamp",
+      "alt": "Lamp",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/3fBR37WefHM",
+      "previewUrl": "https://static.poly.pizza/5c48f763-5cdf-40b2-aaf2-408eb8693826.webp",
+      "publicID": "3fBR37WefHM",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 9,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/3fBR37WefHM"
+    },
+    {
+      "id": 1394,
+      "title": "Rug",
+      "alt": "Rug",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/epuypdA3tpO",
+      "previewUrl": "https://static.poly.pizza/eadd34ee-ed0d-4983-8d75-01fe9d683994.webp",
+      "publicID": "epuypdA3tpO",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 10,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/epuypdA3tpO"
+    },
+    {
+      "id": 565,
+      "title": "Coat rack",
+      "alt": "Coat rack",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/9-VaFd57fTT",
+      "previewUrl": "https://static.poly.pizza/db05852e-11f6-4392-a31f-e3f8cd4b1523.webp",
+      "publicID": "9-VaFd57fTT",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 11,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/9-VaFd57fTT"
+    },
+    {
+      "id": 1289,
+      "title": "Barstool",
+      "alt": "Barstool",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/63U8J3bGSaO",
+      "previewUrl": "https://static.poly.pizza/e9c38a5a-e654-4981-b8a8-d8861e6cf8ce.webp",
+      "publicID": "63U8J3bGSaO",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 12,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/63U8J3bGSaO"
+    },
+    {
+      "id": 70,
+      "title": "Broom",
+      "alt": "Broom",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/a8jocXHu7Od",
+      "previewUrl": "https://static.poly.pizza/ef5822bc-00cc-4811-915c-3729c5e4bccb.webp",
+      "publicID": "a8jocXHu7Od",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 13,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/a8jocXHu7Od"
+    },
+    {
+      "id": 40,
+      "title": "Television",
+      "alt": "Television",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6Fa29JN3A3F",
+      "previewUrl": "https://static.poly.pizza/0b632a99-ea29-4b5c-bb1f-7154365a6515.webp",
+      "publicID": "6Fa29JN3A3F",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "conditional",
+      "review_number": 14,
+      "review_reason": "Selected preview shows an ambiguous black slab; inspect another view or select a clearer version.",
+      "source_url": "https://poly.pizza/m/6Fa29JN3A3F"
+    },
+    {
+      "id": 1343,
+      "title": "Briefcase",
+      "alt": "Briefcase",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/7Y-V-rdyvi6",
+      "previewUrl": "https://static.poly.pizza/1090b4df-14ac-4ef0-989b-01e25f624bf5.webp",
+      "publicID": "7Y-V-rdyvi6",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 15,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/7Y-V-rdyvi6"
+    },
+    {
+      "id": 1170,
+      "title": "Open umbrella",
+      "alt": "Open umbrella",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/4uOho8GeU_w",
+      "previewUrl": "https://static.poly.pizza/fda336a5-836d-44b4-be44-ce5c3fa7c07d.webp",
+      "publicID": "4uOho8GeU_w",
+      "licence": "CC-BY 3.0",
+      "review_group": "Places and practical props",
+      "tier": "strong",
+      "review_number": 16,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/4uOho8GeU_w"
+    },
+    {
+      "id": 1741,
+      "title": "Etch a Sketch",
+      "alt": "Etch a Sketch",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/diUjohGgQnJ",
+      "previewUrl": "https://static.poly.pizza/521aa6da-a45f-478d-8158-c988b85044c9.webp",
+      "publicID": "diUjohGgQnJ",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 17,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/diUjohGgQnJ"
+    },
+    {
+      "id": 936,
+      "title": "Handheld game console",
+      "alt": "Handheld game console",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/fw194G1mJA9",
+      "previewUrl": "https://static.poly.pizza/9d670a21-5e87-4b1e-b324-68c5735528c9.webp",
+      "publicID": "fw194G1mJA9",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 18,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/fw194G1mJA9"
+    },
+    {
+      "id": 1084,
+      "title": "Videogame Controller",
+      "alt": "Videogame Controller",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6365MG_Pr_f",
+      "previewUrl": "https://static.poly.pizza/7c2fa4e9-4287-4f5f-8399-181ace7af858.webp",
+      "publicID": "6365MG_Pr_f",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 19,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/6365MG_Pr_f"
+    },
+    {
+      "id": 367,
+      "title": "Dice",
+      "alt": "Dice",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/dt1_LCub60M",
+      "previewUrl": "https://static.poly.pizza/05ebcbb1-76f5-4ea8-af66-3c9ad8409c4c.webp",
+      "publicID": "dt1_LCub60M",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 20,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/dt1_LCub60M"
+    },
+    {
+      "id": 971,
+      "title": "Pawn",
+      "alt": "Pawn",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/fXbCgbsujx4",
+      "previewUrl": "https://static.poly.pizza/08bc0f95-41d5-487d-8ace-6b245f861b7b.webp",
+      "publicID": "fXbCgbsujx4",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 21,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/fXbCgbsujx4"
+    },
+    {
+      "id": 271,
+      "title": "Knight chess piece",
+      "alt": "Knight chess piece",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/aW5HcCo0KZa",
+      "previewUrl": "https://static.poly.pizza/8aebecee-f42d-4f8c-90af-4871bde00d87.webp",
+      "publicID": "aW5HcCo0KZa",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 22,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/aW5HcCo0KZa"
+    },
+    {
+      "id": 1025,
+      "title": "Gavel",
+      "alt": "Gavel",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6yKiq1_NH5K",
+      "previewUrl": "https://static.poly.pizza/4bf03f3f-7898-4973-a5ae-d7e2c29db2db.webp",
+      "publicID": "6yKiq1_NH5K",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 23,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/6yKiq1_NH5K"
+    },
+    {
+      "id": 1339,
+      "title": "Candelabra",
+      "alt": "Candelabra",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/1kgsY8kDKT_",
+      "previewUrl": "https://static.poly.pizza/6f8788da-f10e-4f49-ba33-88a612820235.webp",
+      "publicID": "1kgsY8kDKT_",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 24,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/1kgsY8kDKT_"
+    },
+    {
+      "id": 1742,
+      "title": "Coins",
+      "alt": "Coins",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/fNCwo0rGrqD",
+      "previewUrl": "https://static.poly.pizza/f05e6d87-9e39-4f7c-ba61-628d22c836fd.webp",
+      "publicID": "fNCwo0rGrqD",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 25,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/fNCwo0rGrqD"
+    },
+    {
+      "id": 908,
+      "title": "Catapult",
+      "alt": "Catapult",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/9ahVI0EijEi",
+      "previewUrl": "https://static.poly.pizza/487d3271-beb2-4325-b95b-69b5537d0389.webp",
+      "publicID": "9ahVI0EijEi",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 26,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/9ahVI0EijEi"
+    },
+    {
+      "id": 1099,
+      "title": "Bone",
+      "alt": "Bone",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/5x7GOmvt0Tk",
+      "previewUrl": "https://static.poly.pizza/27de8ff7-fda6-41a1-88b4-582ee6fe6200.webp",
+      "publicID": "5x7GOmvt0Tk",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 27,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/5x7GOmvt0Tk"
+    },
+    {
+      "id": 1581,
+      "title": "Jack-O-Lantern",
+      "alt": "Jack-O-Lantern",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/cggu6F8hvCm",
+      "previewUrl": "https://static.poly.pizza/498fd373-557b-455a-96a5-dc1ad9175330.webp",
+      "publicID": "cggu6F8hvCm",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "conditional",
+      "review_number": 28,
+      "review_reason": "Selected preview is monochrome white; inspect materials or choose a clearer colored variant.",
+      "source_url": "https://poly.pizza/m/cggu6F8hvCm"
+    },
+    {
+      "id": 371,
+      "title": "Gingerbread man",
+      "alt": "Gingerbread man",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/cuIw8qvi-3T",
+      "previewUrl": "https://static.poly.pizza/542c0b13-e6fb-4aa9-b310-9b46d6abd767.webp",
+      "publicID": "cuIw8qvi-3T",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 29,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/cuIw8qvi-3T"
+    },
+    {
+      "id": 1043,
+      "title": "Top hat",
+      "alt": "Top hat",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/1PP65IsuNwv",
+      "previewUrl": "https://static.poly.pizza/8b57048e-81b3-49cb-b6d9-6b23ace1a92c.webp",
+      "publicID": "1PP65IsuNwv",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 30,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/1PP65IsuNwv"
+    },
+    {
+      "id": 186,
+      "title": "Cowboy hat",
+      "alt": "Cowboy hat",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/aWzUlZtGLC0",
+      "previewUrl": "https://static.poly.pizza/d7985d90-3621-4595-8321-25d39a25d47d.webp",
+      "publicID": "aWzUlZtGLC0",
+      "licence": "CC-BY 3.0",
+      "review_group": "Play, roles and celebration",
+      "tier": "strong",
+      "review_number": 31,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/aWzUlZtGLC0"
+    },
+    {
+      "id": 1555,
+      "title": "Football",
+      "alt": "Football",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/ci3cZGbNTql",
+      "previewUrl": "https://static.poly.pizza/1adb57a2-e9a2-494f-ad31-f807fd28322a.webp",
+      "publicID": "ci3cZGbNTql",
+      "licence": "CC-BY 3.0",
+      "review_group": "Sport and music",
+      "tier": "strong",
+      "review_number": 32,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/ci3cZGbNTql"
+    },
+    {
+      "id": 331,
+      "title": "Baseball bat",
+      "alt": "Baseball bat",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/7lesi0f7J82",
+      "previewUrl": "https://static.poly.pizza/78a0f578-8b68-42bd-b0cf-f1a5fdaba1fb.webp",
+      "publicID": "7lesi0f7J82",
+      "licence": "CC-BY 3.0",
+      "review_group": "Sport and music",
+      "tier": "strong",
+      "review_number": 33,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/7lesi0f7J82"
+    },
+    {
+      "id": 530,
+      "title": "Hockey stick",
+      "alt": "Hockey stick",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/7Ap2g6_26po",
+      "previewUrl": "https://static.poly.pizza/ab50b45b-1520-46b9-82ef-3ddefe6284df.webp",
+      "publicID": "7Ap2g6_26po",
+      "licence": "CC-BY 3.0",
+      "review_group": "Sport and music",
+      "tier": "strong",
+      "review_number": 34,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/7Ap2g6_26po"
+    },
+    {
+      "id": 216,
+      "title": "Surfboard",
+      "alt": "Surfboard",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/dkwqsVsI2R0",
+      "previewUrl": "https://static.poly.pizza/15eb2c4f-a5c2-49ba-9845-01817b2bf997.webp",
+      "publicID": "dkwqsVsI2R0",
+      "licence": "CC-BY 3.0",
+      "review_group": "Sport and music",
+      "tier": "strong",
+      "review_number": 35,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/dkwqsVsI2R0"
+    },
+    {
+      "id": 247,
+      "title": "Punching bag",
+      "alt": "Punching bag",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/aODw_lbKxQP",
+      "previewUrl": "https://static.poly.pizza/90587b18-dc2a-4e7f-ab90-c20fd8fced09.webp",
+      "publicID": "aODw_lbKxQP",
+      "licence": "CC-BY 3.0",
+      "review_group": "Sport and music",
+      "tier": "strong",
+      "review_number": 36,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/aODw_lbKxQP"
+    },
+    {
+      "id": 1721,
+      "title": "Dumbbell",
+      "alt": "Dumbbell",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6nGMIxBENld",
+      "previewUrl": "https://static.poly.pizza/132843b8-e432-44a9-b2b4-1f1c5f421602.webp",
+      "publicID": "6nGMIxBENld",
+      "licence": "CC-BY 3.0",
+      "review_group": "Sport and music",
+      "tier": "strong",
+      "review_number": 37,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/6nGMIxBENld"
+    },
+    {
+      "id": 831,
+      "title": "Gong",
+      "alt": "Gong",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/c3iMv3-DFuh",
+      "previewUrl": "https://static.poly.pizza/6911f3f9-d9c5-475c-a16f-638627854007.webp",
+      "publicID": "c3iMv3-DFuh",
+      "licence": "CC-BY 3.0",
+      "review_group": "Sport and music",
+      "tier": "strong",
+      "review_number": 38,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/c3iMv3-DFuh"
+    },
+    {
+      "id": 2138,
+      "title": "Maracas",
+      "alt": "Maracas",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/dULnMoBvtBN",
+      "previewUrl": "https://static.poly.pizza/caac3fba-2f55-4deb-9c12-9680f8b77a40.webp",
+      "publicID": "dULnMoBvtBN",
+      "licence": "CC-BY 3.0",
+      "review_group": "Sport and music",
+      "tier": "strong",
+      "review_number": 39,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/dULnMoBvtBN"
+    },
+    {
+      "id": 102,
+      "title": "Record player",
+      "alt": "Record player",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/4-d0cvpHjpS",
+      "previewUrl": "https://static.poly.pizza/62d90933-fdf6-48df-a0e0-f79a0920fdc4.webp",
+      "publicID": "4-d0cvpHjpS",
+      "licence": "CC-BY 3.0",
+      "review_group": "Sport and music",
+      "tier": "strong",
+      "review_number": 40,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/4-d0cvpHjpS"
+    },
+    {
+      "id": 387,
+      "title": "Headphones",
+      "alt": "Headphones",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/4h-eJ4xCsQa",
+      "previewUrl": "https://static.poly.pizza/1bcb9801-6be5-482b-9f2b-3f363d01697a.webp",
+      "publicID": "4h-eJ4xCsQa",
+      "licence": "CC-BY 3.0",
+      "review_group": "Sport and music",
+      "tier": "strong",
+      "review_number": 41,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/4h-eJ4xCsQa"
+    },
+    {
+      "id": 1255,
+      "title": "Venus flytrap",
+      "alt": "Venus flytrap",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/0y4ZpRcGhoD",
+      "previewUrl": "https://static.poly.pizza/4d364d67-e57d-4f61-8001-b761974ee8fc.webp",
+      "publicID": "0y4ZpRcGhoD",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 42,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/0y4ZpRcGhoD"
+    },
+    {
+      "id": 2262,
+      "title": "Aloe plant",
+      "alt": "Aloe plant",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6hYjnEpV-CC",
+      "previewUrl": "https://static.poly.pizza/3e7a6f88-3a09-45b5-9c19-b2c003f40c12.webp",
+      "publicID": "6hYjnEpV-CC",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 43,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/6hYjnEpV-CC"
+    },
+    {
+      "id": 135,
+      "title": "Log",
+      "alt": "Log",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/dkRLlPSdgdR",
+      "previewUrl": "https://static.poly.pizza/8d96a747-a572-45c7-9f11-4b7d107b4d6b.webp",
+      "publicID": "dkRLlPSdgdR",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "conditional",
+      "review_number": 44,
+      "review_reason": "Branched fallen trunk overlaps existing tree branch, roots and stump; check whether it adds enough variety.",
+      "source_url": "https://poly.pizza/m/dkRLlPSdgdR"
+    },
+    {
+      "id": 531,
+      "title": "Pine cone",
+      "alt": "Pine cone",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/06dagPn-QYn",
+      "previewUrl": "https://static.poly.pizza/79231a72-22f8-4d7d-a5be-bf32a438b824.webp",
+      "publicID": "06dagPn-QYn",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 45,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/06dagPn-QYn"
+    },
+    {
+      "id": 355,
+      "title": "Earth",
+      "alt": "Earth",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/88CP80Kgb-u",
+      "previewUrl": "https://static.poly.pizza/dd881bef-7c0d-4f41-8f81-23862135cafb.webp",
+      "publicID": "88CP80Kgb-u",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 46,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/88CP80Kgb-u"
+    },
+    {
+      "id": 573,
+      "title": "Apple",
+      "alt": "Apple",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/5hRReRDr0v4",
+      "previewUrl": "https://static.poly.pizza/e19d6527-b945-40f4-9e1f-cadfc6f0fcd6.webp",
+      "publicID": "5hRReRDr0v4",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 47,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/5hRReRDr0v4"
+    },
+    {
+      "id": 199,
+      "title": "Grapes",
+      "alt": "Grapes",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/ek6Azqlrpv_",
+      "previewUrl": "https://static.poly.pizza/b48c8dd1-15f3-4427-b661-5f2455ab54b2.webp",
+      "publicID": "ek6Azqlrpv_",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 48,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/ek6Azqlrpv_"
+    },
+    {
+      "id": 344,
+      "title": "Hot dog",
+      "alt": "Hot dog",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/7GZPJAKtU-C",
+      "previewUrl": "https://static.poly.pizza/f80ddd18-efd5-4180-b1a9-fd3d13c45980.webp",
+      "publicID": "7GZPJAKtU-C",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 49,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/7GZPJAKtU-C"
+    },
+    {
+      "id": 1186,
+      "title": "Pie",
+      "alt": "Pie",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/eu-vRr2-5dY",
+      "previewUrl": "https://static.poly.pizza/3cbde6a8-e842-4529-bb7b-248066b9f459.webp",
+      "publicID": "eu-vRr2-5dY",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 50,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/eu-vRr2-5dY"
+    },
+    {
+      "id": 400,
+      "title": "Ice cream",
+      "alt": "Ice cream",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/3qiDGMVEqmd",
+      "previewUrl": "https://static.poly.pizza/08bace27-9f95-4cd6-8ccf-20872b6ef671.webp",
+      "publicID": "3qiDGMVEqmd",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 51,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/3qiDGMVEqmd"
+    },
+    {
+      "id": 72,
+      "title": "Jug of milk",
+      "alt": "Jug of milk",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/a8U8rY_gryf",
+      "previewUrl": "https://static.poly.pizza/2cf87d99-93e0-49bb-93c3-a546251dcfeb.webp",
+      "publicID": "a8U8rY_gryf",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 52,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/a8U8rY_gryf"
+    },
+    {
+      "id": 113,
+      "title": "Water bottle",
+      "alt": "Water bottle",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/0PpSxxQVOxY",
+      "previewUrl": "https://static.poly.pizza/0667eba3-0d48-4759-a8df-2c5b5e4be937.webp",
+      "publicID": "0PpSxxQVOxY",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 53,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/0PpSxxQVOxY"
+    },
+    {
+      "id": 198,
+      "title": "Plate",
+      "alt": "Plate",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/596EEyBvuyM",
+      "previewUrl": "https://static.poly.pizza/81fe61c5-e80c-437f-b411-e29176d89c89.webp",
+      "publicID": "596EEyBvuyM",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 54,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/596EEyBvuyM"
+    },
+    {
+      "id": 2042,
+      "title": "Barbeque",
+      "alt": "Barbeque",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/2RnsxiNMppu",
+      "previewUrl": "https://static.poly.pizza/83378b8d-d8a0-47e8-b047-0efec45415e2.webp",
+      "publicID": "2RnsxiNMppu",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 55,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/2RnsxiNMppu"
+    },
+    {
+      "id": 1822,
+      "title": "Picnic Basket",
+      "alt": "Picnic Basket",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/aWBGhxXig8y",
+      "previewUrl": "https://static.poly.pizza/0f8169b2-dc23-48d6-a0c2-8f06bd2b3905.webp",
+      "publicID": "aWBGhxXig8y",
+      "licence": "CC-BY 3.0",
+      "review_group": "Nature and familiar objects",
+      "tier": "strong",
+      "review_number": 56,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/aWBGhxXig8y"
+    },
+    {
+      "id": 1069,
+      "title": "Anteater",
+      "alt": "Anteater",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/860UUZE3rIn",
+      "previewUrl": "https://static.poly.pizza/61f64b0a-7601-464b-9072-107ea2fe247f.webp",
+      "publicID": "860UUZE3rIn",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 57,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/860UUZE3rIn"
+    },
+    {
+      "id": 1625,
+      "title": "Skunk",
+      "alt": "Skunk",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/bf8IDe1qb7u",
+      "previewUrl": "https://static.poly.pizza/acd9630a-6674-4921-beec-2eac2827f1b0.webp",
+      "publicID": "bf8IDe1qb7u",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 58,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/bf8IDe1qb7u"
+    },
+    {
+      "id": 1226,
+      "title": "Porcupine",
+      "alt": "Porcupine",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/17NdW1sy5PC",
+      "previewUrl": "https://static.poly.pizza/d852c8f0-f977-4165-a054-c404b8c07fc6.webp",
+      "publicID": "17NdW1sy5PC",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 59,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/17NdW1sy5PC"
+    },
+    {
+      "id": 375,
+      "title": "Ostrich",
+      "alt": "Ostrich",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/1LtIviy4khn",
+      "previewUrl": "https://static.poly.pizza/075449c4-8773-4d6c-844a-5daa438cb30e.webp",
+      "publicID": "1LtIviy4khn",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 60,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/1LtIviy4khn"
+    },
+    {
+      "id": 1780,
+      "title": "Goose",
+      "alt": "Goose",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/9wn3If7Qgb4",
+      "previewUrl": "https://static.poly.pizza/d80a1788-3fd5-48fc-b083-7feb96d6394d.webp",
+      "publicID": "9wn3If7Qgb4",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 61,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/9wn3If7Qgb4"
+    },
+    {
+      "id": 1229,
+      "title": "American White Pelican",
+      "alt": "American White Pelican",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/2J2HY1oq8l2",
+      "previewUrl": "https://static.poly.pizza/1e131c5b-b01b-4b60-a490-73a19bb17008.webp",
+      "publicID": "2J2HY1oq8l2",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 62,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/2J2HY1oq8l2"
+    },
+    {
+      "id": 1893,
+      "title": "Salamander",
+      "alt": "Salamander",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/eqjMAgmr-pM",
+      "previewUrl": "https://static.poly.pizza/d7fe4fa8-be91-4e77-8876-e88f6e9501c2.webp",
+      "publicID": "eqjMAgmr-pM",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 63,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/eqjMAgmr-pM"
+    },
+    {
+      "id": 1036,
+      "title": "Scorpion",
+      "alt": "Scorpion",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6Bu7d_Pkm5o",
+      "previewUrl": "https://static.poly.pizza/0910d661-44e4-43d0-86d9-a55012e53949.webp",
+      "publicID": "6Bu7d_Pkm5o",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 64,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/6Bu7d_Pkm5o"
+    },
+    {
+      "id": 1068,
+      "title": "Bee",
+      "alt": "Bee",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/2177F_NMT--",
+      "previewUrl": "https://static.poly.pizza/dc4e6b52-d55a-4892-ac3e-cbb24e3e97ce.webp",
+      "publicID": "2177F_NMT--",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 65,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/2177F_NMT--"
+    },
+    {
+      "id": 1894,
+      "title": "Dragonfly",
+      "alt": "Dragonfly",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/0myA_BOcZrD",
+      "previewUrl": "https://static.poly.pizza/a657ff87-2200-4062-bd01-740ce06f524d.webp",
+      "publicID": "0myA_BOcZrD",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 66,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/0myA_BOcZrD"
+    },
+    {
+      "id": 626,
+      "title": "Caterpillar",
+      "alt": "Caterpillar",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/64T47O5VHAB",
+      "previewUrl": "https://static.poly.pizza/47841971-357b-4532-af8e-ad367980ff16.webp",
+      "publicID": "64T47O5VHAB",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 67,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/64T47O5VHAB"
+    },
+    {
+      "id": 489,
+      "title": "Lady bug",
+      "alt": "Lady bug",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/57yNPP6-sV_",
+      "previewUrl": "https://static.poly.pizza/6a9a7f8b-1061-431e-b0e5-b3697e655855.webp",
+      "publicID": "57yNPP6-sV_",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 68,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/57yNPP6-sV_"
+    },
+    {
+      "id": 1627,
+      "title": "Lobster",
+      "alt": "Lobster",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/7JIU-w5So3a",
+      "previewUrl": "https://static.poly.pizza/3c3f8934-9849-4a20-b29c-43a3d5ee482e.webp",
+      "publicID": "7JIU-w5So3a",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 69,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/7JIU-w5So3a"
+    },
+    {
+      "id": 966,
+      "title": "Starfish",
+      "alt": "Starfish",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6H-0K9IEr56",
+      "previewUrl": "https://static.poly.pizza/c9c1bc97-d76e-4e87-bd3a-87ab44b78aac.webp",
+      "publicID": "6H-0K9IEr56",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 70,
+      "review_reason": "Three starfish grouped in one model; useful as a group, not three independently placeable objects.",
+      "source_url": "https://poly.pizza/m/6H-0K9IEr56",
+      "suggested_display_name": "Starfish group"
+    },
+    {
+      "id": 1180,
+      "title": "Walrus",
+      "alt": "Walrus",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/5T7nIjx9ekP",
+      "previewUrl": "https://static.poly.pizza/4faf999b-6192-470c-803e-8dd951111294.webp",
+      "publicID": "5T7nIjx9ekP",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 71,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/5T7nIjx9ekP"
+    },
+    {
+      "id": 201,
+      "title": "Narwhal",
+      "alt": "Narwhal",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/9nvsRtWPsHv",
+      "previewUrl": "https://static.poly.pizza/155a618b-f335-4d5c-ad83-cda157bb5480.webp",
+      "publicID": "9nvsRtWPsHv",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 72,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/9nvsRtWPsHv"
+    },
+    {
+      "id": 1185,
+      "title": "Pufferfish",
+      "alt": "Pufferfish",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/3tgZD06mzCe",
+      "previewUrl": "https://static.poly.pizza/ee04f1a6-b297-45d0-9aa1-5fd3115c6607.webp",
+      "publicID": "3tgZD06mzCe",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 73,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/3tgZD06mzCe"
+    },
+    {
+      "id": 595,
+      "title": "Kitten",
+      "alt": "Kitten",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/dBJgGEu5bHW",
+      "previewUrl": "https://static.poly.pizza/e068bd2b-9ad3-4d39-a969-0379c8be5270.webp",
+      "publicID": "dBJgGEu5bHW",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "conditional",
+      "review_number": 74,
+      "review_reason": "Selected preview does not clearly read as a juvenile; overlaps existing Cat.",
+      "source_url": "https://poly.pizza/m/dBJgGEu5bHW"
+    },
+    {
+      "id": 760,
+      "title": "Puppy",
+      "alt": "Puppy",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/3nFLBC3aXen",
+      "previewUrl": "https://static.poly.pizza/df8a7c52-dd34-4616-bda2-24a5dac60d4a.webp",
+      "publicID": "3nFLBC3aXen",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "conditional",
+      "review_number": 75,
+      "review_reason": "Selected preview does not clearly read as a juvenile; overlaps existing Dog and Bull Terrier.",
+      "source_url": "https://poly.pizza/m/3nFLBC3aXen"
+    },
+    {
+      "id": 1872,
+      "title": "Duckling",
+      "alt": "Duckling",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/cGH2xtNdS4i",
+      "previewUrl": "https://static.poly.pizza/88f59dcc-fd1a-4393-82b5-152c355672d5.webp",
+      "publicID": "cGH2xtNdS4i",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 76,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/cGH2xtNdS4i"
+    },
+    {
+      "id": 1530,
+      "title": "Baby chick",
+      "alt": "Baby chick",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/fozJTmMX5yv",
+      "previewUrl": "https://static.poly.pizza/851ab442-b03f-461a-9fd8-6f6faf279ff3.webp",
+      "publicID": "fozJTmMX5yv",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "strong",
+      "review_number": 77,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/fozJTmMX5yv"
+    },
+    {
+      "id": 1917,
+      "title": "Bear Cub",
+      "alt": "Bear Cub",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/dc_78YWzT_R",
+      "previewUrl": "https://static.poly.pizza/2196cc0d-d5d6-4ca3-bdaf-ca41beed5e66.webp",
+      "publicID": "dc_78YWzT_R",
+      "licence": "CC-BY 3.0",
+      "review_group": "Distinct wildlife",
+      "tier": "conditional",
+      "review_number": 78,
+      "review_reason": "Selected preview resembles an ordinary bear; juvenile distinction needs closer review.",
+      "source_url": "https://poly.pizza/m/dc_78YWzT_R"
+    },
+    {
+      "id": 36,
+      "title": "Elevator",
+      "alt": "Elevator",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/aZ7y77mq_u6",
+      "previewUrl": "https://static.poly.pizza/62c5d565-5749-4544-82e0-c857482d8500.webp",
+      "publicID": "aZ7y77mq_u6",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 79,
+      "review_reason": "Wall-mounted assembly needs a useful freestanding presentation.",
+      "source_url": "https://poly.pizza/m/aZ7y77mq_u6"
+    },
+    {
+      "id": 26,
+      "title": "Canal",
+      "alt": "Canal",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/9GgPXh03quk",
+      "previewUrl": "https://static.poly.pizza/f372333f-f9e8-4d02-aff3-7879cc2c6f9b.webp",
+      "publicID": "9GgPXh03quk",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 80,
+      "review_reason": "Long flat terrain strip needs placement and usefulness checks.",
+      "source_url": "https://poly.pizza/m/9GgPXh03quk"
+    },
+    {
+      "id": 347,
+      "title": "Fortress",
+      "alt": "Fortress",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/4XMaa7Ovrwx",
+      "previewUrl": "https://static.poly.pizza/831577d5-990e-4e4a-81a2-4ad441c31e01.webp",
+      "publicID": "4XMaa7Ovrwx",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 81,
+      "review_reason": "Standalone but overlaps existing Castle; compare forms.",
+      "source_url": "https://poly.pizza/m/4XMaa7Ovrwx"
+    },
+    {
+      "id": 899,
+      "title": "Wood bridge",
+      "alt": "Wood bridge",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/ccxRFIgIvIL",
+      "previewUrl": "https://static.poly.pizza/ceb96247-ef8c-49ac-99b9-1e11d84dfd42.webp",
+      "publicID": "ccxRFIgIvIL",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 82,
+      "review_reason": "Useful bridge variant, but compare existing Bridge1.",
+      "source_url": "https://poly.pizza/m/ccxRFIgIvIL"
+    },
+    {
+      "id": 1390,
+      "title": "Cottage",
+      "alt": "Cottage",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/bQpvnFgH5wr",
+      "previewUrl": "https://static.poly.pizza/4e8a0091-33dd-4b00-9eed-d1664f714cd3.webp",
+      "publicID": "bQpvnFgH5wr",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 83,
+      "review_reason": "House variant; compare existing House and Farm House.",
+      "source_url": "https://poly.pizza/m/bQpvnFgH5wr"
+    },
+    {
+      "id": 24,
+      "title": "Chalet",
+      "alt": "Chalet",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/8QBUPls_J9b",
+      "previewUrl": "https://static.poly.pizza/40ece29d-b003-480e-8fd5-c006c6ef6725.webp",
+      "publicID": "8QBUPls_J9b",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 84,
+      "review_reason": "Includes snowy terrain and trees; consider extracting the building.",
+      "source_url": "https://poly.pizza/m/8QBUPls_J9b"
+    },
+    {
+      "id": 137,
+      "title": "Cabana",
+      "alt": "Cabana",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/5tEY6_rR2wL",
+      "previewUrl": "https://static.poly.pizza/5085afe8-df0e-481e-ac46-df83d02d549e.webp",
+      "publicID": "5tEY6_rR2wL",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 85,
+      "review_reason": "Small building variant; compare existing buildings.",
+      "source_url": "https://poly.pizza/m/5tEY6_rR2wL"
+    },
+    {
+      "id": 812,
+      "title": "Safe",
+      "alt": "Safe",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/4nGzqEUog7O",
+      "previewUrl": "https://static.poly.pizza/9abd5c4d-c701-45c8-b3f5-b1ecb78cbb0f.webp",
+      "publicID": "4nGzqEUog7O",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 86,
+      "review_reason": "Blank rear-facing preview; inspect front and materials.",
+      "source_url": "https://poly.pizza/m/4nGzqEUog7O"
+    },
+    {
+      "id": 97,
+      "title": "Window",
+      "alt": "Window",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/9eedkubZNOO",
+      "previewUrl": "https://static.poly.pizza/c7db2a08-61dd-4ac7-b0c4-c615c4d5b6ec.webp",
+      "publicID": "9eedkubZNOO",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 87,
+      "review_reason": "Thin architectural component; needs placement and visibility checks.",
+      "source_url": "https://poly.pizza/m/9eedkubZNOO"
+    },
+    {
+      "id": 42,
+      "title": "Road straight",
+      "alt": "Road straight",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/4-vcEW8IzaI",
+      "previewUrl": "https://static.poly.pizza/cce4de22-04c9-4afd-bcb6-4768c282cd15.webp",
+      "publicID": "4-vcEW8IzaI",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 88,
+      "review_reason": "Useful segment, but overlaps existing roads and lane markings.",
+      "source_url": "https://poly.pizza/m/4-vcEW8IzaI"
+    },
+    {
+      "id": 411,
+      "title": "Railway car",
+      "alt": "Railway car",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/4OGoVJSG-zr",
+      "previewUrl": "https://static.poly.pizza/9c471ca9-bf64-4e01-baa9-de5166be855d.webp",
+      "publicID": "4OGoVJSG-zr",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 89,
+      "review_reason": "Preview is a bullet-train vehicle; overlaps existing Bullet train.",
+      "source_url": "https://poly.pizza/m/4OGoVJSG-zr"
+    },
+    {
+      "id": 2040,
+      "title": "Schoolbus",
+      "alt": "Schoolbus",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/8xacyNqdJ3t",
+      "previewUrl": "https://static.poly.pizza/b79bb5fb-28e1-43cb-b821-75a7dcecd89c.webp",
+      "publicID": "8xacyNqdJ3t",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 90,
+      "review_reason": "Compare existing Bus; verify distinct school identity.",
+      "source_url": "https://poly.pizza/m/8xacyNqdJ3t"
+    },
+    {
+      "id": 403,
+      "title": "Rowboat",
+      "alt": "Rowboat",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/dt1yhb5AYXD",
+      "previewUrl": "https://static.poly.pizza/0c76d378-c3fb-4a1c-aa5f-a25f09bd3ea4.webp",
+      "publicID": "dt1yhb5AYXD",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 91,
+      "review_reason": "Distinct rowing detail, but compare existing Boat and Kayak.",
+      "source_url": "https://poly.pizza/m/dt1yhb5AYXD"
+    },
+    {
+      "id": 446,
+      "title": "Sailboat",
+      "alt": "Sailboat",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/7AOnch2wREC",
+      "previewUrl": "https://static.poly.pizza/0539464a-5deb-43b0-9a1d-dab0dbd55436.webp",
+      "publicID": "7AOnch2wREC",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 92,
+      "review_reason": "Compare existing Boat before accepting another watercraft.",
+      "source_url": "https://poly.pizza/m/7AOnch2wREC"
+    },
+    {
+      "id": 513,
+      "title": "Houseboat",
+      "alt": "Houseboat",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6tC1nYlbK3w",
+      "previewUrl": "https://static.poly.pizza/8ef5819b-ba33-49df-8232-11ab0f635609.webp",
+      "publicID": "6tC1nYlbK3w",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 93,
+      "review_reason": "Preview resembles a tugboat; overlaps existing Tugboat.",
+      "source_url": "https://poly.pizza/m/6tC1nYlbK3w"
+    },
+    {
+      "id": 1055,
+      "title": "Gondola",
+      "alt": "Gondola",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/9eqRqoO_oRP",
+      "previewUrl": "https://static.poly.pizza/4bc73d96-8171-4a98-815a-7478a2eeb682.webp",
+      "publicID": "9eqRqoO_oRP",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 94,
+      "review_reason": "Boat variant; check distinct appearance and thin geometry.",
+      "source_url": "https://poly.pizza/m/9eqRqoO_oRP"
+    },
+    {
+      "id": 59,
+      "title": "Unicycle",
+      "alt": "Unicycle",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/c4eT6ivB_Tm",
+      "previewUrl": "https://static.poly.pizza/472440ea-8352-4e36-9b67-835b0caf674f.webp",
+      "publicID": "c4eT6ivB_Tm",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "strong",
+      "review_number": 95,
+      "review_reason": "Recognizable one-wheel cycle, distinct from existing bicycle and tricycle.",
+      "source_url": "https://poly.pizza/m/c4eT6ivB_Tm"
+    },
+    {
+      "id": 465,
+      "title": "Chairlift",
+      "alt": "Chairlift",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6GJ4rMuBZty",
+      "previewUrl": "https://static.poly.pizza/865d8da8-82f3-4f34-a28f-c9e2d0b8d47c.webp",
+      "publicID": "6GJ4rMuBZty",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 96,
+      "review_reason": "Suspended component lacks its cable/support; assess freestanding use.",
+      "source_url": "https://poly.pizza/m/6GJ4rMuBZty"
+    },
+    {
+      "id": 1291,
+      "title": "Bishop",
+      "alt": "Bishop",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/0Iwry_4fNw0",
+      "previewUrl": "https://static.poly.pizza/fc264154-6beb-47af-b1d9-bb6c9cdfcc51.webp",
+      "publicID": "0Iwry_4fNw0",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 97,
+      "review_reason": "Additional chess role after pawn and knight; lower priority.",
+      "source_url": "https://poly.pizza/m/0Iwry_4fNw0"
+    },
+    {
+      "id": 82,
+      "title": "Halo",
+      "alt": "Halo",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/5jiuuz7sOV_",
+      "previewUrl": "https://static.poly.pizza/7ad8b58a-48f6-444c-930d-05342b8f17fb.webp",
+      "publicID": "5jiuuz7sOV_",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 98,
+      "review_reason": "Thin ring needs upright visibility and grounding checks.",
+      "source_url": "https://poly.pizza/m/5jiuuz7sOV_"
+    },
+    {
+      "id": 1273,
+      "title": "Pearl necklace",
+      "alt": "Pearl necklace",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/eyzMh_ozkF4",
+      "previewUrl": "https://static.poly.pizza/256badef-5bec-403b-a456-aca6a7dc4f80.webp",
+      "publicID": "eyzMh_ozkF4",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 99,
+      "review_reason": "Thin loop needs visibility and selection checks.",
+      "source_url": "https://poly.pizza/m/eyzMh_ozkF4"
+    },
+    {
+      "id": 116,
+      "title": "Horseshoe",
+      "alt": "Horseshoe",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/cn2TLOaUBIn",
+      "previewUrl": "https://static.poly.pizza/b42e4970-a092-4aba-b1cf-c23767a42022.webp",
+      "publicID": "cn2TLOaUBIn",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 100,
+      "review_reason": "Useful symbolic object but thin; inspect scale and selection.",
+      "source_url": "https://poly.pizza/m/cn2TLOaUBIn"
+    },
+    {
+      "id": 783,
+      "title": "Pirate hook",
+      "alt": "Pirate hook",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/eKyOgAaDCCV",
+      "previewUrl": "https://static.poly.pizza/ce0b6ac2-6708-4169-99c9-68307b92a34c.webp",
+      "publicID": "eKyOgAaDCCV",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 101,
+      "review_reason": "Detached costume/body accessory; assess standalone use.",
+      "source_url": "https://poly.pizza/m/eKyOgAaDCCV"
+    },
+    {
+      "id": 1169,
+      "title": "Saddle",
+      "alt": "Saddle",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/dSMm_V4sKNr",
+      "previewUrl": "https://static.poly.pizza/aa2e4197-751b-4d0d-a675-a9f6efcd928d.webp",
+      "publicID": "dSMm_V4sKNr",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 102,
+      "review_reason": "Detached riding accessory; inspect standalone placement.",
+      "source_url": "https://poly.pizza/m/dSMm_V4sKNr"
+    },
+    {
+      "id": 1663,
+      "title": "Field of corn",
+      "alt": "Field of corn",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/dE73diXi82k",
+      "previewUrl": "https://static.poly.pizza/f877723d-9178-48a4-aa9a-d014513fb27e.webp",
+      "publicID": "dE73diXi82k",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 103,
+      "review_reason": "Multi-stalk group; compare existing Field of wheat and check geometry.",
+      "source_url": "https://poly.pizza/m/dE73diXi82k"
+    },
+    {
+      "id": 719,
+      "title": "Orchid",
+      "alt": "Orchid",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/0gEtIcRV4do",
+      "previewUrl": "https://static.poly.pizza/e9226fbe-b03e-4ac2-b2ec-eff43b8558e1.webp",
+      "publicID": "0gEtIcRV4do",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 104,
+      "review_reason": "Potted flowering plant; compare existing plants for added variety.",
+      "source_url": "https://poly.pizza/m/0gEtIcRV4do"
+    },
+    {
+      "id": 1301,
+      "title": "Daisy",
+      "alt": "Daisy",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/ckAqqaCskMy",
+      "previewUrl": "https://static.poly.pizza/50457fd9-4041-4016-8d7a-40718d8fefae.webp",
+      "publicID": "ckAqqaCskMy",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 105,
+      "review_reason": "Thin flower; compare existing flower range.",
+      "source_url": "https://poly.pizza/m/ckAqqaCskMy"
+    },
+    {
+      "id": 564,
+      "title": "Comet",
+      "alt": "Comet",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/ffzZSJOorck",
+      "previewUrl": "https://static.poly.pizza/53d737bb-dc6e-4a63-8897-6fc6db176986.webp",
+      "publicID": "ffzZSJOorck",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 106,
+      "review_reason": "Stylized space object may not be recognizable at tray scale.",
+      "source_url": "https://poly.pizza/m/ffzZSJOorck"
+    },
+    {
+      "id": 1937,
+      "title": "Black hole",
+      "alt": "Black hole",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/bUEMVxbw9Zr",
+      "previewUrl": "https://static.poly.pizza/fdeb3110-8854-48e8-a26b-d8dcb9ba2aaf.webp",
+      "publicID": "bUEMVxbw9Zr",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 107,
+      "review_reason": "Complex stylized space object; check readability and geometry.",
+      "source_url": "https://poly.pizza/m/bUEMVxbw9Zr"
+    },
+    {
+      "id": 390,
+      "title": "Jupiter",
+      "alt": "Jupiter",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/cI_DG84S1NP",
+      "previewUrl": "https://static.poly.pizza/33920adc-ecf0-4b2f-ba75-31b02b2cb881.webp",
+      "publicID": "cI_DG84S1NP",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 108,
+      "review_reason": "Planet variant after Earth; lower priority.",
+      "source_url": "https://poly.pizza/m/cI_DG84S1NP"
+    },
+    {
+      "id": 958,
+      "title": "Mars",
+      "alt": "Mars",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/7JzVJ36_nXh",
+      "previewUrl": "https://static.poly.pizza/25699e94-2b16-4b20-991a-f8285158ac7f.webp",
+      "publicID": "7JzVJ36_nXh",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 109,
+      "review_reason": "Planet variant after Earth; lower priority.",
+      "source_url": "https://poly.pizza/m/7JzVJ36_nXh"
+    },
+    {
+      "id": 553,
+      "title": "Venus",
+      "alt": "Venus",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6V99ow0chMd",
+      "previewUrl": "https://static.poly.pizza/332d678b-6f71-4a2c-bc29-61ee7e22f554.webp",
+      "publicID": "6V99ow0chMd",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 110,
+      "review_reason": "Planet variant after Earth; lower priority.",
+      "source_url": "https://poly.pizza/m/6V99ow0chMd"
+    },
+    {
+      "id": 420,
+      "title": "Neptune",
+      "alt": "Neptune",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6dOb2Q_w_pM",
+      "previewUrl": "https://static.poly.pizza/1f913936-8dc8-4ea9-bd4d-cadacd20b357.webp",
+      "publicID": "6dOb2Q_w_pM",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 111,
+      "review_reason": "Planet variant after Earth; lower priority.",
+      "source_url": "https://poly.pizza/m/6dOb2Q_w_pM"
+    },
+    {
+      "id": 1314,
+      "title": "Manatee",
+      "alt": "Manatee",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/7nDfJjW0Csq",
+      "previewUrl": "https://static.poly.pizza/6a03a835-2d9e-4694-8ab0-f308a22724c0.webp",
+      "publicID": "7nDfJjW0Csq",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "strong",
+      "review_number": 112,
+      "review_reason": "Recognizable aquatic mammal with a distinct silhouette from existing seal, whale and dolphin.",
+      "source_url": "https://poly.pizza/m/7nDfJjW0Csq"
+    },
+    {
+      "id": 1075,
+      "title": "Orca",
+      "alt": "Orca",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/5p9B6IebY-A",
+      "previewUrl": "https://static.poly.pizza/f6214f69-34e2-4a28-8986-1e7d6ca9b964.webp",
+      "publicID": "5p9B6IebY-A",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 113,
+      "review_reason": "Distinct markings, but compare existing Whale and Dolphin.",
+      "source_url": "https://poly.pizza/m/5p9B6IebY-A"
+    },
+    {
+      "id": 651,
+      "title": "Squid",
+      "alt": "Squid",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/aOY1Ae28E9k",
+      "previewUrl": "https://static.poly.pizza/48d466f4-30aa-4605-92d3-d1bee6d32fbc.webp",
+      "publicID": "aOY1Ae28E9k",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "strong",
+      "review_number": 114,
+      "review_reason": "Long-bodied tentacled animal, visually distinct from existing Octopus.",
+      "source_url": "https://poly.pizza/m/aOY1Ae28E9k"
+    },
+    {
+      "id": 1905,
+      "title": "Sea Urchin",
+      "alt": "Sea Urchin",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/f4iwEhEP3-d",
+      "previewUrl": "https://static.poly.pizza/aac25f73-615e-4c08-bc5b-7d8fb291d359.webp",
+      "publicID": "f4iwEhEP3-d",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 115,
+      "review_reason": "Fine spines need geometry, visibility and selection checks.",
+      "source_url": "https://poly.pizza/m/f4iwEhEP3-d"
+    },
+    {
+      "id": 1568,
+      "title": "Elk",
+      "alt": "Elk",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/bO8XPdrAb5G",
+      "previewUrl": "https://static.poly.pizza/0dac29e1-fae0-4cad-b117-03b6c0dbbd37.webp",
+      "publicID": "bO8XPdrAb5G",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 116,
+      "review_reason": "Compare existing Deer and Antelope; species variant.",
+      "source_url": "https://poly.pizza/m/bO8XPdrAb5G"
+    },
+    {
+      "id": 968,
+      "title": "Ram",
+      "alt": "Ram",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/fm86jjk4m7D",
+      "previewUrl": "https://static.poly.pizza/37f8e517-8a9d-48b7-b7cb-18d2a06999aa.webp",
+      "publicID": "fm86jjk4m7D",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 117,
+      "review_reason": "Compare existing Sheep and Goat; species/sex variant.",
+      "source_url": "https://poly.pizza/m/fm86jjk4m7D"
+    },
+    {
+      "id": 1963,
+      "title": "Bull",
+      "alt": "Bull",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/fWsIqDIIJ5S",
+      "previewUrl": "https://static.poly.pizza/3fb4ae59-9b2a-4a44-873c-e629a69bf32e.webp",
+      "publicID": "fWsIqDIIJ5S",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 118,
+      "review_reason": "Compare existing Cow and Bison; species/sex variant.",
+      "source_url": "https://poly.pizza/m/fWsIqDIIJ5S"
+    },
+    {
+      "id": 1333,
+      "title": "Hummingbird",
+      "alt": "Hummingbird",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/70NyKFt-vLF",
+      "previewUrl": "https://static.poly.pizza/4737f745-a27e-41d5-b8ea-e888637aadb2.webp",
+      "publicID": "70NyKFt-vLF",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 119,
+      "review_reason": "Distinct silhouette but compare existing bird range; thin beak/wings.",
+      "source_url": "https://poly.pizza/m/70NyKFt-vLF"
+    },
+    {
+      "id": 533,
+      "title": "Tennis court",
+      "alt": "Tennis court",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/7cVH1Xt-LYy",
+      "previewUrl": "https://static.poly.pizza/86f97158-aed0-4316-a70e-8c6cab185c03.webp",
+      "publicID": "7cVH1Xt-LYy",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 120,
+      "review_reason": "Whole sports area with base; lower priority than individual miniatures.",
+      "source_url": "https://poly.pizza/m/7cVH1Xt-LYy"
+    },
+    {
+      "id": 1351,
+      "title": "Football stadium",
+      "alt": "Football stadium",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6TZCkGh76m5",
+      "previewUrl": "https://static.poly.pizza/c64ea3bf-399e-4e55-ab07-497e0457e699.webp",
+      "publicID": "6TZCkGh76m5",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 121,
+      "review_reason": "Whole sports scene with terrain base.",
+      "source_url": "https://poly.pizza/m/6TZCkGh76m5"
+    },
+    {
+      "id": 1618,
+      "title": "Ballpark",
+      "alt": "Ballpark",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/45Ez39JSdz6",
+      "previewUrl": "https://static.poly.pizza/98e54cbc-cca3-425b-9424-2c5a3d29a095.webp",
+      "publicID": "45Ez39JSdz6",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 122,
+      "review_reason": "Whole sports scene; compare existing Coliseum and sports areas.",
+      "source_url": "https://poly.pizza/m/45Ez39JSdz6"
+    },
+    {
+      "id": 880,
+      "title": "Bakery",
+      "alt": "Bakery",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/d9J1yq_vg5X",
+      "previewUrl": "https://static.poly.pizza/6fa50a08-6ac4-4602-be5a-45456bd34671.webp",
+      "publicID": "d9J1yq_vg5X",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 123,
+      "review_reason": "Building includes a large road/terrain base; extraction may help.",
+      "source_url": "https://poly.pizza/m/d9J1yq_vg5X"
+    },
+    {
+      "id": 1954,
+      "title": "Garden",
+      "alt": "Garden",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/3vUUYmsouMM",
+      "previewUrl": "https://static.poly.pizza/bdec5ee0-efa1-4c99-9b48-8e209d501df5.webp",
+      "publicID": "3vUUYmsouMM",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 124,
+      "review_reason": "Complete planted scene; compare individual garden assets.",
+      "source_url": "https://poly.pizza/m/3vUUYmsouMM"
+    },
+    {
+      "id": 1498,
+      "title": "Chapel",
+      "alt": "Chapel",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/6Fk2w-sKlk6",
+      "previewUrl": "https://static.poly.pizza/d07eb944-474f-47ff-b0a3-3fc004030987.webp",
+      "publicID": "6Fk2w-sKlk6",
+      "licence": "CC-BY 3.0",
+      "review_group": "Conditional — preparation or overlap",
+      "tier": "conditional",
+      "review_number": 125,
+      "review_reason": "Compare existing Church and Temple; building variant.",
+      "source_url": "https://poly.pizza/m/6Fk2w-sKlk6"
+    },
+    {
+      "id": 38,
+      "title": "Cinder block",
+      "alt": "Cinder block",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/d69NgO3BXv1",
+      "previewUrl": "https://static.poly.pizza/3fc7bab6-1804-4385-9f60-ddcbf11ddea7.webp",
+      "publicID": "d69NgO3BXv1",
+      "licence": "CC-BY 3.0",
+      "tier": "strong",
+      "review_group": "Places and practical props",
+      "review_number": 126,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/d69NgO3BXv1"
+    },
+    {
+      "id": 832,
+      "title": "Anvil",
+      "alt": "Anvil",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/aTcKrofhCXS",
+      "previewUrl": "https://static.poly.pizza/db4be0be-8090-40c4-9b47-98b1e61b2e26.webp",
+      "publicID": "aTcKrofhCXS",
+      "licence": "CC-BY 3.0",
+      "tier": "strong",
+      "review_group": "Places and practical props",
+      "review_number": 127,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/aTcKrofhCXS"
+    },
+    {
+      "id": 176,
+      "title": "Hatchet",
+      "alt": "Hatchet",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/2DrO3g2y_g2",
+      "previewUrl": "https://static.poly.pizza/0c6ed1e5-469f-4555-8985-2d5112cc656a.webp",
+      "publicID": "2DrO3g2y_g2",
+      "licence": "CC-BY 3.0",
+      "tier": "strong",
+      "review_group": "Places and practical props",
+      "review_number": 128,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/2DrO3g2y_g2"
+    },
+    {
+      "id": 1424,
+      "title": "Pitchfork",
+      "alt": "Pitchfork",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/edEe1ygZiHf",
+      "previewUrl": "https://static.poly.pizza/f9f3459b-fc03-4b10-8b27-cadaebad9eb3.webp",
+      "publicID": "edEe1ygZiHf",
+      "licence": "CC-BY 3.0",
+      "tier": "strong",
+      "review_group": "Places and practical props",
+      "review_number": 129,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/edEe1ygZiHf"
+    },
+    {
+      "id": 2129,
+      "title": "Cell phone",
+      "alt": "Cell phone",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/bezroX5BmjX",
+      "previewUrl": "https://static.poly.pizza/68f749a0-cbfa-444f-85eb-498894722db8.webp",
+      "publicID": "bezroX5BmjX",
+      "licence": "CC-BY 3.0",
+      "tier": "strong",
+      "review_group": "Places and practical props",
+      "review_number": 130,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/bezroX5BmjX"
+    },
+    {
+      "id": 4,
+      "title": "Paper airplane",
+      "alt": "Paper airplane",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/75WQH5E29tF",
+      "previewUrl": "https://static.poly.pizza/13ee3d74-48dd-475b-a6d0-1068b77f72f2.webp",
+      "publicID": "75WQH5E29tF",
+      "licence": "CC-BY 3.0",
+      "tier": "strong",
+      "review_group": "Play, roles and celebration",
+      "review_number": 131,
+      "review_reason": "Recognizable standalone subject in the preview; adds a useful object or distinct silhouette to the existing selection.",
+      "source_url": "https://poly.pizza/m/75WQH5E29tF"
+    },
+    {
+      "id": 154,
+      "title": "Casino",
+      "alt": "Casino",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/ch4RRNmqTUI",
+      "previewUrl": "https://static.poly.pizza/2766c729-ce26-427c-bad0-66f5db0342ea.webp",
+      "publicID": "ch4RRNmqTUI",
+      "licence": "CC-BY 3.0",
+      "tier": "conditional",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 132,
+      "review_reason": "Building includes broad decorative base; assess extraction and added variety.",
+      "source_url": "https://poly.pizza/m/ch4RRNmqTUI"
+    },
+    {
+      "id": 1931,
+      "title": "Saloon",
+      "alt": "Saloon",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/82JBTSsWag4",
+      "previewUrl": "https://static.poly.pizza/ce3e2403-2f9f-49c1-a786-20bfcda8fbd5.webp",
+      "publicID": "82JBTSsWag4",
+      "licence": "CC-BY 3.0",
+      "tier": "conditional",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 133,
+      "review_reason": "Compare existing Bar; distinctive exterior but possible overlap.",
+      "source_url": "https://poly.pizza/m/82JBTSsWag4"
+    },
+    {
+      "id": 860,
+      "title": "Bathroom",
+      "alt": "Bathroom",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/3qqka8Oxe2B",
+      "previewUrl": "https://static.poly.pizza/7e964d3c-3125-44f4-bf3a-a23184f5a8ff.webp",
+      "publicID": "3qqka8Oxe2B",
+      "licence": "CC-BY 3.0",
+      "tier": "conditional",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 134,
+      "review_reason": "Room diorama; requires component extraction for individual props.",
+      "source_url": "https://poly.pizza/m/3qqka8Oxe2B"
+    },
+    {
+      "id": 165,
+      "title": "Kitchen",
+      "alt": "Kitchen",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/b90F1JhGrA4",
+      "previewUrl": "https://static.poly.pizza/2fa8173a-6602-432f-bdea-4ea7db6ee069.webp",
+      "publicID": "b90F1JhGrA4",
+      "licence": "CC-BY 3.0",
+      "tier": "conditional",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 135,
+      "review_reason": "Room diorama; requires component extraction for individual props.",
+      "source_url": "https://poly.pizza/m/b90F1JhGrA4"
+    },
+    {
+      "id": 1688,
+      "title": "Brick",
+      "alt": "Brick",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/8MWIRnfzcuS",
+      "previewUrl": "https://static.poly.pizza/3f433e6f-001f-44ec-908c-fa66a572992c.webp",
+      "publicID": "8MWIRnfzcuS",
+      "licence": "CC-BY 3.0",
+      "tier": "conditional",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 136,
+      "review_reason": "Small construction unit; compare Cinder block for added value.",
+      "source_url": "https://poly.pizza/m/8MWIRnfzcuS"
+    },
+    {
+      "id": 2118,
+      "title": "Metal pipe",
+      "alt": "Metal pipe",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/a4bBMLzmLky",
+      "previewUrl": "https://static.poly.pizza/ddfae033-4399-4801-9f2b-919fe2a5ac67.webp",
+      "publicID": "a4bBMLzmLky",
+      "licence": "CC-BY 3.0",
+      "tier": "conditional",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 137,
+      "review_reason": "Several pipes grouped; inspect usefulness and labeling.",
+      "source_url": "https://poly.pizza/m/a4bBMLzmLky"
+    },
+    {
+      "id": 792,
+      "title": "Lawn mower",
+      "alt": "Lawn mower",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/1pdSPagFCub",
+      "previewUrl": "https://static.poly.pizza/53112885-4635-40f0-abf0-0356e2a8e490.webp",
+      "publicID": "1pdSPagFCub",
+      "licence": "CC-BY 3.0",
+      "tier": "conditional",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 138,
+      "review_reason": "Recognizable tool; lower priority than broader scene-building gaps.",
+      "source_url": "https://poly.pizza/m/1pdSPagFCub"
+    },
+    {
+      "id": 80,
+      "title": "Magnet",
+      "alt": "Magnet",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/dD2RIIea6WR",
+      "previewUrl": "https://static.poly.pizza/d1c37470-d7e6-46da-a6f2-ea623ca6fdab.webp",
+      "publicID": "dD2RIIea6WR",
+      "licence": "CC-BY 3.0",
+      "tier": "strong",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 139,
+      "review_reason": "Clear horseshoe magnet supports attraction/connection themes and adds a distinct everyday object.",
+      "source_url": "https://poly.pizza/m/dD2RIIea6WR"
+    },
+    {
+      "id": 270,
+      "title": "Big red button",
+      "alt": "Big red button",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/fIK34Yaek_W",
+      "previewUrl": "https://static.poly.pizza/da8fa651-2d11-4747-8a01-992b9a428040.webp",
+      "publicID": "fIK34Yaek_W",
+      "licence": "CC-BY 3.0",
+      "tier": "strong",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 140,
+      "review_reason": "Recognizable button supports choice/control storytelling; inspect its label and placement when importing.",
+      "source_url": "https://poly.pizza/m/fIK34Yaek_W"
+    },
+    {
+      "id": 1208,
+      "title": "Calculator",
+      "alt": "Calculator",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/0yU6BDQRVYw",
+      "previewUrl": "https://static.poly.pizza/21dac080-4a06-4169-af59-2e78680c4432.webp",
+      "publicID": "0yU6BDQRVYw",
+      "licence": "CC-BY 3.0",
+      "tier": "conditional",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 141,
+      "review_reason": "Small flat device; lower priority and visibility check.",
+      "source_url": "https://poly.pizza/m/0yU6BDQRVYw"
+    },
+    {
+      "id": 607,
+      "title": "Tablet",
+      "alt": "Tablet",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/crlQklnLvz7",
+      "previewUrl": "https://static.poly.pizza/1396b036-1f3b-4f8b-92b4-d005ee6aee4a.webp",
+      "publicID": "crlQklnLvz7",
+      "licence": "CC-BY 3.0",
+      "tier": "conditional",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 142,
+      "review_reason": "Flat device overlaps existing Laptop/Computer and proposed Cell phone.",
+      "source_url": "https://poly.pizza/m/crlQklnLvz7"
+    },
+    {
+      "id": 2105,
+      "title": "Watch",
+      "alt": "Watch",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/5MFJqeBgWBn",
+      "previewUrl": "https://static.poly.pizza/16f52f6a-bd90-4cca-b97b-f970a15dfdb8.webp",
+      "publicID": "5MFJqeBgWBn",
+      "licence": "CC-BY 3.0",
+      "tier": "conditional",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 143,
+      "review_reason": "Small thin accessory; visibility and grounding checks.",
+      "source_url": "https://poly.pizza/m/5MFJqeBgWBn"
+    },
+    {
+      "id": 559,
+      "title": "Gold",
+      "alt": "Gold",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/0w-WpQf7O9J",
+      "previewUrl": "https://static.poly.pizza/4ef79f85-7298-4e5e-b303-79d756c0a398.webp",
+      "publicID": "0w-WpQf7O9J",
+      "licence": "CC-BY 3.0",
+      "tier": "conditional",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 144,
+      "review_reason": "Gold bar overlaps existing Gem and proposed Coins as treasure.",
+      "source_url": "https://poly.pizza/m/0w-WpQf7O9J"
+    },
+    {
+      "id": 170,
+      "title": "Bongos",
+      "alt": "Bongos",
+      "creator": {
+        "username": "Poly by Google",
+        "initials": "P",
+        "DPURL": "https://static.poly.pizza/dp%2Fpolygoogle.jpg",
+        "profileLink": "/u/Poly by Google"
+      },
+      "url": "/m/4tAGfJTheb4",
+      "previewUrl": "https://static.poly.pizza/6ed37fd1-9424-4d1f-a364-86448635aef4.webp",
+      "publicID": "4tAGfJTheb4",
+      "licence": "CC-BY 3.0",
+      "tier": "conditional",
+      "review_group": "Conditional — preparation or overlap",
+      "review_number": 145,
+      "review_reason": "Preview resembles one drum; compare existing Drum and verify label.",
+      "source_url": "https://poly.pizza/m/4tAGfJTheb4"
+    }
+  ]
+}

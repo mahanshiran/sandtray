@@ -22,6 +22,7 @@ namespace Sandplay.Objects
         public Sprite Thumbnail;
         [TextArea] public string Description;
         public string[] Tags;
+        [Range(1, 3)] public int objectSize = 1;
 
         /// <summary>
         /// Unique identifier for serialization. Auto-set from asset name if empty.

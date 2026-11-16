@@ -1,0 +1,80 @@
+import {chromium} from '@playwright/test';
+import assert from 'node:assert/strict';import path from 'node:path';
+const executablePath=process.env.CHROME_PATH||chromium.executablePath();
+const browser=await chromium.launch({executablePath,headless:true});
+const page=await browser.newPage({viewport:{width:430,height:900}});const errors=[];
+page.on('pageerror',e=>errors.push(e.message));
+await page.addInitScript(()=>{window.packets=[];window.Unity={call:message=>window.packets.push(JSON.parse(decodeURIComponent(message)))};});
+await page.goto(new URL('../../Assets/StreamingAssets/ReportEditor/index.html',import.meta.url).href);
+await page.evaluate(()=>window.SandtrayReport.load({html:'<h2>Observations</h2><p>Initial text</p>',privateHtml:'<p>Private notes</p>'}));
+const document=page.locator('#public .tiptap');await document.click();await page.keyboard.press('ControlOrMeta+End');await page.keyboard.press('Enter');
+await page.getByTitle('Bold (Ctrl/⌘ B)').click();await page.keyboard.type('Bold observation');await page.getByTitle('Bold (Ctrl/⌘ B)').click();
+await page.locator('#color').click();await page.getByRole('button',{name:'Text color #dc2626',exact:true}).click();await document.focus();await page.waitForTimeout(50);await page.keyboard.type(' Red observation');
+await page.locator('#file').setInputFiles({name:'sample.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j3ioAAAAASUVORK5CYII=','base64')});
+await page.locator('#public img').waitFor();
+async function capture(){return page.evaluate(()=>{window.packets=[];window.SandtrayReport.snapshot('save');const parts=window.packets.filter(p=>p.type==='part');return JSON.parse(parts.map(p=>p.data).join(''));});}
+const value=await capture();assert.match(value.html,/<strong>Bold observation/);assert.match(value.html,/color: rgb\(220, 38, 38\)/);assert.match(value.html,/data:image\/png;base64/);assert.equal(value.privateText,'');assert.equal(await page.locator('#private-notes').count(),0);
+await page.evaluate(value=>window.SandtrayReport.load(value),value);const reloaded=await capture();assert.equal(value.html,reloaded.html);assert.equal(value.privateHtml,reloaded.privateHtml);
+await page.evaluate(()=>{const file=new File([Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j3ioAAAAASUVORK5CYII='),c=>c.charCodeAt(0))],'paste.png',{type:'image/png'});const transfer=new DataTransfer();transfer.items.add(file);document.querySelector('#public .tiptap').dispatchEvent(new ClipboardEvent('paste',{clipboardData:transfer,bubbles:true,cancelable:true}));});
+await page.waitForFunction(()=>document.querySelectorAll('#public img').length===2);
+// Select existing text, open the palette, and use its custom input (focus leaves the editor).
+await page.evaluate(()=>{const p=[...document.querySelectorAll('#public .tiptap p')].find(p=>p.textContent.includes('Initial text'));const range=document.createRange();range.selectNodeContents(p);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);document.dispatchEvent(new Event('selectionchange'));});
+await page.locator('#color').click();await page.locator('#custom-color').fill('#2563eb');await page.locator('#apply-color').click();
+assert.match((await capture()).html, /color: rgb\(37, 99, 235\)[^>]*>Initial text/);
+// Formatting menus are WebView content anchored to their toolbar buttons,
+// and preserve the selected text while applying font / size / alignment.
+assert.equal(await page.locator('#toolbar select').count(),0);
+await page.locator('#font').click();
+const fontButton=await page.locator('#font').boundingBox(),fontMenu=await page.locator('#font-menu').boundingBox();
+assert.ok(Math.abs(fontMenu.y-fontButton.y-fontButton.height-4)<2);
+assert.ok(Math.abs(fontMenu.x-fontButton.x)<2);
+await page.getByRole('option',{name:'Georgia',exact:true}).click();
+assert.match((await capture()).html,/font-family: Georgia/);
+await page.locator('#size').focus();await page.keyboard.press('ArrowDown');await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');
+assert.match((await capture()).html,/font-size: 18px/);
+await page.locator('#align').click();await page.getByRole('option',{name:'Center',exact:true}).click();
+assert.match((await capture()).html,/text-align: center/);
+await page.locator('#heading').click();await page.keyboard.press('Escape');assert.equal(await page.locator('#heading-menu').isVisible(),false);
+// A real drag on the official Image extension's resize handle must update saved HTML.
+await page.evaluate(()=>{const canvas=document.createElement('canvas');canvas.width=320;canvas.height=180;canvas.getContext('2d').fillRect(0,0,320,180);window.SandtrayReport.load({html:'<p>Resize image</p><img src="'+canvas.toDataURL()+'" width="320" height="180"><p>After image</p>'});});
+const image=page.locator('#public img');await image.waitFor();await image.click();
+const handle=page.locator('[data-resize-handle="bottom-right"]');await handle.scrollIntoViewIfNeeded();const box=await handle.boundingBox();
+await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x-75,box.y-40,{steps:10});await page.mouse.up();
+const resized=await capture();assert.ok(Number(resized.html.match(/width="(\d+)/)[1])<320);assert.match(resized.html,/height="/);
+await page.evaluate(value=>window.SandtrayReport.load(value),resized);assert.equal((await capture()).html,resized.html);
+const dimensions=await page.locator('#public img').boundingBox();assert.ok(dimensions.width<300);assert.ok(Math.abs(dimensions.width/dimensions.height-320/180)<.03);
+// Floating chrome and save notices must reserve no height for the document.
+assert.equal(await page.locator('#document-chrome').evaluate(e=>e.getBoundingClientRect().height),0);
+const paperBeforeStatus=await page.locator('#public').boundingBox();
+await page.evaluate(()=>window.SandtrayReport.status({text:'Draft saved on this device'}));
+assert.deepEqual(await page.locator('#public').boundingBox(),paperBeforeStatus);
+assert.equal(await page.locator('#save-status').textContent(),'Draft saved on this device');
+// Document zoom changes rendering only, never the saved report or image dimensions.
+await page.evaluate(()=>{const p=document.createElement('p');p.textContent='Fixed A4 line wrapping. '.repeat(30);document.querySelector('#public .tiptap').appendChild(p);});
+const paperWidth=await page.locator('#public').evaluate(e=>e.offsetWidth);
+assert.ok(Math.abs(paperWidth-210*96/25.4)<1);
+const paragraphHeight=await page.locator('#public .tiptap p').last().evaluate(e=>e.offsetHeight);
+const beforeZoom=await capture();const imageBeforeZoom=await page.locator('#public img').boundingBox();
+for(let i=0;i<5;i++)await page.getByRole('button',{name:'Zoom out',exact:true}).click();
+assert.equal(await page.locator('#zoom-value').textContent(),'50%');assert.equal(await page.locator('#zoom-out').isDisabled(),true);
+const imageAfterZoom=await page.locator('#public img').boundingBox();assert.ok(Math.abs(imageAfterZoom.width/imageBeforeZoom.width-.5)<.02);
+assert.equal((await capture()).html,beforeZoom.html);
+assert.equal(await page.locator('#public').evaluate(e=>e.offsetWidth),paperWidth);
+assert.equal(await page.locator('#public .tiptap p').last().evaluate(e=>e.offsetHeight),paragraphHeight);
+assert.ok(Math.abs((await page.locator('#public').boundingBox()).width-(430-16)*.5)<2);
+await page.setViewportSize({width:900,height:900});
+assert.equal(await page.locator('#public .tiptap p').last().evaluate(e=>e.offsetHeight),paragraphHeight);
+await page.setViewportSize({width:1760,height:1400});
+for(let i=0;i<5;i++)await page.getByRole('button',{name:'Zoom in',exact:true}).click();
+assert.equal(await page.locator('#zoom-value').textContent(),'100%');assert.equal(await page.locator('#zoom-in').isDisabled(),true);
+await page.waitForFunction(()=>Math.abs(document.querySelector('#public').getBoundingClientRect().width-(document.querySelector('#document-viewport').clientWidth-16))<2);
+assert.equal(await page.locator('#public').evaluate(e=>e.offsetWidth),paperWidth);
+assert.equal(await page.locator('#public .tiptap p').last().evaluate(e=>e.offsetHeight),paragraphHeight);
+assert.equal((await capture()).html,beforeZoom.html);
+await page.setViewportSize({width:430,height:900});
+await page.waitForFunction(()=>Math.abs(document.querySelector('#public').getBoundingClientRect().width-414)<2);
+await page.screenshot({path:'/tmp/sandtray-rich-editor.png',fullPage:true});
+await page.evaluate(value=>window.SandtrayReport.load({...value,readOnly:true,privateHtml:''}),value);
+assert.equal(await document.getAttribute('contenteditable'),'false');assert.equal(await page.locator('#private-notes').isVisible(),false);assert.equal(await page.locator('#toolbar').isVisible(),false);
+assert.deepEqual(errors,[]);console.log('PASS: real Tiptap formatting, image insertion/paste, save/reload, single document, read-only and 430px layout');
+await browser.close();

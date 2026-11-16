@@ -98,12 +98,37 @@ namespace Sandplay.Core
                 OrganizationId = workspace.id,
                 OrganizationClientId = client.id,
             };
+        private Action _pendingSessionSignInRetry;
+
+        private void RememberSessionSignInRetry(Action retry, Func<bool> stillRelevant)
+        {
+            var client = BackendClient.Instance;
+            int user = client.UserId, epoch = LocalAccountStorage.Epoch;
+            _pendingSessionSignInRetry = () =>
+            {
+                if (this != null && client != null && client.IsLoggedIn && !client.RequiresSignIn &&
+                    BackendClient.CanResumeCloudIdentity(user, client.UserId) &&
+                    epoch == LocalAccountStorage.Epoch && !LocalAccountStorage.RequiresRestart && stillRelevant())
+                    retry();
+            };
+        }
+
         private void ShowConnectionError(string message)
         {
             _pendingScheduleStartId = null;
             HideBoardLoadingOverlay();
             HideReconnectOverlay();
             if (_netOverlayGo != null) _netOverlayGo.SetActive(false);
+            var client = BackendClient.Instance;
+            if (client != null && client.RequiresSignIn &&
+                (message ?? "").IndexOf("sign in", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                var retry = _pendingSessionSignInRetry;
+                _pendingSessionSignInRetry = null;
+                CloseClientDialog();
+                OpenLoginScreen(() => retry?.Invoke());
+                return;
+            }
             var box = ClientDialog(Localization.Get("net.connection_error_title"), 560, 320);
             var text = ClientText(box, message, 16, .06f, .28f, .88f, .50f, Color.white);
             text.name = "ConnectionErrorMessage";
@@ -146,6 +171,8 @@ namespace Sandplay.Core
             string clientId, string organizationId, string organizationClientId, SessionInviteTarget inviteTarget, bool circularTray = false)
         {
             if (LocalAccountStorage.RequiresRestart) { LocalAccountStorage.ShowRestartShield(); return; }
+            EndTestTableReview();
+            SetScheduledTableMode(!string.IsNullOrEmpty(_pendingScheduleStartId) || !string.IsNullOrEmpty(_activeScheduleId) || !string.IsNullOrEmpty(_runningTestId));
             if (_enterSandboxRoutine != null)
                 StopCoroutine(_enterSandboxRoutine);
             if (isNew && SessionManager.Instance != null)
@@ -216,7 +243,6 @@ namespace Sandplay.Core
                     SessionManager.Instance?.LoadSession(boardName);
                     // Saved boards can have different dimensions from the menu's
                     // default tray. Keep the room and its light ranges in sync.
-                    ApplyEnvironmentLighting();
                     BuildTherapyRoom();
                 }
             }
@@ -291,12 +317,15 @@ namespace Sandplay.Core
 
             // Local recording is available to every account, including offline use.
             // Plan checks apply when playing a saved replay, not when capturing it.
-            StartLocalReplayRecording(boardName);
+            string reviewId=isNew?null:SessionManager.Instance.LoadSessionData(boardName)?.ScheduledReviewId;
+            if(string.IsNullOrEmpty(reviewId))StartLocalReplayRecording(boardName);
 
             if (_sandboxUI != null) _sandboxUI.SetActive(true);
+            if(!string.IsNullOrEmpty(reviewId))BeginTestTableReview(boardName,reviewId);
             ShowContextInviteCard(inviteTarget);
 
             // Hold the door-outside view under the veil so the tray overview never flashes first.
+            CloseCatalogPanel();
             var cam = FindAnyObjectByType<Sandplay.Camera.SandboxCamera>();
             cam?.SnapToDoorIntroStart();
             yield return null;
@@ -305,6 +334,15 @@ namespace Sandplay.Core
             HideBoardLoadingOverlay();
 
             cam?.PlayIntro();
+
+            // Open after the camera actually arrives, including the door-entry
+            // path, rather than guessing its duration with a fixed delay.
+            while (cam != null && cam.IsAnimatingIntro)
+                yield return null;
+            if (_sandboxRoot != null && _sandboxRoot.activeInHierarchy &&
+                _sandboxUI != null && _sandboxUI.activeInHierarchy &&
+                (GameManager.Instance == null || !GameManager.Instance.IsSpectator))
+                OpenCatalogPanel();
 
             _enterSandboxRoutine = null;
         }
@@ -582,6 +620,29 @@ namespace Sandplay.Core
             spinRT.pivot = new Vector2(0.5f, 0f);
             spinRT.anchoredPosition = new Vector2(0f, 8f);
             spinRT.sizeDelta = new Vector2(28f, 28f);
+
+            if (boardName != null && boardName.StartsWith("Test review_", StringComparison.Ordinal))
+            {
+                // Review storage keys are internal identifiers, not display names.
+                // A compact loader has no blank thumbnail or decorative hourglass.
+                bg.color = HomeBg;
+                cardImg.color = HomeCard;
+                cardRT.sizeDelta = new Vector2(420f, 180f);
+                thumbGo.SetActive(false);
+                spinGo.SetActive(false);
+                titleTxt.text = F("Opening report", "正在打开报告");
+                titleTxt.color = HomeText;
+                titleTxt.fontSize = 21;
+                titleRT.anchorMin = new Vector2(.08f, .65f);
+                titleRT.anchorMax = new Vector2(.92f, .86f);
+                _boardLoadingStatusTxt.color = HomeMuted;
+                statusRT.anchorMin = new Vector2(.08f, .40f);
+                statusRT.anchorMax = new Vector2(.92f, .59f);
+                trackImg.color = HomeChromeButton;
+                trackRT.anchorMin = new Vector2(.08f, .20f);
+                trackRT.anchorMax = new Vector2(.92f, .245f);
+                _boardLoadingProgressFill.color = HomePrimary;
+            }
         }
 
         private void BeginJoinedSessionLoading(NetworkBootstrapper network)
@@ -787,6 +848,15 @@ namespace Sandplay.Core
         private void ReturnToMenu()
 
         {
+            if (!string.IsNullOrEmpty(_runningTestId))
+            {
+                var box=ClientDialog(F("End this test?", "结束测试？"),560,330);
+                ClientText(box,F("Leaving submits your current sandtray and ends this test. The original deadline continues while this dialog is open.",
+                    "离开将提交当前沙盘并结束测试。此窗口打开期间计时仍继续。"),16,.06f,.35f,.88f,.38f,HomeText);
+                ClientButton(box,F("Continue test", "继续测试"),.06f,.08f,.42f,.17f,CloseClientDialog);
+                ClientButton(box,F("Submit and exit", "提交并退出"),.52f,.08f,.42f,.17f,()=>{_finishTestRequested=true;CloseClientDialog();},true);
+                return;
+            }
             ClearJoinedSessionLoadingHandlers();
             // Keep the board open if persistence fails; do not silently discard this session.
             if (_currentBoardName != null && SessionManager.Instance != null &&
@@ -825,11 +895,13 @@ namespace Sandplay.Core
             if (!string.IsNullOrEmpty(sandlogPath))
                 TrySaveReplayPreview(sandlogPath);
 
+            // Leaving preserves the schedule so both participants can reconnect.
+            PauseActiveScheduledSession();
+
             // Disconnect from network if online
             if (NetworkBootstrapper.Instance != null && NetworkBootstrapper.Instance.IsOnline)
                 NetworkBootstrapper.Instance.Disconnect();
 
-            CompleteActiveScheduledSession();
 
             ClearHostingWarningAfterBoardExit();
 
@@ -861,7 +933,7 @@ namespace Sandplay.Core
 
         private bool RequireMultiplayerAccount(System.Action resume)
         {
-            if (BackendClient.Instance != null && BackendClient.Instance.IsLoggedIn) return true;
+            if (BackendClient.Instance != null && BackendClient.Instance.IsLoggedIn && !BackendClient.Instance.RequiresSignIn) return true;
             OpenLoginScreen(() =>
             {
                 if (this != null && BackendClient.Instance != null && BackendClient.Instance.IsLoggedIn)
@@ -1202,7 +1274,10 @@ namespace Sandplay.Core
             cloudJoinBtn.onClick.AddListener(() =>
             {
                 if (joinPanel == null || _networkPanel != joinPanel || !cloudJoinBtn.interactable) return;
-                if (!RequireMultiplayerAccount(ShowJoinPanel)) return;
+                if (!RequireMultiplayerAccount(() =>
+                {
+                    if (joinPanel != null && _networkPanel == joinPanel) cloudJoinBtn.onClick.Invoke();
+                })) return;
                 string code = roomInput.text.Trim().ToUpperInvariant();
                 if (!IsValidJoinRoomCode(code))
                 {
@@ -1242,11 +1317,17 @@ namespace Sandplay.Core
                         network.OnConnected -= onConnect;
                         network.OnDisconnected -= onDisconnect;
                         if (joinPanel == null || _networkPanel != joinPanel) return;
-                        cloudStatusTxt.text = Localization.Get("join.room_not_found");
+                        cloudStatusTxt.text = BackendClient.Instance.RequiresSignIn
+                            ? F("Your login expired. Please sign in again.", "登录已过期，请重新登录。")
+                            : Localization.Get("join.room_not_found");
                         cloudJoinBtn.interactable = true;
                     };
                     network.OnConnected += onConnect;
                     network.OnDisconnected += onDisconnect;
+                    RememberSessionSignInRetry(() => cloudJoinBtn.onClick.Invoke(),
+                        () => joinPanel != null && _networkPanel == joinPanel &&
+                            network != null && !network.IsOnline &&
+                            roomInput.text.Trim().ToUpperInvariant() == code);
                     network.StartClientRelay(RelayAddress, code, PlayerRole.Observer);
                 }
             });
@@ -1397,50 +1478,51 @@ namespace Sandplay.Core
         // ======================= Reconnection UI =======================
 
         private GameObject _reconnectOverlay;
+        private TMP_Text _reconnectTitle, _reconnectStatus;
 
         private void ShowReconnectOverlay(int attempt)
         {
             if (_reconnectOverlay == null)
             {
-                _reconnectOverlay = new GameObject("ReconnectOverlay");
-                _reconnectOverlay.transform.SetParent(_safeArea.transform, false);
-                var bg = _reconnectOverlay.AddComponent<Image>();
-                bg.color = new Color(0, 0, 0, 0.7f);
-                ApplyRoundedCorners(bg);
-                var bgRT = _reconnectOverlay.GetComponent<RectTransform>();
-                bgRT.anchorMin = Vector2.zero;
-                bgRT.anchorMax = Vector2.one;
-                bgRT.offsetMin = Vector2.zero;
-                bgRT.offsetMax = Vector2.zero;
+                var backdrop=ClientRect(_safeArea.transform,"ReconnectOverlay",0,0,1,1);
+                _reconnectOverlay=backdrop.gameObject;
+                var bg=backdrop.gameObject.AddComponent<Image>();
+                bg.color=new Color(.015f,.03f,.035f,.48f);
+                bg.raycastTarget=true;
 
-                var msgGo = CreateText(_reconnectOverlay.transform, "ReconnectMsg", "", 20,
-                    new Vector2(0, 0), new Vector2(400, 60));
-                var msgTxt = msgGo.GetComponent<TextMeshProUGUI>();
-                msgTxt.alignment = TextAlignmentOptions.Center;
-                msgTxt.fontStyle = FontStyles.Bold;
-                var msgRT = msgGo.GetComponent<RectTransform>();
-                msgRT.anchorMin = new Vector2(0.1f, 0.45f);
-                msgRT.anchorMax = new Vector2(0.9f, 0.6f);
-                msgRT.offsetMin = Vector2.zero;
-                msgRT.offsetMax = Vector2.zero;
+                var card=ClientRect(backdrop,"ReconnectCard",.5f,.5f,0,0);
+                card.pivot=new Vector2(.5f,.5f);
+                card.sizeDelta=new Vector2(Mathf.Min(380f,Mathf.Max(240f,_safeArea.GetComponent<RectTransform>().rect.width-32f)),218f);
+                var surface=card.gameObject.AddComponent<Image>();surface.color=HomeCard;
+                ApplyHomeRoundedCorners(surface,14);
+                var outline=card.gameObject.AddComponent<Outline>();
+                outline.effectColor=HomeCardBorder;outline.effectDistance=new Vector2(1,-1);
 
-                var cancelBtn = CreateMenuButton(_reconnectOverlay.transform, "Btn_CancelReconnect",
-                    Localization.Get("reconnect.return"), new Vector2(0.3f, 0.3f), new Vector2(0.7f, 0.4f),
-                    new Color(0.48f, 0.22f, 0.22f, 1f));
-                cancelBtn.onClick.AddListener(() =>
+                var iconRect=ClientRect(card,"ReconnectIndicator",.07f,.69f,0,0);
+                iconRect.sizeDelta=new Vector2(28,28);
+                var icon=AddHomeIconGraphic(iconRect,"refresh",Vector2.zero,Vector2.one,HomePrimary);
+                icon.gameObject.AddComponent<Sandplay.UI.LoadingSpinner>();
+                _reconnectTitle=ClientText(card,"",20,.19f,.67f,.74f,.19f,HomeText);
+                _reconnectTitle.fontStyle=FontStyles.Bold;
+                _reconnectTitle.alignment=TextAlignmentOptions.MidlineLeft;
+                _reconnectStatus=ClientText(card,"",14,.07f,.47f,.86f,.16f,HomeMuted);
+                _reconnectStatus.alignment=TextAlignmentOptions.MidlineLeft;
+                var hint=ClientText(card,F("You can stay here while we reconnect.","请稍候，我们正在尝试恢复连接。"),12,.07f,.32f,.86f,.12f,HomeMuted);
+                hint.alignment=TextAlignmentOptions.MidlineLeft;
+                var cancelBtn=ClientButton(card,"reconnect.return",.07f,.10f,.86f,.17f,()=>
                 {
                     NetworkBootstrapper.Instance?.StopReconnection();
                     HideReconnectOverlay();
                     ReturnToMenu();
                 });
+                cancelBtn.GetComponentInChildren<TMP_Text>().fontSize=14;
             }
 
-            // Update attempt text
-            var text = _reconnectOverlay.GetComponentInChildren<TextMeshProUGUI>();
-            if (text != null)
-                text.text = Localization.Get("reconnect.message", attempt);
-
+            var message=Localization.Get("reconnect.message",attempt).Split('\n');
+            if(_reconnectTitle!=null)_reconnectTitle.text=message[0];
+            if(_reconnectStatus!=null)_reconnectStatus.text=message.Length>1?message[1]:message[0];
             _reconnectOverlay.SetActive(true);
+            _reconnectOverlay.transform.SetAsLastSibling();
         }
 
         private void HideReconnectOverlay()

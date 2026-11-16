@@ -50,7 +50,7 @@ namespace Sandplay.Core
             // width, giving the catalog more vertical space for results.
             searchRect.anchorMin = new Vector2(0, 1); searchRect.anchorMax = new Vector2(1, 1);
             searchRect.pivot = new Vector2(.5f, 1);
-            searchRect.offsetMin = new Vector2(40, -36);
+            searchRect.offsetMin = new Vector2(46, -36);
             searchRect.offsetMax = new Vector2(-6, -4);
             search.lineType = TMP_InputField.LineType.SingleLine;
             search.textComponent.richText = false;
@@ -82,7 +82,7 @@ namespace Sandplay.Core
         private void BuildCatalogCategoryChips()
         {
             if (_catalogCategoryContent == null) return;
-            var categories = new SortedSet<string>(StringComparer.Ordinal);
+            var categories = new SortedSet<string>(Comparer<string>.Create(CatalogDisplayOrder.CompareCategories));
             foreach (var item in _catalogFilterItems)
                 if (item != null) categories.Add(CatalogCategory(item.category));
             if (_selectedCatalogCategory != null && !categories.Contains(_selectedCatalogCategory)) _selectedCatalogCategory = null;
@@ -93,10 +93,8 @@ namespace Sandplay.Core
                 if (Application.isPlaying) Destroy(child); else DestroyImmediate(child);
             }
             var ordered = new List<string> { null };
-            foreach (var preferred in new[] { "people", "animals" })
-                if (categories.Remove(preferred)) ordered.Add(preferred);
             ordered.AddRange(categories);
-            float x = 4;
+            float x = 10;
             foreach (var category in ordered)
             {
                 string label = CatalogCategoryLabel(category);

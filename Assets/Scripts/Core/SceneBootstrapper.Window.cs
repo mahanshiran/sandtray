@@ -42,7 +42,7 @@ namespace Sandplay.Core
             sunlight.spotAngle = 48f;
             sunlight.renderMode = LightRenderMode.ForcePixel;
             sunlight.shadows = LightShadows.Soft;
-            sunlight.shadowStrength = .65f;
+            sunlight.shadowStrength = .52f;
             sunlight.shadowResolution = LightShadowResolution.High;
             sunlight.shadowBias = .025f;
             sunlight.shadowNormalBias = .15f;

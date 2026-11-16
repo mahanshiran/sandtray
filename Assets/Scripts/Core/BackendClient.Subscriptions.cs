@@ -15,6 +15,7 @@ namespace Sandplay.Core
             // Reconcile store purchases with the account on every launch and sign-in,
             // including desktop devices that cannot query the app store directly.
             FetchAccess();
+            if (IsClientAccount) return;
             SyncStoreSubscription(FetchAccess,
                 error => Debug.LogWarning($"[BackendClient] Failed to sync subscription: {error}"));
         }

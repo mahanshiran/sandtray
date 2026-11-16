@@ -19,6 +19,31 @@ namespace Sandplay.Data
     }
 
     [Serializable]
+    public class ClientReportReceiver
+    {
+        public bool ClientSelf;
+        public string Name, Email, Phone, Relationship;
+        public static readonly string[] Relationships = { "father", "mother", "brother", "sister", "guardian", "spouse", "grandfather", "grandmother", "teacher", "other" };
+
+        public static bool ValidEmail(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return false;
+            try { return new System.Net.Mail.MailAddress(value).Address == value &&
+                System.Text.RegularExpressions.Regex.IsMatch(value, @"^[^\s@]+@[^\s@]+\.[^\s@]+$"); }
+            catch (FormatException) { return false; }
+        }
+        public void Validate(string clientEmail)
+        {
+            if (!ValidEmail(clientEmail)) throw new ArgumentException("Enter a valid client email address.");
+            if (ClientSelf) return;
+            if (string.IsNullOrWhiteSpace(Name) || Name.Length > 100) throw new ArgumentException("Enter the report receiver's name.");
+            if (!ValidEmail(Email) || Email.Length > 320) throw new ArgumentException("Enter a valid report receiver email address.");
+            if (string.IsNullOrWhiteSpace(Phone) || Phone.Length > 100) throw new ArgumentException("Enter the report receiver's phone number.");
+            if (Array.IndexOf(Relationships, Relationship) < 0) throw new ArgumentException("Select the report receiver's relationship.");
+        }
+    }
+
+    [Serializable]
     public class ClientRecord
     {
         public string Id;
@@ -31,6 +56,7 @@ namespace Sandplay.Data
         public string Email;
         public string Phone;
         public string Notes;
+        public ClientReportReceiver ReportReceiver;
         public bool Archived;
         public string CreatedAt;
         public string UpdatedAt;
@@ -202,6 +228,7 @@ namespace Sandplay.Data
             requireCurrent?.Invoke();
             var capacity = ResolveCapacity();
             if (isNew || string.IsNullOrEmpty(record.Id) || !GetAll().Any(c => c.Id == record.Id)) requireCreation?.Invoke();
+            record.ReportReceiver?.Validate((record.Email ?? "").Trim());
             record.Name = (record.Name ?? "").Trim();
             record.Reference = (record.Reference ?? "").Trim();
             record.DateOfBirth = (record.DateOfBirth ?? "").Trim();

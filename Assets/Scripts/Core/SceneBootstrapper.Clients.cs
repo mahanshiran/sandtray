@@ -65,6 +65,7 @@ namespace Sandplay.Core
                 RefreshClientsPage();
             });
             _clientList = ClientScroll(_clientsPage.transform, "ClientList", .01f, .025f, .275f, .79f);
+            _clientList.GetComponent<VerticalLayoutGroup>().padding = new RectOffset(0, 0, 8, 8);
             _clientDetail = ClientRect(_clientsPage.transform, "ClientDetail", .305f, .025f, .685f, .86f);
             var detailImage = _clientDetail.gameObject.AddComponent<Image>();
             detailImage.color = HomeCard;
@@ -73,7 +74,6 @@ namespace Sandplay.Core
             detailOutline.effectColor = HomeCardBorder;
             detailOutline.effectDistance = new Vector2(1,-1);
             BuildPersonalClientSyncControls();
-            BuildOrganizationTherapistClientsPanel();
             _homePages["clients"] = _clientsPage;
             _clientsPage.SetActive(false);
         }
@@ -106,7 +106,7 @@ namespace Sandplay.Core
                 _clientStatus.text = ClientStore.RecoveredFromBackup ? Localization.Get("clients.recovered") : "";
                 RefreshClientList();
                 RefreshClientDetail();
-                RefreshIndependentOrganizationWorkspaceAvailability();
+                // Organization workspaces have been retired.
             }
             catch (Exception) { _clientStatus.text = Localization.Get("clients.storage_error"); }
         }
@@ -242,8 +242,17 @@ namespace Sandplay.Core
             // Do not expose unassigned tables from the client workspace.
             var tables = client == null ? new List<SessionListEntry>() : ClientTables(_selectedClientId);
             ClientRecordAvatar(_clientDetail, client, .035f, .865f, .09f, .11f);
+            bool hasEmail = !string.IsNullOrWhiteSpace(client?.Email);
             var clientTitle = ClientText(_clientDetail, client?.Name ?? F("Select a client","请选择来访者"), 24,
-                .145f, .865f, client == null ? .50f : .33f, .11f, HomeText);
+                .145f, hasEmail ? .925f : .865f, client == null ? .50f : .33f, hasEmail ? .05f : .11f, HomeText);
+            if(hasEmail)
+            {
+                var clientEmail = ClientText(_clientDetail, client.Email, 12, .145f, .88f, .33f, .04f, HomeMuted);
+                clientEmail.enableWordWrapping = false;
+                clientEmail.overflowMode = TextOverflowModes.Ellipsis;
+                clientEmail.richText = false;
+                clientEmail.alignment = TextAlignmentOptions.MidlineLeft;
+            }
             clientTitle.enableWordWrapping = false;
             clientTitle.overflowMode = TextOverflowModes.Ellipsis;
             clientTitle.richText = false;
@@ -266,7 +275,7 @@ namespace Sandplay.Core
                 ClientButton(_clientDetail, "clients.edit", .67f, .885f, .135f, .065f,
                     () => ShowClientEditor(client));
                 string info = string.Join("  ·  ", new[] { client.Reference,
-                    string.IsNullOrEmpty(client.DateOfBirth) ? "" : ClientDateLabel(client.DateOfBirth), client.Email, client.Phone }
+                    string.IsNullOrEmpty(client.DateOfBirth) ? "" : ClientDateLabel(client.DateOfBirth), client.Phone }
                     .Where(v => !string.IsNullOrWhiteSpace(v)));
                 bool hasInfo = !string.IsNullOrWhiteSpace(info);
                 bool hasNotes = !string.IsNullOrWhiteSpace(client.Notes);
@@ -295,15 +304,6 @@ namespace Sandplay.Core
             StyleContentTab(tablesTab, !_clientReportsTab && !_clientReplaysTab);
             StyleContentTab(reportsTab, _clientReportsTab);
             float nextRowY = tabsY - .075f;
-            if (client != null && !client.Archived)
-            {
-                bool canSchedule = client.Account != null && client.Account.Backend == BackendClient.BaseUrl && Guid.TryParse(client.Account.IdentityCode, out _);
-                ClientButton(_clientDetail, "host.title", .035f, nextRowY, canSchedule ? .45f : .93f, .06f,
-                    () => CreateHostedClientTable(client.Id), true);
-                if (canSchedule) ClientButton(_clientDetail, F("Schedule session", "预约会话"), .515f, nextRowY, .45f, .06f,
-                    () => ShowScheduleProposal(client));
-                nextRowY -= .075f;
-            }
             if (_clientReportsTab)
             {
                 ClientButton(_clientDetail, F("+ New report", "+ 新建报告"), .035f, nextRowY, .93f, .055f,
@@ -681,15 +681,24 @@ namespace Sandplay.Core
             }
             if (original?.Account == null)
             {
-                ClientEditorSecondaryButton(accountRow, F("Add from account ID", "从账号 ID 添加"),
-                    .03f, .15f, .45f, .70f, () => SelectAccount(false));
+                ClientAccountActionButton(accountRow, F("Add from account ID", "从账号 ID 添加"),
+                    .02f, .20f, .30f, .60f, () => SelectAccount(false));
                 if (BackendClient.Instance.ExternalContactsAllowed)
-                    ClientEditorSecondaryButton(accountRow, F("Add from friends", "从好友添加"),
-                        .52f, .15f, .45f, .70f, () => SelectAccount(true));
+                    ClientAccountActionButton(accountRow, F("Add from friends", "从好友添加"),
+                        .35f, .20f, .30f, .60f, () => SelectAccount(true));
                 else
                     ClientText(accountRow, F("Link an account to this client", "为来访者关联账号"),
                         12, .52f, .20f, .45f, .60f, HomeMuted);
             }
+            if (original?.Account == null && BackendClient.Instance.IsTherapistAccount)
+                ClientAccountActionButton(accountRow, F("+ New account", "+ 新建账号"), .68f, .20f, .30f, .60f,
+                    () => ShowNewClientAccount(_clientDialog.transform, person =>
+                    {
+                        account = new ClientAccountLink { UserId = person.id, IdentityCode = person.code,
+                            AccountCode = person.friend_code, DisplayName = person.name, Backend = BackendClient.BaseUrl };
+                        if (string.IsNullOrWhiteSpace(name.text)) name.text = person.name;
+                        ImportAccountPhoto(person);
+                    }));
             var reference = Field("clients.reference", original?.Reference, narrow ? .02f : .52f, narrow ? .59f : .66f, 60);
             string dob = original?.DateOfBirth ?? "";
             float dobY = narrow ? .49f : .51f;
@@ -702,11 +711,101 @@ namespace Sandplay.Core
                     dateButton.GetComponentInChildren<TMP_Text>().text = ClientDateLabel(value);
                 }));
             var phone = Field("clients.phone", original?.Phone, narrow ? .02f : .52f, narrow ? .39f : .51f, 60);
-            var email = Field("clients.email", original?.Email, .02f, narrow ? .29f : .36f, 150);
+            var email = Field(F("Email *", "邮箱 *"), original?.Email, .02f, narrow ? .29f : .36f, 150);
             ClientText(form, Localization.Get("clients.notes"), 12, .02f, narrow ? .22f : .28f, .96f, .05f, HomeMuted);
             var notes = ClientInput(form, original?.Notes ?? "", "", .02f, .03f, .96f, narrow ? .19f : .25f, 2000);
             notes.lineType = TMP_InputField.LineType.MultiLineNewline;
             notes.textComponent.alignment = TextAlignmentOptions.TopLeft;
+            var receiverSection = ClientRow(content, "ReportResultReceiver", narrow ? 640 : 390);
+            receiverSection.GetComponent<Image>().color = HomeCard;
+            ClientText(receiverSection, F("Report result receiver", "报告结果接收人"), 20, .03f, .90f, .94f, .08f, HomeText).fontStyle = FontStyles.Bold;
+            var receiver = original?.ReportReceiver;
+            // Fixed-size switch inside a full-width, keyboard-accessible click target.
+            var toggleRect = ClientRect(receiverSection, "ClientSelfToggle", .03f, .815f, .94f, 0);
+            toggleRect.sizeDelta = new Vector2(0, 44);
+            var hitArea = toggleRect.gameObject.AddComponent<Image>(); hitArea.color = Color.clear;
+            var trackRect = ClientRect(toggleRect, "Track", 0, .5f, 0, 0);
+            trackRect.pivot = new Vector2(0, .5f); trackRect.sizeDelta = new Vector2(56, 32);
+            var track = trackRect.gameObject.AddComponent<Image>();
+            track.sprite = ReceiverSwitchTrack(); track.type = Image.Type.Sliced; track.raycastTarget = false;
+            var thumbRect = ClientRect(trackRect, "Thumb", .5f, .5f, 0, 0);
+            thumbRect.sizeDelta = new Vector2(26, 26);
+            var thumb = thumbRect.gameObject.AddComponent<Image>();
+            thumb.sprite = Sandplay.UI.SessionAvatars.Circle(); thumb.color = Color.white; thumb.raycastTarget = false;
+            var selfLabel = ClientText(toggleRect, F("Client himself", "来访者本人"), 16, 0, 0, 1, 1, HomeText);
+            selfLabel.rectTransform.offsetMin = new Vector2(72, 0);
+            selfLabel.rectTransform.offsetMax = new Vector2(-52, 0);
+            selfLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            selfLabel.raycastTarget = false;
+            var switchState = ClientText(toggleRect, "", 12, 1, 0, 0, 1, HomeMuted);
+            switchState.rectTransform.pivot = new Vector2(1, .5f);
+            switchState.rectTransform.sizeDelta = new Vector2(48, 0);
+            switchState.alignment = TextAlignmentOptions.MidlineRight; switchState.raycastTarget = false;
+            var selfToggle = toggleRect.gameObject.AddComponent<Toggle>();
+            selfToggle.targetGraphic = track; selfToggle.transition = Selectable.Transition.ColorTint;
+            var switchColors = selfToggle.colors;
+            switchColors.highlightedColor = new Color(1.15f, 1.15f, 1.15f);
+            switchColors.selectedColor = new Color(1.15f, 1.15f, 1.15f);
+            switchColors.pressedColor = new Color(.8f, .8f, .8f);
+            selfToggle.colors = switchColors;
+            selfToggle.isOn = receiver?.ClientSelf ?? false;
+            Coroutine switchAnimation = null;
+            System.Collections.IEnumerator AnimateSwitch(float targetX, Color targetColor)
+            {
+                float startX = thumbRect.anchoredPosition.x;
+                Color startColor = track.color;
+                for (float elapsed = 0; elapsed < .16f; elapsed += Time.unscaledDeltaTime)
+                {
+                    if (thumbRect == null || track == null) yield break;
+                    float t = Mathf.SmoothStep(0, 1, elapsed / .16f);
+                    thumbRect.anchoredPosition = new Vector2(Mathf.Lerp(startX, targetX, t), 0);
+                    track.color = Color.Lerp(startColor, targetColor, t);
+                    yield return null;
+                }
+                if (thumbRect != null) thumbRect.anchoredPosition = new Vector2(targetX, 0);
+                if (track != null) track.color = targetColor;
+                switchAnimation = null;
+            }
+            void UpdateSwitch(bool animate)
+            {
+                float x = selfToggle.isOn ? 12 : -12;
+                Color color = selfToggle.isOn ? HomePrimary : HomeIsLight ? new Color(.55f,.62f,.63f) : new Color(.27f,.35f,.38f);
+                switchState.text = selfToggle.isOn ? F("On", "开") : F("Off", "关");
+                switchState.color = selfToggle.isOn ? HomePrimary : HomeMuted;
+                if (switchAnimation != null) StopCoroutine(switchAnimation);
+                if (animate && Application.isPlaying) switchAnimation = StartCoroutine(AnimateSwitch(x, color));
+                else { thumbRect.anchoredPosition = new Vector2(x, 0); track.color = color; }
+            }
+            UpdateSwitch(false);
+            var receiverHint = ClientText(receiverSection, "", 12, .03f, .69f, .94f, .08f, HomeMuted);
+            var receiverFields = ClientRect(receiverSection, "ReceiverFields", .03f, .03f, .94f, .63f);
+            float rw = narrow ? 1f : .47f, rh = narrow ? .10f : .19f;
+            TMP_InputField ReceiverField(string label, string value, float x, float y, int limit)
+            {
+                ClientText(receiverFields, label, 12, x, y + rh, rw, narrow ? .055f : .12f, HomeMuted);
+                return ClientInput(receiverFields, value ?? "", "", x, y, rw, rh, limit);
+            }
+            var receiverName = ReceiverField(F("Receiver name *", "接收人姓名 *"), receiver?.Name, 0, narrow ? .80f : .65f, 100);
+            var receiverEmail = ReceiverField(F("Receiver email *", "接收人邮箱 *"), receiver?.Email, narrow ? 0 : .53f, narrow ? .56f : .65f, 320);
+            var receiverPhone = ReceiverField(F("Receiver phone *", "接收人电话 *"), receiver?.Phone, 0, narrow ? .32f : .17f, 100);
+            float relationshipX = narrow ? 0 : .53f, relationshipY = narrow ? .08f : .17f;
+            ClientText(receiverFields, F("Relationship *", "与来访者关系 *"), 12, relationshipX, relationshipY + rh, rw, narrow ? .055f : .12f, HomeMuted);
+            var relationshipRow = ClientRect(receiverFields, "Relationship", relationshipX, relationshipY, rw, rh);
+            var relationshipOptions = new[] { F("Select relationship…", "选择关系…"), F("Father", "父亲"), F("Mother", "母亲"), F("Brother", "兄弟"), F("Sister", "姐妹"), F("Guardian", "监护人"), F("Spouse", "配偶"), F("Grandfather", "祖父/外祖父"), F("Grandmother", "祖母/外祖母"), F("Teacher", "老师"), F("Other", "其他") };
+            int relationshipIndex = Array.IndexOf(ClientReportReceiver.Relationships, receiver?.Relationship) + 1;
+            var relationship = SettingsDropdown(relationshipRow, "ReceiverRelationship", relationshipOptions, relationshipIndex, _ => {}, true);
+            var relationshipRect = relationship.GetComponent<RectTransform>();
+            relationshipRect.anchorMin = Vector2.zero; relationshipRect.anchorMax = Vector2.one;
+            relationshipRect.offsetMin = relationshipRect.offsetMax = Vector2.zero;
+            void RefreshReceiver()
+            {
+                receiverFields.gameObject.SetActive(!selfToggle.isOn);
+                receiverHint.text = selfToggle.isOn ? F("Uses the client's email above: ", "使用上方来访者邮箱：") + email.text.Trim()
+                    : F("Reports are intended for the receiver below, rather than the client.", "报告接收人为下方指定人员。");
+            }
+            selfToggle.onValueChanged.AddListener(_ => { UpdateSwitch(true); RefreshReceiver(); });
+            email.onValueChanged.AddListener(_ => RefreshReceiver());
+            RefreshReceiver();
             var error = ClientText(box, "", 12, .05f, .105f, .90f, .03f, new Color(1,.65f,.55f));
             var picker = new GameObject("ClientPhotoPicker-" + Guid.NewGuid().ToString("N"))
                 .AddComponent<Sandplay.UI.ClientPhotoPicker>();
@@ -727,7 +826,7 @@ namespace Sandplay.Core
                     RefreshPhotoOverlay();
                 }, () => error.text = Localization.Get("clients.photo_error"), Localization.Get("clients.choose_photo"));
             });
-            if (!narrow) ClientText(form, Localization.Get("clients.optional"), 12, .52f, .34f, .46f, .10f, HomeMuted);
+            if (!narrow) ClientText(form, F("A valid client email is required. An app account is optional.", "必须填写有效的来访者邮箱。应用账号为选填。"), 12, .52f, .34f, .46f, .10f, HomeMuted);
             ClientEditorSecondaryButton(box, "dialog.cancel", .49f, .035f, .21f, .065f, CloseClientDialog);
             ClientRecord pendingClient=null;
             bool savePending=false;
@@ -744,6 +843,11 @@ namespace Sandplay.Core
                         Id = pendingClient?.Id ?? original?.Id, Name = name.text, Reference = reference.text,
                         DateOfBirth = dob, Phone = phone.text.Trim(), Email = email.text.Trim(),
                         Notes = notes.text.Trim(), Archived = original?.Archived ?? false, Account = account,
+                        ReportReceiver = new ClientReportReceiver { ClientSelf = selfToggle.isOn,
+                            Name = selfToggle.isOn ? "" : receiverName.text.Trim(),
+                            Email = selfToggle.isOn ? "" : receiverEmail.text.Trim(),
+                            Phone = selfToggle.isOn ? "" : receiverPhone.text.Trim(),
+                            Relationship = selfToggle.isOn || relationship.value == 0 ? "" : ClientReportReceiver.Relationships[relationship.value - 1] },
                         AccountPhotoSuppressed = photoChanged ? draftPhoto == null : original?.AccountPhotoSuppressed ?? false
                     };
                     savePending=true;
@@ -862,6 +966,53 @@ namespace Sandplay.Core
             button.onClick.AddListener(() => action());
             if (key == "report.back" || key == F("Back to notifications", "返回通知中心"))
                 Sandplay.UI.RecordSearchGlyph.StyleBackButton(button, HomeText);
+            return button;
+        }
+
+        private static Sprite _receiverSwitchTrack;
+        private static Sprite ReceiverSwitchTrack()
+        {
+            if (_receiverSwitchTrack != null) return _receiverSwitchTrack;
+            var texture = new Texture2D(64, 32, TextureFormat.RGBA32, false);
+            texture.wrapMode = TextureWrapMode.Clamp;
+            var pixels = new Color[64 * 32];
+            for (int y = 0; y < 32; y++) for (int x = 0; x < 64; x++)
+            {
+                float centerX = Mathf.Clamp(x + .5f, 16, 48);
+                float distance = Vector2.Distance(new Vector2(x + .5f, y + .5f), new Vector2(centerX, 16));
+                pixels[y * 64 + x] = new Color(1, 1, 1, Mathf.Clamp01(16 - distance));
+            }
+            texture.SetPixels(pixels); texture.Apply();
+            _receiverSwitchTrack = Sprite.Create(texture, new Rect(0,0,64,32), Vector2.one * .5f, 100, 0,
+                SpriteMeshType.FullRect, new Vector4(16, 16, 16, 16));
+            return _receiverSwitchTrack;
+        }
+
+        private Button ClientAccountActionButton(Transform parent, string key, float x, float y, float w, float h, Action action)
+        {
+            var button = ClientButton(parent, key, x, y, w, h, action);
+            var image = button.GetComponent<Image>();
+            image.color = HomeIsLight ? new Color(.025f, .42f, .39f) : new Color(.035f, .43f, .41f);
+            var border = button.gameObject.AddComponent<Outline>();
+            border.effectColor = HomeIsLight ? new Color(.015f, .30f, .28f) : new Color(.14f, .67f, .62f);
+            border.effectDistance = new Vector2(1, -1);
+            var shadow = button.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0, 0, 0, .30f);
+            shadow.effectDistance = new Vector2(0, -3);
+            var label = button.GetComponentInChildren<TextMeshProUGUI>();
+            label.color = Color.white;
+            label.fontStyle = FontStyles.Bold;
+            label.fontSize = label.fontSizeMax = 14;
+            button.transition = Selectable.Transition.ColorTint;
+            button.targetGraphic = image;
+            var colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1.2f, 1.2f, 1.2f);
+            colors.selectedColor = new Color(1.12f, 1.12f, 1.12f);
+            colors.pressedColor = new Color(.72f, .72f, .72f);
+            colors.disabledColor = new Color(.5f, .5f, .5f, .55f);
+            colors.fadeDuration = .10f;
+            button.colors = colors;
             return button;
         }
 

@@ -137,6 +137,7 @@ namespace Sandplay.Core
             so.ObjectId = category + "_" + displayName.Replace(" ", "_");
             so.DisplayName = displayName;
             so.Category = category;
+            so.objectSize = Objects.ObjectSizing.Recommend(category.ToString(), displayName);
             so.Prefab = template;
 
             catalog.Objects.Add(so);

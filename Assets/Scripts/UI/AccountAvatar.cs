@@ -136,6 +136,8 @@ namespace Sandplay.UI
             {
                 request.timeout = 10;
                 request.redirectLimit = 0;
+                if(Sandplay.Core.UnityRequestLifetime.IsStopping){request.Dispose();yield break;}
+                using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(request,null);
                 yield return request.SendWebRequest();
                 complete(request.result == UnityWebRequest.Result.Success ? request.downloadHandler.data : null,
                     ProfileImageCache.Lifetime(request.GetResponseHeader("Cache-Control"), request.GetResponseHeader("Age")));

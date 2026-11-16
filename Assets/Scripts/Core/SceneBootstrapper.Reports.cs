@@ -25,6 +25,7 @@ namespace Sandplay.Core
         {
             var analysisPanel = CreatePanel(_sandboxUI.transform, "AnalysisPanel",
                 new Vector2(0.10f, 0.05f), new Vector2(0.935f, 0.91f), Vector2.zero, Vector2.zero);
+            _gameAnalysisPanel=analysisPanel;
             analysisPanel.GetComponent<Image>().color = HomeCard;
             ApplyHomeRoundedCorners(analysisPanel.GetComponent<Image>(), 16f);
             var analysisOutline = analysisPanel.AddComponent<Outline>();
@@ -226,6 +227,11 @@ namespace Sandplay.Core
 
             // Wire up AnalysisUI component
             var analysisUI = analysisPanel.AddComponent<Sandplay.UI.AnalysisUI>();
+            analysisUI.OpenInSidePane=open=>RequestGameSidePane("analysis",()=>
+            {
+                open();
+                DockGameSidePane(analysisPanel,"analysis",(RectTransform)analysisPanel.transform,420);
+            });
             analysisUI.RoundReflectionCard = img => ApplyHomeRoundedCorners(img, 12);
             analysisUI.ReflectionCardColor = HomeIsLight ? new Color(.95f, .97f, .965f) : new Color(.08f, .14f, .16f);
             analysisUI.ReflectionAccent = HomePrimary;
@@ -292,7 +298,7 @@ namespace Sandplay.Core
 
         private GameObject _manualReportPanel;
 
-        private void ToggleManualReportPanel() => OpenReportWorkspace(SessionManager.Instance?.CurrentBoardName);
+        private void ToggleManualReportPanel() => OpenReportWorkspaceRecord(SessionManager.Instance?.CurrentBoardName,false);
 
         // Created on demand so history always reflects the current board/account.
         private void CreateManualReportPanel() { }
@@ -557,17 +563,31 @@ namespace Sandplay.Core
             Sandplay.Data.AnalysisReport report,
             string sessionName,
             Button pdfBtn,
-            TextMeshProUGUI statusTxt)
+            TextMeshProUGUI statusTxt, bool richServerReady = false)
         {
             if (report == null) return;
             var current = CapturePersistedReportGuard(report, sessionName);
+            if (RichReportDocument.IsRich(report) && !richServerReady)
+            {
+                if (pdfBtn) pdfBtn.interactable = false;
+                BackendClient.Instance.RequireRichReportServer(() => {
+                    if (!current()) return;
+                    if (pdfBtn) pdfBtn.interactable = true;
+                    ExportReportPdf(report, sessionName, pdfBtn, statusTxt, true);
+                }, error => {
+                    if (!current()) return;
+                    if (pdfBtn) pdfBtn.interactable = true;
+                    if (statusTxt) statusTxt.text = error;
+                });
+                return;
+            }
             ShowPrivatePdfReview(report, (text, includeAI, includePrivate) =>
             {
                 try
                 {
                     if (!current()) throw new InvalidOperationException(Localization.Get("reports.edit_stale"));
                     SessionManager.Instance.ReviewReportPdf(sessionName, report.ReportId, ReportSharingText.Fingerprint(report), includeAI, includePrivate, text);
-                    ExportReviewedReportPdf(report, sessionName, pdfBtn, statusTxt, text);
+                    ExportReviewedReportPdf(report, sessionName, pdfBtn, statusTxt, text, RichReportDocument.ExportHtml(report,includePrivate));
                 }
                 catch (Exception ex)
                 {
@@ -623,7 +643,7 @@ namespace Sandplay.Core
             Sandplay.Data.AnalysisReport report,
             string sessionName,
             Button pdfBtn,
-            TextMeshProUGUI statusTxt, string exportText)
+            TextMeshProUGUI statusTxt, string exportText, string richHtml = null)
         {
             var client = BackendClient.Instance;
             if (client == null || !client.IsLoggedIn)
@@ -708,7 +728,7 @@ namespace Sandplay.Core
                     if (!current()) { if (pdfBtn) pdfBtn.interactable = true; return; }
                     if (statusTxt) statusTxt.text = Localization.Get("reports.pdf_error", err);
                     if (pdfBtn) pdfBtn.interactable = true;
-                }
+                }, richHtml
             );
         }
 
@@ -882,42 +902,12 @@ namespace Sandplay.Core
             detailScrollRect.vertical = true;
             detailScrollRect.movementType = ScrollRect.MovementType.Elastic;
             if (!readOnly && !string.IsNullOrEmpty(sessionName) && SessionManager.CanEditReport(report))
-                ClientButton(box.transform, "reports.edit", .05f, .02f, .43f, .065f, () =>
+                ClientButton(box.transform, "reports.edit", .05f, .02f, .90f, .065f, () =>
                     ShowReportEditor(report, sessionName, () =>
                     {
                         if (bodyTxt) bodyTxt.text = report.ResultText ?? "";
                     }), true).name = "EditSavedReport";
-            ClientButton(box.transform, "reports.revisions", .52f, .02f, .43f, .065f,
-                () => ShowReportRevisions(report)).name = "ViewReportRevisions";
             viewportRT.offsetMin = new Vector2(14, 72);
-        }
-
-        private void ShowReportRevisions(AnalysisReport report)
-        {
-            var box = ClientDialog(Localization.Get("reports.revisions"), 760, 650);
-            ClientText(box, Localization.Get("reports.revisions_notice"), 13, .05f, .73f, .90f, .11f, HomeMuted);
-            var history = new System.Text.StringBuilder();
-            if (report.Revisions != null)
-                for (int i = report.Revisions.Count - 1; i >= 0; i--)
-                {
-                    var revision = report.Revisions[i];
-                    if (revision == null) continue;
-                    history.AppendLine(revision.ReplacedAt ?? "");
-                    history.AppendLine(revision.ResultText ?? "");
-                    history.AppendLine();
-                }
-            var preview = ClientInput(box, history.Length > 0 ? history.ToString() : Localization.Get("reports.revisions_empty"),
-                "", .05f, .07f, .90f, .63f, 0);
-            if (SessionManager.CanEditReport(report))
-            {
-                preview.GetComponent<RectTransform>().offsetMin += new Vector2(0, 56);
-                ClientButton(box, "sharing.history", .05f, .025f, .90f, .07f, () => OpenSharedReportHistory(box, report));
-            }
-            preview.name = "ReportRevisionHistory";
-            preview.lineType = TMP_InputField.LineType.MultiLineNewline;
-            preview.readOnly = true;
-            preview.textComponent.richText = false;
-            preview.textComponent.alignment = TextAlignmentOptions.TopLeft;
         }
 
     }

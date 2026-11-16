@@ -90,7 +90,7 @@ namespace Sandplay.Core
         {
             ClearClientChildren(square);
             var background = ClientRect(square, "Background", 0, 0, 1, 1).gameObject.AddComponent<Image>();
-            background.color = HomeIsLight ? new Color(.90f, .94f, .94f, 1f) : HomeCard;
+            background.color = HomeAvatarBackground;
             ApplyHomeRoundedCorners(background, 10f);
             background.gameObject.AddComponent<Mask>().showMaskGraphic = true;
             var raw = ClientRect(background.transform, "Photo", 0, 0, 1, 1).gameObject.AddComponent<RawImage>();

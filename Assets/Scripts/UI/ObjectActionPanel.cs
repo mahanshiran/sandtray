@@ -59,6 +59,7 @@ namespace Sandplay.UI
         }
         private void OnDisable()
         {
+            HideLinearMarkers();
             OnApplicationFocus(false);
             if (_gizmo != null) _gizmo.SetTarget(null);
         }
@@ -70,7 +71,7 @@ namespace Sandplay.UI
 
         /// <summary>True while a transform action is being dragged.</summary>
         public bool IsActionActive =>
-            _verticalHeld || _verticalDropping || _rotateHeld || _resizeHeld ||
+            WaitingForLinearConfirmation || _verticalHeld || _verticalDropping || _rotateHeld || _resizeHeld ||
             _pendingTool != ObjectTransformTool.None || (_gizmo != null && _gizmo.IsDragging);
 
         public void Initialize(UnityEngine.Camera cam)
@@ -87,11 +88,18 @@ namespace Sandplay.UI
 
         private void OnDestroy()
         {
-            if (_gizmo != null) Destroy(_gizmo.gameObject);
+            if (_linearLeftMarker != null) DestroyToolObject(_linearLeftMarker.gameObject);
+            if (_linearRightMarker != null) DestroyToolObject(_linearRightMarker.gameObject);
+            if (_gizmo != null) DestroyToolObject(_gizmo.gameObject);
             KeyboardShortcuts.Changed -= RefreshKeyboardHints;
             EventBus.Unsubscribe<ObjectSelectedEvent>(OnObjectSelected);
             EventBus.Unsubscribe<ObjectRemovedEvent>(OnObjectRemoved);
             EventBus.Unsubscribe<NetworkRoleAssignedEvent>(OnEditingRoleChanged);
+        }
+
+        private static void DestroyToolObject(GameObject tool)
+        {
+            if (Application.isPlaying) Destroy(tool); else DestroyImmediate(tool);
         }
 
         private void OnEditingRoleChanged(NetworkRoleAssignedEvent evt)
@@ -138,6 +146,7 @@ namespace Sandplay.UI
         {
             UpdatePanel();
             RefreshToolbarVisibility();
+            RefreshLinearTools();
         }
 
         private void UpdatePanel()
@@ -209,6 +218,8 @@ namespace Sandplay.UI
             float scaleFactor = canvas != null ? canvas.scaleFactor : 1f;
             float panelWidth = _rt.rect.width * scaleFactor * Mathf.Abs(_rt.localScale.x);
             float panelHeight = _rt.rect.height * scaleFactor * Mathf.Abs(_rt.localScale.y);
+            if (_target.GetComponent<SmartLinearObject>() != null && !HasGroup)
+                panelHeight += (LinearToolsHeight + 8f) * scaleFactor * Mathf.Abs(_rt.localScale.y);
             screenPos.x = Mathf.Clamp(screenPos.x, panelWidth * 0.5f + 8f,
                 Screen.width - panelWidth * 0.5f - 8f);
             screenPos.y = Mathf.Clamp(screenPos.y + 8f + 42f * scaleFactor, HasGroup ? 24f * scaleFactor : 8f,

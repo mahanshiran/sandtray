@@ -15,6 +15,17 @@ namespace Sandplay.UI
         private bool focused = true;
         private int recordedMinutes;
 
+        private static bool countdownActive;
+        private static double countdownDeadline;
+        public static void BeginTestCountdown(double remainingSeconds)
+        {
+            countdownDeadline = Time.realtimeSinceStartupAsDouble + Math.Max(0, remainingSeconds);
+            countdownActive = true;
+        }
+        public static void EndTestCountdown() { countdownActive = false; }
+        public static string FormatRemaining(double seconds) => FormatElapsed((long)Math.Ceiling(Math.Max(0, seconds)));
+        public static bool CountdownIsUrgent(double seconds) => seconds < 60;
+
         public void Initialize(TMP_FontAsset font)
         {
             var rect = (RectTransform)transform;
@@ -37,6 +48,16 @@ namespace Sandplay.UI
         private void Update()
         {
             if (label == null) return;
+            if (countdownActive)
+            {
+                double left = Math.Max(0, countdownDeadline - Time.realtimeSinceStartupAsDouble);
+                label.enabled = true;
+                label.color = CountdownIsUrgent(left) ? new Color(1f,.22f,.22f) : Color.white;
+                label.text = FormatRemaining(left);
+                previousSecond = -1;
+                return;
+            }
+            label.color = Color.white;
             var network = NetworkBootstrapper.Instance;
             bool visible = network != null && network.IsOnline;
             if (!visible && focused)

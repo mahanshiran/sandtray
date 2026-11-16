@@ -63,6 +63,9 @@ namespace Sandplay.Core
         private void ShowMainMenu()
         {
             if (LocalAccountStorage.RequiresRestart) { LocalAccountStorage.ShowRestartShield(); return; }
+            EndTestTableReview();
+            CloseGameSidePanes();
+            SetScheduledTableMode(false);
             // Hosting warnings belong to an open board, never to home pages.
             ClearHostingWarningAfterBoardExit();
             ClearContextInviteCard();
@@ -140,15 +143,11 @@ namespace Sandplay.Core
                 navY, navH, false, false, () => ShowHomeSection("clients")), "clients");
 
             navY -= navH + navGap;
-            RegisterHomeNav(CreateHomeNavItem(sidebar.transform, "Nav_Organization", "join", Localization.Get("organization.nav"),
-                navY, navH, false, false, () => ShowHomeSection("organization")), "organization");
-
-            navY -= navH + navGap;
-            RegisterHomeNav(CreateHomeNavItem(sidebar.transform, "Nav_Schedules", "boards", F("Schedules", "预约日程"),
+            RegisterHomeNav(CreateHomeNavItem(sidebar.transform, "Nav_Schedules", "calendar", F("Schedules", "预约日程"),
                 navY, navH, false, false, () => ShowSchedules()), "schedules");
             navY -= navH + navGap;
-            var reportsNav = CreateHomeNavItem(sidebar.transform, "Nav_Reports", "boards", F("Reports", "报告"),
-                navY, navH, false, false, OpenReceivedReports);
+            var reportsNav = CreateHomeNavItem(sidebar.transform, "Nav_Reports", "report", F("Reports", "报告"),
+                navY, navH, false, false, () => {if(CanUsePersonalClientDirectory)ShowHomeSection("reports");else OpenReceivedReports();});
             RegisterHomeNav(reportsNav, "reports");
             WireReportsBadge(reportsNav.transform);
             BuildFriendsSidebar(sidebar.transform);
@@ -407,8 +406,8 @@ namespace Sandplay.Core
             _homePages["home"] = _homeDashboardContent;
             BuildMyBoardsPage();
             BuildClientsPage();
-            BuildOrganizationPage();
             BuildSchedulesPage();
+            BuildTherapistReportsPage();
             BuildMultiplayerPage();
             BuildHomeReplaysPage();
             BuildHomeAiPage();
@@ -565,7 +564,7 @@ namespace Sandplay.Core
         private Button _secondaryHomeHeaderSettings;
         private GameObject _secondaryHomeHeaderAccount;
 
-        private static bool IsPrimaryHomeSection(string key) => key == "home" || key == "clients" || key == "organization" || key == "schedules";
+        private static bool IsPrimaryHomeSection(string key) => key == "home" || key == "clients" || key == "organization" || key == "schedules" || key == "reports";
 
         private static string SecondaryHomeTitleKey(string key)
         {
@@ -626,7 +625,7 @@ namespace Sandplay.Core
                 var accountRect = ClientRect(header, "Account", .76f, .12f, .045f, .76f);
                 var accountImage = accountRect.gameObject.AddComponent<Image>();
                 accountImage.sprite = SessionAvatars.Circle();
-                accountImage.color = HomeTeal;
+                accountImage.color = HomeAvatarBackground;
                 accountRect.gameObject.AddComponent<AccountAvatar>();
                 accountRect.gameObject.AddComponent<Button>().onClick.AddListener(OpenOwnAvatarProfile);
                 _secondaryHomeHeaderAccount = accountRect.gameObject;
@@ -899,8 +898,11 @@ namespace Sandplay.Core
             _homePages["objects"] = _objectsPage;
         }
 
+        private bool _settingsPageForClient;
+
         private void BuildHomeSettingsPage()
         {
+            _settingsPageForClient = BackendClient.Instance.IsClientAccount;
             _settingsPage = CreateHomeSidePage("SettingsPage");
             var list = ClientScroll(_settingsPage.transform, "SettingsList", .01f,.025f,.98f,.98f);
             var settingsViewportImage = list.parent.GetComponent<Image>();
@@ -928,9 +930,15 @@ namespace Sandplay.Core
 
         private void ShowHomeSection(string key)
         {
+            if (BackendClient.Instance.IsClientAccount && key != "settings") key = "schedules";
             if (string.IsNullOrEmpty(key)) key = "home";
             if (key == "clients" && !CanShowClientNavigation) key = "home";
             if (key == "organization" && !CanShowOrganizationNavigation) key = "home";
+            if (key == "settings" && _settingsPageForClient != BackendClient.Instance.IsClientAccount)
+            {
+                if (_settingsPage != null) { _settingsPage.SetActive(false); Destroy(_settingsPage); }
+                BuildHomeSettingsPage();
+            }
             _activeHomeNav = key;
             RefreshHomeNavigationLevel(key);
 
@@ -970,6 +978,8 @@ namespace Sandplay.Core
                 RefreshHomeReplaysPage();
             else if (key == "schedules")
                 RefreshSchedulesPage();
+            else if (key == "reports")
+                RefreshTherapistReportsPage();
             else if (key == "ai")
                 RefreshHomeAiReports();
             else if (key == "settings")
@@ -1008,6 +1018,11 @@ namespace Sandplay.Core
 
         private void OnAccountStatusChanged()
         {
+            if (BackendClient.Instance.RequiresSignIn)
+            {
+                CloseAccountPopover();
+                if (FindObjectOfType<Sandplay.UI.LoginScreen>() == null) OpenLoginScreen();
+            }
             UpdateHomeUserChrome();
             RefreshSettingsValues();
             if (_accountPopover != null && _accountPopover.activeInHierarchy)
@@ -1495,6 +1510,7 @@ namespace Sandplay.Core
                 _sidebarProBadgeImg.gameObject.SetActive(subscribed && !compactHeader);
             }
 
+            if (_proBtn != null) _proBtn.gameObject.SetActive(!BackendClient.Instance.IsClientAccount);
             if (_proBtn != null)
             {
                 var lbl = _proBtn.GetComponentInChildren<TextMeshProUGUI>();
@@ -1508,6 +1524,17 @@ namespace Sandplay.Core
                         ? new Color(0.16f, 0.58f, 0.38f, 1f)
                         : HomeGold;
             }
+            PromptAccountTypeSelection();
+        }
+
+        // Restored sessions must finish the same onboarding as fresh password/social logins.
+        private void PromptAccountTypeSelection()
+        {
+            var client = BackendClient.Instance;
+            if (_canvasGo == null || client == null || !client.NeedsAccountTypeSelection ||
+                FindObjectOfType<Sandplay.UI.LoginScreen>() != null) return;
+            CloseAccountPopover();
+            OpenLoginScreen(null);
         }
 
         // ── RevenueCat ───────────────────────────────────────────────────────
@@ -1544,7 +1571,7 @@ namespace Sandplay.Core
             bool therapist=client.UserType=="psychologist";
             var card=ClientRect(overlay,"YourProfile",1,1,0,0);
             card.pivot=new Vector2(1,1);card.anchoredPosition=new Vector2(-18,-68);
-            card.sizeDelta=new Vector2(Mathf.Min(340,size.x-24),Mathf.Min(therapist?475:430,size.y-84));
+            card.sizeDelta=new Vector2(Mathf.Min(340,size.x-24),Mathf.Min(client.IsClientAccount ? 330 : therapist?475:430,size.y-84));
             var image=card.gameObject.AddComponent<Image>();image.color=HomeCard;ApplyHomeRoundedCorners(image,12);
             var border=card.gameObject.AddComponent<Outline>();border.effectColor=HomeCardBorder;border.effectDistance=new Vector2(1,-1);
             // Consume clicks inside the card instead of dismissing through the backdrop.
@@ -1552,12 +1579,12 @@ namespace Sandplay.Core
             var close=ClientButton(card,"×",.86f,.90f,.09f,.07f,CloseAccountPopover);close.GetComponent<Image>().color=Color.clear;
             // Keep the identity column vertically compact so it sits alongside the avatar.
             var photo=ClientRect(card,"Avatar",.07f,.68f,.24f,.21f);
-            var circle=photo.gameObject.AddComponent<Image>();circle.sprite=Sandplay.UI.SessionAvatars.Circle();circle.color=HomeTeal;
+            var circle=photo.gameObject.AddComponent<Image>();circle.sprite=Sandplay.UI.SessionAvatars.Circle();circle.color=HomeAvatarBackground;
             string initial=string.IsNullOrWhiteSpace(client.UserName)?"?":System.Globalization.StringInfo.GetNextTextElement(client.UserName.Trim()).ToUpperInvariant();
-            var initialLabel=ClientText(photo,initial,28,0,0,1,1,HomePrimary);initialLabel.alignment=TextAlignmentOptions.Center;
+            var initialLabel=ClientText(photo,initial,28,0,0,1,1,HomeIsLight?HomePrimary:Color.white);initialLabel.alignment=TextAlignmentOptions.Center;
             photo.gameObject.AddComponent<Sandplay.UI.AccountAvatar>().SetPerson(client.UserId,client.UserAvatarUrl,initialLabel);
             ClientText(card,client.UserName,18,.37f,.79f,.56f,.065f,HomeText).fontStyle=FontStyles.Bold;
-            ClientText(card,client.UserEmail,12,.37f,.735f,.56f,.05f,HomeMuted);
+            ClientText(card,client.IsClientAccount ? F("Client account", "来访者账号") : client.UserEmail,12,.37f,.735f,.56f,.05f,HomeMuted);
             ClientText(card,F("Signed in","已登录"),12,.40f,.685f,.53f,.045f,HomeMuted);
             // Keep the signed-in status marker circular at every resolution.
             var dotRect=ClientRect(card,"Online",.37f,.714f,0,0);
@@ -1570,6 +1597,8 @@ namespace Sandplay.Core
             float vipY = .645f - primaryActionHeight;
             float usageY = vipY - primaryActionGap - primaryActionHeight;
             float editY = usageY - primaryActionGap - primaryActionHeight;
+            if (!client.IsClientAccount)
+            {
             var vip=ClientButton(card,"",.065f,vipY,.87f,primaryActionHeight,()=>
             {CloseAccountPopover();ShowPaywallPanel();});
             vip.GetComponent<Image>().color=HomeProPurple;
@@ -1589,9 +1618,11 @@ namespace Sandplay.Core
             _hostingWalletLabel=ClientText(usage.transform,F("Hosting minutes","主持分钟数"),10,.04f,.06f,.82f,.36f,HomeMuted);
             _hostingWalletNext=0;_hostingWalletUser=-1;
             AddHomeIconGraphic(usage.transform,"chevron",new Vector2(.90f,.30f),new Vector2(.96f,.70f),HomeText);
+            }
+            else editY = .42f;
             ClientButton(card,F("Edit profile","编辑个人资料"),.065f,editY,.87f,primaryActionHeight,()=>{CloseAccountPopover();EditAccountProfile();});
             if(therapist)ClientButton(card,F("Edit therapist profile","编辑治疗师资料"),.065f,.30f,.87f,.07f,()=>{CloseAccountPopover();OpenTherapistProfile();});
-            ClientButton(card,F("Account security","账号安全"),.065f,.025f,.54f,.085f,()=>{CloseAccountPopover();ShowAccountSecurity(false);});
+            if (!client.IsClientAccount) ClientButton(card,F("Account security","账号安全"),.065f,.025f,.54f,.085f,()=>{CloseAccountPopover();ShowAccountSecurity(false);});
             var logout=ClientButton(card,F("Log out","退出登录"),.635f,.025f,.30f,.085f,()=>
             {CloseAccountPopover();client.SignOut();UpdateAccountButton();});
             logout.GetComponent<Image>().color=Color.clear;
@@ -1662,7 +1693,7 @@ namespace Sandplay.Core
                 ClientButton(photoRow,F("Remove photo", "移除照片"),.25f,.10f,.70f,.36f,()=>
                 { data.image_data = ""; SetClientAvatar(avatar,data.name,null); SetClientPhotoOverlay(avatar,false); });
                 Field(F("Display name (required)", "显示名称（必填）"),data.name,150,v=>data.name=v.Trim());
-                Field(F("Email · change in Account security", "邮箱 · 请在账号安全中更改"),data.email,254,null);
+                if (!client.IsClientAccount) Field(F("Email · change in Account security", "邮箱 · 请在账号安全中更改"),data.email,254,null);
                 Field(F("Preferred name", "常用称呼"),data.preferred_name,150,v=>data.preferred_name=v);
                 Field(F("Age", "年龄"),data.age,3,v=>data.age=v.Trim());
                 Field(F("Gender (self-described)", "性别（自行填写）"),data.gender,80,v=>data.gender=v);
@@ -1707,12 +1738,14 @@ namespace Sandplay.Core
 
         private void OpenLoginScreen()
         {
-            if (BackendClient.Instance.IsLoggedIn) { ShowAccountPopover(); return; }
+            if (BackendClient.Instance.IsLoggedIn && !BackendClient.Instance.RequiresSignIn &&
+                !BackendClient.Instance.NeedsAccountTypeSelection) { ShowAccountPopover(); return; }
             OpenLoginScreen(null);
         }
 
         private void OpenLoginScreen(System.Action afterAuth)
         {
+            if (FindObjectOfType<Sandplay.UI.LoginScreen>() != null) return;
             var go = new GameObject("LoginScreen");
             go.transform.SetParent(_canvasGo.transform, false);
             var ls = go.AddComponent<Sandplay.UI.LoginScreen>();
@@ -1728,40 +1761,9 @@ namespace Sandplay.Core
         private void TryStartHostOnline()
         {
             var client = BackendClient.Instance;
-            if (client == null || !client.IsLoggedIn)
+            if (client == null || !client.IsLoggedIn || client.RequiresSignIn)
             {
                 OpenLoginScreen(TryStartHostOnline);
-                return;
-            }
-            if (client.IsOrganizationTherapist && !client.ManagedCanHostSessions)
-            {
-                ShowLockedFeatureDialog(F(
-                    "Your organization has not allowed this account to host online sessions.",
-                    "您的机构尚未允许此账户主持在线会话。"));
-                return;
-            }
-            if (client.IsOrganizationTherapist)
-            {
-                client.ActiveHostingOrganizationId = "";
-                ShowHostPanel();
-                return;
-            }
-            if (client.UserType == "psychologist")
-            {
-                int account = client.UserId;
-                client.FetchOrganizationWorkspaces(workspaces =>
-                {
-                    if (client.UserId != account || !client.IsLoggedIn) return;
-                    var workspace = (workspaces ?? Array.Empty<BackendClient.OrganizationWorkspace>())
-                        .FirstOrDefault(item => item != null && item.role == "therapist" &&
-                            item.membership_status == "active" && item.can_host_sessions);
-                    if (workspace != null) ShowHostingWorkspaceDialog(workspace);
-                    else StartPersonalHosting();
-                }, error =>
-                {
-                    if (client.UserId == account && client.IsLoggedIn)
-                        ShowLockedFeatureDialog(error);
-                });
                 return;
             }
             StartPersonalHosting();
@@ -1771,35 +1773,17 @@ namespace Sandplay.Core
         {
             var client = BackendClient.Instance;
             client.ActiveHostingOrganizationId = "";
+            int userId = client.UserId;
+            long epoch = LocalAccountStorage.Epoch;
+            bool Current() => this != null && client != null && client.IsLoggedIn &&
+                client.UserId == userId && LocalAccountStorage.Epoch == epoch;
+            var loading = BeginUiOperation(F("Preparing session…", "正在准备会话…"));
             client.ConsumeFreeFeature(
                 BackendClient.FeatureHostSession,
-                _ => ShowHostPanel(),
-                () => ShowLockedFeatureDialog(Localization.Get("sub.free_host_limit")),
-                error => ShowLockedFeatureDialog(error)
+                _ => { if (CompleteUiOperation(loading) && Current()) ShowHostPanel(); },
+                () => { if (CompleteUiOperation(loading) && Current()) ShowLockedFeatureDialog(Localization.Get("sub.free_host_limit")); },
+                error => { if (CompleteUiOperation(loading) && Current()) ShowLockedFeatureDialog(F("The session service could not be reached. Please try again.","无法连接会话服务，请重试。"), F("Host online session","主持在线会话"), false); }
             );
-        }
-
-        private void ShowHostingWorkspaceDialog(BackendClient.OrganizationWorkspace workspace)
-        {
-            var box = ClientDialog(F("Choose hosting allowance", "选择主持额度"), 620, 390);
-            var dialog = _clientDialog;
-            var message = ClientText(box, F(
-                "Choose which allowance this session should use.",
-                "选择本次会话使用的额度。"), 15,.07f,.62f,.86f,.14f,HomeText);
-            message.enableWordWrapping = true;
-            ClientButton(box, F("Personal", "个人"), .07f,.33f,.86f,.15f, () =>
-            {
-                if (dialog != _clientDialog) return;
-                CloseOrganizationDialog();
-                StartPersonalHosting();
-            });
-            ClientButton(box, workspace.name, .07f,.14f,.86f,.15f, () =>
-            {
-                if (dialog != _clientDialog) return;
-                BackendClient.Instance.ActiveHostingOrganizationId = workspace.id;
-                CloseOrganizationDialog();
-                ShowHostPanel();
-            }, true);
         }
 
         private void UpdateAccountButton()

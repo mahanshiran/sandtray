@@ -41,6 +41,11 @@ namespace Sandplay.Objects
             foreach (var item in items)
                 if (item != null && !string.IsNullOrEmpty(item.id))
                 {
+                    if (!BundledCatalog.IsPlacementAllowed(item))
+                    {
+                        _dependencies[item.id] = item;
+                        continue;
+                    }
                     if (previous.TryGetValue(item.id, out var existing))
                     {
                         if (SameMetadata(existing, item))
@@ -49,17 +54,21 @@ namespace Sandplay.Objects
                             _dependencies.Remove(item.id);
                             continue;
                         }
-                        if (SameText(existing.model_url, item.model_url) &&
-                            SameText(existing.model_hash, item.model_hash))
+                        if (SameModel(existing, item))
+                        {
                             item.LoadedPrefab = existing.LoadedPrefab;
+                            item.ObjectPreviewSprite = existing.ObjectPreviewSprite;
+                        }
                         if (SameText(existing.thumbnail_url, item.thumbnail_url))
                             item.ThumbnailSprite = existing.ThumbnailSprite;
                     }
                     else if (_dependencies.TryGetValue(item.id, out var dependency))
                     {
-                        if (SameText(dependency.model_url, item.model_url) &&
-                            SameText(dependency.model_hash, item.model_hash))
+                        if (SameModel(dependency, item))
+                        {
                             item.LoadedPrefab = dependency.LoadedPrefab;
+                            item.ObjectPreviewSprite = dependency.ObjectPreviewSprite;
+                        }
                         if (SameText(dependency.thumbnail_url, item.thumbnail_url))
                             item.ThumbnailSprite = dependency.ThumbnailSprite;
                     }
@@ -78,6 +87,11 @@ namespace Sandplay.Objects
                 {
                     var item = items[i];
                     if (item == null || string.IsNullOrEmpty(item.id)) continue;
+                    if (!BundledCatalog.IsPlacementAllowed(item))
+                    {
+                        _dependencies[item.id] = item;
+                        continue;
+                    }
                     if (_items.TryGetValue(item.id, out var existing))
                     {
                         // Keep the same instance for repeated handoff manifests, including
@@ -87,9 +101,11 @@ namespace Sandplay.Objects
                             items[i] = existing;
                             continue;
                         }
-                        if (SameText(existing.model_url, item.model_url) &&
-                            SameText(existing.model_hash, item.model_hash) && item.LoadedPrefab == null)
+                        if (SameModel(existing, item) && item.LoadedPrefab == null)
+                        {
                             item.LoadedPrefab = existing.LoadedPrefab;
+                            item.ObjectPreviewSprite = existing.ObjectPreviewSprite;
+                        }
                         if (SameText(existing.thumbnail_url, item.thumbnail_url) && item.ThumbnailSprite == null)
                             item.ThumbnailSprite = existing.ThumbnailSprite;
                     }
@@ -102,9 +118,11 @@ namespace Sandplay.Objects
                             _dependencies.Remove(item.id);
                             continue;
                         }
-                        if (SameText(dependency.model_url, item.model_url) &&
-                            SameText(dependency.model_hash, item.model_hash) && item.LoadedPrefab == null)
+                        if (SameModel(dependency, item) && item.LoadedPrefab == null)
+                        {
                             item.LoadedPrefab = dependency.LoadedPrefab;
+                            item.ObjectPreviewSprite = dependency.ObjectPreviewSprite;
+                        }
                         if (SameText(dependency.thumbnail_url, item.thumbnail_url) && item.ThumbnailSprite == null)
                             item.ThumbnailSprite = dependency.ThumbnailSprite;
                         _dependencies.Remove(item.id);
@@ -131,12 +149,25 @@ namespace Sandplay.Objects
 
         private static bool SameText(string a, string b) => (a ?? "") == (b ?? "");
 
+        // A host may send a refreshed/signed URL for the exact same GLB. Its
+        // content hash identifies the model; a URL change must not throw away
+        // an already imported template when joining or refreshing a session.
+        // Legacy entries without hashes can only be reused at the same URL.
+        private static bool SameModel(NetworkCatalogItem a, NetworkCatalogItem b) =>
+            !string.IsNullOrEmpty(a.model_hash) && !string.IsNullOrEmpty(b.model_hash)
+                ? SameText(a.model_hash, b.model_hash)
+                : SameText(a.model_hash, b.model_hash) &&
+                  !string.IsNullOrEmpty(a.model_url) && SameText(a.model_url, b.model_url);
+
         private static bool SameMetadata(NetworkCatalogItem a, NetworkCatalogItem b) =>
+            a.objectSizeExplicit == b.objectSizeExplicit &&
+            ObjectSizing.Valid(a.objectSize) == ObjectSizing.Valid(b.objectSize) &&
             SameText(a.id, b.id) && SameText(a.display_name, b.display_name) && SameText(a.category, b.category) &&
             SameText(a.model_url, b.model_url) && SameText(a.model_hash, b.model_hash) &&
             SameText(a.thumbnail_url, b.thumbnail_url) && SameText(a.description, b.description) &&
             (a.tags ?? System.Array.Empty<string>()).SequenceEqual(b.tags ?? System.Array.Empty<string>());
 
+        public static bool IsPlacementEnabled(string id) => _items.ContainsKey(id ?? "");
         public static NetworkCatalogItem[] Snapshot() => _items.Values.ToArray();
 
         /// <summary>Clear active items and retained board dependencies between workspaces.</summary>
@@ -152,7 +183,11 @@ namespace Sandplay.Objects
         {
             string key = id ?? "";
             if (_items.TryGetValue(key, out item)) return true;
-            return _dependencies.TryGetValue(key, out item);
+            if (_dependencies.TryGetValue(key, out item)) return true;
+            if (LinearObjectState.TryParse(key, out var state) &&
+                (_items.ContainsKey(state.DefinitionId) || _dependencies.ContainsKey(state.DefinitionId)))
+            { item = SmartLinearCatalog.Item(key); return true; }
+            return false;
         }
 
         /// <summary>

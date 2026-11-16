@@ -101,3 +101,90 @@ The same unchanged-GLB, rendered-thumbnail and runtime-scaling notes apply.
 Source manifest: `catalog-imports/2026-09-10-google-batch2.json`.
 Server deployment archive: `/root/sandtray-google-20260910-batch2/`.
 The combined Settings credit list includes both batches and can be scrolled.
+
+## Poly by Google expansion — 20 October 2026
+
+The 100 models selected in the October shortlist were individually downloaded
+from their linked Poly Pizza pages. Each page identifies **Poly by Google** as
+the creator and **CC BY 3.0** as the license. Original GLB bytes are unchanged.
+Model-specific source URLs, categories, tags, download URLs, sizes, and SHA-256
+hashes are recorded in `catalog-imports/2026-10-20-google-100.json`.
+
+All 100 passed the Khronos glTF validator with zero errors and zero warnings.
+All 100 also imported and rendered in an isolated Unity 2022.3.62f3c1 project
+using the application's UnityGLTF 2.15.0 package and existing normalization
+behavior. Preview sheets were visually inspected; no missing-material magenta
+or black-silhouette failures remained. Validator and Unity results are retained
+beside the manifest, together with both preview sheets. This verifies the import
+and desktop rendering path; it does not constitute device-specific QA.
+
+The original downloads, source pages, source metadata, Unity-rendered transparent
+512 × 512 thumbnails, and verification logs are retained in
+`/Users/mahanshiran/Downloads/Sandtray Poly Google 2026-10-20/`.
+The bundled `Assets/Resources/Credits/GooglePoly.json` includes the additional
+100 source records, preserving the previous 29 entries. Each published catalog
+object also carries its individual attribution and modification notice.
+
+Preparation, validation, Unity thumbnail rendering, and sequential catalog
+publication utilities are retained in `tools/catalog/`. Publication adds each
+object in its own transaction, retains a snapshot of the original catalog, and
+supports recovery without overwriting existing objects.
+
+All 100 were published to the existing default catalog, increasing it from 151
+to 251 entries. Published object IDs and file URLs are recorded in
+`catalog-imports/2026-10-20-google-100-published.json`. All 200 model/thumbnail
+files are attached and present in persistent server storage. The server archive,
+including the original 151-entry metadata snapshot and publication journal, is
+`/root/sandtray-google-20261020-100/`. No application server deployment or schema
+change was required. Existing apps receive the additions when their catalog is
+refreshed; the expanded bundled Settings credit list ships in the next app build.
+
+Final public-API verification downloaded every new GLB and thumbnail, matched all
+100 model hashes and all 100 thumbnail files, checked individual credits and
+categories, and confirmed all 151 previous entries retained their metadata.
+Results: `catalog-imports/2026-10-20-google-100-live-verification.json`.
+
+## Sandtray-focused Poly by Google expansion — 20 October 2026, batch 2
+
+The next 100 selections cover home and care, community objects, play, art and
+music, vegetation, water/weather, everyday props, fantasy, travel, and wildlife.
+Each model page was individually checked for Poly by Google authorship and
+CC BY 3.0. Provenance, original/prepared hashes, categories, and per-model changes
+are recorded in `catalog-imports/2026-10-20-google-batch2.json`.
+
+Source GLBs are preserved byte-for-byte in the batch archive's `originals/`
+directory. Prepared copies add a glTF scene wrapper that centers the horizontal
+placement origin at the base. Mesh, material, and texture definitions and binary
+chunks are unchanged. This corrects source origin offsets that would otherwise
+place the visible miniature away from the drop point. The original source title
+Stove is retained in credits; the catalog label is Wood-burning stove.
+
+All 100 prepared copies pass Khronos validation with zero errors and warnings.
+All 100 import and render in Unity 2022.3.62f3c1 / UnityGLTF 2.15.0, seat on a flat
+sand plane, and pass fitted BoxCollider selection raycasts at four yaw rotations.
+Placement origins are centered to within 0.001 world units after normalization.
+Mesh/material counts and desktop import timings are recorded with the Unity
+results. Both preview sheets were visually inspected. These geometry checks do
+not replace device-specific touch or performance QA.
+
+Original downloads, source pages, prepared copies, and logs are retained at
+`/Users/mahanshiran/Downloads/Sandtray Poly Google 2026-10-20 Batch 2/`.
+The project includes individual credits for the additional models, preserving
+all earlier entries. Each catalog description records the source and placement
+origin modification. Source verification, prepared-copy validation, original
+pivot measurements, final Unity results, and preview sheets are stored beside
+the batch manifest in `catalog-imports/`.
+
+All 100 were added individually to the existing default catalog, increasing it
+from 251 to 351 entries. Published IDs and hosted file URLs are recorded in
+`catalog-imports/2026-10-20-google-batch2-published.json`. Server archive:
+`/root/sandtray-google-20261020-batch2/`, including the pre-addition catalog
+snapshot and publication journal. No application server deployment or database
+schema change was needed; existing clients receive the models when their
+catalog refreshes. Updated bundled Settings credits ship in the next app build.
+
+Final public-API verification downloaded all 100 prepared models and all 100
+thumbnails, checked their bytes/hashes and individual source/modification notices,
+and confirmed that metadata for all 251 previous entries is unchanged. All 200
+new files are attached and present in persistent media storage. Results:
+`catalog-imports/2026-10-20-google-batch2-live-verification.json`.

@@ -86,12 +86,13 @@ namespace Sandplay.Sand
         private void Update()
         {
             if (InputHelper.GetPointerUp() && _strokeActive) FinishStroke();
-            if (_sandMesh == null || _cam == null) return;
+            var game=GameManager.Instance;
+            if (_sandMesh == null || _cam == null || game == null) return;
 
             // Spectators cannot modify sand
-            if (GameManager.Instance.IsSpectator) return;
+            if (game.IsSpectator) return;
 
-            var mode = GameManager.Instance.CurrentTool;
+            var mode = game.CurrentTool;
             if (mode != ToolMode.SandRaise && mode != ToolMode.SandDig &&
                 mode != ToolMode.SandSmooth && mode != ToolMode.SandFlatten &&
                 mode != ToolMode.SandPaint && mode != ToolMode.SandDraw)

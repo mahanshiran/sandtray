@@ -52,7 +52,7 @@ namespace Sandplay.Core
         void Update(){
             if(!Supported)return;
             var backend=BackendClient.Instance;
-            string user=backend.IsLoggedIn?backend.UserId.ToString():"";
+            string user=backend.CanUseCloudSession?backend.UserId.ToString():"";
             if(user!=account){account=user;lastRegistration="";nextCheck=0;if(user!="" && Enabled)NativeEnable();else NativeDisable();}
 #if UNITY_IOS && !UNITY_EDITOR
             Status=Read(SandtrayPushState());string tap=Read(SandtrayPushTap());
@@ -81,7 +81,13 @@ namespace Sandplay.Core
         IEnumerator Send(PushRegistration body,string token,bool showError,Action done=null){
             using(var request=new UnityWebRequest(BackendClient.BaseUrl+"/community/push/devices/","POST")){
                 request.uploadHandler=new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(body)));request.downloadHandler=new DownloadHandlerBuffer();request.timeout=15;request.redirectLimit=0;
-                request.SetRequestHeader("Content-Type","application/json");request.SetRequestHeader("Authorization","Bearer "+token);yield return request.SendWebRequest();
+                request.SetRequestHeader("Content-Type","application/json");request.SetRequestHeader("Authorization","Bearer "+token);
+                if(Sandplay.Core.UnityRequestLifetime.IsStopping)yield break;
+                using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(request,this);
+                yield return request.SendWebRequest();
+                var backend=BackendClient.Instance;
+                if(request.responseCode==401 && token==backend.AccessToken)
+                    backend.RecoverCloudSession(token,()=>{lastRegistration="";nextCheck=0;},_=>{});
                 if(request.result==UnityWebRequest.Result.Success){bindingFailed=false;done?.Invoke();}else if(showError){bindingFailed=true;Status="server_registration_failed";}
             }
         }

@@ -24,6 +24,7 @@ namespace Sandplay.Data
         public static string Draft(AnalysisReport report, bool includeAI)
         {
             if (report == null || report.Source == "ai" && !includeAI) return "";
+            if (RichReportDocument.IsRich(report)) return (report.Sections.Observations ?? "").Trim();
             if (report.Sections == null) return (report.ResultText ?? "").Trim();
             var source = report.Sections;
             // There is intentionally no option to include the private practitioner-notes field.
@@ -35,6 +36,9 @@ namespace Sandplay.Data
         public static string PdfDraft(AnalysisReport report, bool includeAI, bool includePrivate)
         {
             if (report == null || report.Source == "ai" && !includeAI) return "";
+            if (RichReportDocument.IsRich(report)) return Draft(report,includeAI) +
+                (includePrivate && !string.IsNullOrWhiteSpace(report.Sections.PractitionerNotes) ?
+                    "\n\n" + Localization.Get("report.practitioner_notes") + "\n" + report.Sections.PractitionerNotes : "");
             if (!includePrivate || report.Sections == null) return Draft(report, includeAI);
             var source = report.Sections;
             return SceneBootstrapper.StructuredReportText(new ReportSections {

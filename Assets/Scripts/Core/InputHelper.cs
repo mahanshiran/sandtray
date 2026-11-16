@@ -11,7 +11,7 @@ namespace Sandplay.Core
         {
             get
             {
-                if (KeyboardShortcuts.IsEditing || TouchScreenKeyboard.visible) return true;
+                if (Sandplay.UI.RichReportEditor.HasKeyboardFocus || KeyboardShortcuts.IsEditing || TouchScreenKeyboard.visible) return true;
                 var selected = UnityEngine.EventSystems.EventSystem.current?.currentSelectedGameObject;
                 if (selected == null) return false;
                 return selected.GetComponentInParent<TMPro.TMP_InputField>() != null ||

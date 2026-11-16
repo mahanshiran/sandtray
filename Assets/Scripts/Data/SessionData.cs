@@ -24,6 +24,7 @@ namespace Sandplay.Data
         public string ReviewedAt;
         public string PdfReviewText, PdfReviewFingerprint, PdfReviewedAt;
         public string SharedText, SharedReviewFingerprint, SharedReviewedAt;
+        // Legacy serialized data only. Report edits no longer create version history.
         public List<ReportTextRevision> Revisions = new();
     }
 
@@ -40,6 +41,8 @@ namespace Sandplay.Data
     [Serializable]
     public class ReportSections
     {
+        public int RichTextVersion;
+        public string RichHtml, PrivateHtml;
         public string Observations, ClientPerspective, PractitionerNotes, NextSteps, AIReflection;
         // A snapshot of the chosen layout; changing a template never changes a report.
         public string TemplateName;
@@ -63,6 +66,7 @@ namespace Sandplay.Data
         public string BoardHistoryId;
         public bool Archived;
         public string SessionName;
+        public string ScheduledReviewId;
         public string CreatedAt;
         public string ModifiedAt;
         public string TherapistNotes;

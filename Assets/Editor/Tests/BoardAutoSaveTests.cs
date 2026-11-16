@@ -62,6 +62,62 @@ namespace Sandplay.Tests
             Assert.AreEqual(Localization.Get("save.load_failed"), method.Invoke(null, new object[] { false, null }));
         }
 
+        [Test] public void ScheduledReviewGetsItsOwnStableIdentityAndKeepsItWhenRefreshed()
+        {
+            var snapshot=manager.LoadSessionData("Test board");
+            snapshot.ScheduledReviewId=Guid.NewGuid().ToString("D");
+            snapshot.BoardHistoryId="client-table-identity";snapshot.LocalCapacityId="client-storage-slot";
+            string source=JsonUtility.ToJson(snapshot);
+            manager.RestoreScheduledTest("Test review",source,"client-1");
+            var review=manager.LoadSessionData("Test review");
+            Assert.IsTrue(Guid.TryParse(review.BoardHistoryId,out _));
+            Assert.AreNotEqual(snapshot.BoardHistoryId,review.BoardHistoryId);
+            Assert.IsNull(review.LocalCapacityId);
+            Assert.AreEqual("Boards/"+review.BoardHistoryId,AggregateCapacityStore.ReportAggregate(review));
+            string identity=review.BoardHistoryId;
+            review.LocalCapacityId="review-storage-slot";
+            review.Reports.Add(new AnalysisReport{ReportId="local-report",Source="manual",ResultText="Keep this report"});
+            File.WriteAllText(Path.Combine(directory,"Test review.json"),JsonUtility.ToJson(review));
+            manager.RestoreScheduledTest("Test review",source,"client-1");
+            review=manager.LoadSessionData("Test review");
+            Assert.AreEqual(identity,review.BoardHistoryId);
+            Assert.AreEqual("review-storage-slot",review.LocalCapacityId);
+            Assert.AreEqual("Keep this report",review.Reports.Find(r=>r.ReportId=="local-report").ResultText);
+        }
+
+        [Test] public void LegacyScheduledReviewIdentityIsRepairedWithoutChangingTheTable()
+        {
+            var legacy=manager.LoadSessionData("Test board");
+            legacy.ScheduledReviewId=Guid.NewGuid().ToString("D");legacy.BoardHistoryId=null;
+            legacy.TherapistNotes="Keep these notes";
+            File.WriteAllText(BoardPath,JsonUtility.ToJson(legacy));
+            var repaired=manager.LoadSessionData("Test board");
+            Assert.IsTrue(Guid.TryParse(repaired.BoardHistoryId,out _));
+            Assert.AreEqual(legacy.HeightmapBase64,repaired.HeightmapBase64);
+            Assert.AreEqual(legacy.TherapistNotes,repaired.TherapistNotes);
+            Assert.AreEqual(repaired.BoardHistoryId,manager.LoadSessionData("Test board").BoardHistoryId);
+        }
+
+        [Test] public void FailedScheduledReportSaveIsRecoveredAsDraftWithoutMarkingItSaved()
+        {
+            var legacy=manager.LoadSessionData("Test board");
+            legacy.ScheduledReviewId=Guid.NewGuid().ToString("D");legacy.BoardHistoryId=null;
+            File.WriteAllText(BoardPath,JsonUtility.ToJson(legacy));
+            legacy.Reports.Add(new AnalysisReport{ReportId="draft-1",Source="manual",AuthorUserId=901,
+                ResultText="Practitioner notes: aaa",Sections=new ReportSections{PractitionerNotes="aaa",NextSteps="sdasdas"}});
+            string path=BoardPath+".interrupted-draft-1";
+            File.WriteAllText(path,JsonUtility.ToJson(legacy));
+            var draft=manager.LoadScheduledReportDraft("Test board");
+            Assert.IsNotNull(draft);Assert.AreEqual("draft-1",draft.ReportId);
+            Assert.AreEqual("aaa",draft.Sections.PractitionerNotes);
+            Assert.AreEqual("sdasdas",draft.Sections.NextSteps);
+            Assert.IsEmpty(manager.LoadSessionData("Test board").Reports);
+            Assert.IsTrue(File.Exists(path));
+            legacy.ScheduledReviewId=Guid.NewGuid().ToString("D");
+            File.WriteAllText(path,JsonUtility.ToJson(legacy));
+            Assert.IsNull(manager.LoadScheduledReportDraft("Test board"));
+        }
+
         [Test] public void CapacityValidationErrorIsNotReducedToHttp400()
         {
             var method = typeof(BackendClient).GetMethod("ExtractError", BindingFlags.Static | BindingFlags.NonPublic);
@@ -282,6 +338,38 @@ namespace Sandplay.Tests
             Assert.Throws<InvalidDataException>(()=>manager.RestoreCloudBackup(data,901));
         }
 
+        [Test] public void RichReportFormattingOnlyEditsPersistAndInvalidatePublicationReview()
+        {
+            var sections=RichReportDocument.Sections("<p>Observation</p>","Observation","<p>Private</p>","Private");
+            var report=new AnalysisReport {ReportId="rich-edit",ResultText="Observation",Source="manual",Sections=sections,CloudId="old-pdf"};
+            Assert.IsTrue(manager.AppendAnalysisReport("Test board",report));
+            string originalFingerprint=ReportSharingText.Fingerprint(report);
+            var changed=RichReportDocument.Sections("<p><strong>Observation</strong></p>","Observation","<p>Private</p>","Private");
+            var saved=manager.UpdateAnalysisReportText("Test board",report.ReportId,"Observation","Observation",changed,originalFingerprint);
+            Assert.AreEqual(changed.RichHtml,manager.LoadSessionData("Test board").Reports.Find(r=>r.ReportId==report.ReportId).Sections.RichHtml);
+            Assert.AreNotEqual(originalFingerprint,ReportSharingText.Fingerprint(saved));
+            Assert.IsNull(saved.CloudId);
+            Assert.AreEqual("Observation",ReportSharingText.Draft(saved,false));
+            StringAssert.DoesNotContain("Private",RichReportDocument.ExportHtml(saved));
+            StringAssert.Contains("Private",RichReportDocument.ExportHtml(saved,true));
+            Assert.Throws<InvalidOperationException>(()=>manager.UpdateAnalysisReportText("Test board",report.ReportId,"Observation","Observation",sections,originalFingerprint));
+        }
+
+        [Test] public void RichDraftRoundTripRetainsEmbeddedImagesAndPrivateNotes()
+        {
+            var report=new AnalysisReport {Source="manual",ResultText="Observation",Sections=RichReportDocument.Sections(
+                "<p>Observation</p><img src=\"data:image/png;base64,aGVsbG8=\">","Observation","<p>Private</p>","Private")};
+            try
+            {
+                RichReportDocument.WriteDraft("Test board","rich-draft",report);
+                var recovered=RichReportDocument.LoadDraft("Test board","rich-draft");
+                Assert.AreEqual(report.Sections.RichHtml,recovered.Sections.RichHtml);
+                Assert.AreEqual(report.Sections.PrivateHtml,recovered.Sections.PrivateHtml);
+                Assert.AreEqual("Observation",ReportSharingText.Draft(recovered,false));
+            }
+            finally {RichReportDocument.DeleteDraft("Test board","rich-draft");}
+        }
+
         [Test]
         public void ReportAuthorIsStampedAndEnforcedIncludingLegacyAndNoopEdits()
         {
@@ -300,7 +388,7 @@ namespace Sandplay.Tests
             LocalAccountStorage.CompleteWorkspaceTransition();
             Set("_requireWorkspace", LocalAccountStorage.CaptureGuard());
             var revised=manager.UpdateAnalysisReportText("Test board","owned","Original","Reviewed");
-            Assert.AreEqual(901,revised.Revisions[0].EditedByUserId);Assert.AreEqual("ai",revised.Source);
+            Assert.IsEmpty(revised.Revisions);Assert.AreEqual("ai",revised.Source);
             var data=manager.LoadSessionData("Test board");data.Reports[0].AuthorUserId=0;
             File.WriteAllText(BoardPath,JsonUtility.ToJson(data));
             Assert.Throws<UnauthorizedAccessException>(()=>manager.UpdateAnalysisReportText("Test board","owned","Reviewed","Legacy edit"));
@@ -323,10 +411,18 @@ namespace Sandplay.Tests
                 typeof(SceneBootstrapper).GetMethod("OpenAuthorizedReportWorkspace",Private)
                     .Invoke(ui,new object[]{"Test board",true,null});
                 var card=uiRoot.transform.Find("ClientDialog/Card").GetComponent<RectTransform>();
-                Assert.AreEqual(new Vector2(.5f,.5f),card.anchorMin);
-                Assert.AreEqual(new Vector2(.5f,.5f),card.anchorMax);
-                Assert.AreEqual(new Vector2(920,590),card.sizeDelta);
-                var inputs=uiRoot.GetComponentsInChildren<TMPro.TMP_InputField>();Assert.AreEqual(5,inputs.Length);
+                Assert.AreEqual(new Vector2(.07f,.025f),card.anchorMin);
+                Assert.AreEqual(new Vector2(.94f,.935f),card.anchorMax);
+                Assert.AreEqual(Vector2.zero,card.sizeDelta);
+                Assert.IsNull(card.Find("Report history"));
+                foreach(var button in card.GetComponentsInChildren<UnityEngine.UI.Button>())
+                {
+                    Assert.AreNotEqual("report.history",button.name);
+                    Assert.AreNotEqual("report.new_manual",button.name);
+                    Assert.AreNotEqual("templates.manage",button.name);
+                }
+                Assert.IsEmpty(card.GetComponentsInChildren<TMPro.TMP_Dropdown>());
+                var inputs=uiRoot.GetComponentsInChildren<TMPro.TMP_InputField>();Assert.AreEqual(4,inputs.Length);
                 inputs[0].text="Observed placement of three objects.";
                 var save=Array.Find(uiRoot.GetComponentsInChildren<UnityEngine.UI.Button>(),b=>b.GetComponentInChildren<TMPro.TMP_Text>()?.text==Localization.Get("manual.save"));
                 save.onClick.Invoke();
@@ -511,7 +607,7 @@ namespace Sandplay.Tests
                 Assert.AreEqual(1, saved);
                 Assert.AreEqual("Reviewed", report.ResultText);
                 Assert.IsTrue(string.IsNullOrEmpty(report.CloudId));
-                Assert.AreEqual("<b>Original</b>", report.Revisions[0].ResultText);
+                Assert.IsEmpty(report.Revisions);
                 Open(); Input().text = "Obsolete edit";
                 manager.UpdateAnalysisReportText("Test board", "edit", "Reviewed", "Changed elsewhere");
                 before = File.ReadAllText(BoardPath);
@@ -520,23 +616,19 @@ namespace Sandplay.Tests
                 Assert.AreEqual(1, saved);
                 Assert.IsNotNull(Button("SaveReportEdit"));
                 Button("CancelReportEdit").onClick.Invoke();
-                typeof(SceneBootstrapper).GetMethod("ShowReportRevisions", Private).Invoke(ui, new object[] { report });
-                var history = Input();
-                Assert.IsTrue(history.readOnly);
-                Assert.IsFalse(history.textComponent.richText);
-                StringAssert.Contains("<b>Original</b>", history.text);
+                Assert.IsNull(typeof(SceneBootstrapper).GetMethod("ShowReportRevisions",Private));
                 Assert.AreEqual(before, File.ReadAllText(BoardPath));
             }
             finally { UnityEngine.Object.DestroyImmediate(uiRoot); }
         }
 
         [Test]
-        public void ReportRevisionsInvalidateCloudPdfAndRejectStaleEdits()
+        public void ReportEditsReplaceCurrentTextWithoutHistoryAndRejectStaleEdits()
         {
             manager.AppendAnalysisReport("Test board", new AnalysisReport { ReportId = "r", ResultText = "Original", CloudId = "old-pdf" });
             var revised = manager.UpdateAnalysisReportText("Test board", "r", "Original", "Reviewed");
             Assert.IsTrue(string.IsNullOrEmpty(revised.CloudId));
-            Assert.AreEqual("Original", revised.Revisions[0].ResultText);
+            Assert.IsEmpty(revised.Revisions);
             Assert.IsNotEmpty(revised.EditedAt);
             string saved = File.ReadAllText(BoardPath);
             manager.UpdateAnalysisReportText("Test board", "r", "Reviewed", "Reviewed");
@@ -550,11 +642,11 @@ namespace Sandplay.Tests
             Assert.AreEqual(saved, File.ReadAllText(BoardPath));
             Directory.Delete(BoardPath + ".tmp");
             revised = manager.UpdateAnalysisReportText("Test board", "r", "Reviewed", "Retry me");
-            Assert.AreEqual(2, revised.Revisions.Count);
+            Assert.IsEmpty(revised.Revisions);
             manager.SaveSession("Test board");
             var persisted = JsonUtility.FromJson<SessionData>(File.ReadAllText(BoardPath));
             Assert.AreEqual("Retry me", persisted.Reports[0].ResultText);
-            Assert.AreEqual(2, persisted.Reports[0].Revisions.Count);
+            Assert.IsEmpty(persisted.Reports[0].Revisions);
         }
 
         [Test]

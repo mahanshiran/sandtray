@@ -10,6 +10,13 @@ namespace Sandplay.Objects
 
         public static void Install(GameObject root)
         {
+            if (root.GetComponent<SmartLinearObject>() != null)
+            {
+                // Generated parts own fitted colliders; keep fence gaps open.
+                var selectionBox = root.GetComponent<BoxCollider>();
+                if (selectionBox != null) selectionBox.enabled = false;
+                return;
+            }
             if (root.GetComponent<ModelCollision>() != null) return;
             var owner = root.AddComponent<ModelCollision>();
             foreach (var collider in root.GetComponentsInChildren<Collider>(true)) collider.enabled = false;

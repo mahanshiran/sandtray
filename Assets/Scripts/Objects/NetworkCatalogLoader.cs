@@ -64,7 +64,7 @@ namespace Sandplay.Objects
 
         /// <summary>Returns true if the GLB file for this item is already on disk.</summary>
         public static bool IsGlbCached(NetworkCatalogItem item) =>
-            item != null && File.Exists(GlbPath(item));
+            item != null && (LinearObjectState.TryParse(item.id, out _) || BundledCatalog.Contains(item) || File.Exists(GlbPath(item)));
 
         /// <summary>Returns true if a thumbnail for this item is already on disk (any supported format).</summary>
         public static bool IsThumbCached(NetworkCatalogItem item)
@@ -97,6 +97,7 @@ namespace Sandplay.Objects
         {
             if (shouldContinue != null && !shouldContinue()) yield break;
             if (host == null || item == null) { onDone?.Invoke(); yield break; }
+            if (SmartLinearCatalog.EnsureTemplate(item)) { onDone?.Invoke(); yield break; }
             if (item.LoadedPrefab != null) { onDone?.Invoke(); yield break; }
 
             // A resumed snapshot can request many models at once (and the same
@@ -140,7 +141,13 @@ namespace Sandplay.Objects
 
             byte[] bytes = null;
 
-            if (File.Exists(path))
+            // Prefer the read-only shipped model when its hash matches. A newer
+            // cloud revision has a different hash and follows the normal cache /
+            // download path. Bundled bytes are never copied into persistent data.
+            if (BundledCatalog.Contains(item))
+                yield return BundledCatalog.ReadGlb(item, result => bytes = result);
+
+            if (bytes == null && File.Exists(path))
             {
                 // Disk hit — instant
                 try
@@ -153,10 +160,12 @@ namespace Sandplay.Objects
                     try { File.Delete(path); } catch { }
                 }
             }
-            else if (!string.IsNullOrEmpty(item.model_url))
+            if (bytes == null && !string.IsNullOrEmpty(item.model_url))
             {
                 using var req = UnityWebRequest.Get(item.model_url);
                 req.timeout = ModelDownloadTimeoutSeconds;
+                if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+                using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,host);
                 yield return req.SendWebRequest();
 
                 if (req.result == UnityWebRequest.Result.Success)
@@ -275,6 +284,8 @@ namespace Sandplay.Objects
 
                 using var req = UnityWebRequestTexture.GetTexture(item.thumbnail_url, nonReadable: true);
                 req.timeout = 30;
+                if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+                using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,null);
                 yield return req.SendWebRequest();
 
                 if (req.result == UnityWebRequest.Result.Success)

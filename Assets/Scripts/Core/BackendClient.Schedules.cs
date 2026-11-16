@@ -6,6 +6,11 @@ namespace Sandplay.Core
     {
         public string id,therapist_name,client_name,therapist_avatar_url,client_avatar_url,
             starts_at,status,url,room_code,started_at,ended_at,organization_id,organization_client_id;
+        public string kind,server_time,deadline,table_type,test_client_id,timing_mode,ends_at,report_state,report_snapshot_digest;
+        public bool has_submission,submission_late,can_manage,notify_receiver;
+        public int revision,report_revision;
+        public float table_width,table_height;
+        public int duration_minutes;
         public int therapist_id,client_id,utc_offset_minutes;
     }
     [Serializable] public class ScheduleList { public ScheduledSession[] items; public bool has_more; }
@@ -20,7 +25,7 @@ namespace Sandplay.Core
         public void Schedules(string path,object data,Action<string> done,Action<string> failed)
         {
             if(!IsLoggedIn){failed?.Invoke("Sign in to view schedules.");return;}
-            var guard=CaptureCredentialGuard();int epoch=Sandplay.Data.LocalAccountStorage.Epoch;
+            var guard=CaptureAccountGuard();int epoch=Sandplay.Data.LocalAccountStorage.Epoch;
             bool Current()=>guard() && epoch==Sandplay.Data.LocalAccountStorage.Epoch;
             string url=BaseUrl+"/auth/schedules/"+path;
             Action<string> success=value=>{if(Current())done?.Invoke(value);};

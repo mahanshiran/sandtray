@@ -141,7 +141,7 @@ namespace Sandplay.Core
         public static ShortcutMap Map => map ??= ShortcutMap.Deserialize(PlayerPrefs.GetString(PreferenceKey, ""));
         public static event Action Changed;
         public static int EditorCount;
-        public static bool IsEditing => EditorCount > 0;
+        public static bool IsEditing => EditorCount > 0 || Sandplay.UI.RichReportEditor.HasKeyboardFocus;
         public static ShortcutBinding Modifiers(KeyCode key) => new ShortcutBinding(key,
             Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand),
             Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt), Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));

@@ -38,9 +38,9 @@ namespace Sandplay.Tests
             Assert.IsTrue(_backend.ExternalContactsAllowed);
         }
 
-        [TestCase(false, false)]
+        [TestCase(false, true)]
         [TestCase(true, true)]
-        public void OrganizationCreatedTherapistUsesOrganizationPermission(bool permission, bool expected)
+        public void LegacyOrganizationAccountHasNoContactRestrictions(bool permission, bool expected)
         {
             Set("UserType", "therapist_org");
             Set("IsManagedTherapist", true);

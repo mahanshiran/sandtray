@@ -640,6 +640,8 @@ namespace Sandplay.Core
             request.SetRequestHeader("Authorization", "Bearer " + AccessToken);
             if (jsonBody != null)
                 request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonBody));
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){request.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(request,this);
             yield return request.SendWebRequest();
             if (!guard() || epoch != Sandplay.Data.LocalAccountStorage.Epoch) yield break;
             if (request.result == UnityWebRequest.Result.Success)
@@ -664,6 +666,8 @@ namespace Sandplay.Core
             request.SetRequestHeader("Authorization", "Bearer " + AccessToken);
             if (jsonBody != null)
                 request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonBody));
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){request.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(request,this);
             yield return request.SendWebRequest();
             if (!guard() || epoch != Sandplay.Data.LocalAccountStorage.Epoch) yield break;
             if (request.result == UnityWebRequest.Result.Success)

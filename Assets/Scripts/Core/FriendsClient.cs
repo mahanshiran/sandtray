@@ -50,7 +50,7 @@ namespace Sandplay.Core
         public void EnsureAccount()
         {
             var backend=BackendClient.Instance;
-            string key=backend.IsLoggedIn?backend.UserId+":"+backend.AccessToken+":"+(backend.ExternalContactsAllowed?"1":"0"):"";
+            string key=backend.CanUseCloudSession?backend.UserId+":"+backend.AccessToken+":"+(backend.ExternalContactsAllowed?"1":"0"):"";
             if(key!=credential)
             {
                 StopAllCoroutines();pending.Clear();credential=key;Generation++;State=null;Error=null;busy=false;refreshQueued=false;nextPoll=0;
@@ -65,7 +65,7 @@ namespace Sandplay.Core
         public void Refresh()
         {
             EnsureAccount();
-            if(!BackendClient.Instance.IsLoggedIn || !BackendClient.Instance.ExternalContactsAllowed)return;
+            if(!BackendClient.Instance.CanUseCloudSession || !BackendClient.Instance.ExternalContactsAllowed)return;
             if(busy){refreshQueued=true;return;}
             busy=true;nextPoll=Time.unscaledTime+15;
             Request<FriendResult>("heartbeat/",new FriendHeartbeat{device=device},_=>
@@ -111,14 +111,24 @@ namespace Sandplay.Core
         IEnumerator Send<T>(string path,object body,Action<T> success,Action<string> failure,string method) where T:class
         {
             var backend=BackendClient.Instance;int user=backend.UserId;string token=backend.AccessToken;
-            if(!backend.IsLoggedIn){failure(Text("Sign in to use friends and chat.","登录后使用好友和聊天。"));yield break;}
+            if(!backend.CanUseCloudSession){failure(Text("Sign in to use friends and chat.","登录后使用好友和聊天。"));yield break;}
             using(var request=new UnityWebRequest(BackendClient.BaseUrl+"/community/"+path,method))
             {
                 request.timeout=15;request.redirectLimit=0;request.downloadHandler=new DownloadHandlerBuffer();
                 request.SetRequestHeader("Authorization","Bearer "+token);
                 if(body!=null){request.uploadHandler=new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(body)));request.SetRequestHeader("Content-Type","application/json");}
+                if(Sandplay.Core.UnityRequestLifetime.IsStopping){request.Dispose();yield break;}
+                using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(request,this);
                 yield return request.SendWebRequest();
                 if(!backend.IsLoggedIn || backend.UserId!=user || backend.AccessToken!=token)yield break;
+                if(request.responseCode==401)
+                {
+                    // Share refresh with account polling. A successful refresh resets
+                    // the poller's credential generation on its next update.
+                    backend.RecoverCloudSession(token,
+                        ()=>failure(Text("Session renewed. Please retry.","登录已续期，请重试。")), failure);
+                    yield break;
+                }
                 if(request.result!=UnityWebRequest.Result.Success)
                 {
                     string error=request.responseCode==404?Text("Not found, or friends service is not available yet.","未找到，或好友服务尚未上线。"):
@@ -127,6 +137,7 @@ namespace Sandplay.Core
                         request.responseCode==403?Text("This action is not allowed. Refresh your friends list.","无法执行此操作，请刷新好友列表。"):
                         request.responseCode==409?Text("This report changed or its recipients differ. Reopen and review before retrying.","报告已变更或接收者不同，请重新打开并审核后重试。"):
                         request.responseCode==400?Text("The request changed or is invalid. Refresh and try again.","请求已变更或无效，请刷新后重试。"):
+                        request.responseCode>=500?Text("The server could not process this request. Please retry.","服务器暂时无法处理此请求，请重试。"):
                         Text("Unable to connect. Please retry.","无法连接，请重试。");
                     failure(error);yield break;
                 }

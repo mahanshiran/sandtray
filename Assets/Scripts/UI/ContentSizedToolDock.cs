@@ -7,19 +7,38 @@ namespace Sandplay.UI
     public sealed class ContentSizedToolDock : MonoBehaviour
     {
         private RectTransform viewport, content;
-        private float width, height;
+        private float width, height, fullHeight;
+        private readonly System.Collections.Generic.Dictionary<RectTransform,Vector2> originalPositions = new System.Collections.Generic.Dictionary<RectTransform,Vector2>();
+
+        public void RefreshVisibleHeight()
+        {
+            if(content==null)return;
+            float bottom=0;
+            foreach(var entry in originalPositions)
+            {
+                var child=entry.Key;
+                if(child!=null&&child.gameObject.activeSelf)
+                    bottom=Mathf.Max(bottom,fullHeight*.5f-entry.Value.y+child.rect.height*child.pivot.y);
+            }
+            height=Mathf.Min(fullHeight,bottom+6);
+            content.sizeDelta=new Vector2(width,height);
+            foreach(var entry in originalPositions)
+                if(entry.Key!=null)entry.Key.anchoredPosition=entry.Value-new Vector2(0,(fullHeight-height)*.5f);
+            LateUpdate();
+        }
 
         public void Initialize(float contentWidth, float contentHeight)
         {
             viewport = (RectTransform)transform;
             width = contentWidth;
-            height = contentHeight + 12;
+            height = fullHeight = contentHeight + 12;
             var group = new GameObject("Tools", typeof(RectTransform));
             content = (RectTransform)group.transform;
             // Existing controls are positioned around their parent's center.
             while (transform.childCount > 0)
                 transform.GetChild(0).SetParent(content, false);
             content.SetParent(transform, false);
+            foreach(RectTransform child in content)originalPositions[child]=child.anchoredPosition;
             content.anchorMin = content.anchorMax = new Vector2(.5f, 1);
             content.pivot = new Vector2(.5f, 1);
             content.sizeDelta = new Vector2(width, height);

@@ -1,5 +1,15 @@
 # Central access policy integration
 
+## Simplified plan screen — October 29, 2026
+
+`GameConfig.SimplifiedSubscriptionPlans` defaults to enabled. The app shows Free,
+Basic (`personal_pro`), Plus (`therapist_basic`) and Pro (`therapist_pro`) in one
+comparison, without audience tabs. Prices and benefit values come from the same
+existing store products and access policies. Other plans and the organization UI
+are hidden, not removed; disable this setting to restore the full comparison.
+Existing hidden-plan subscribers retain their access, current-plan status and
+store management/restore actions. No products, grants or usage counters migrate.
+
 ## Sources of truth
 
 - `accounts.access_policy.CAPABILITIES` defines capability types and units.

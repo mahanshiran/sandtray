@@ -9,6 +9,14 @@ namespace Sandplay.Objects
         [System.NonSerialized] public NetworkCatalogItem NetworkItem;
         public float PlacementTime;
         public uint NetworkId;
+        public string InstanceId = System.Guid.NewGuid().ToString("N");
+        public static PlacedObject ResolveInstance(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            foreach (var placed in FindObjectsOfType<PlacedObject>())
+                if (placed.InstanceId == id) return placed;
+            return null;
+        }
 
         private Renderer[] _renderers;
         private Color[] _originalColors;
@@ -27,12 +35,14 @@ namespace Sandplay.Objects
 
         private void CacheRenderers()
         {
-            _renderers = GetComponentsInChildren<Renderer>();
+            _renderers = GetComponent<SmartLinearObject>() != null
+                ? System.Array.FindAll(GetComponentsInChildren<Renderer>(), renderer => renderer.enabled)
+                : GetComponentsInChildren<Renderer>();
             _originalColors = new Color[_renderers.Length];
             for (int i = 0; i < _renderers.Length; i++)
             {
                 var renderer = _renderers[i];
-                var material = renderer != null ? renderer.material : null;
+                var material = renderer != null ? (GetComponent<SmartLinearObject>() != null ? renderer.sharedMaterial : renderer.material) : null;
                 _originalColors[i] = material != null ? GetMainColor(material) : Color.white;
             }
         }
@@ -47,6 +57,17 @@ namespace Sandplay.Objects
             for (int i = 0; i < _renderers.Length; i++)
             {
                 if (_renderers[i] == null) continue;
+                if (GetComponent<SmartLinearObject>() != null)
+                {
+                    var material = _renderers[i].sharedMaterial;
+                    var block = new MaterialPropertyBlock();
+                    _renderers[i].GetPropertyBlock(block);
+                    foreach (var prop in ColorProps)
+                        if (material != null && material.HasProperty(prop))
+                            block.SetColor(prop, selected ? Color.Lerp(_originalColors[i], new Color(.2f,.85f,.9f,_originalColors[i].a), .12f) : _originalColors[i]);
+                    _renderers[i].SetPropertyBlock(block);
+                    continue;
+                }
                 var mat = _renderers[i].material;
                 if (mat == null) continue;
                 if (selected)
@@ -54,6 +75,12 @@ namespace Sandplay.Objects
                 else
                     SetMainColor(mat, _originalColors[i]);
             }
+        }
+
+        public void RefreshGeometry()
+        {
+            CacheRenderers();
+            SetSelected(_isSelected);
         }
 
         private static Color GetMainColor(Material mat)
@@ -91,6 +118,7 @@ namespace Sandplay.Objects
             var saved = new PlacedObjectData
             {
                 ObjectId = objectId,
+                InstanceId = InstanceId,
                 Position = transform.position,
                 Rotation = transform.rotation.eulerAngles,
                 Scale = relativeScale,
@@ -115,6 +143,10 @@ namespace Sandplay.Objects
     public class PlacedObjectData
     {
         public string ObjectId;
+        [System.NonSerialized] public string InstanceId;
+        // Layout lives in the versioned ObjectId in JSON/wire data. Properties
+        // are not serialized by JsonUtility, preserving existing cloud schemas.
+        public LinearObjectState LinearState => LinearObjectState.TryParse(ObjectId, out var state) ? state : null;
         public Vector3 Position;
         public Vector3 Rotation;
         public float Scale;

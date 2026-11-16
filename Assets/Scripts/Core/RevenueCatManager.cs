@@ -139,7 +139,13 @@ namespace Sandplay.Core
             Debug.Log("[RevenueCat] Initialized.");
 #else
             IsInitialized = true;
-            Debug.Log("[RevenueCat] Not available on this platform / SDK not installed. Using mock mode.");
+#if UNITY_EDITOR
+            Debug.Log("[RevenueCat] Store billing is skipped in Unity Editor. Account access is checked with the backend; mobile builds initialize the store SDK.");
+#elif !REVENUECAT_INSTALLED
+            Debug.LogWarning("[RevenueCat] Store SDK integration is not enabled for this build.");
+#else
+            Debug.Log("[RevenueCat] Store billing is unavailable on this platform. Account access is checked with the backend.");
+#endif
 #endif
         }
 

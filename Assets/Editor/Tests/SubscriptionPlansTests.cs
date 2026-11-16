@@ -8,6 +8,22 @@ namespace Sandplay.Tests
     public class SubscriptionPlansTests
     {
         [Test]
+        public void NormalAccountShowsOnlyPlusUsingExistingPersonalProduct()
+        {
+            CollectionAssert.AreEqual(new[] { "personal_pro" }, SubscriptionPlans.VisibleCodes("normal"));
+            Assert.AreEqual("Plus", SubscriptionPlans.DisplayName("personal_pro"));
+            Assert.AreEqual("sandtray.personal.pro.monthly", SubscriptionPlans.Product("personal_pro"));
+            Assert.AreEqual("personal_basic", SubscriptionPlans.Code("sandtray.personal.basic.monthly"));
+        }
+
+        [Test]
+        public void TherapistAccountShowsOnlyTherapistPlans()
+        {
+            CollectionAssert.AreEqual(new[] { "therapist_plus", "therapist_pro" },
+                SubscriptionPlans.VisibleCodes("psychologist"));
+        }
+
+        [Test]
         public void VerifiedPhonePurchaseSelectsTheSamePlanOnDesktop()
         {
             var snapshot = new AccessSnapshot { sources = new[] {

@@ -12,6 +12,28 @@ namespace Sandplay.Data
         private Action<LocalCapacityRequest,Action<LocalCapacityReceipt>,Action<string>> ReportTransport =>
             ReportCapacityTransport ?? BackendClient.Instance.RequestLocalCapacity;
 
+        // Preserved failed saves are offered as drafts, never counted as completed reports.
+        public AnalysisReport LoadScheduledReportDraft(string board)
+        {
+            var current=ReadSavedData(board,out _);
+            if(string.IsNullOrWhiteSpace(current?.ScheduledReviewId))return null;
+            string path=Path.Combine(SavePath,SanitizeFileName(board)+".json");
+            var savedIds=new System.Collections.Generic.HashSet<string>((current.Reports??new System.Collections.Generic.List<AnalysisReport>()).Where(r=>r!=null).Select(r=>r.ReportId));
+            var candidates=Directory.GetFiles(SavePath,Path.GetFileName(path)+".interrupted-*")
+                .Where(p=>!p.EndsWith(".write-lock",StringComparison.Ordinal)&&!p.EndsWith(".recovered-ai",StringComparison.Ordinal))
+                .OrderByDescending(File.GetLastWriteTimeUtc);
+            foreach(var candidatePath in candidates)
+            {
+                var candidate=ReadValidCopy(candidatePath,board);
+                if(candidate?.ScheduledReviewId!=current.ScheduledReviewId ||
+                    (!string.IsNullOrWhiteSpace(candidate?.BoardHistoryId)&&candidate.BoardHistoryId!=current.BoardHistoryId))continue;
+                var draft=candidate.Reports?.LastOrDefault(r=>r!=null&&r.Source=="manual"&&r.AuthorUserId==BackendClient.Instance.UserId&&
+                    !string.IsNullOrWhiteSpace(r.ReportId)&&!string.IsNullOrWhiteSpace(r.ResultText)&&!savedIds.Contains(r.ReportId));
+                if(draft!=null)return JsonUtility.FromJson<AnalysisReport>(JsonUtility.ToJson(draft));
+            }
+            return null;
+        }
+
         public void DeleteSessionAsync(string board,Action saved,Action<string> failed)
         {
             if(!CapacityEnforced){try{DeleteSessionCore(board);saved?.Invoke();}catch(Exception ex){failed?.Invoke(ex.Message);}return;}

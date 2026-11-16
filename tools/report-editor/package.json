@@ -1,0 +1,25 @@
+{
+  "name": "sandtray-report-editor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test editor.test.mjs",
+    "test:browser": "node browser-check.mjs"
+  },
+  "dependencies": {
+    "@tiptap/core": "3.33.1",
+    "@tiptap/extension-image": "3.33.1",
+    "@tiptap/extension-table": "3.33.1",
+    "@tiptap/extension-text-align": "3.33.1",
+    "@tiptap/extension-text-style": "3.33.1",
+    "@tiptap/starter-kit": "3.33.1",
+    "core-js": "3.51.0",
+    "dompurify": "3.4.17"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "esbuild": "0.27.0",
+    "jsdom": "27.2.0"
+  }
+}

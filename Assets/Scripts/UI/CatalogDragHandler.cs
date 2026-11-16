@@ -60,6 +60,7 @@ namespace Sandplay.UI
         private SandMesh _sand;
         private bool _canPlace;
         private float _dragScale = 1f;
+        public float PlacementScale => _dragScale;
 
         private ScrollRect _parentScroll;
         private bool _dragDecided;
@@ -175,6 +176,7 @@ namespace Sandplay.UI
             _cam = UnityEngine.Camera.main;
             _sand = SandMesh.Instance;
             _canPlace = false;
+            _dragScale = ObjectSizing.Valid(NetworkItem != null ? NetworkItem.objectSize : ObjectData != null ? ObjectData.objectSize : 1);
 
             if (NetworkItem != null)
             {
@@ -283,7 +285,7 @@ namespace Sandplay.UI
             _ghost = Instantiate(prefab);
             _ghost.SetActive(true);
             _ghost.name = "DragGhost";
-            _ghost.transform.localScale = prefab.transform.localScale * _dragScale;
+            _ghost.transform.localScale = prefab.transform.localScale * PlacementScale;
 
             _preview = _ghost.AddComponent<CatalogPlacementPreview>();
             _preview.Initialize();
@@ -300,7 +302,7 @@ namespace Sandplay.UI
             if (_ghost == null) return;
             GameObject src = NetworkItem?.LoadedPrefab ?? ObjectData?.Prefab;
             Vector3 baseScale = src != null ? src.transform.localScale : Vector3.one;
-            _ghost.transform.localScale = baseScale * _dragScale;
+            _ghost.transform.localScale = baseScale * PlacementScale;
             if (_activeEvent != null) UpdateGhostPosition(_activeEvent);
         }
 
@@ -313,13 +315,13 @@ namespace Sandplay.UI
             PlacedObject placed = null;
             if (NetworkItem?.LoadedPrefab != null)
             {
-                var cmd = new PlaceNetworkObjectCommand(placer, NetworkItem, pos, Quaternion.identity, _dragScale);
+                var cmd = new PlaceNetworkObjectCommand(placer, NetworkItem, pos, Quaternion.identity, PlacementScale);
                 if (UndoManager.Instance != null) UndoManager.Instance.Execute(cmd); else cmd.Execute();
                 placed = cmd.PlacedObject;
             }
             else if (ObjectData != null)
             {
-                var cmd = new PlaceObjectCommand(placer, ObjectData, pos, Quaternion.identity, _dragScale);
+                var cmd = new PlaceObjectCommand(placer, ObjectData, pos, Quaternion.identity, PlacementScale);
                 if (UndoManager.Instance != null) UndoManager.Instance.Execute(cmd); else cmd.Execute();
                 placed = cmd.PlacedObject;
             }

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -39,6 +40,7 @@ namespace Sandplay.UI
         private bool _planeRotation, _changed;
         private TMPro.TMP_Text[] _axisLabels;
         private bool Editable => _target != null && _placer != null &&
+            !SmartLinearObject.AwaitingConfirmation(_target) && !_placer.Selection.Any(SmartLinearObject.AwaitingConfirmation) &&
             (GameManager.Instance == null || !GameManager.Instance.IsSpectator);
         public bool IsDragging => _handle >= 0;
         public static bool HasCapturedPointer => _active != null && _active.isActiveAndEnabled && _active.IsDragging;

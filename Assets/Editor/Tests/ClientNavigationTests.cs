@@ -43,6 +43,36 @@ namespace Sandplay.Tests
             typeof(BackendClient).GetProperty("UserType").SetValue(client, oldType);
             Object.DestroyImmediate(root);
         }
+        [TestCase("normal", false, true)]
+        [TestCase("psychologist", false, true)]
+        [TestCase("normal", true, false)]
+        [TestCase("psychologist", true, false)]
+        [TestCase("client", false, false)]
+        [TestCase("admin", false, false)]
+        public void AccountTypePromptOnlyAppliesToUnfinishedPublicAccounts(string type, bool selected, bool expected)
+        {
+            bool previous = client.AccountTypeSelected;
+            try
+            {
+                SetAccount(type);
+                typeof(BackendClient).GetProperty("AccountTypeSelected").SetValue(client, selected);
+                Assert.AreEqual(expected, client.NeedsAccountTypeSelection);
+            }
+            finally { typeof(BackendClient).GetProperty("AccountTypeSelected").SetValue(client, previous); }
+        }
+
+        [Test]
+        public void ClientAccountOnlyShowsSchedulesAndCanOpenSettings()
+        {
+            SetAccount("client"); Refresh();
+            foreach (var entry in nav)
+                Assert.AreEqual(entry.Key == "schedules", entry.Value.activeSelf, entry.Key);
+            typeof(SceneBootstrapper).GetMethod("ShowHomeSection", Flags).Invoke(bootstrap, new object[] { "settings" });
+            Assert.AreEqual("settings", typeof(SceneBootstrapper).GetField("_activeHomeNav", Flags).GetValue(bootstrap));
+            typeof(SceneBootstrapper).GetMethod("ShowHomeSection", Flags).Invoke(bootstrap, new object[] { "boards" });
+            Assert.AreEqual("schedules", typeof(SceneBootstrapper).GetField("_activeHomeNav", Flags).GetValue(bootstrap));
+        }
+
         [Test]
         public void OnlyTherapistAccountShowsClients_AndLayoutClosesGap()
         {
@@ -59,8 +89,8 @@ namespace Sandplay.Tests
             }
             SetAccount("organization"); Refresh();
             Assert.IsFalse(nav["clients"].activeSelf);
-            Assert.IsTrue(nav["organization"].activeSelf);
-            Assert.That(nav["multiplayer"].GetComponent<RectTransform>().anchorMax.y, Is.EqualTo(therapistY).Within(.0001f));
+            Assert.IsFalse(nav["organization"].activeSelf);
+            Assert.That(nav["multiplayer"].GetComponent<RectTransform>().anchorMax.y, Is.EqualTo(therapistY + .064f).Within(.0001f));
             SetAccount("psychologist", false); Refresh();
             Assert.IsFalse(nav["clients"].activeSelf);
             Assert.IsFalse(nav["organization"].activeSelf);
@@ -82,7 +112,7 @@ namespace Sandplay.Tests
         {
             SetAccount("organization"); Refresh();
             typeof(SceneBootstrapper).GetMethod("ShowHomeSection", Flags).Invoke(bootstrap, new object[] { "organization" });
-            Assert.AreEqual("organization", typeof(SceneBootstrapper).GetField("_activeHomeNav", Flags).GetValue(bootstrap));
+            Assert.AreEqual("home", typeof(SceneBootstrapper).GetField("_activeHomeNav", Flags).GetValue(bootstrap));
 
             SetAccount("psychologist"); Refresh();
             Assert.IsFalse(nav["organization"].activeSelf);

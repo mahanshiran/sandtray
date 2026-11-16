@@ -145,11 +145,13 @@ namespace Sandplay.Core
         private void FetchAccessSnapshotAttempt(Action<AccessSnapshot> success,
             Action<string> failure, bool force, int refreshAttempt)
         {
-            if (!IsLoggedIn || UserId <= 0) { failure?.Invoke("Sign in to view access."); return; }
+            if (!CanUseCloudSession || UserId <= 0) { failure?.Invoke("Sign in to view access."); return; }
             if (!force && CurrentAccess != null) { success?.Invoke(CurrentAccess); return; }
             int user = UserId, generation = _accessGeneration; string token = AccessToken;
+            int epoch = Sandplay.Data.LocalAccountStorage.Epoch;
             double started = Time.realtimeSinceStartupAsDouble;
-            bool Current() => this != null && BackendClient.Instance == this && UserId == user && AccessToken == token;
+            bool Current() => this != null && BackendClient.Instance == this && UserId == user &&
+                Sandplay.Data.LocalAccountStorage.Epoch == epoch;
             StartCoroutine(Get(BaseUrl + "/auth/access/me/", token, json =>
             {
                 if (!Current()) return;
@@ -171,7 +173,7 @@ namespace Sandplay.Core
                 if (AccessSnapshot.TryParse(json, user, out var snapshot))
                 {
                     var ttl = Math.Min(30, (DateTimeOffset.Parse(snapshot.valid_until) - DateTimeOffset.Parse(snapshot.server_time)).TotalSeconds);
-                    _cachedAccess = snapshot; _cachedAccessToken = token; _cachedAccessUntil = started + ttl;
+                    _cachedAccess = snapshot; _cachedAccessToken = AccessToken; _cachedAccessUntil = started + ttl;
                     if (CurrentAccess == null) { failure?.Invoke("Access expired. Please retry."); return; }
                     success?.Invoke(snapshot);
                 }

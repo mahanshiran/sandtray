@@ -42,7 +42,27 @@ namespace Sandplay.Core
         private const string PrefKeyManagedExternalContacts = "backend_managed_external_contacts";
         private const string PrefKeyAccountTypeSelected = "backend_account_type_selected";
 
+        // Local identity stays available for offline boards when cloud credentials expire.
         public bool IsLoggedIn => !string.IsNullOrEmpty(AccessToken);
+        private Func<bool> _rejectedCredentials;
+        public bool RequiresSignIn => IsLoggedIn && _rejectedCredentials?.Invoke() == true;
+        public bool CanUseCloudSession => IsLoggedIn && !RequiresSignIn;
+        private void RequireCloudSignIn()
+        {
+            if (RequiresSignIn) return;
+            _rejectedCredentials = CaptureCredentialGuard();
+            OnAccountStatusChanged?.Invoke();
+        }
+
+        internal void RecoverCloudSession(string rejectedToken, Action recovered, Action<string> failure)
+            => RetryWithFreshAccessToken(rejectedToken, recovered, failure);
+
+        private bool BlockRejectedSession(string token, Action<string> failure)
+        {
+            if (string.IsNullOrEmpty(token) || token != AccessToken || !RequiresSignIn) return false;
+            failure?.Invoke("Session expired. Please sign in again.");
+            return true;
+        }
 
         [Serializable] private class RelayTicketResponse { public string ticket; public int expires_in; }
 
@@ -53,6 +73,7 @@ namespace Sandplay.Core
         {
             if (!IsLoggedIn || !Uri.TryCreate(BaseUrl, UriKind.Absolute, out var uri) || uri.Scheme != "https")
             { failure?.Invoke("Secure sign-in is required for sessions."); return; }
+            if (RequiresSignIn) { failure?.Invoke("Session expired. Please sign in again."); return; }
             string token = AccessToken;
             int user = UserId;
             string body;
@@ -96,12 +117,26 @@ namespace Sandplay.Core
         public string UserName { get; private set; }
         public string UserAvatarUrl { get; private set; }
         public string UserEmail { get; private set; }
-        public string UserType { get; private set; }  // public: normal/psychologist/organization; internal: therapist_org/admin
-        public bool IsTherapistAccount => UserType == "psychologist" || UserType == "therapist_org";
-        public bool IsOrganizationTherapist => UserType == "therapist_org";
+        public string UserType { get; private set; }  // public: normal/psychologist; internal: admin
+        // Compatibility for cached accounts and older servers during rollout.
+        private static string NormalizeAccountType(string value) =>
+            value == "therapist_org" ? "psychologist" : value == "organization" ? "normal" : value;
+        public bool IsClientAccount => UserType == "client";
+        [Serializable] private class ClientCredentials { public string username, password; }
+        public void CreateClientAccount(string username, string password, Action<FriendPerson> success, Action<string> failure)
+        {
+            if (!IsLoggedIn || !IsTherapistAccount) { failure?.Invoke("Only therapists can create client accounts."); return; }
+            StartCoroutine(Post($"{BaseUrl}/auth/clients/new-account/",
+                JsonUtility.ToJson(new ClientCredentials { username = username, password = password }), AccessToken,
+                json => success?.Invoke(JsonUtility.FromJson<FriendPerson>(json)), failure));
+        }
+        public bool IsTherapistAccount => UserType == "psychologist";
+        public bool IsOrganizationTherapist => false;
         public bool IsUpdatingUserType { get; private set; }
         public bool IsManagedTherapist { get; private set; }
         public bool AccountTypeSelected { get; private set; }
+        public bool NeedsAccountTypeSelection => IsLoggedIn && !RequiresSignIn &&
+            !AccountTypeSelected && (UserType == "normal" || UserType == "psychologist");
         public bool MustChangePassword { get; private set; }
         public string ManagedOrganizationName { get; private set; }
         public string ManagedOrganizationId { get; private set; }
@@ -153,6 +188,13 @@ namespace Sandplay.Core
             LoadFromPrefs();
         }
 
+        private void OnApplicationPause(bool paused)
+        {
+            if (!paused && IsLoggedIn && !RequiresSignIn)
+                FetchMe(_ => InitializeAccountAccess(),
+                    _ => { }); // Connectivity failure must not sign the user out.
+        }
+
         private void Start()
         {
             // Resolve account access as soon as a saved session is restored.
@@ -171,8 +213,8 @@ namespace Sandplay.Core
             UserName = PlayerPrefs.GetString(PrefKeyName, "");
             UserAvatarUrl = PlayerPrefs.GetString("backend_avatar_url", "");
             UserEmail = PlayerPrefs.GetString(PrefKeyEmail, "");
-            UserType = PlayerPrefs.GetString(PrefKeyUserType, "");
-            IsManagedTherapist = PlayerPrefs.GetInt(PrefKeyManagedTherapist, 0) == 1;
+            UserType = NormalizeAccountType(PlayerPrefs.GetString(PrefKeyUserType, ""));
+            IsManagedTherapist = false;
             ManagedAllowExternalContacts = PlayerPrefs.GetInt(PrefKeyManagedExternalContacts, 0) == 1;
             AccountTypeSelected = PlayerPrefs.GetInt(PrefKeyAccountTypeSelected, 1) == 1;
 
@@ -330,6 +372,11 @@ namespace Sandplay.Core
                     onError?.Invoke("Invalid response from server.");
                     return;
                 }
+                if (RequiresSignIn && UserId > 0)
+                {
+                    ReauthenticateSameAccount(resp.access, resp.refresh, attempt, onSuccess, onError);
+                    return;
+                }
                 if (!Sandplay.Data.LocalAccountStorage.SaveBeforeIdentityChange()) { onError?.Invoke("Save your current table before switching accounts."); return; }
                 UserId = 0; // A new credential must never temporarily borrow the old account's local identity.
                 UserName = UserEmail = UserType = "";
@@ -405,6 +452,8 @@ namespace Sandplay.Core
                 request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(data)));
                 request.SetRequestHeader("Content-Type", "application/json");
             }
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){request.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(request,this);
             yield return request.SendWebRequest();
             if (!guard()) yield break;
             if (request.result != UnityWebRequest.Result.Success)
@@ -435,6 +484,8 @@ namespace Sandplay.Core
                 request.SetRequestHeader("Authorization","Bearer "+AccessToken);
                 var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
+                if(Sandplay.Core.UnityRequestLifetime.IsStopping){request.Dispose();yield break;}
+                using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(request,this);
                 yield return request.SendWebRequest();
                 if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
                 if(!IsLoggedIn||UserId!=user){failure?.Invoke("Account changed. Please sign in again.");yield break;}
@@ -453,7 +504,7 @@ namespace Sandplay.Core
         public void UpdateUserType(string userType, Action onSuccess, Action<string> onError)
         {
             if (!IsLoggedIn) { onError?.Invoke("Please sign in first."); return; }
-            if ((userType != "normal" && userType != "psychologist" && userType != "organization") || UserType == "admin")
+            if ((userType != "normal" && userType != "psychologist") || UserType == "admin")
             { onError?.Invoke("This account type cannot be changed here."); return; }
             if (IsUpdatingUserType) { onError?.Invoke("An account update is already in progress."); return; }
             IsUpdatingUserType = true;
@@ -478,6 +529,8 @@ namespace Sandplay.Core
                 request.timeout = 30;
                 var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
+                if(Sandplay.Core.UnityRequestLifetime.IsStopping){request.Dispose();yield break;}
+                using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(request,this);
                 yield return request.SendWebRequest();
                 if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
                 if (!IsLoggedIn || UserId != accountId)
@@ -513,44 +566,7 @@ namespace Sandplay.Core
             {
                 if (!credentialsCurrent()) return;
                 var me = JsonUtility.FromJson<MeResponse>(json);
-                UserId = me.id;
-                RevenueCatUserId = me.revenuecatAppUserId;
-                StoreSubscriptionState = me.subscriptionState;
-                AccessSource = me.access_source ?? "";
-                UserName = me.name;
-                UserAvatarUrl = me.profile?.avatar_url ?? "";
-                UserEmail = me.email;
-                MustChangePassword = me.must_change_password;
-                AccountTypeSelected = me.account_type_selected;
-                IsManagedTherapist = me.managed_therapist != null;
-                ManagedOrganizationId = me.managed_therapist?.organization_id ?? "";
-                ManagedOrganizationName = me.managed_therapist?.organization_name ?? "";
-                ManagedCanCreateClients = me.managed_therapist?.can_create_clients ?? false;
-                ManagedCanCreateSchedules = me.managed_therapist?.can_create_schedules ?? false;
-                ManagedCanHostSessions = me.managed_therapist?.can_host_sessions ?? false;
-                ManagedCanCreateReports = me.managed_therapist?.can_create_reports ?? false;
-                ManagedCanInviteClients = me.managed_therapist?.can_invite_clients ?? false;
-                ManagedAllowExternalContacts = me.managed_therapist?.allow_external_contacts ?? false;
-                // A launch-time GET may finish after the Settings PATCH.
-                if (userTypeRevision == _userTypeRevision) UserType = me.user_type;
-
-                // Parse subscription expiration if present
-                if (!string.IsNullOrEmpty(me.subscriptionExpireDate))
-                {
-                    if (DateTime.TryParse(me.subscriptionExpireDate, out DateTime expires))
-                        SubscriptionExpiresAt = expires;
-                    else
-                        SubscriptionExpiresAt = null;
-                }
-                else
-                {
-                    SubscriptionExpiresAt = null;
-                }
-
-                SaveToPrefs();
-                RevenueCatManager.Instance?.IdentifyUser(RevenueCatAppUserId);
-                OnAccountStatusChanged?.Invoke();
-                onSuccess?.Invoke(UserName);
+                ApplyAccountResponse(me, userTypeRevision, onSuccess);
             }, error =>
             {
                 if (!credentialsCurrent()) return;
@@ -565,6 +581,49 @@ namespace Sandplay.Core
             }));
         }
 
+        private void ApplyAccountResponse(MeResponse me, int userTypeRevision, Action<string> onSuccess)
+        {
+            UserId = me.id;
+            RevenueCatUserId = me.revenuecatAppUserId;
+            StoreSubscriptionState = me.subscriptionState;
+            AccessSource = me.access_source ?? "";
+            UserName = me.name;
+            UserAvatarUrl = me.profile?.avatar_url ?? "";
+            UserEmail = me.email;
+            MustChangePassword = me.must_change_password;
+            // Ignore account-type metadata from a GET started before the selection PATCH.
+            if (userTypeRevision == _userTypeRevision) AccountTypeSelected = me.account_type_selected;
+            IsManagedTherapist = false;
+            ManagedOrganizationId = me.managed_therapist?.organization_id ?? "";
+            ManagedOrganizationName = me.managed_therapist?.organization_name ?? "";
+            ManagedCanCreateClients = me.managed_therapist?.can_create_clients ?? false;
+            ManagedCanCreateSchedules = me.managed_therapist?.can_create_schedules ?? false;
+            ManagedCanHostSessions = me.managed_therapist?.can_host_sessions ?? false;
+            ManagedCanCreateReports = me.managed_therapist?.can_create_reports ?? false;
+            ManagedCanInviteClients = me.managed_therapist?.can_invite_clients ?? false;
+            ManagedAllowExternalContacts = me.managed_therapist?.allow_external_contacts ?? false;
+            // A launch-time GET may finish after the Settings PATCH.
+            if (userTypeRevision == _userTypeRevision) UserType = NormalizeAccountType(me.user_type);
+
+            // Parse subscription expiration if present
+            if (!string.IsNullOrEmpty(me.subscriptionExpireDate))
+            {
+                if (DateTime.TryParse(me.subscriptionExpireDate, out DateTime expires))
+                    SubscriptionExpiresAt = expires;
+                else
+                    SubscriptionExpiresAt = null;
+            }
+            else
+            {
+                SubscriptionExpiresAt = null;
+            }
+
+            SaveToPrefs();
+            RevenueCatManager.Instance?.IdentifyUser(RevenueCatAppUserId);
+            OnAccountStatusChanged?.Invoke();
+            onSuccess?.Invoke(UserName);
+        }
+
         /// <summary>
         /// Fetches all objects from all public catalogs. No auth required.
         /// </summary>
@@ -574,8 +633,8 @@ namespace Sandplay.Core
         {
             StartCoroutine(Get($"{BaseUrl}/catalogs/public/", null, json =>
             {
-                var resp = JsonUtility.FromJson<Sandplay.Objects.PublicCatalogResponse>(json);
-                onSuccess?.Invoke(resp?.objects ?? new Sandplay.Objects.NetworkCatalogItem[0]);
+                var items = Sandplay.Objects.ObjectSizing.ParseCatalog(json);
+                onSuccess?.Invoke(Sandplay.Objects.SmartLinearCatalog.WithDefaults(items));
             }, onError));
         }
 
@@ -595,8 +654,8 @@ namespace Sandplay.Core
 
             StartCoroutine(Get($"{BaseUrl}/catalogs/library/", AccessToken, json =>
             {
-                var resp = JsonUtility.FromJson<Sandplay.Objects.PublicCatalogResponse>(json);
-                onSuccess?.Invoke(resp?.objects ?? new Sandplay.Objects.NetworkCatalogItem[0]);
+                var items = Sandplay.Objects.ObjectSizing.ParseCatalog(json);
+                onSuccess?.Invoke(Sandplay.Objects.SmartLinearCatalog.WithDefaults(items));
             }, onError));
         }
 
@@ -647,16 +706,30 @@ namespace Sandplay.Core
         /// <summary>
         /// Save an AI-assisted reflection record to the cloud. Returns the new record UUID via onSuccess.
         /// </summary>
+        public void RequireRichReportServer(Action ready, Action<string> unavailable)
+        {
+            if (!IsLoggedIn) { unavailable?.Invoke("Sign in before exporting a report."); return; }
+            string token = AccessToken; int user = UserId;
+            int epoch = Sandplay.Data.LocalAccountStorage.Epoch;
+            bool Current() => IsLoggedIn && UserId == user && Sandplay.Data.LocalAccountStorage.Epoch == epoch;
+            StartCoroutine(Get(BaseUrl + "/analysis/report-editor/", token, json =>
+            {
+                if (!Current()) return;
+                if (ParseField(json, "document_format") == "html-v1") ready?.Invoke();
+                else unavailable?.Invoke("The server needs the report-editor update before it can preserve report formatting and images.");
+            }, _ => { if (Current()) unavailable?.Invoke("Formatted report export is not available on this server yet. Your report is saved on this device."); }));
+        }
+
         public void SaveAnalysisRecord(string resultText, string screenshotB64, string modelUsed,
-            Action<string> onSuccess, Action<string> onError)
+            Action<string> onSuccess, Action<string> onError, string richHtml = null)
         {
             SaveAnalysisRecord(resultText, screenshotB64, modelUsed, null, null, null, null,
-                onSuccess, onError);
+                onSuccess, onError, richHtml);
         }
 
         public void SaveAnalysisRecord(string resultText, string screenshotB64, string modelUsed,
             string organizationId, string organizationClientId, string operationId, string tableName,
-            Action<string> onSuccess, Action<string> onError)
+            Action<string> onSuccess, Action<string> onError, string richHtml = null)
         {
             if (!IsLoggedIn) { onError?.Invoke("Not logged in"); return; }
 
@@ -665,7 +738,7 @@ namespace Sandplay.Core
                 "\"model_used\":\"" + EscapeForJson(modelUsed) + "\"," +
                 "\"prompt_snapshot\":\"" + EscapeForJson(resultText) + "\"," +
                 "\"raw_response\":\"" + EscapeForJson(resultText) + "\"," +
-                "\"parsed_result\":{}," +
+                "\"parsed_result\":" + (string.IsNullOrEmpty(richHtml) ? "{}" : "{\"rich_html\":\"" + EscapeForJson(richHtml) + "\"}") + "," +
                 "\"tokens_used\":0," +
                 "\"cost_fen\":0," +
                 "\"screenshot_b64\":\"" + (screenshotB64 ?? "") + "\"" +
@@ -707,12 +780,13 @@ namespace Sandplay.Core
         /// </summary>
         public void ExportReflectionPdf(string operationId, string reportText,
             string screenshotB64, string tableName, string modelUsed,
-            Action<byte[]> onSuccess, Action onLimitReached, Action<string> onError)
+            Action<byte[]> onSuccess, Action onLimitReached, Action<string> onError, string richHtml = null)
         {
             if (!IsLoggedIn) { onError?.Invoke("Not logged in"); return; }
             var body = "{" +
                 "\"operation_id\":\"" + EscapeForJson(operationId) + "\"," +
                 "\"report_text\":\"" + EscapeForJson(reportText ?? "") + "\"," +
+                "\"rich_html\":\"" + EscapeForJson(richHtml ?? "") + "\"," +
                 "\"screenshot_base64\":\"" + (screenshotB64 ?? "") + "\"," +
                 "\"table_name\":\"" + EscapeForJson(tableName ?? "") + "\"," +
                 "\"model_used\":\"" + EscapeForJson(modelUsed ?? "") + "\"" +
@@ -813,43 +887,107 @@ namespace Sandplay.Core
             onSuccess?.Invoke(response.token, response.app_id);
         }
 
+        private sealed class RefreshWaiter
+        {
+            public Action Success;
+            public Action<string> Error;
+        }
+        private Func<bool> _refreshCredentials;
+        private List<RefreshWaiter> _refreshWaiters;
+
         private void RefreshAccessToken(Action onSuccess, Action<string> onError)
         {
-            var current = CaptureCredentialGuard();
-            if (string.IsNullOrEmpty(RefreshToken))
+            if (RequiresSignIn || string.IsNullOrEmpty(RefreshToken))
             {
-                // Expired cloud credentials must not switch/lock the local workspace.
-                // Explicit sign-out still clears identity and transitions the workspace.
+                RequireCloudSignIn();
                 onError?.Invoke("Session expired. Please sign in again.");
                 return;
             }
-
+            // Launch checks and foreground actions can expire together. Refresh once,
+            // then complete every waiting action with the same credential result.
+            if (_refreshCredentials != null && _refreshCredentials())
+            {
+                _refreshWaiters.Add(new RefreshWaiter { Success = onSuccess, Error = onError });
+                return;
+            }
+            var current = CaptureCredentialGuard();
+            var waiters = new List<RefreshWaiter> { new RefreshWaiter { Success = onSuccess, Error = onError } };
+            _refreshCredentials = current;
+            _refreshWaiters = waiters;
+            void Complete(string error)
+            {
+                if (ReferenceEquals(_refreshWaiters, waiters))
+                { _refreshCredentials = null; _refreshWaiters = null; }
+                foreach (var waiter in waiters)
+                {
+                    try
+                    {
+                        if (error == null) waiter.Success?.Invoke();
+                        else waiter.Error?.Invoke(error);
+                    }
+                    catch (Exception ex) { Debug.LogException(ex); }
+                }
+            }
+            long refreshStatus = 0;
             var body = $"{{\"refresh\":\"{Escape(RefreshToken)}\"}}";
             StartCoroutine(Post($"{BaseUrl}/auth/token/refresh/", body, null, json =>
             {
-                if (!current()) { onError?.Invoke("Account changed. Please connect again."); return; }
-                var response = JsonUtility.FromJson<TokenResponse>(json);
+                if (!current()) { Complete("Account changed. Please connect again."); return; }
+                TokenResponse response;
+                try { response = JsonUtility.FromJson<TokenResponse>(json); }
+                catch (Exception) { Complete("Session service unavailable. Please try again."); return; }
                 if (response == null || string.IsNullOrEmpty(response.access))
+                { Complete("Session service unavailable. Please try again."); return; }
+                AccessToken = response.access;
+                if (!string.IsNullOrEmpty(response.refresh)) RefreshToken = response.refresh;
+                _rejectedCredentials = null;
+                SaveToPrefs();
+                Complete(null);
+            }, error => HandleRefreshFailure(current, Complete, refreshStatus),
+                onHttpStatus: code => refreshStatus = code));
+        }
+
+        private void HandleRefreshFailure(Func<bool> current, Action<string> complete, long status)
+        {
+            if (!current()) { complete("Account changed. Please connect again."); return; }
+            // Only a definitive rejection of refresh credentials requires login.
+            // DNS, offline, TLS, timeouts and server errors remain retryable.
+            if (status == 401)
+            {
+                RequireCloudSignIn();
+                complete("Session expired. Please sign in again.");
+            }
+            else complete("Session service unavailable. Please try again.");
+        }
+
+        private void ReauthenticateSameAccount(string access, string refresh, int attempt,
+            Action<string> success, Action<string> error)
+        {
+            int expectedUser = UserId;
+            var current = CaptureCredentialGuard();
+            // Verify the replacement identity before publishing new credentials. A
+            // temporary UserId=0 would invalidate the existing board workspace.
+            StartCoroutine(Get($"{BaseUrl}/auth/me/", access, json =>
+            {
+                if (attempt != _loginAttempt || !current()) return;
+                MeResponse me;
+                try { me = JsonUtility.FromJson<MeResponse>(json); }
+                catch (Exception) { error?.Invoke("Invalid account response. Please retry."); return; }
+                if (!CanResumeCloudIdentity(expectedUser, me?.id ?? 0))
                 {
-                    onError?.Invoke("Session expired. Please sign in again.");
+                    error?.Invoke(Localization.Current == Language.Chinese
+                        ? "请使用原账户重新登录。切换账户请先退出登录。"
+                        : "Please sign in with the original account. To switch accounts, sign out first.");
                     return;
                 }
-
-                AccessToken = response.access;
-                if (!string.IsNullOrEmpty(response.refresh))
-                    RefreshToken = response.refresh;
-                SaveToPrefs();
-                onSuccess?.Invoke();
-            }, error =>
-            {
-                if (!current()) { onError?.Invoke("Account changed. Please connect again."); return; }
-                if (IsAuthenticationError(error))
-                {
-                    onError?.Invoke("Session expired. Please sign in again.");
-                }
-                else onError?.Invoke("Session service unavailable. Please try again.");
-            }));
+                AccessToken = access; RefreshToken = refresh ?? "";
+                _rejectedCredentials = null;
+                ApplyAccountResponse(me, _userTypeRevision, name =>
+                { InitializeAccountAccess(); success?.Invoke(name); });
+            }, message => { if (attempt == _loginAttempt && current()) error?.Invoke(message); }));
         }
+
+        internal static bool CanResumeCloudIdentity(int expected, int actual) => expected > 0 && expected == actual;
 
         private Func<bool> CaptureCredentialGuard()
         {
@@ -878,6 +1016,8 @@ namespace Sandplay.Core
 
             if (url.EndsWith("/analysis/reflect/", StringComparison.Ordinal))
                 timeout = AiRequestTimeoutSeconds;
+            else if (url.Contains("/auth/schedules/tests/") && url.EndsWith("/attempt/", StringComparison.Ordinal))
+                timeout = UploadRequestTimeoutSeconds; // Full saved tables can be several megabytes.
             else if (url.Contains("/auth/relay/ticket/") || url.Contains("/auth/token/refresh/"))
                 timeout = 4;
             else if (url.EndsWith("/auth/access/local-leases/", StringComparison.Ordinal) ||
@@ -888,8 +1028,10 @@ namespace Sandplay.Core
         }
 
         private IEnumerator Post(string url, string jsonBody, string token,
-            Action<string> onSuccess, Action<string> onError, bool allowTokenRefresh = false)
+            Action<string> onSuccess, Action<string> onError, bool allowTokenRefresh = true,
+            Action<long> onHttpStatus = null)
         {
+            if (BlockRejectedSession(token, onError)) yield break;
             using var req = new UnityWebRequest(url, "POST");
             bool isLargeUpload = url.EndsWith("/analysis/", StringComparison.Ordinal) ||
                                  url.Contains("/cloud/v1/");
@@ -900,13 +1042,26 @@ namespace Sandplay.Core
             if (!string.IsNullOrEmpty(token))
                 req.SetRequestHeader("Authorization", "Bearer " + token);
 
-            var requestGuard = allowTokenRefresh ? CaptureAccountGuard() : CaptureCredentialGuard();
+            var requestGuard = !string.IsNullOrEmpty(token) && UserId > 0 ? CaptureAccountGuard() : CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
 
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,this);
             yield return req.SendWebRequest();
 
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
+            onHttpStatus?.Invoke(req.responseCode);
 
+            if (req.responseCode == 401 && allowTokenRefresh && !string.IsNullOrEmpty(token))
+            {
+                RetryWithFreshAccessToken(token,
+                    () => StartCoroutine(Post(url, jsonBody, AccessToken, onSuccess, onError,
+                        false, onHttpStatus)), onError);
+                yield break;
+            }
+
+            if (req.responseCode == 401 && token == AccessToken && !string.IsNullOrEmpty(token))
+                RequireCloudSignIn();
             if (req.result == UnityWebRequest.Result.Success ||
                 req.responseCode == 201)
             {
@@ -921,25 +1076,50 @@ namespace Sandplay.Core
         }
 
         private IEnumerator Get(string url, string token,
-            Action<string> onSuccess, Action<string> onError)
+            Action<string> onSuccess, Action<string> onError, bool allowTokenRefresh = true)
         {
+            if (BlockRejectedSession(token, onError)) yield break;
             var req = UnityWebRequest.Get(url);
             ApplyRequestTimeout(req, url);
             req.SetRequestHeader("Content-Type", "application/json");
             if (!string.IsNullOrEmpty(token))
                 req.SetRequestHeader("Authorization", "Bearer " + token);
 
-            var requestGuard = CaptureCredentialGuard();
+            // Login resolves /auth/me/ before publishing a positive user ID.
+            // Keep that response guarded by its credentials during the transition.
+            var requestGuard = !string.IsNullOrEmpty(token) && UserId > 0 ? CaptureAccountGuard() : CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
 
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,this);
             yield return req.SendWebRequest();
 
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
 
+            if (req.responseCode == 401 && allowTokenRefresh && !string.IsNullOrEmpty(token))
+            {
+                RetryWithFreshAccessToken(token,
+                    () => StartCoroutine(Get(url, AccessToken, onSuccess, onError, false)), onError);
+                yield break;
+            }
+
+            if (req.responseCode == 401 && token == AccessToken && !string.IsNullOrEmpty(token))
+                RequireCloudSignIn();
             if (req.result == UnityWebRequest.Result.Success)
                 onSuccess?.Invoke(req.downloadHandler.text);
             else
                 onError?.Invoke(RequestFailure(req));
+        }
+
+        private void RetryWithFreshAccessToken(string rejectedToken, Action retry, Action<string> onError)
+        {
+            var current = CaptureAccountGuard();
+            void Resume() { if (current()) retry(); }
+            // Another request may already have renewed the same account's token.
+            if (!RequiresSignIn && !string.IsNullOrEmpty(AccessToken) && AccessToken != rejectedToken)
+                Resume();
+            else
+                RefreshAccessToken(Resume, error => { if (current()) onError?.Invoke(error); });
         }
 
         private IEnumerator GetBytes(string url, string token,
@@ -953,6 +1133,8 @@ namespace Sandplay.Core
             var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
 
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,this);
             yield return req.SendWebRequest();
 
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
@@ -976,6 +1158,8 @@ namespace Sandplay.Core
 
             var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,this);
             yield return req.SendWebRequest();
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
 
@@ -1187,6 +1371,8 @@ namespace Sandplay.Core
             var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
 
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,this);
             yield return req.SendWebRequest();
 
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
@@ -1251,6 +1437,8 @@ namespace Sandplay.Core
             var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
 
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,this);
             yield return req.SendWebRequest();
 
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
@@ -1282,6 +1470,8 @@ namespace Sandplay.Core
             var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
 
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,this);
             yield return req.SendWebRequest();
 
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
@@ -1320,6 +1510,8 @@ namespace Sandplay.Core
             var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
 
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,this);
             yield return req.SendWebRequest();
 
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
@@ -1358,6 +1550,8 @@ namespace Sandplay.Core
             var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
 
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,this);
             yield return req.SendWebRequest();
 
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
@@ -1396,6 +1590,8 @@ namespace Sandplay.Core
             var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
 
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,this);
             yield return req.SendWebRequest();
 
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
@@ -1447,6 +1643,8 @@ namespace Sandplay.Core
             req.SetRequestHeader("Authorization", "Bearer " + AccessToken);
             var requestGuard = CaptureCredentialGuard();
             int requestEpoch = Sandplay.Data.LocalAccountStorage.Epoch;
+            if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+            using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,this);
             yield return req.SendWebRequest();
             if (requestEpoch != Sandplay.Data.LocalAccountStorage.Epoch || !requestGuard()) yield break;
 
@@ -1474,6 +1672,8 @@ namespace Sandplay.Core
                 req.SetRequestHeader("Authorization", "Bearer " + AccessToken);
                 var guard = CaptureCredentialGuard();
                 int epoch = Sandplay.Data.LocalAccountStorage.Epoch;
+                if(Sandplay.Core.UnityRequestLifetime.IsStopping){req.Dispose();yield break;}
+                using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(req,this);
                 yield return req.SendWebRequest();
                 if (epoch != Sandplay.Data.LocalAccountStorage.Epoch || !guard()) yield break;
                 if (req.result == UnityWebRequest.Result.Success) onSuccess?.Invoke();

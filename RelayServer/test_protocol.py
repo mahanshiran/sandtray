@@ -45,6 +45,21 @@ def run(dll):
                 send(client, kind, data)
                 assert receive(client) == b'\x19\x02\x00\x00\x00'
                 assert client.recv(1) == b'', 'Incompatible client stayed connected'
+        # New unauthenticated protocol keeps legacy rooms usable but separates
+        # smart-object-capable rooms from older apps.
+        with connect() as host:
+            send(host, 24, struct.pack('<I', 3))
+            assert receive(host) == b'\x19' + struct.pack('<I', 3)
+            send(host, 10)
+            created = receive(host)
+            with connect() as mismatch:
+                send(mismatch, 24, struct.pack('<I', 2)); receive(mismatch)
+                send(mismatch, 12, created[1:])
+                assert receive(mismatch)[:2] == b'\x0d\x00'
+            with connect() as current:
+                send(current, 24, struct.pack('<I', 3)); receive(current)
+                send(current, 12, created[1:])
+                assert receive(current)[:2] == b'\x0d\x01'
         with connect() as host:
             send(host, 24, struct.pack('<I', 2))
             assert receive(host) == b'\x19\x02\x00\x00\x00'

@@ -36,6 +36,7 @@ namespace Sandplay.Core
                 timeoutSeconds,
                 onTimeout ?? (() => ShowLockedFeatureDialog(
                     F("This is taking longer than expected. Please try again.", "处理时间过长，请重试。"),
+                    F("Connection timed out", "连接超时"),
                     offerUpgrade: false)));
         }
 

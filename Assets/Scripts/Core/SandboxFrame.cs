@@ -8,7 +8,7 @@ namespace Sandplay.Core
     /// </summary>
     public class SandboxFrame : MonoBehaviour
     {
-        public const float LegHeight = 1.2f;
+        public const float LegHeight = 2.4f;
         public const float RoomFloorY = -0.1f - LegHeight;
         [SerializeField] private GameConfig _config;
         [SerializeField] private Material _frameMaterial;
@@ -77,7 +77,7 @@ namespace Sandplay.Core
         private void BuildLegs()
         {
             // Keep the sand and saved object coordinates unchanged; the room floor
-            // sits lower so these supports raise the tray visually into a low table.
+            // sits lower so these supports raise the tray visually into a taller table.
             float width = Mathf.Clamp(Mathf.Min(_config.SandboxWidth, _config.SandboxDepth) * .045f, .2f, .5f);
             float x = _config.SandboxWidth * .5f - width;
             float z = _config.SandboxDepth * .5f - width;

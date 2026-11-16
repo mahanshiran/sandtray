@@ -24,6 +24,7 @@ enum MsgType : byte
 
 class Room
 {
+    public int Protocol;
     public string Code = "";
     public TcpClient? Host;
     public Stream? HostStream;
@@ -119,16 +120,18 @@ partial class Program
                     ClientCertificateRequired = false
                 });
             }
-            int protocol = tickets == null ? 2 : 4;
+            int protocol = tickets == null ? 3 : 5;
+            int legacyProtocol = tickets == null ? 2 : 4;
 
             // Require explicit compatibility before creating/joining any room.
             if (!ReadPacket(stream, out byte helloType, out byte[] hello, 5) ||
-                helloType != (byte)MsgType.ProtocolHello || hello.Length != 4 || BitConverter.ToInt32(hello, 0) != protocol)
+                helloType != (byte)MsgType.ProtocolHello || hello.Length != 4 || (BitConverter.ToInt32(hello, 0) != protocol && BitConverter.ToInt32(hello, 0) != legacyProtocol))
             {
-                SendPacket(stream, (byte)MsgType.ProtocolResult, BitConverter.GetBytes(protocol));
+                SendPacket(stream, (byte)MsgType.ProtocolResult, BitConverter.GetBytes(legacyProtocol));
                 client.Close();
                 return;
             }
+            protocol = BitConverter.ToInt32(hello, 0);
             SendPacket(stream, (byte)MsgType.ProtocolResult, BitConverter.GetBytes(protocol));
 
             // First message must be a control message (CreateRoom or JoinRoom)
@@ -156,10 +159,10 @@ partial class Program
             switch ((MsgType)type)
             {
                 case MsgType.CreateRoom:
-                    HandleCreateRoom(client, stream, account, organization);
+                    HandleCreateRoom(client, stream, account, organization, protocol);
                     break;
                 case MsgType.JoinRoom:
-                    HandleJoinRoom(client, stream, payload, account);
+                    HandleJoinRoom(client, stream, payload, account, protocol);
                     break;
                 default:
                     Console.WriteLine($"[Relay] Unexpected first message type: {type}");
@@ -177,14 +180,14 @@ partial class Program
 
     // ── Host flow ──
 
-    static void HandleCreateRoom(TcpClient client, Stream stream, string account, string? organization)
+    static void HandleCreateRoom(TcpClient client, Stream stream, string account, string? organization, int protocol)
     {
         string code;
         Room room;
         lock (_roomsLock)
         {
             code = GenerateRoomCode();
-            room = new Room { Code = code, Host = client, HostStream = stream,
+            room = new Room { Code = code, Protocol = protocol, Host = client, HostStream = stream,
                 HostAccount = account, HostOrganization = organization };
             _rooms[code] = room;
         }
@@ -349,7 +352,7 @@ partial class Program
 
     // ── Client flow ──
 
-    static void HandleJoinRoom(TcpClient client, Stream stream, byte[] payload, string account)
+    static void HandleJoinRoom(TcpClient client, Stream stream, byte[] payload, string account, int protocol)
     {
         string code = ReadString(payload);
         Room? room;
@@ -366,6 +369,12 @@ partial class Program
         }
 
         bool added = false;
+        if (room.Protocol != protocol)
+        {
+            SendPacket(stream, (byte)MsgType.JoinResult, WriteJoinResult(false, "App versions are incompatible. Update both devices to the same app version."));
+            client.Close();
+            return;
+        }
         bool shouldStartHosting = false;
         lock (room.Lock)
         {

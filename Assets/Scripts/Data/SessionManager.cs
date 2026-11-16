@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using Sandplay.Core;
 using Sandplay.Objects;
@@ -130,6 +131,7 @@ namespace Sandplay.Data
                 if (existing == null) throw new InvalidDataException("Existing table could not be read.");
                 data.Reports = existing.Reports ?? new List<AnalysisReport>();
                 data.ClientId = existing.ClientId;
+                data.ScheduledReviewId = existing.ScheduledReviewId;
                 data.OrganizationId = existing.OrganizationId;
                 data.OrganizationClientId = existing.OrganizationClientId;
                 data.CreatorUserId = existing.CreatorUserId;
@@ -314,6 +316,7 @@ namespace Sandplay.Data
                         loadScale,
                         skipOffset: true, placementFeedback: false
                     );
+                    if (placed != null && !string.IsNullOrEmpty(objData.InstanceId)) placed.InstanceId = objData.InstanceId;
                     if (placed == null) _unrestoredObjects.Add(objData);
                     localPlaced++;
                     continue;
@@ -420,7 +423,11 @@ namespace Sandplay.Data
                     objData.Scale,
                     skipOffset: true, placementFeedback: false
                 );
-                if (placed != null) _unrestoredObjects.Remove(objData);
+                if (placed != null)
+                {
+                    if (!string.IsNullOrEmpty(objData.InstanceId)) placed.InstanceId = objData.InstanceId;
+                    _unrestoredObjects.Remove(objData);
+                }
                 Debug.Log($"[Session] PlaceNetworkObject returned {(placed != null ? "OK" : "NULL")} for '{item.display_name}' at {objData.Position} scale={objData.Scale:F3}");
             }
             finally
@@ -602,6 +609,35 @@ namespace Sandplay.Data
         public bool IsRestoringNetworkObjects => PendingNetworkRestores > 0;
 
         /// <summary>Load and return session data without applying it to the scene.</summary>
+        public void RestoreScheduledTest(string boardName, string snapshot, string clientId = null)
+        {
+            var data = JsonUtility.FromJson<SessionData>(snapshot);
+            if(data == null) throw new InvalidDataException("Invalid test recovery data.");
+            string path=Path.Combine(SavePath,SanitizeFileName(boardName)+".json");
+            SessionData existing=null;
+            if(File.Exists(path)||File.Exists(path+".bak"))
+            {
+                existing=ReadSavedData(boardName,out _);
+                if(existing==null)throw new InvalidDataException("The existing test table needs recovery before it can be refreshed.");
+            }
+            bool review=!string.IsNullOrWhiteSpace(data.ScheduledReviewId);
+            // The local review owns its own identity; never import the client's storage slot.
+            data.BoardHistoryId=!string.IsNullOrWhiteSpace(existing?.BoardHistoryId)?existing.BoardHistoryId:
+                review||string.IsNullOrWhiteSpace(data.BoardHistoryId)?Guid.NewGuid().ToString("N"):data.BoardHistoryId;
+            if(review)
+            {
+                data.LocalCapacityId=existing?.LocalCapacityId;
+                data.CreatorUserId=BackendClient.Instance.UserId;
+                data.TherapistNotes=existing?.TherapistNotes;
+                data.Reports??=new List<AnalysisReport>();
+                foreach(var report in existing?.Reports??new List<AnalysisReport>())
+                    if(report!=null&&!data.Reports.Any(r=>r!=null&&r.ReportId==report.ReportId))data.Reports.Add(report);
+            }
+            data.SessionName = boardName;
+            if(!string.IsNullOrEmpty(clientId)) data.ClientId = clientId;
+            TableCapacity.Write(path,JsonUtility.ToJson(data));
+        }
+
         public SessionData LoadSessionData(string sessionName)
         {
             string sanitized = SanitizeFileName(sessionName);
@@ -645,8 +681,8 @@ namespace Sandplay.Data
             return report != null && report.AuthorUserId > 0 && user != null && user.IsLoggedIn && user.UserId == report.AuthorUserId;
         }
 
-        /// <summary>Persist a text revision atomically; never reuse the previous text's cloud PDF.</summary>
-        public AnalysisReport UpdateAnalysisReportText(string sessionName, string reportId, string expectedText, string text, ReportSections sections = null)
+        /// <summary>Save the current report text atomically; invalidate the previous cloud PDF.</summary>
+        public AnalysisReport UpdateAnalysisReportText(string sessionName, string reportId, string expectedText, string text, ReportSections sections = null, string expectedFingerprint = null)
         {
             if (string.IsNullOrWhiteSpace(reportId) || string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("A report ID and non-empty report text are required.");
@@ -656,10 +692,11 @@ namespace Sandplay.Data
             if (!CanEditReport(report)) throw new UnauthorizedAccessException("Only the report author can edit this report.");
             if (!string.Equals(report.ResultText, expectedText, StringComparison.Ordinal))
                 throw new InvalidOperationException("Report changed. Reopen it before editing.");
-            if (string.Equals(report.ResultText, text, StringComparison.Ordinal)) return report;
+            if (expectedFingerprint != null && ReportSharingText.Fingerprint(report) != expectedFingerprint)
+                throw new InvalidOperationException("Report changed. Reopen it before editing.");
+            if (string.Equals(report.ResultText, text, StringComparison.Ordinal) &&
+                (sections == null || JsonUtility.ToJson(report.Sections ?? new ReportSections()) == JsonUtility.ToJson(sections))) return report;
             string now = DateTime.UtcNow.ToString("o");
-            if (report.Revisions == null) report.Revisions = new List<ReportTextRevision>();
-            report.Revisions.Add(new ReportTextRevision { ReplacedAt = now, ResultText = report.ResultText, Sections = report.Sections, EditedByUserId = BackendClient.Instance.UserId });
             report.Sections = sections;
             report.ResultText = text;
             report.EditedAt = now;
@@ -758,5 +795,90 @@ namespace Sandplay.Data
             if (Instance == this)
                 Instance = null;
         }
+    }
+}
+
+namespace Sandplay.Data
+{
+    [Serializable]
+    public sealed class PendingTestSubmission
+    {
+        public string Id, Board, Snapshot, Authority, CreatedAt, Checksum;
+        public int Owner;
+    }
+
+    // Immutable, account-scoped final snapshots. Cloud confirmation is the only removal path.
+    public sealed class TestSubmissionOutbox
+    {
+        private readonly string directory, authority;
+        private readonly int owner;
+        private readonly Action guard;
+        public TestSubmissionOutbox(string root, int account, string backend, Action requireCurrent = null)
+        { directory=Path.Combine(root,"TestSubmissions");owner=account;authority=backend;guard=requireCurrent; }
+        private string PathFor(string id)
+        {
+            if(!Guid.TryParse(id,out var parsed))throw new ArgumentException("Invalid test identity.");
+            return Path.Combine(directory,parsed.ToString("D")+".json");
+        }
+        private static string Hash(string text)
+        {
+            using var sha=System.Security.Cryptography.SHA256.Create();
+            return BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(text))).Replace("-","");
+        }
+        public void Enqueue(string id,string board,string snapshot)
+        {
+            guard?.Invoke();
+            if(string.IsNullOrWhiteSpace(snapshot))throw new ArgumentException("The final table is empty.");
+            string path=PathFor(id);
+            if(File.Exists(path+".receipt"))return;
+            var existing=Read(id);
+            if(existing!=null)
+            {
+                if(existing.Snapshot!=snapshot)throw new InvalidOperationException("A different final snapshot is already queued.");
+                return;
+            }
+            var pending=new PendingTestSubmission { Id=Guid.Parse(id).ToString("D"),Board=board,Snapshot=snapshot,
+                Authority=authority,Owner=owner,CreatedAt=DateTimeOffset.UtcNow.ToString("o"),Checksum=Hash(snapshot) };
+            LocalRecordFile.Write(path,JsonUtility.ToJson(pending),true);
+        }
+        public PendingTestSubmission Read(string id)
+        {
+            guard?.Invoke();string path=PathFor(id);
+            if(File.Exists(path+".receipt"))return null;
+            bool found=false;
+            foreach(var candidate in new[]{path,path+".bak",path+".tmp"})
+            {
+                if(!File.Exists(candidate))continue;
+                found=true;
+                try
+                {
+                    var pending=JsonUtility.FromJson<PendingTestSubmission>(File.ReadAllText(candidate));
+                    if(pending!=null&&Guid.Parse(pending.Id)==Guid.Parse(id)&&pending.Owner==owner&&pending.Authority==authority&&pending.Checksum==Hash(pending.Snapshot))return pending;
+                }
+                catch(Exception) { }
+            }
+            if(found)throw new InvalidDataException("The pending test save needs recovery. Its files have been preserved.");
+            return null;
+        }
+        public PendingTestSubmission First()
+        {
+            guard?.Invoke();if(!Directory.Exists(directory))return null;
+            foreach(var path in Directory.GetFiles(directory,"*.json*").OrderBy(p=>p,StringComparer.Ordinal))
+            {
+                string file=Path.GetFileName(path);int suffix=file.IndexOf(".json",StringComparison.Ordinal);
+                if(suffix<0||!Guid.TryParse(file.Substring(0,suffix),out var id))continue;
+                var pending=Read(id.ToString("D"));if(pending!=null)return pending;
+            }
+            return null;
+        }
+        public void Confirm(string id,string snapshot)
+        {
+            guard?.Invoke();var pending=Read(id);if(pending==null)return;
+            if(pending.Snapshot!=snapshot)throw new InvalidDataException("Cloud confirmation does not match the saved table.");
+            string path=PathFor(id);
+            LocalRecordFile.Write(path+".receipt",pending.Checksum);
+            foreach(var file in new[]{path,path+".bak",path+".tmp"})if(File.Exists(file))File.Delete(file);
+        }
+        public bool Confirmed(string id) { guard?.Invoke();return File.Exists(PathFor(id)+".receipt"); }
     }
 }

@@ -166,14 +166,14 @@ namespace Sandplay.Tests
         {
             Call("BuildHomeSettingsPage");
             var dropdown=Get<TMP_Dropdown>("_accountTypeDropdown");
-            Assert.AreEqual(3,dropdown.options.Count);
-            foreach(var role in new[]{"normal","psychologist","organization","admin"})
+            Assert.AreEqual(2,dropdown.options.Count);
+            foreach(var role in new[]{"normal","psychologist","admin"})
             {
                 typeof(BackendClient).GetProperty("AccessToken").SetValue(client,"test-only");
                 typeof(BackendClient).GetProperty("UserType").SetValue(client,role);
                 Call("RefreshAccountTypeSettings");
                 Assert.AreEqual(role!="admin",dropdown.interactable);
-                if(role!="admin") Assert.AreEqual(role=="psychologist"?1:role=="organization"?2:0,dropdown.value);
+                if(role!="admin") Assert.AreEqual(role=="psychologist"?1:0,dropdown.value);
             }
             typeof(BackendClient).GetProperty("AccessToken").SetValue(client,"");
             Call("RefreshAccountTypeSettings"); Assert.IsFalse(dropdown.interactable);

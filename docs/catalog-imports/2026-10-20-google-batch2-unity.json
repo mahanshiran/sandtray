@@ -1,0 +1,2602 @@
+[
+  {
+    "index": 1,
+    "title": "Crib",
+    "status": "passed",
+    "renderer_count": 82,
+    "source_max_dimension": 491017.656,
+    "scale_baked": true,
+    "opaque_pixels": 123290,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.600000143,
+      "y": 0.404359937,
+      "z": 0.3626945
+    },
+    "triangle_count": 1624,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.202179968,
+      "z": -5.96046448E-08
+    },
+    "material_count": 3,
+    "import_milliseconds": 45.7767,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 2,
+    "title": "Crutches",
+    "status": "passed",
+    "renderer_count": 6,
+    "source_max_dimension": 166987.516,
+    "scale_baked": true,
+    "opaque_pixels": 12466,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.348235667,
+      "y": 0.6,
+      "z": 0.3961879
+    },
+    "triangle_count": 1136,
+    "normalized_pivot_offset": {
+      "x": -1.49011612E-07,
+      "y": 0.3,
+      "z": 1.49011612E-08
+    },
+    "material_count": 2,
+    "import_milliseconds": 1.816,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 3,
+    "title": "Walking stick",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1.75340009,
+    "scale_baked": false,
+    "opaque_pixels": 5374,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.0143720778,
+      "z": 0.07953919
+    },
+    "triangle_count": 476,
+    "normalized_pivot_offset": {
+      "x": 9.313226E-10,
+      "y": 0.00718603935,
+      "z": -3.7252903E-09
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.7831,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 4,
+    "title": "Pillow",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 5.23523,
+    "scale_baked": false,
+    "opaque_pixels": 43005,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.200765982,
+      "z": 0.487401783
+    },
+    "triangle_count": 192,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.100383,
+      "z": 1.16415322E-10
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.7494,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 5,
+    "title": "Blankets",
+    "status": "passed",
+    "renderer_count": 2,
+    "source_max_dimension": 31.8858,
+    "scale_baked": false,
+    "opaque_pixels": 57436,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.170430735,
+      "z": 0.402308881
+    },
+    "triangle_count": 19274,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.08521536,
+      "z": 0.0
+    },
+    "material_count": 2,
+    "import_milliseconds": 2.6659,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 6,
+    "title": "Luggage",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 6.316875,
+    "scale_baked": false,
+    "opaque_pixels": 68627,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.284662277,
+      "y": 0.6,
+      "z": 0.222224012
+    },
+    "triangle_count": 704,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": -3.7252903E-09
+    },
+    "material_count": 1,
+    "import_milliseconds": 33.3723,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 7,
+    "title": "Bookcase",
+    "status": "passed",
+    "renderer_count": 28,
+    "source_max_dimension": 643054.4,
+    "scale_baked": true,
+    "opaque_pixels": 93154,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.311496377,
+      "y": 0.5999999,
+      "z": 0.1411215
+    },
+    "triangle_count": 336,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.299999923,
+      "z": -1.1920929E-07
+    },
+    "material_count": 1,
+    "import_milliseconds": 4.5121,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 8,
+    "title": "Closet",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 3.642025,
+    "scale_baked": false,
+    "opaque_pixels": 202420,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.5645509,
+      "z": 0.1383274
+    },
+    "triangle_count": 366,
+    "normalized_pivot_offset": {
+      "x": 3.7252903E-09,
+      "y": 0.282275438,
+      "z": -1.16415322E-10
+    },
+    "material_count": 3,
+    "import_milliseconds": 2.5986,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 9,
+    "title": "Stove",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 131.529373,
+    "scale_baked": false,
+    "opaque_pixels": 30124,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.2229327,
+      "y": 0.6,
+      "z": 0.169714153
+    },
+    "triangle_count": 890,
+    "normalized_pivot_offset": {
+      "x": -1.86264515E-09,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 1.7891,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 10,
+    "title": "Curtains",
+    "status": "passed",
+    "renderer_count": 3,
+    "source_max_dimension": 188359.813,
+    "scale_baked": true,
+    "opaque_pixels": 107827,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.33056128,
+      "y": 0.6,
+      "z": 0.5370213
+    },
+    "triangle_count": 376,
+    "normalized_pivot_offset": {
+      "x": -5.96046448E-08,
+      "y": 0.299999952,
+      "z": 2.98023224E-08
+    },
+    "material_count": 2,
+    "import_milliseconds": 1.7008,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 11,
+    "title": "Bank",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 487.276978,
+    "scale_baked": false,
+    "opaque_pixels": 131137,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.4465575,
+      "y": 0.52966696,
+      "z": 0.6
+    },
+    "triangle_count": 8568,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.26483348,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 103.18,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 12,
+    "title": "Hotel",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 676.186035,
+    "scale_baked": true,
+    "opaque_pixels": 74101,
+    "dark_fraction": 1.34950942E-05,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.5725025,
+      "z": 0.3059664
+    },
+    "triangle_count": 13459,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.286251247,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 83.0597,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 13,
+    "title": "Coliseum",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1614.06372,
+    "scale_baked": true,
+    "opaque_pixels": 40492,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.5232099,
+      "y": 0.206689775,
+      "z": 0.6
+    },
+    "triangle_count": 24153,
+    "normalized_pivot_offset": {
+      "x": -9.094947E-13,
+      "y": 0.103344887,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 12.4473,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 14,
+    "title": "Bird Cage",
+    "status": "passed",
+    "renderer_count": 3,
+    "source_max_dimension": 562342.6,
+    "scale_baked": true,
+    "opaque_pixels": 45329,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.316691756,
+      "y": 0.6,
+      "z": 0.317135632
+    },
+    "triangle_count": 7300,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.299999923,
+      "z": 0.0
+    },
+    "material_count": 2,
+    "import_milliseconds": 3.3845,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 15,
+    "title": "Payphone",
+    "status": "passed",
+    "renderer_count": 2,
+    "source_max_dimension": 74.0592957,
+    "scale_baked": false,
+    "opaque_pixels": 42748,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.5853353,
+      "y": 0.6000001,
+      "z": 0.5853354
+    },
+    "triangle_count": 2960,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.300000042,
+      "z": 0.0
+    },
+    "material_count": 4,
+    "import_milliseconds": 2.3327,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 16,
+    "title": "Lamp post",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 19.7200851,
+    "scale_baked": false,
+    "opaque_pixels": 9186,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.06302505,
+      "y": 0.6,
+      "z": 0.06302505
+    },
+    "triangle_count": 2476,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 3,
+    "import_milliseconds": 1.1211,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 17,
+    "title": "Telephone pole",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 10.8484554,
+    "scale_baked": false,
+    "opaque_pixels": 25858,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.324540377,
+      "y": 0.6,
+      "z": 0.5751485
+    },
+    "triangle_count": 6528,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 5,
+    "import_milliseconds": 2.7068,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 18,
+    "title": "Dumpster",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 6.071008,
+    "scale_baked": false,
+    "opaque_pixels": 97790,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.333312362,
+      "y": 0.302162915,
+      "z": 0.6
+    },
+    "triangle_count": 224,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.151081473,
+      "z": 5.684342E-14
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.9135,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 19,
+    "title": "Walkie talkie",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 77.1248,
+    "scale_baked": false,
+    "opaque_pixels": 30760,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.238235429,
+      "y": 0.0864189,
+      "z": 0.6
+    },
+    "triangle_count": 2486,
+    "normalized_pivot_offset": {
+      "x": -1.86264515E-09,
+      "y": 0.04320945,
+      "z": 0.0
+    },
+    "material_count": 5,
+    "import_milliseconds": 2.2786,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 20,
+    "title": "Cash register",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 12.880765,
+    "scale_baked": false,
+    "opaque_pixels": 124857,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.573758364,
+      "z": 0.537126839
+    },
+    "triangle_count": 3194,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.286879182,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 8.8427,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 21,
+    "title": "See-saw",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 9.522404,
+    "scale_baked": false,
+    "opaque_pixels": 10782,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6000001,
+      "y": 0.192480519,
+      "z": 0.2985003
+    },
+    "triangle_count": 760,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.09624026,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 21.4927,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 22,
+    "title": "Trampoline",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 10.7557478,
+    "scale_baked": false,
+    "opaque_pixels": 29463,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.5999999,
+      "y": 0.199157029,
+      "z": 0.6
+    },
+    "triangle_count": 720,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.0995785147,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 17.6801,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 23,
+    "title": "Jungle gym",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 11.5805569,
+    "scale_baked": false,
+    "opaque_pixels": 60454,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.492204547,
+      "y": 0.6,
+      "z": 0.4858185
+    },
+    "triangle_count": 5376,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": -3.55271368E-15
+    },
+    "material_count": 1,
+    "import_milliseconds": 31.025,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 24,
+    "title": "Bouncy castle",
+    "status": "passed",
+    "renderer_count": 22,
+    "source_max_dimension": 1136431.88,
+    "scale_baked": true,
+    "opaque_pixels": 66429,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.362473965,
+      "y": 0.34109962,
+      "z": 0.6
+    },
+    "triangle_count": 4752,
+    "normalized_pivot_offset": {
+      "x": -1.1920929E-07,
+      "y": 0.17054981,
+      "z": -5.96046448E-08
+    },
+    "material_count": 3,
+    "import_milliseconds": 5.0551,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 25,
+    "title": "Jump rope",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 2.41642284,
+    "scale_baked": false,
+    "opaque_pixels": 17837,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.538407,
+      "y": 0.09146313,
+      "z": 0.6
+    },
+    "triangle_count": 1100,
+    "normalized_pivot_offset": {
+      "x": -5.684342E-14,
+      "y": 0.0457315668,
+      "z": 0.0
+    },
+    "material_count": 3,
+    "import_milliseconds": 1.8121,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 26,
+    "title": "Frisbee",
+    "status": "passed",
+    "renderer_count": 9,
+    "source_max_dimension": 661283.5,
+    "scale_baked": true,
+    "opaque_pixels": 25157,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.06641248,
+      "z": 0.599999964
+    },
+    "triangle_count": 1916,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.0332062244,
+      "z": 0.0
+    },
+    "material_count": 2,
+    "import_milliseconds": 10.9491,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 27,
+    "title": "Basketball",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1.105074,
+    "scale_baked": false,
+    "opaque_pixels": 81805,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.599999964,
+      "y": 0.59223634,
+      "z": 0.5922222
+    },
+    "triangle_count": 508,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.29611817,
+      "z": -4.54747351E-13
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.8418,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 28,
+    "title": "Tennis racket",
+    "status": "passed",
+    "renderer_count": 43,
+    "source_max_dimension": 330.063843,
+    "scale_baked": false,
+    "opaque_pixels": 12913,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.235811248,
+      "y": 0.03338498,
+      "z": 0.6
+    },
+    "triangle_count": 3136,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.0166924912,
+      "z": 0.0
+    },
+    "material_count": 4,
+    "import_milliseconds": 3.3892,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 29,
+    "title": "Tennis ball",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 0.117198,
+    "scale_baked": false,
+    "opaque_pixels": 81500,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.6,
+      "z": 0.6
+    },
+    "triangle_count": 440,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 1.5899,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 30,
+    "title": "Trophy",
+    "status": "passed",
+    "renderer_count": 3,
+    "source_max_dimension": 562993.1,
+    "scale_baked": true,
+    "opaque_pixels": 72284,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.49873662,
+      "z": 0.3535836
+    },
+    "triangle_count": 898,
+    "normalized_pivot_offset": {
+      "x": -1.1920929E-07,
+      "y": 0.24936831,
+      "z": -2.98023224E-08
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.9167,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 31,
+    "title": "Blackboard",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1.205118,
+    "scale_baked": false,
+    "opaque_pixels": 100778,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.289914548,
+      "z": 0.0056509
+    },
+    "triangle_count": 52,
+    "normalized_pivot_offset": {
+      "x": 1.45519152E-11,
+      "y": 0.144957289,
+      "z": -2.32830644E-10
+    },
+    "material_count": 1,
+    "import_milliseconds": 1.2399,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 32,
+    "title": "Easel",
+    "status": "passed",
+    "renderer_count": 24,
+    "source_max_dimension": 374453.4,
+    "scale_baked": true,
+    "opaque_pixels": 47681,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.3259275,
+      "y": 0.6,
+      "z": 0.4098448
+    },
+    "triangle_count": 1136,
+    "normalized_pivot_offset": {
+      "x": -1.1920929E-07,
+      "y": 0.3,
+      "z": 4.47034836E-08
+    },
+    "material_count": 10,
+    "import_milliseconds": 3.7615,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 33,
+    "title": "Palette",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1.610393,
+    "scale_baked": false,
+    "opaque_pixels": 19950,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.03747185,
+      "z": 0.5369651
+    },
+    "triangle_count": 612,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.0187359247,
+      "z": -3.7252903E-09
+    },
+    "material_count": 10,
+    "import_milliseconds": 2.4225,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 34,
+    "title": "Crayons",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1.76255,
+    "scale_baked": false,
+    "opaque_pixels": 91064,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.541278958,
+      "y": 0.6,
+      "z": 0.07060566
+    },
+    "triangle_count": 1904,
+    "normalized_pivot_offset": {
+      "x": 1.49011612E-08,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 15,
+    "import_milliseconds": 3.2701,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 35,
+    "title": "Sewing machine",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 17.9660454,
+    "scale_baked": false,
+    "opaque_pixels": 107800,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.486571282,
+      "z": 0.147109777
+    },
+    "triangle_count": 606,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.243285641,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 22.5413,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 36,
+    "title": "Graduation cap",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1.516794,
+    "scale_baked": false,
+    "opaque_pixels": 36274,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.591344953,
+      "y": 0.395478636,
+      "z": 0.6
+    },
+    "triangle_count": 112,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.197739318,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.7759,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 37,
+    "title": "Electric guitar",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 22.5998211,
+    "scale_baked": false,
+    "opaque_pixels": 31377,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.192299441,
+      "y": 0.6,
+      "z": 0.0381698869
+    },
+    "triangle_count": 560,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 18.4531,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 38,
+    "title": "Violin",
+    "status": "passed",
+    "renderer_count": 17,
+    "source_max_dimension": 780571.75,
+    "scale_baked": true,
+    "opaque_pixels": 13658,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.454426825,
+      "y": 0.07577092,
+      "z": 0.6
+    },
+    "triangle_count": 7685,
+    "normalized_pivot_offset": {
+      "x": 2.98023224E-08,
+      "y": 0.03788546,
+      "z": 0.0
+    },
+    "material_count": 6,
+    "import_milliseconds": 4.8496,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 39,
+    "title": "Trumpet",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 387.30896,
+    "scale_baked": false,
+    "opaque_pixels": 33434,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.32375142,
+      "z": 0.293229371
+    },
+    "triangle_count": 25384,
+    "normalized_pivot_offset": {
+      "x": 1.86264515E-09,
+      "y": 0.16187571,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 2.0085,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 40,
+    "title": "Microphone",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1.38189507,
+    "scale_baked": false,
+    "opaque_pixels": 45285,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.16948466,
+      "y": 0.6,
+      "z": 0.16948466
+    },
+    "triangle_count": 68,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.6935,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 41,
+    "title": "Bamboo",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 10.9069233,
+    "scale_baked": false,
+    "opaque_pixels": 12025,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.09646932,
+      "y": 0.6,
+      "z": 0.0166078
+    },
+    "triangle_count": 2640,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 2,
+    "import_milliseconds": 1.2123,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 42,
+    "title": "Bonsai",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1.96543,
+    "scale_baked": false,
+    "opaque_pixels": 30910,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.4040035,
+      "y": 0.4699518,
+      "z": 0.6
+    },
+    "triangle_count": 751,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.234975919,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 4.4188,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 43,
+    "title": "Dead tree",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 2.231632,
+    "scale_baked": false,
+    "opaque_pixels": 20161,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.345126271,
+      "y": 0.6,
+      "z": 0.333007872
+    },
+    "triangle_count": 608,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 5.2165,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 44,
+    "title": "Tree roots",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 2.28389287,
+    "scale_baked": false,
+    "opaque_pixels": 37165,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.490828,
+      "y": 0.6,
+      "z": 0.225479767
+    },
+    "triangle_count": 733,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 4.3775,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 45,
+    "title": "Tree branch",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 2.609822,
+    "scale_baked": false,
+    "opaque_pixels": 12614,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.120404541,
+      "y": 0.6,
+      "z": 0.0563967228
+    },
+    "triangle_count": 304,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 9.313226E-10
+    },
+    "material_count": 1,
+    "import_milliseconds": 4.3344,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 46,
+    "title": "Tuft of grass",
+    "status": "passed",
+    "renderer_count": 28,
+    "source_max_dimension": 363.825378,
+    "scale_baked": false,
+    "opaque_pixels": 20074,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.394473851,
+      "y": 0.600000143,
+      "z": 0.380333364
+    },
+    "triangle_count": 280,
+    "normalized_pivot_offset": {
+      "x": 4.47034836E-08,
+      "y": 0.299999982,
+      "z": 1.1920929E-07
+    },
+    "material_count": 1,
+    "import_milliseconds": 2.2046,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 47,
+    "title": "Clover",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 2.19648,
+    "scale_baked": false,
+    "opaque_pixels": 37712,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.4269542,
+      "z": 0.6
+    },
+    "triangle_count": 976,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.21347709,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.8069,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 48,
+    "title": "Tulip",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 2.276412,
+    "scale_baked": false,
+    "opaque_pixels": 21646,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.168598235,
+      "y": 0.6,
+      "z": 0.2567857
+    },
+    "triangle_count": 904,
+    "normalized_pivot_offset": {
+      "x": 2.32830644E-10,
+      "y": 0.3,
+      "z": 3.7252903E-09
+    },
+    "material_count": 1,
+    "import_milliseconds": 5.4817,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 49,
+    "title": "Daffodil",
+    "status": "passed",
+    "renderer_count": 3,
+    "source_max_dimension": 120.081604,
+    "scale_baked": false,
+    "opaque_pixels": 49030,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.5708568,
+      "z": 0.5710961
+    },
+    "triangle_count": 5872,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.2854284,
+      "z": 0.0
+    },
+    "material_count": 5,
+    "import_milliseconds": 3.8838,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 50,
+    "title": "Dandelion",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 3.734565,
+    "scale_baked": false,
+    "opaque_pixels": 8783,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.165286869,
+      "y": 0.6,
+      "z": 0.165411711
+    },
+    "triangle_count": 6208,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 3,
+    "import_milliseconds": 1.7117,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 51,
+    "title": "Ocean",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 2003.19,
+    "scale_baked": true,
+    "opaque_pixels": 17983,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.5995591,
+      "y": 0.03336753,
+      "z": 0.6
+    },
+    "triangle_count": 800,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.0166837648,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.9809,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 52,
+    "title": "Wave",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 12838.51,
+    "scale_baked": true,
+    "opaque_pixels": 44681,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.397532582,
+      "y": 0.248549744,
+      "z": 0.6
+    },
+    "triangle_count": 509,
+    "normalized_pivot_offset": {
+      "x": 7.450581E-09,
+      "y": 0.124274872,
+      "z": 1.49011612E-08
+    },
+    "material_count": 1,
+    "import_milliseconds": 20.6764,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 53,
+    "title": "Kelp",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 2.299407,
+    "scale_baked": false,
+    "opaque_pixels": 27346,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.3099768,
+      "y": 0.6,
+      "z": 0.2808012
+    },
+    "triangle_count": 784,
+    "normalized_pivot_offset": {
+      "x": 9.313226E-10,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 4.7213,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 54,
+    "title": "Cliff",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1469.299,
+    "scale_baked": true,
+    "opaque_pixels": 104258,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.552778363,
+      "y": 0.6,
+      "z": 0.313984036
+    },
+    "triangle_count": 292,
+    "normalized_pivot_offset": {
+      "x": 4.656613E-10,
+      "y": 0.300000042,
+      "z": -1.86264515E-09
+    },
+    "material_count": 1,
+    "import_milliseconds": 17.6229,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 55,
+    "title": "Cattail",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 13.2512884,
+    "scale_baked": false,
+    "opaque_pixels": 12337,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.202237174,
+      "y": 0.6,
+      "z": 0.197795957
+    },
+    "triangle_count": 1146,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 2,
+    "import_milliseconds": 0.9629,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 56,
+    "title": "Field of wheat",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 16.2082767,
+    "scale_baked": false,
+    "opaque_pixels": 57126,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.4977505,
+      "z": 0.302018553
+    },
+    "triangle_count": 4385,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.248875245,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 30.9078,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 57,
+    "title": "Haystack",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 11.5915833,
+    "scale_baked": false,
+    "opaque_pixels": 64877,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.464810342,
+      "z": 0.426829755
+    },
+    "triangle_count": 414,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.232405171,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 40.3501,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 58,
+    "title": "Tornado",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 2.209416,
+    "scale_baked": false,
+    "opaque_pixels": 40213,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.341258317,
+      "y": 0.6,
+      "z": 0.3262655
+    },
+    "triangle_count": 324,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.300000042,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 5.4473,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 59,
+    "title": "Lightning bolt",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 2.926651,
+    "scale_baked": false,
+    "opaque_pixels": 26908,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.468569577,
+      "y": 0.6,
+      "z": 0.257325351
+    },
+    "triangle_count": 621,
+    "normalized_pivot_offset": {
+      "x": 4.656613E-10,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 3.5691,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 60,
+    "title": "Icicle",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 2.251567,
+    "scale_baked": false,
+    "opaque_pixels": 40788,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.371375,
+      "y": 0.6,
+      "z": 0.15630582
+    },
+    "triangle_count": 340,
+    "normalized_pivot_offset": {
+      "x": 2.32830644E-10,
+      "y": 0.300000042,
+      "z": 5.684342E-14
+    },
+    "material_count": 1,
+    "import_milliseconds": 4.393,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 61,
+    "title": "Cake",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 360.29364,
+    "scale_baked": false,
+    "opaque_pixels": 102369,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.5273486,
+      "y": 0.6,
+      "z": 0.2486908
+    },
+    "triangle_count": 208,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": -7.450581E-09
+    },
+    "material_count": 3,
+    "import_milliseconds": 1.2004,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 62,
+    "title": "Teapot",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 132113.734,
+    "scale_baked": true,
+    "opaque_pixels": 43341,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.311548352,
+      "z": 0.373359323
+    },
+    "triangle_count": 992,
+    "normalized_pivot_offset": {
+      "x": -1.1920929E-07,
+      "y": 0.155774117,
+      "z": -1.1920929E-07
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.8743,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 63,
+    "title": "Cooking pot",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 69.46935,
+    "scale_baked": false,
+    "opaque_pixels": 33942,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.309292585,
+      "y": 0.160658851,
+      "z": 0.6
+    },
+    "triangle_count": 708,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.0803294256,
+      "z": -1.49011612E-08
+    },
+    "material_count": 1,
+    "import_milliseconds": 1.2107,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 64,
+    "title": "Frying pan",
+    "status": "passed",
+    "renderer_count": 2,
+    "source_max_dimension": 926511.1,
+    "scale_baked": true,
+    "opaque_pixels": 39247,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.599999964,
+      "y": 0.06794006,
+      "z": 0.371262372
+    },
+    "triangle_count": 724,
+    "normalized_pivot_offset": {
+      "x": 2.98023224E-08,
+      "y": 0.03397003,
+      "z": 0.0
+    },
+    "material_count": 3,
+    "import_milliseconds": 1.2565,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 65,
+    "title": "Fruit bowl",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 3.892926,
+    "scale_baked": false,
+    "opaque_pixels": 35790,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.178654522,
+      "z": 0.6
+    },
+    "triangle_count": 520,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.08932726,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.6803,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 66,
+    "title": "Cup of tea",
+    "status": "passed",
+    "renderer_count": 3,
+    "source_max_dimension": 102696.555,
+    "scale_baked": true,
+    "opaque_pixels": 79311,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.5064982,
+      "y": 0.4815011,
+      "z": 0.6
+    },
+    "triangle_count": 1224,
+    "normalized_pivot_offset": {
+      "x": -1.1920929E-07,
+      "y": 0.240750551,
+      "z": 2.98023224E-08
+    },
+    "material_count": 3,
+    "import_milliseconds": 1.412,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 67,
+    "title": "Vase",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 220.939926,
+    "scale_baked": false,
+    "opaque_pixels": 58215,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.345004976,
+      "y": 0.6,
+      "z": 0.345004976
+    },
+    "triangle_count": 3400,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.9924,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 68,
+    "title": "Picture frame",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 659030.5,
+    "scale_baked": true,
+    "opaque_pixels": 36712,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.37671873,
+      "y": 0.6000001,
+      "z": 0.270266235
+    },
+    "triangle_count": 64,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 2,
+    "import_milliseconds": 0.8289,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 69,
+    "title": "Piggy bank",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1.044035,
+    "scale_baked": false,
+    "opaque_pixels": 90716,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.504852057,
+      "y": 0.539756656,
+      "z": 0.6
+    },
+    "triangle_count": 808,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.269878358,
+      "z": 1.86264515E-09
+    },
+    "material_count": 2,
+    "import_milliseconds": 0.9421,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 70,
+    "title": "Bell",
+    "status": "passed",
+    "renderer_count": 4,
+    "source_max_dimension": 248.228424,
+    "scale_baked": false,
+    "opaque_pixels": 38999,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.369903356,
+      "y": 0.6,
+      "z": 0.364283681
+    },
+    "triangle_count": 3536,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.299999982,
+      "z": 0.0
+    },
+    "material_count": 3,
+    "import_milliseconds": 1.3754,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 71,
+    "title": "Robot",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 113.312523,
+    "scale_baked": false,
+    "opaque_pixels": 34228,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.220307827,
+      "y": 0.6,
+      "z": 0.241609707
+    },
+    "triangle_count": 2286,
+    "normalized_pivot_offset": {
+      "x": 7.450581E-09,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 1.2971,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 72,
+    "title": "Magic wand",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 400.0,
+    "scale_baked": false,
+    "opaque_pixels": 9944,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.0300000012,
+      "y": 0.6,
+      "z": 0.0300000012
+    },
+    "triangle_count": 144,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 2,
+    "import_milliseconds": 0.778,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 73,
+    "title": "Scroll",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1.948692,
+    "scale_baked": false,
+    "opaque_pixels": 49144,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.165094748,
+      "y": 0.165094748,
+      "z": 0.6
+    },
+    "triangle_count": 796,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.0825473741,
+      "z": 0.0
+    },
+    "material_count": 3,
+    "import_milliseconds": 1.1526,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 74,
+    "title": "Beanstalk",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 3.063646,
+    "scale_baked": false,
+    "opaque_pixels": 15113,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.220049381,
+      "y": 0.6,
+      "z": 0.244376868
+    },
+    "triangle_count": 1260,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 7.2958,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 75,
+    "title": "Archer",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 11.2659941,
+    "scale_baked": false,
+    "opaque_pixels": 31824,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.228300914,
+      "y": 0.6,
+      "z": 0.192635149
+    },
+    "triangle_count": 1263,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 37.5001,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 76,
+    "title": "Bow and arrow",
+    "status": "passed",
+    "renderer_count": 6,
+    "source_max_dimension": 2357556.5,
+    "scale_baked": true,
+    "opaque_pixels": 4778,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.0143436044,
+      "z": 0.585970163
+    },
+    "triangle_count": 292,
+    "normalized_pivot_offset": {
+      "x": 5.96046448E-08,
+      "y": 0.00717180967,
+      "z": 0.0
+    },
+    "material_count": 3,
+    "import_milliseconds": 2.0653,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 77,
+    "title": "Pirate hat",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 5.02998,
+    "scale_baked": false,
+    "opaque_pixels": 35585,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.2390925,
+      "z": 0.5308962
+    },
+    "triangle_count": 504,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.11954625,
+      "z": 0.0
+    },
+    "material_count": 2,
+    "import_milliseconds": 1.4529,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 78,
+    "title": "Trident",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 729544.0,
+    "scale_baked": true,
+    "opaque_pixels": 15235,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.0164082944,
+      "z": 0.221274391
+    },
+    "triangle_count": 120,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.008204162,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.5626,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 79,
+    "title": "Cannon",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 1.724298,
+    "scale_baked": false,
+    "opaque_pixels": 87330,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.415974468,
+      "z": 0.34632045
+    },
+    "triangle_count": 312,
+    "normalized_pivot_offset": {
+      "x": 9.313226E-10,
+      "y": 0.207987189,
+      "z": 1.86264515E-09
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.909,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 80,
+    "title": "Shepherd's Staff",
+    "status": "passed",
+    "renderer_count": 5,
+    "source_max_dimension": 311.047455,
+    "scale_baked": false,
+    "opaque_pixels": 5118,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.101183861,
+      "y": 0.6,
+      "z": 0.0135648856
+    },
+    "triangle_count": 1124,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.299999923,
+      "z": 0.0
+    },
+    "material_count": 2,
+    "import_milliseconds": 1.097,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 81,
+    "title": "Jeep",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 96.45543,
+    "scale_baked": false,
+    "opaque_pixels": 57149,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.283057958,
+      "y": 0.2444105,
+      "z": 0.6
+    },
+    "triangle_count": 3312,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.12220525,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 1.3752,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 82,
+    "title": "Taxi",
+    "status": "passed",
+    "renderer_count": 68,
+    "source_max_dimension": 1930.544,
+    "scale_baked": true,
+    "opaque_pixels": 64620,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.295481622,
+      "z": 0.4702597
+    },
+    "triangle_count": 8360,
+    "normalized_pivot_offset": {
+      "x": -5.96046448E-08,
+      "y": 0.147740826,
+      "z": -1.49011612E-08
+    },
+    "material_count": 5,
+    "import_milliseconds": 7.8203,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 83,
+    "title": "Kayak",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 85.4091644,
+    "scale_baked": false,
+    "opaque_pixels": 24567,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.1321141,
+      "y": 0.08897039,
+      "z": 0.6
+    },
+    "triangle_count": 430,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.0444851927,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 1.1191,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 84,
+    "title": "Hang glider",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 381.146,
+    "scale_baked": false,
+    "opaque_pixels": 9972,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.377568573,
+      "y": 0.126411885,
+      "z": 0.6
+    },
+    "triangle_count": 4048,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.06320596,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 22.8124,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 85,
+    "title": "Bullet train",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 4.97158,
+    "scale_baked": false,
+    "opaque_pixels": 46039,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.09637307,
+      "z": 0.09560744
+    },
+    "triangle_count": 600,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.0481865369,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 3.73,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 86,
+    "title": "Jet",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 136.6494,
+    "scale_baked": false,
+    "opaque_pixels": 13933,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.173724473,
+      "z": 0.5696309
+    },
+    "triangle_count": 928,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.0868622363,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.9098,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 87,
+    "title": "Jetpack",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 12.8901634,
+    "scale_baked": false,
+    "opaque_pixels": 64196,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.5783393,
+      "y": 0.6,
+      "z": 0.337205231
+    },
+    "triangle_count": 2312,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 26.798,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 88,
+    "title": "Space rover",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 8.366352,
+    "scale_baked": false,
+    "opaque_pixels": 46288,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.3932451,
+      "y": 0.497327745,
+      "z": 0.6
+    },
+    "triangle_count": 2274,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.248663872,
+      "z": -3.7252903E-09
+    },
+    "material_count": 1,
+    "import_milliseconds": 20.0544,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 89,
+    "title": "Telescope",
+    "status": "passed",
+    "renderer_count": 3,
+    "source_max_dimension": 1289773.0,
+    "scale_baked": true,
+    "opaque_pixels": 14778,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.429949522,
+      "y": 0.6,
+      "z": 0.3203952
+    },
+    "triangle_count": 3474,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.299999982,
+      "z": 0.0
+    },
+    "material_count": 2,
+    "import_milliseconds": 2.2013,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 90,
+    "title": "Life preserver",
+    "status": "passed",
+    "renderer_count": 6,
+    "source_max_dimension": 285.190674,
+    "scale_baked": false,
+    "opaque_pixels": 44012,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.6,
+      "y": 0.109623231,
+      "z": 0.6
+    },
+    "triangle_count": 3744,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.0548116155,
+      "z": 0.0
+    },
+    "material_count": 2,
+    "import_milliseconds": 1.7913,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 91,
+    "title": "Beaver",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 111.6281,
+    "scale_baked": false,
+    "opaque_pixels": 31198,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.200104371,
+      "y": 0.2134106,
+      "z": 0.6
+    },
+    "triangle_count": 568,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.1067053,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.9485,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 92,
+    "title": "Hedgehog",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 118.660973,
+    "scale_baked": false,
+    "opaque_pixels": 60452,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.278079867,
+      "y": 0.31299004,
+      "z": 0.6
+    },
+    "triangle_count": 376,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.156495035,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.736,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 93,
+    "title": "River otter",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 9.593503,
+    "scale_baked": false,
+    "opaque_pixels": 30280,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.202745587,
+      "y": 0.272796571,
+      "z": 0.6
+    },
+    "triangle_count": 1084,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.136398286,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 26.6791,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 94,
+    "title": "Badger",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 10.7064323,
+    "scale_baked": false,
+    "opaque_pixels": 38902,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.191260472,
+      "y": 0.213051826,
+      "z": 0.6
+    },
+    "triangle_count": 640,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.106525913,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 18.2091,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 95,
+    "title": "Armadillo",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 673.842,
+    "scale_baked": true,
+    "opaque_pixels": 33834,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.156964049,
+      "y": 0.207374424,
+      "z": 0.6
+    },
+    "triangle_count": 2149,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.103687212,
+      "z": 0.0
+    },
+    "material_count": 4,
+    "import_milliseconds": 1.3758,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 96,
+    "title": "Antelope",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 170.384979,
+    "scale_baked": false,
+    "opaque_pixels": 47744,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.125413761,
+      "y": 0.556829751,
+      "z": 0.6
+    },
+    "triangle_count": 1168,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.278414875,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 7.8063,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 97,
+    "title": "Gorilla",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 156.597443,
+    "scale_baked": false,
+    "opaque_pixels": 86275,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.2944142,
+      "y": 0.6,
+      "z": 0.5693294
+    },
+    "triangle_count": 576,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.9742,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 98,
+    "title": "Llama",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 9.38276,
+    "scale_baked": false,
+    "opaque_pixels": 49336,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.191815391,
+      "y": 0.598240435,
+      "z": 0.6
+    },
+    "triangle_count": 1098,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.299120218,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 26.702,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 99,
+    "title": "T-Rex",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 542.283447,
+    "scale_baked": false,
+    "opaque_pixels": 26166,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.13790302,
+      "y": 0.270711154,
+      "z": 0.6
+    },
+    "triangle_count": 1016,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.135355592,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 1.4242,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  },
+  {
+    "index": 100,
+    "title": "Jellyfish",
+    "status": "passed",
+    "renderer_count": 1,
+    "source_max_dimension": 135.991669,
+    "scale_baked": false,
+    "opaque_pixels": 29587,
+    "dark_fraction": 0.0,
+    "magenta_pixels": 0,
+    "normalized_size": {
+      "x": 0.253620654,
+      "y": 0.6,
+      "z": 0.36736843
+    },
+    "triangle_count": 432,
+    "normalized_pivot_offset": {
+      "x": 0.0,
+      "y": 0.3,
+      "z": 0.0
+    },
+    "material_count": 1,
+    "import_milliseconds": 0.6648,
+    "ground_placement_rotations_passed": 4,
+    "selection_raycast_rotations_passed": 4
+  }
+]

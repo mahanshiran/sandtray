@@ -30,8 +30,10 @@ namespace Sandplay.Objects
             if (!File.Exists(CachePath)) return new CacheData();
             try
             {
-                var data = JsonUtility.FromJson<CacheData>(File.ReadAllText(CachePath)) ?? new CacheData();
+                string json = File.ReadAllText(CachePath);
+                var data = JsonUtility.FromJson<CacheData>(json) ?? new CacheData();
                 if (data.items == null) data.items = new List<NetworkCatalogItem>();
+                ObjectSizing.ApplyMissingDefaults(data.items.ToArray(), json, "items");
                 if (data.disabledCatalogs == null) data.disabledCatalogs = new List<string>();
                 if (data.disabledObjects == null) data.disabledObjects = new List<string>();
                 return data;
@@ -62,22 +64,20 @@ namespace Sandplay.Objects
         /// </summary>
         public static NetworkCatalogItem[] LoadCached()
         {
-            if (!File.Exists(CachePath))
-                return new NetworkCatalogItem[0];
+            return MergeWithBundled(ReadData().items);
+        }
 
-            try
-            {
-                string json = File.ReadAllText(CachePath);
-                var data = JsonUtility.FromJson<CacheData>(json) ?? new CacheData();
-                if (data.items == null) data.items = new List<NetworkCatalogItem>();
-                Debug.Log($"[CatalogCache] Loaded {data.items.Count} cached items.");
-                return data.items.ToArray();
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning($"[CatalogCache] Load failed: {ex.Message}");
-                return new NetworkCatalogItem[0];
-            }
+        private static NetworkCatalogItem[] MergeWithBundled(List<NetworkCatalogItem> downloaded)
+        {
+            var items = new Dictionary<string, NetworkCatalogItem>();
+            foreach (var item in SmartLinearCatalog.WithDefaults(BundledCatalog.Items))
+                if (item != null && !string.IsNullOrEmpty(item.id)) items[item.id] = item;
+            // Cached metadata may describe a newer revision than this app ships.
+            foreach (var item in downloaded)
+                if (item != null && !string.IsNullOrEmpty(item.id)) items[item.id] = item;
+            var result = new NetworkCatalogItem[items.Count];
+            items.Values.CopyTo(result, 0);
+            return result;
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Sandplay.Objects
         /// </summary>
         public static void MarkDownloaded(NetworkCatalogItem item)
         {
-            if (item == null || string.IsNullOrEmpty(item.id))
+            if (item == null || string.IsNullOrEmpty(item.id) || LinearObjectState.TryParse(item.id, out _))
                 return;
 
             // Load current cache
@@ -106,7 +106,9 @@ namespace Sandplay.Objects
                 thumbnail_url = item.thumbnail_url,
                 model_hash = item.model_hash,
                 description = item.description,
-                tags = item.tags
+                tags = item.tags,
+                objectSize = ObjectSizing.Valid(item.objectSize),
+                objectSizeExplicit = item.objectSizeExplicit
             };
             data.items.Add(itemCopy);
 
@@ -144,8 +146,9 @@ namespace Sandplay.Objects
             var data = ReadData();
             var disabled = new HashSet<string>(data.disabledCatalogs);
             var disabledObjects = new HashSet<string>(data.disabledObjects);
-            return data.items.FindAll(item => item != null &&
-                !disabled.Contains(item.catalog) && !disabledObjects.Contains(item.id)).ToArray();
+            return Array.FindAll(MergeWithBundled(data.items), item =>
+                BundledCatalog.IsPlacementAllowed(item) &&
+                !disabled.Contains(item.catalog) && !disabledObjects.Contains(item.id));
         }
 
         /// <summary>

@@ -49,6 +49,8 @@ namespace Sandplay.Core
         public string AgoraAppId = "4e83cfbb48df4b298e769d0bf591f88b"; // Kept for fallback; backend now uses token authentication
 
         [Header("RevenueCat Subscription")]
+        [Tooltip("Legacy setting retained for saved configs. The plan page now always follows the current account type.")]
+        public bool SimplifiedSubscriptionPlans = true;
         [Tooltip("Apple App Store API key from the RevenueCat dashboard")]
         public string RevenueCatAppleApiKey = "appl_OARoUMFKxBwoZIimzOcXlDFgZBa"; // TODO: rotate before public release
         [Tooltip("Google Play API key from the RevenueCat dashboard")]

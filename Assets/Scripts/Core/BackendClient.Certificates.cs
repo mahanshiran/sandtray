@@ -35,6 +35,8 @@ namespace Sandplay.Core
             using(request)
             {
                 request.timeout=60;request.SetRequestHeader("Authorization","Bearer "+AccessToken);
+                if(Sandplay.Core.UnityRequestLifetime.IsStopping){request.Dispose();yield break;}
+                using var requestLifetime=Sandplay.Core.UnityRequestLifetime.Track(request,this);
                 yield return request.SendWebRequest();
                 if(!current()) yield break;
                 if(request.result!=UnityWebRequest.Result.Success) { failure?.Invoke(ExtractError(request.downloadHandler.text,request.responseCode));yield break; }

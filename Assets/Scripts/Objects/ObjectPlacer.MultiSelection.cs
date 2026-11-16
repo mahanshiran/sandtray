@@ -325,6 +325,7 @@ namespace Sandplay.Objects
 
         public void DeleteSelection()
         {
+            if (_selection.Any(SmartLinearObject.AwaitingConfirmation)) return;
             var commands = _selection.Where(o => o != null).Select(o => (ICommand)new RemoveObjectCommand(this,o)).ToList();
             if (commands.Count > 0) ExecutePlacementCommand(new SelectionCommand(this, commands, true, true));
         }
@@ -333,6 +334,7 @@ namespace Sandplay.Objects
         public void DuplicateSelection() { DuplicateSelection(_selection.ToList()); }
         private void DuplicateSelection(List<PlacedObject> sources)
         {
+            if (sources.Any(SmartLinearObject.AwaitingConfirmation)) return;
             sources = sources.Where(o => o != null && (o.ObjectData != null || o.NetworkItem != null)).ToList();
             if (sources.Count == 0) return;
             var bounds = ObjectBounds(sources[0]);

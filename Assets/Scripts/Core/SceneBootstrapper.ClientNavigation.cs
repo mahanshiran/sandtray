@@ -9,8 +9,7 @@ namespace Sandplay.Core
             BackendClient.Instance.IsTherapistAccount;
         private bool CanUsePersonalClientDirectory => BackendClient.Instance.IsLoggedIn &&
             BackendClient.Instance.UserType == "psychologist";
-        private bool CanShowOrganizationNavigation => BackendClient.Instance.IsLoggedIn &&
-            BackendClient.Instance.UserType == "organization";
+        private bool CanShowOrganizationNavigation => false;
 
         private void RefreshClientNavigationVisibility()
         {
@@ -20,8 +19,8 @@ namespace Sandplay.Core
             foreach (var key in new[] { "home", "boards", "clients", "organization", "schedules", "reports", "multiplayer" })
             {
                 if (!_homeNavItems.TryGetValue(key, out var item) || item == null) continue;
-                bool show = key == "clients" ? visible :
-                    key == "reports" ? BackendClient.Instance.IsLoggedIn && BackendClient.Instance.UserType == "normal" :
+                bool show = BackendClient.Instance.IsClientAccount ? key == "schedules" : key == "clients" ? visible :
+                    key == "reports" ? BackendClient.Instance.IsLoggedIn && (BackendClient.Instance.UserType == "normal" || visible) :
                     key == "schedules" && BackendClient.Instance.IsOrganizationTherapist
                         ? BackendClient.Instance.ManagedCanCreateSchedules :
                     key != "organization" || CanShowOrganizationNavigation;
@@ -31,6 +30,12 @@ namespace Sandplay.Core
                 rect.anchorMin = new Vector2(rect.anchorMin.x, top - height);
                 rect.anchorMax = new Vector2(rect.anchorMax.x, top);
                 top -= height + .012f;
+            }
+            if (BackendClient.Instance.IsClientAccount)
+            {
+                foreach (var nav in _homeNavItems)
+                    if (nav.Value != null && nav.Key != "schedules") nav.Value.SetActive(false);
+                if (_activeHomeNav != "schedules" && _activeHomeNav != "settings") ShowHomeSection("schedules");
             }
             if (_friendsSidebar != null)
                 _friendsSidebar.anchorMax = new Vector2(_friendsSidebar.anchorMax.x, top);
